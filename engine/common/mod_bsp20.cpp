@@ -68,7 +68,7 @@ bool CBsp20Loader::CheckBuffer(const void* buf, size_t len)
 {
 	if(len < sizeof(bsp20::dheader_t) || !buf) return false;
 	bsp20::dheader_t* hdr = (bsp20::dheader_t*)buf;
-	return hdr->ident == bsp20::BSP_HEADER && hdr->version == 20;
+	return hdr->ident == bsp20::BSP_HEADER && (hdr->version == 20 || hdr->version == 19);
 }
 
 bool CBsp20Loader::LoadMap(model_t* mod, const void* buffer, size_t length)
@@ -77,7 +77,9 @@ bool CBsp20Loader::LoadMap(model_t* mod, const void* buffer, size_t length)
 	bsp20::dheader_t* hdr = (bsp20::dheader_t*)buffer;
 
 	Con_Printf("CBsp20Loader::LoadModel: Loading map.\n");
-	Host_Error("CBsp20Loader::Unsupported Map Version\n");
+
+	/* Allocate a pool */
+	mod->mempool = Mem_AllocPool(va("%s_pool", mod->name));
 
 	VectorClear(mins);
 	VectorClear(maxs);
