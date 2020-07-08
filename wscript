@@ -253,9 +253,9 @@ def configure(conf):
 			'default': ['-O3']
 		},
 		'debug': {
-			'msvc':    ['/O1', '/DDEBUG'],
-			'gcc':     ['-Og', '-DDEBUG=1'],
-			'default': ['-O1', '-DDEBUG=1']
+			'msvc':    ['/O1', '/DDEBUG', '/D_DEBUG'],
+			'gcc':     ['-Og', '-DDEBUG=1', '-D_DEBUG=1'],
+			'default': ['-O1', '-DDEBUG=1', '-D_DEBUG=1']
 		},
 		'sanitize': {
 			'msvc':    ['/Od', '/RTC1'],
