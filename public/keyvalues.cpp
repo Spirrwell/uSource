@@ -449,7 +449,7 @@ long int KeyValues::key_t::ReadInt(bool& ok)
 	}
 
 	long int v = strtol(this->value, NULL, 10);
-	if(errno == 0)
+	//if(errno == 0)
 	{
 		this->cached = ELastCached ::INT;
 		this->cachedv.ival = v;
@@ -475,7 +475,7 @@ double KeyValues::key_t::ReadFloat(bool& ok)
 	}
 
 	double f = strtod(this->value, NULL);
-	if(errno == 0)
+	//if(errno == 0)
 	{
 		this->cached = ELastCached::FLOAT;
 		this->cachedv.fval = f;
