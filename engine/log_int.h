@@ -28,6 +28,8 @@ public:
 	virtual LoggingChannel_t CreateLoggingChannel(LoggingChannel_t id, const char* name, int verbo, char color[3]) = 0;
 	virtual LoggingChannel_t GetLoggingChannelForName(const char* name) = 0;
 
+	virtual void SetColor(const char colo[3]) = 0;
+	virtual void ClearColor() = 0;
 
 	virtual void Log(LoggingChannel_t channel, int verbosity, const char* fmt) = 0;
 	virtual void Warn(LoggingChannel_t channel, int verbosity, const char* fmt) = 0;
@@ -57,6 +59,7 @@ public:
 #define LOGCHAN_FATAL	3 /* General fatal errors */
 
 #define LOGVERBO_LOWEST 0
+#define LOGVERBO_HIGHEST 255
 
 /*
 =======================

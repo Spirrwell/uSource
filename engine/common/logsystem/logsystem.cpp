@@ -9,12 +9,28 @@ struct log_channel_t
 {
 	char* name;
 	int verbosity;
-	char color[3];
+	unsigned char color[3];
 	LoggingChannel_t id;
 };
 
+static unsigned char g_color_white[3] = {255, 255, 255};
+static unsigned char g_color_black[3] = {0, 0, 0};
+static unsigned char g_color_red[3] = {255, 0, 0};
+static unsigned char g_color_green[3] = {0, 255, 0};
+static unsigned char g_color_blue[3] = {0, 0, 255};
+static unsigned char g_color_yellow[3] = {255, 255, 0};
+
+static unsigned char* g_color_map[] = {
+	g_color_white,
+	g_color_black,
+	g_color_yellow,
+	g_color_red,
+	g_color_blue,
+	g_color_green,
+};
+
 static List<log_channel_t> g_Channels;
-static LoggingChannel_t g_CurrentIndex = 1;
+static LoggingChannel_t g_CurrentIndex = 0;
 
 
 class CLoggingSystem : public ILogSystem
@@ -33,6 +49,8 @@ public:
 
 	CLoggingSystem();
 
+	char default_color[3];
+
 	/* Return true to support remote logging features */
 	virtual bool SupportsRemoteLogging();
 
@@ -46,6 +64,8 @@ public:
 	virtual LoggingChannel_t CreateLoggingChannel(LoggingChannel_t id, const char* name, int verbosity, char color[3]);
 	virtual LoggingChannel_t GetLoggingChannelForName(const char* name);
 
+	virtual void SetColor(const char color[3]);
+	virtual void ClearColor();
 
 	virtual void Log(LoggingChannel_t channel, int v, const char* fmt);
 	virtual void Warn(LoggingChannel_t channel, int v, const char* fmt);
@@ -65,6 +85,7 @@ CLoggingSystem::CLoggingSystem()
 {
 	this->_stdout = nullptr;
 	this->_stdin = nullptr;
+	default_color[0] = default_color[1] = default_color[2] = 255;
 }
 
 /**
@@ -118,11 +139,9 @@ LoggingChannel_t CLoggingSystem::GetLoggingChannelForName(const char *name)
 	return 0;
 }
 
-void SetColor(FILE* fs, char r, char g, char b)
+void SetColor(FILE* fs, unsigned char r, unsigned char g, unsigned char b)
 {
-#ifdef _POSIX
-	fprintf(fs, "\e[38;5;%u;%u;%um", r, g, b);
-#endif
+	fprintf(fs, "\e[38;2;%u;%u;%um", (unsigned char)r, (unsigned char)g, (unsigned char)b);
 }
 
 log_channel_t GetChan(LoggingChannel_t chan)
@@ -142,8 +161,9 @@ void CLoggingSystem::Log(LoggingChannel_t channel, int v, const char *fmt)
 	if(this->_stdout)
 	{
 		auto chan = GetChan(channel); 
-		SetColor(this->_stdout, chan.color[0], chan.color[1], chan.color[2]);
+		this->SetColor((const char*)chan.color);
 		fprintf(this->_stdout, fmt);
+		this->ClearColor();
 	}
 
 	for(auto stream : this->m_stdout)
@@ -159,7 +179,7 @@ void CLoggingSystem::Warn(LoggingChannel_t channel, int v, const char *fmt)
 	if(this->_stdout)
 	{
 		auto chan = GetChan(channel);
-		SetColor(this->_stdout, chan.color[0], chan.color[1], chan.color[2]);
+		::SetColor(this->_stdout, chan.color[0], chan.color[1], chan.color[2]);
 		fprintf(this->_stdout, fmt);
 	}
 	
@@ -175,12 +195,22 @@ void CLoggingSystem::Error(LoggingChannel_t channel, int v, const char *fmt)
 	if(this->_stdout)
 	{
 		auto chan = GetChan(channel);
-		SetColor(this->_stdout, chan.color[0], chan.color[1], chan.color[2]);
+		::SetColor(this->_stdout, chan.color[0], chan.color[1], chan.color[2]);
 		fprintf(this->_stdout, fmt);
 	}
 	
 	for(auto stream : this->m_stdout)
 		fprintf(stream, fmt);
+}
+
+void CLoggingSystem::SetColor(const char colo[3])
+{
+	::SetColor(this->_stdout, colo[0], colo[1], colo[2]);
+}
+
+void CLoggingSystem::ClearColor()
+{
+	::SetColor(this->_stdout, default_color[0], default_color[1], default_color[2]);
 }
 
 
@@ -215,11 +245,11 @@ bool CLoggingSystem::PreInit()
 
 bool CLoggingSystem::Init()
 {
-	/* Create the default logging channel */
-	char white[3] = {
-		(char)255, (char)255, (char)255
-	};
-	this->CreateLoggingChannel("General", 0, white);
+	this->CreateLoggingChannel("General", 0, (char*)g_color_white);
+	this->CreateLoggingChannel("Warnings", 0, (char*)g_color_yellow);
+	this->CreateLoggingChannel("Errors", 0, (char*)g_color_red);
+	this->CreateLoggingChannel("Fatal Errors", 0, (char*)g_color_red);
+
 	return true;
 }
 
