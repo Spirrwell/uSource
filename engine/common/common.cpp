@@ -40,9 +40,18 @@ void DBG_AssertFunction( qboolean fExpr, const char* szExpr, const char* szFile,
 {
 	if( fExpr ) return;
 
+#if 0
 	if( szMessage != NULL )
 		Con_DPrintf( S_ERROR "ASSERT FAILED:\n %s \n(%s@%d)\n%s\n", szExpr, szFile, szLine, szMessage );
 	else Con_DPrintf( S_ERROR "ASSERT FAILED:\n %s \n(%s@%d)\n", szExpr, szFile, szLine );
+#endif
+
+	char buf[512];
+	if(szMessage)
+		snprintf(buf, sizeof(buf), "Assertion failed: %s %s:%u: %s\n", szExpr, szFile, szLine, szMessage);
+	else
+		snprintf(buf, sizeof(buf), "Assertion failed: %s %s:%u\n", szExpr, szFile, szLine);
+	g_pLoggingSystem->Log(LOGCHAN_ERROR, LOGVERBO_HIGHEST, buf);
 }
 #endif	// DEBUG
 

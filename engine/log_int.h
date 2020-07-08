@@ -32,8 +32,6 @@ public:
 	virtual void ClearColor() = 0;
 
 	virtual void Log(LoggingChannel_t channel, int verbosity, const char* fmt) = 0;
-	virtual void Warn(LoggingChannel_t channel, int verbosity, const char* fmt) = 0;
-	virtual void Error(LoggingChannel_t channel, int verbosity, const char* fmt) = 0;
 
 	/* Sets the standard file streams */
 	virtual void SetStdin(FILE* stream) = 0;

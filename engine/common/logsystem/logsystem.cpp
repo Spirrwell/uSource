@@ -68,8 +68,6 @@ public:
 	virtual void ClearColor();
 
 	virtual void Log(LoggingChannel_t channel, int v, const char* fmt);
-	virtual void Warn(LoggingChannel_t channel, int v, const char* fmt);
-	virtual void Error(LoggingChannel_t channel, int v, const char* fmt);
 
 	/* Sets the standard file streams */
 	virtual void SetStdin(FILE* stream);
@@ -169,38 +167,6 @@ void CLoggingSystem::Log(LoggingChannel_t channel, int v, const char *fmt)
 	for(auto stream : this->m_stdout)
 		fprintf(stream, fmt);
 	
-}
-
-void CLoggingSystem::Warn(LoggingChannel_t channel, int v, const char *fmt)
-{
-	static thread_local char buf[8192];
-
-	/* Only for stdout */
-	if(this->_stdout)
-	{
-		auto chan = GetChan(channel);
-		::SetColor(this->_stdout, chan.color[0], chan.color[1], chan.color[2]);
-		fprintf(this->_stdout, fmt);
-	}
-	
-	for(auto stream : this->m_stdout)
-		fprintf(stream, fmt);
-
-}
-
-void CLoggingSystem::Error(LoggingChannel_t channel, int v, const char *fmt)
-{
-	static thread_local char buf[8192];
-	/* Only for stdout */
-	if(this->_stdout)
-	{
-		auto chan = GetChan(channel);
-		::SetColor(this->_stdout, chan.color[0], chan.color[1], chan.color[2]);
-		fprintf(this->_stdout, fmt);
-	}
-	
-	for(auto stream : this->m_stdout)
-		fprintf(stream, fmt);
 }
 
 void CLoggingSystem::SetColor(const char colo[3])
