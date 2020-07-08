@@ -3784,25 +3784,19 @@ public:
 
 	virtual FILE* OpenFile(const char* path, const char* mode, bool gamedironly = false) 
 	{
-		/* Perform a search to find the file if it's in one of our search paths */
-		search_t* search = FS_Search(path, 0, gamedironly);
-		if(!search) return nullptr;
+		int index;
+		searchpath_t* _path = FS_FindFile(path, &index, gamedironly);
 
-		if(search->numfilenames <= 0)
-		{
-			Mem_Free(search);
-			return nullptr;
-		}
+		if(!_path) return nullptr;
 
-		/* Just return the first search entry */
-		FILE* ret = fopen(search->filenames[0], mode);
-		Mem_Free(search);
-		return ret;
+		char buf[512];
+		Q_snprintf(buf, sizeof(buf), "%s%s", _path->filename, path);
+		return fopen(buf, mode);
 	}
 
 	virtual void CloseFile(FILE* file) 
 	{
-		Assert(file);
+		Assert(file != nullptr);
 		fclose(file);
 	}
 
