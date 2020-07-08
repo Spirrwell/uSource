@@ -19,6 +19,7 @@ GNU General Public License for more details.
 #include "const.h"
 #include "client.h"
 #include "library.h"
+#include "engine_int.h"
 
 static const char *file_exts[] =
 {
@@ -1289,3 +1290,50 @@ only exists in PlayStation version
 void GAME_EXPORT pfnResetTutorMessageDecayData( void )
 {
 }
+
+class CEngineDebug : public IEngineDebug
+{
+public:
+	virtual const char* GetName() { return "CEngineDebug001"; };
+	virtual const char* GetParentInterface() { return IENGINEDEBUG_INTERFACE; };
+	virtual bool Init() { return true; }
+	virtual bool PreInit() { return true; }
+	virtual void Shutdown() {};
+
+	virtual void AssertFunction(bool fExpr, const char* szExpr, const char* szFile, int szLine, const char* szMessage) 
+	{
+#ifdef _DEBUG
+		DBG_AssertFunction(fExpr, szExpr, szFile, szLine, szMessage);
+#else
+		Con_DPrintf("Assertion failed: %s %s:%u: %s\n", szExpr, szFile, szLine, szMessage);
+#endif 
+	}
+
+	virtual void MemCheck() 
+	{
+		Mem_Check();
+	}
+
+	virtual void MemPrintStats() 
+	{
+		Mem_PrintStats();
+	}
+
+	virtual void ClientShutdown() 
+	{
+		CL_Shutdown();
+	}
+
+	virtual void ServerShutdown() 
+	{
+		SV_Shutdown("");
+	}
+
+	virtual void HostError(const char* fmt) 
+	{
+		Host_Error("%s", fmt);
+	}
+
+};
+
+EXPOSE_INTERFACE(CEngineDebug);

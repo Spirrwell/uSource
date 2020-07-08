@@ -27,6 +27,20 @@
 #define IENGINEFILESYSTEM_001 "IEngineFilesystem001"
 #define IENGINEFILESYSTEM_INTERFACE IENGINEFILESYSTEM_001
 
+#define IENGINEDEBUG_001 "IEngineDebug001"
+#define IENGINEDEBUG_INTERFACE IENGINEDEBUG_001
+
+class IEngineDebug : public IAppInterface
+{
+public:
+	virtual void AssertFunction(bool fExpr, const char* szExpr, const char* szFile, int szLine, const char* szMessage) = 0;
+	virtual void MemCheck() = 0;
+	virtual void MemPrintStats() = 0;
+	virtual void ClientShutdown() = 0;
+	virtual void ServerShutdown() = 0;
+	virtual void HostError(const char* fmt) = 0;
+};
+
 class IEngineFilesystem : public IAppInterface
 {
 public:
