@@ -5,6 +5,7 @@
 IEngineCvar* g_pEngineCvar;
 ILogSystem* g_pLogSystem;
 IEngineFilesystem* g_pFilesystem;
+IEngineDebug* g_pEngineDebug;
 
 void ConnectTier1Libraries()
 {
