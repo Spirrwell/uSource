@@ -47,6 +47,30 @@ KeyValues::~KeyValues()
 		delete section;
 }
 
+void KeyValues::ParseFile(FILE* fs, bool use_esc_codes)
+{
+	if(!fs)
+	{
+		this->good = false;
+		return;
+	}
+
+	/* Get file size */
+	fseek(fs, 0, SEEK_END);
+	long int size = ftell(fs);
+
+	/* Read the entire file */
+	char* buffer = static_cast<char*>(malloc(size + 1));
+	fseek(fs, 0, SEEK_SET);
+	fread(buffer, size, 1, fs);
+	buffer[size] = 0;
+	
+	this->ParseString(buffer, use_esc_codes, size);
+
+	/* Free the allocated buffer */
+	free(buffer);
+}
+
 void KeyValues::ParseFile(const char *file, bool use_escape_codes)
 {
 	FILE* fs = fopen(file, "r");

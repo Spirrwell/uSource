@@ -74,6 +74,7 @@ public:
 
 	/* Parse from a file */
 	void 		ParseFile(const char* file, bool use_escape_codes = false);
+	void		ParseFile(FILE* f, bool use_escape_codes = false);
 	void 		ParseString(const char* string, bool use_escape_codes = false, long long len = -1);
 
 	/* Clears a key's value setting it to "" */
