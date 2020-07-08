@@ -341,3 +341,4 @@ compile_commands.json
 
 # Stuff from intellij
 .idea
+*.code-workspace
