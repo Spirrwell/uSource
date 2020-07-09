@@ -1293,6 +1293,7 @@ void FS_Rescan( void )
 	if( Q_stricmp( GI->basedir, GI->falldir ) && Q_stricmp( GI->gamefolder, GI->falldir ))
 		FS_AddGameHierarchy( GI->falldir, 0 );
 	FS_AddGameHierarchy( GI->gamefolder, FS_GAMEDIR_PATH );
+	FS_AddGameHierarchy("platform", FS_CUSTOM_PATH);
 
 	if( FS_FileExists( va( "%s.rc", SI.basedirName ), false ))
 		Q_strncpy( SI.rcName, SI.basedirName, sizeof( SI.rcName ));	// e.g. valve.rc
