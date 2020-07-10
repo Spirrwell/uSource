@@ -11,6 +11,7 @@
 #include <stack>
 #include <stdio.h>
 #include <errno.h>
+#include "xprof.h"
 
 inline bool _internal_isspace(char c)
 {
@@ -49,6 +50,7 @@ KeyValues::~KeyValues()
 
 void KeyValues::ParseFile(FILE* fs, bool use_esc_codes)
 {
+	XPROF_NODE(XPROF_CATEGORY_OTHER);
 	if(!fs)
 	{
 		this->good = false;
@@ -100,6 +102,7 @@ void KeyValues::ParseFile(const char *file, bool use_escape_codes)
 
 void KeyValues::ParseString(const char* string, bool escape, long long len)
 {
+	XPROF_NODE(XPROF_CATEGORY_OTHER);
 	int nline = 0, nchar = 0, bracket_level = 0;
 	bool inquote = false, incomment = false, parsed_key = false;
 	char buf[512];
