@@ -489,7 +489,7 @@ void Sys_Print( const char *pMsg )
 #ifndef XASH_DEDICATED
 	if( !Host_IsDedicated() )
 	{
-		Con_Print( pMsg );
+		//Con_Print( pMsg );
 	}
 #endif
 

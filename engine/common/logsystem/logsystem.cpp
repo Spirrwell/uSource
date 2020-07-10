@@ -166,7 +166,10 @@ void CLoggingSystem::Log(LoggingChannel_t channel, int v, const char *fmt)
 
 	for(auto stream : this->m_stdout)
 		fprintf(stream, fmt);
-	
+
+	/* TODO: Colors this shit */
+	if(!Host_IsDedicated())
+		Con_Print(fmt);
 }
 
 void CLoggingSystem::SetColor(const char colo[3])
