@@ -9,6 +9,41 @@
 
 CXProf* g_pXProf = NULL;
 
+struct xprof_node_desc_t
+{
+	const char* name;
+	unsigned long long budget;
+};
+
+static xprof_node_desc_t g_categories[] =
+{
+	{XPROF_CATEGORY_OTHER, 0},
+	{XPROF_CATEGORY_MATH, 0},
+	{XPROF_CATEGORY_RENDERING, 0},
+	{XPROF_CATEGORY_MAINUI, 0},
+	{XPROF_CATEGORY_PHYSICS, 0},
+	{XPROF_CATEGORY_SOUND, 0},
+	{XPROF_CATEGORY_MAPLOAD, 0},
+	{XPROF_CATEGORY_TEXLOAD, 0},
+	{XPROF_CATEGORY_MODELOAD, 0},
+	{XPROF_CATEGORY_SOUNDLOAD, 0},
+	{XPROF_CATEGORY_FILESYSTEM, 0},
+	{XPROF_CATEGORY_CRTFUNC, 0},
+	{XPROF_CATEGORY_NETWORK, 0},
+	{XPROF_CATEGORY_CVAR, 0},
+	{XPROF_CATEGORY_CONCOMMAND, 0},
+	{XPROF_CATEGORY_SCRIPTING, 0},
+	{XPROF_CATEGORY_KVPARSE, 0},
+	{XPROF_CATEGORY_PARSING, 0},
+	{XPROF_CATEGORY_GAME_CLIENT_INIT, 0},
+	{XPROF_CATEGORY_GAME_SERVER_INIT, 0},
+	{XPROF_CATEGORY_CLIENT_THINK, 0},
+	{XPROF_CATEGORY_SERVER_THINK, 0},
+	{XPROF_CATEGORY_UNZIP, 0},
+	{XPROF_CATEGORY_LZSS, 0},
+};
+
+
 class CXProfInit 
 {
 public:
@@ -24,23 +59,29 @@ public:
 };
 static CXProfInit g_xprof_init_wrapper;
 
-CXProf::CXProf()
+/* Constructor is NOT thread-safe, obviously! */
+CXProf::CXProf() :
+	m_enabled(true)
 {
 	for(int i = 0; i < MAX_NODESTACKS; i++)
 	{
 		m_nodeStack[i] = std::stack<CXProfNode*>();
 		m_nodeStackThreads[i] = 0;
 	}
-	this->AddCategoryNode(XPROF_CATEGORY_OTHER, 1e6);
+	for(int i = 0; i < (sizeof(g_categories) / sizeof(xprof_node_desc_t)); i++)
+	{
+		this->AddCategoryNode(g_categories[i].name, g_categories[i].budget);
+	}
 }
 
 CXProf::~CXProf()
 {
-	this->DumpCategoryTree(XPROF_CATEGORY_OTHER);
+	this->DumpCategoryTree(XPROF_CATEGORY_KVPARSE);
 }
 
 void CXProf::AddCategoryNode(const char* name, unsigned long long budget)
 {
+	auto lock = m_mutex.RAIILock();
 	CXProfNode* node = new CXProfNode(name, "", "", budget);
 	node->m_parent = nullptr;
 	node->m_root = node;
@@ -51,6 +92,8 @@ void CXProf::AddCategoryNode(const char* name, unsigned long long budget)
 
 void CXProf::PushNode(CXProfNode* node)
 {
+	auto lock = m_mutex.RAIILock();
+
 	/* first, get the nodestack index for this thread */
 	auto threadid = platform::GetCurrentThreadId();
 	int index = -1;
@@ -125,6 +168,14 @@ CXProfNode* CXProf::CreateNode(const char* category, const char* func, const cha
 	return node;
 }
 
+void CXProf::DumpAllNodes(int(*printFn)(const char*,...))
+{
+	for(auto x : m_nodes)
+	{
+		DumpCategoryTree(x->m_category, printFn);
+	}
+}
+
 class CXProfNode* CXProf::FindCategory(const char* category)
 {
 	for(auto x : this->m_nodes)
@@ -135,27 +186,74 @@ class CXProfNode* CXProf::FindCategory(const char* category)
 	return nullptr;
 }
 
-void CXProf::DumpCategoryTree(const char* cat)
+void CXProf::DumpCategoryTree(const char* cat, int(*printFn)(const char*,...))
 {
 	for(auto x : m_nodes)
 	{
 		if(Q_strcmp(x->m_category, cat) == 0)
 		{
-			this->DumpNodeTreeInternal(x, 0);
+			this->DumpNodeTreeInternal(x, 0, printFn);
 			return;
 		}
 	}
 }
 
-void CXProf::DumpNodeTreeInternal(CXProfNode* node, int indent)
+void CXProf::DumpNodeTreeInternal(CXProfNode* node, int indent, int(*printFn)(const char*,...))
 {
 	for(int i = indent; i > 0; i--) printf("\t");
-	printf("%s\n", node->Name());
+	printFn("%s\n", node->Name());
 	for(int i = indent; i >= 0; i--) printf("\t");
-	printf("Total time: %llu us\n", node->GetRemainingBudget() / 1000);
+	printFn("Total time: %llu us\n", node->GetRemainingBudget() / 1000);
 	for(auto x : node->Children())
 		DumpNodeTreeInternal(x, indent+1);
 }
+
+void CXProf::Frame(float dt)
+{
+	auto lock = m_mutex.RAIILock();
+	/* Reset all budgets */
+	for(auto x : m_nodes)
+	{
+		x->ResetBudget();
+	}
+}
+
+void CXProf::ClearNodes()
+{
+	auto lock = m_mutex.RAIILock();
+	for(auto x : this->m_nodes)
+	{
+		/* Only delete the non-category nodes */
+		for(auto g : x->m_children)
+		{
+			delete g;
+		}
+	}
+}
+
+void CXProf::Disable()
+{
+	auto lock = m_mutex.RAIILock();
+	m_enabled = false;
+}
+
+void CXProf::Enable()
+{
+	auto lock = m_mutex.RAIILock();
+	m_enabled = true;
+}
+
+bool CXProf::Enabled() const
+{
+	auto lock = m_mutex.RAIILock();
+	return  m_enabled;
+}
+
+/*=======================================================
+ *
+ *      CXProfNode
+ *
+ *======================================================= */
 
 CXProfNode::CXProfNode(const char* category, const char* function, const char* file, unsigned long long budget) :
 	m_timeBudget(budget),
@@ -166,13 +264,20 @@ CXProfNode::CXProfNode(const char* category, const char* function, const char* f
 	m_root(nullptr),
 	m_testQueueSize(0),
 	m_category(category),
-	m_totalTime(0)
+	m_totalTime(0),
+	m_added(false)
+{
+
+}
+
+CXProfNode::~CXProfNode()
 {
 
 }
 
 unsigned long long CXProfNode::GetRemainingBudget() const
 {
+	auto lock = m_mutex.RAIILock();
 	unsigned long long remaining = m_totalTime;
 	for(auto node : this->m_children)
 		remaining += node->m_totalTime;
@@ -181,12 +286,46 @@ unsigned long long CXProfNode::GetRemainingBudget() const
 
 void CXProfNode::ResetBudget()
 {
+	auto lock = m_mutex.RAIILock();
 	this->m_totalTime = 0;
 	for(auto node : this->m_children)
-		node->m_totalTime = 0; 
+	{
+		node->ResetBudget();
+	}
 }
 
 void CXProfNode::SubmitTest(CXProfTest* test)
 {
+	auto lock = m_mutex.RAIILock();
 	this->m_totalTime += (test->stop.to_ns() - test->start.to_ns());
+}
+
+void CXProfNode::SetBudget(unsigned long long int time)
+{
+	auto lock = m_mutex.RAIILock();
+	m_timeBudget = time;
+}
+
+unsigned long long CXProfNode::GetBudget() const
+{
+	auto lock = m_mutex.RAIILock();
+	return m_timeBudget;
+}
+
+List<CXProfNode *> CXProfNode::Children() const
+{
+	auto lock = this->m_mutex.RAIILock();
+	return this->m_children;
+}
+
+void CXProfNode::AddChild(CXProfNode *node)
+{
+	auto lock = this->m_mutex.RAIILock();
+	m_children.push_back(node);
+}
+
+Array<CXProfTest> CXProfNode::TestQueue() const
+{
+	auto lock = this->m_mutex.RAIILock();
+	return m_testQueue;
 }

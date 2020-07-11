@@ -50,7 +50,8 @@ KeyValues::~KeyValues()
 
 void KeyValues::ParseFile(FILE* fs, bool use_esc_codes)
 {
-	XPROF_NODE(XPROF_CATEGORY_OTHER);
+	XPROF_NODE(XPROF_CATEGORY_KVPARSE);
+
 	if(!fs)
 	{
 		this->good = false;
@@ -75,6 +76,8 @@ void KeyValues::ParseFile(FILE* fs, bool use_esc_codes)
 
 void KeyValues::ParseFile(const char *file, bool use_escape_codes)
 {
+	XPROF_NODE(XPROF_CATEGORY_KVPARSE);
+
 	FILE* fs = fopen(file, "r");
 	if(!fs)
 	{
@@ -102,7 +105,8 @@ void KeyValues::ParseFile(const char *file, bool use_escape_codes)
 
 void KeyValues::ParseString(const char* string, bool escape, long long len)
 {
-	XPROF_NODE(XPROF_CATEGORY_OTHER);
+	XPROF_NODE(XPROF_CATEGORY_KVPARSE);
+	
 	int nline = 0, nchar = 0, bracket_level = 0;
 	bool inquote = false, incomment = false, parsed_key = false;
 	char buf[512];

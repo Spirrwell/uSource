@@ -6,6 +6,7 @@ xprof.h - Realtime profiling
 #include "containers/list.h"
 #include "containers/array.h"
 #include "platformspec.h"
+#include "threadtools.h"
 
 #include <initializer_list>
 #include <stdio.h>
@@ -25,7 +26,7 @@ xprof.h - Realtime profiling
 #define XPROF_CATEGORY_MODELOAD "ModelLoading"
 #define XPROF_CATEGORY_SOUNDLOAD "SoundLoading"
 #define XPROF_CATEGORY_FILESYSTEM "Filesystem"
-#define XPROF_CATEGROY_CRTFUNC "CrtFunctions"
+#define XPROF_CATEGORY_CRTFUNC "CrtFunctions"
 #define XPROF_CATEGORY_NETWORK "Network"
 #define XPROF_CATEGORY_CVAR "ConsoleVar"
 #define XPROF_CATEGORY_CONCOMMAND "ConsoleCommand"
@@ -39,16 +40,53 @@ xprof.h - Realtime profiling
 #define XPROF_CATEGORY_UNZIP "Unzip"
 #define XPROF_CATEGORY_LZSS "LZSS"
 
+namespace xprof
+{
+	constexpr inline unsigned long long SecondsToNs(unsigned long long sec)
+	{
+		return sec * 1000000000;
+	}
+
+	constexpr inline unsigned long long SecondsToUs(unsigned long long sec)
+	{
+		return sec * 1000000;
+	}
+
+	constexpr inline unsigned long long SecondsToMs(unsigned long long sec)
+	{
+		return sec * 1000;
+	}
+
+	constexpr inline unsigned long long MsToNs(unsigned long long sec)
+	{
+		return sec * 1000000;
+	}
+
+	constexpr inline unsigned long long FpsToNs(unsigned long long fps)
+	{
+		return (1000/fps) * 1000000;
+	}
+
+	constexpr inline float NsToMsF(unsigned long long ns)
+	{
+		return (ns / (float)1000000);
+	}
+}
+
 class CXProf
 {
 private:
 	List<class CXProfNode*> m_nodes;
 	std::stack<class CXProfNode*> m_nodeStack[MAX_NODESTACKS];
 	unsigned long long m_nodeStackThreads[MAX_NODESTACKS];
+	bool m_enabled;
+	mutable CThreadMutex m_mutex;
 public:
 	CXProf();
 	~CXProf();
 
+	/* Creates a new node category */
+	/* THREAD SAFE */
 	void AddCategoryNode(const char* name, unsigned long long budget);
 	
 	class CXProfNode* CreateNode(const char* category, const char* func, const char* file, unsigned long long budget);
@@ -58,18 +96,31 @@ public:
 	class CXProfNode* FindCategory(const char* name);
 
 	/* Returns a list of category nodes */
-	const List<class CXProfNode*>& Nodes() const { return m_nodes; };
+	/* THREAD SAFE */
+	List<class CXProfNode*> Nodes()
+	{
+		auto lock = m_mutex.RAIILock();
+		return m_nodes;
+	};
 
-	/**
-	 * @brief attempts to find a parent node for the current thread
-	 * @return pointer to the parent node, or nullptr if there are no parents
-	 */ 
-	class CXProfNode* FindParent();
+	/* Tree dump functions */
+	/* NOT THREAD SAFE */
+	void DumpAllNodes(int(*printFn)(const char*,...) = printf);
+	void DumpCategoryTree(const char* cat, int(*printFn)(const char*,...) = printf);
 
-	void DumpCategoryTree(const char* cat);
+	/* A "frame". Resets all per-frame budgets */
+	/* THREAD SAFE */
+	void Frame(float dt = 0.0f);
 
+	/* Enables or disables xprof */
+	/* THREAD SAFE */
+	bool Enabled() const;
+	void Enable();
+	void Disable();
+
+	void ClearNodes();
 private:
-	void DumpNodeTreeInternal(class CXProfNode* node, int indent);
+	void DumpNodeTreeInternal(class CXProfNode* node, int indent, int(*printFn)(const char*,...) = printf);
 };
 
 class CXProfNode
@@ -87,6 +138,7 @@ private:
 	Array<class CXProfTest> m_testQueue;
 	const char* m_file;
 	const char* m_category;
+	mutable CThreadSpinlock m_mutex;
 
 	friend class CXProf;
 
@@ -94,13 +146,21 @@ public:
 	CXProfNode(const char* category, const char* function, const char* file, unsigned long long budget);
 	~CXProfNode();
 
+	/* Returns a copy of this node for reading */
+	/* THREAD SAFE */
+	CXProfNode LockRead()
+	{
+		auto lock = m_mutex.RAIILock();
+		return *this;
+	}
+
 	/**
 	 * @brief Submit a new XProf time test to the node
 	 */ 
 	void SubmitTest(class CXProfTest* test);
 
-	void SetBudget(unsigned long long time) { m_timeBudget = time; };
-	unsigned long long GetBudget(unsigned long long time) const { return m_timeBudget; };
+	void SetBudget(unsigned long long time);
+	unsigned long long GetBudget() const;
 
 	/**
 	 * @brief Get or reset the remaining budget constraints
@@ -108,14 +168,15 @@ public:
 	unsigned long long GetRemainingBudget() const;
 	void ResetBudget();
 
+	/* Accessors */
+	/* THREAD SAFE */
 	const char* Name() const { return m_function; };
-
+	const char* File() const { return m_file; };
+	const char* Category() const { return m_category; };
 	CXProfNode* Parent() const { return m_parent; };
-
-	const List<CXProfNode*>& Children() const { return m_children; };
-	void AddChild(CXProfNode* node) { m_children.push_back(node); };
-
-	const Array<CXProfTest>& TestQueue() const { return m_testQueue; };
+	List<CXProfNode*> Children() const;
+	void AddChild(CXProfNode* node);
+	Array<CXProfTest> TestQueue() const;
 };
 
 extern CXProf* g_pXProf;
@@ -126,9 +187,12 @@ class CXProfTest
 public:
 	CXProfNode* node;
 	platform::time_t start, stop;
+	bool m_disabled;
 
-	CXProfTest(CXProfNode* node)
+	CXProfTest(CXProfNode* node) : 
+		m_disabled(false)
 	{
+		m_disabled = !g_pXProf->Enabled();
 		this->node = node;
 		start = platform::GetCurrentTime();
 		g_pXProf->PushNode(node);
@@ -136,11 +200,14 @@ public:
 
 	~CXProfTest()
 	{
+		if(m_disabled) return;
 		stop = platform::GetCurrentTime();
 		this->node->SubmitTest(this);
 		g_pXProf->PopNode();
 	}
 };
+
+#ifdef ENABLE_XPROF
 
 #ifndef _MSC_VER
 
@@ -154,5 +221,10 @@ CXProfTest __xprof_test(__xprof_node);
 static CXProfNode* __xprof_node = new CXProfNode((category), __FUNCSIG__, __FILE__, 0); \
 CXProfTest __xprof_test(__xprof_node); 
 
+#endif // msc
 
-#endif // _MSC_VER
+#else
+
+#define XPROF_NODE(c)
+
+#endif
