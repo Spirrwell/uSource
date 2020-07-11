@@ -34,6 +34,8 @@ typedef struct convar_s
 	// this part unique for convar_t
 	char		*desc;		// variable descrition info
 	char		*def_string;	// keep pointer to initial value
+
+	void (*callback)(const char*, const char*); /* First param = old var, second param = new var */
 } convar_t;
 
 // cvar internal flags

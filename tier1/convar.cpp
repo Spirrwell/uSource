@@ -21,15 +21,16 @@ void Convar::RegisterAllCvars()
 
 	for(auto x : *g_pConvarRegistrationQueue)
 	{
-		g_pEngineCvar->RegisterCvar(x->name, x->_default, x->desc, x->flags);
+		g_pEngineCvar->RegisterCvar(x->name, x->_default, x->desc, x->flags, x->m_callback);
 	}
 }
 
-Convar::Convar(const char *_name, const char *def, unsigned int _flags, const char *description) :
+Convar::Convar(const char *_name, const char *def, unsigned int _flags, const char *description, void(*callback)(const char*,const char*)) :
 	name(_name),
 	_default(def),
 	flags(_flags),
-	desc(description)
+	desc(description),
+	m_callback(callback)
 {
 	if(!g_pConvarRegistrationQueue) 
 		g_pConvarRegistrationQueue = new Array<Convar*>();
@@ -61,9 +62,7 @@ bool Convar::GetBool() const
 	if(!this->name) return false;
 	const char* b = g_pEngineCvar->CvarGetString(this->name);
 	if(!b) return false;
-	if(Q_strcasecmp(b, "false") == 0 || Q_strcmp(b, "0") == 0)
-		return false;
-	return true;
+	return !(Q_strcasecmp(b, "false") == 0 || Q_strcmp(b, "0") == 0);
 }
 
 

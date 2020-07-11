@@ -399,6 +399,7 @@ convar_t *Cvar_Get( const char *name, const char *value, int flags, const char *
 	var->desc = copystring( var_desc );
 	var->value = Q_atof( var->string );
 	var->flags = flags|FCVAR_ALLOCATED;
+	var->callback = nullptr;
 
 	// link the variable in alphanumerical order
 	for( cur = NULL, find = cvar_vars; find && Q_strcmp( find->name, var->name ) < 0; cur = find, find = find->next );
@@ -549,6 +550,9 @@ void Cvar_DirectSet( convar_t *var, const char *value )
 	// fill it cls.userinfo, svs.serverinfo
 	if( !Cvar_UpdateInfo( var, pszValue, true ))
 		return;
+
+	// Call usercallback before freeing previous val
+	if(var->callback) var->callback(var->string, pszValue);
 
 	// and finally changed the cvar itself
 	freestring( var->string );
@@ -959,7 +963,7 @@ public:
 	virtual const char* GetName() { return "CEngineCvar001"; };
 
 	virtual void AddCommand(const char* cmd, void(*function)(), const char* desc, int flags);
-	virtual void RegisterCvar(const char* name, const char* default_val, const char* desc, int flags);
+	virtual void RegisterCvar(const char* name, const char* default_val, const char* desc, int flags, void(*callback)(const char*,const char*));
 	virtual const char* CvarGetString(const char* name);
 	virtual void CvarSetString(const char* name, const char* string);
 	virtual void CvarInit();
@@ -974,7 +978,7 @@ void CEngineCvar::AddCommand(const char* cmd, void(*function)(), const char* des
 	Cmd_AddCommand(cmd, function, desc);
 }
 
-void CEngineCvar::RegisterCvar(const char* name, const char* default_val, const char* desc, int flags) 
+void CEngineCvar::RegisterCvar(const char* name, const char* default_val, const char* desc, int flags, void(*callback)(const char*,const char*))
 {
 	convar_t* var = (convar_t*)Z_Malloc(sizeof(convar_t));
 	var->name = copystring(name);

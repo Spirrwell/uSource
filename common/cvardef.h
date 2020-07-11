@@ -40,6 +40,7 @@ typedef struct cvar_s
 	int		flags;
 	float		value;
 	struct cvar_s	*next;
+	void (*callback)(const char*, const char*); /* First param = old var, second param = new var */
 } cvar_t;
 
 #endif//CVARDEF_H

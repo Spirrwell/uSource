@@ -16,8 +16,9 @@ private:
 	const char* const _default;
 	const unsigned int flags;
 	const char* const desc;
+	void(*m_callback)(const char*,const char*);
 public:
-	Convar(const char* name, const char* _default, unsigned int flags = 0, const char* description = "");
+	Convar(const char* name, const char* _default, unsigned int flags = 0, const char* description = "", void(*callback)(const char*, const char*) = nullptr);
 
 	float GetFloat() const;
 	int GetInt() const;
