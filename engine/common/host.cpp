@@ -41,6 +41,7 @@ GNU General Public License for more details.
 #include "render_api.h"	// decallist_t
 #include "appframework.h"
 #include "public/containers/list.h"
+#include "tier1/tier1.h"
 
 /* Interface includes */
 #include "log_int.h"
@@ -991,6 +992,7 @@ extern "C" int EXPORT Host_Main( int argc, char **argv, const char *progname, in
 
 	Host_InitInterfaces();
 	Host_InitCommon( argc, argv, progname, bChangeGame );
+	ConnectTier1Libraries();
 
 	// init commands and vars
 	if( host_developer.value >= DEV_EXTENDED )

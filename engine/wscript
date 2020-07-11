@@ -64,7 +64,7 @@ def configure(conf):
 		conf.env.append_unique('DEFINES', 'SCRIPTING_LUAJIT')
 
 def build(bld):
-	libs = [ 'public', 'mathlib' ]
+	libs = [ 'public', 'mathlib', 'tier1' ]
 	source = bld.path.ant_glob([
 		'common/*.cpp',
 		'common/imagelib/*.cpp',
