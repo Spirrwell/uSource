@@ -363,6 +363,7 @@ convar_t *Cvar_Get( const char *name, const char *value, int flags, const char *
 			// in other cases we need to rewrite them
 			if( Q_strcmp( var->desc, "" ))
 			{
+				if(var->callback) var->callback(var->string, value);
 				// directly set value
 				freestring( var->string );
 				var->string = copystring( value );
@@ -579,6 +580,8 @@ void Cvar_FullSet( const char *var_name, const char *value, int flags )
 		Cvar_Get( var_name, value, flags, "" );
 		return;
 	}
+
+	if(var->callback) var->callback(var->string, value);
 
 	freestring( var->string );
 	var->string = copystring( value );
@@ -985,6 +988,7 @@ void CEngineCvar::RegisterCvar(const char* name, const char* default_val, const 
 	var->flags = flags;
 	var->string = copystring(default_val);
 	var->desc = copystring(desc);
+	var->callback = callback;
 	Cvar_RegisterVariable(var);
 }
 
