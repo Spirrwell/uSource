@@ -942,3 +942,9 @@ CBaseEntity *CBaseEntity::Create( const char *szName, const Vector &vecOrigin, c
 	DispatchSpawn( pEntity->edict() );
 	return pEntity;
 }
+
+void CBaseEntity::RemoveThis(float time)
+{
+	pev->nextthink = pev->ltime + time;
+	m_bShouldRemove = true;
+}

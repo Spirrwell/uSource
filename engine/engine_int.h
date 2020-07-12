@@ -16,7 +16,8 @@
 #define IENGINETRACE_INTERFACE IENGINETRACE_001
 
 #define IENGINECVAR_001 "IEngineCvar001"
-#define IENGINECVAR_INTERFACE IENGINECVAR_001
+#define IENGINECVAR_002 "IEngineCvar002"
+#define IENGINECVAR_INTERFACE IENGINECVAR_002
 
 #define IENGINEINTERFACE_001 "IEngineInterface001"
 #define IENGINEINTERFACE_INTERFACE IENGINEINTERFACE_001
@@ -113,7 +114,7 @@ class IEngineCvar : public IAppInterface
 {
 public:
 	virtual void AddCommand(const char* cmd, void(*function)(), const char* desc, int flags) = 0;
-	virtual void RegisterCvar(const char* name, const char* default_val, const char* desc, int flags) = 0;
+	virtual void RegisterCvar(const char* name, const char* default_val, const char* desc, int flags, void(*callback)(const char*,const char*)) = 0;
 	virtual const char* CvarGetString(const char* name) = 0;
 	virtual void CvarSetString(const char* name, const char* string) = 0;
 	virtual void CvarInit() = 0;

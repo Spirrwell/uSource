@@ -32,19 +32,19 @@
 class CFuncMortarField : public CBaseToggle
 {
 public:
-	void Spawn( void );
-	void Precache( void );
-	void KeyValue( KeyValueData *pkvd );
+	void Spawn( void ) override;
+	void Precache( void ) override;
+	void KeyValue( KeyValueData *pkvd ) override;
 
 	// Bmodels don't go across transitions
-	virtual int ObjectCaps( void ) { return CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	virtual int ObjectCaps( void ) override { return CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 
-	virtual int Save( CSave &save );
-	virtual int Restore( CRestore &restore );
+	virtual int Save( CSave &save ) override;
+	virtual int Restore( CRestore &restore ) override;
 
 	static TYPEDESCRIPTION m_SaveData[];
 
-	void EXPORT FieldUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	virtual void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value ) override;
 
 	string_t m_iszXController;
 	string_t m_iszYController;
@@ -104,7 +104,7 @@ void CFuncMortarField::Spawn( void )
 	SET_MODEL( ENT( pev ), STRING( pev->model ) );    // set size and link into world
 	pev->movetype = MOVETYPE_NONE;
 	SetBits( pev->effects, EF_NODRAW );
-	SetUse( &CFuncMortarField::FieldUse );
+	// SetUse( &CFuncMortarField::FieldUse );
 	Precache();
 }
 
@@ -116,8 +116,10 @@ void CFuncMortarField::Precache( void )
 }
 
 // If connected to a table, then use the table controllers, else hit where the trigger is.
-void CFuncMortarField::FieldUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+void CFuncMortarField::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
+	CBaseToggle::Use(pActivator, pCaller, useType, value);
+
 	Vector vecStart;
 
 	vecStart.x = RANDOM_FLOAT( pev->mins.x, pev->maxs.x );
@@ -195,7 +197,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 
-	void EXPORT MortarExplode( void );
+	void MortarExplode( void );
 
 	int m_spriteTexture;
 };
@@ -209,7 +211,8 @@ void CMortar::Spawn()
 
 	pev->dmg = 200;
 
-	SetThink( &CMortar::MortarExplode );
+	//SetThink( &CMortar::MortarExplode );
+	CMortar::MortarExplode();
 	pev->nextthink = 0;
 
 	Precache();

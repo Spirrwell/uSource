@@ -83,17 +83,21 @@ void CShower::Touch( CBaseEntity *pOther )
 class CEnvExplosion : public CBaseMonster
 {
 public:
-	void Spawn();
-	void EXPORT Smoke( void );
-	void KeyValue( KeyValueData *pkvd );
-	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	virtual void Spawn() override;
+	void Smoke( void );
+	virtual void KeyValue( KeyValueData *pkvd ) override;
+	virtual void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value ) override;
 
-	virtual int Save( CSave &save );
-	virtual int Restore( CRestore &restore );
+	virtual int Save( CSave &save ) override;
+	virtual int Restore( CRestore &restore ) override;
 	static TYPEDESCRIPTION m_SaveData[];
 
+	virtual void Think() override;
+
 	int m_iMagnitude;// how large is the fireball? how much damage?
-	int m_spriteScale; // what's the exact fireball sprite scale? 
+	int m_spriteScale; // what's the exact fireball sprite scale?
+
+	bool m_bSmoking : 1;
 };
 
 TYPEDESCRIPTION	CEnvExplosion::m_SaveData[] =
@@ -216,7 +220,8 @@ void CEnvExplosion::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 		RadiusDamage( pev, pev, m_iMagnitude, CLASS_NONE, DMG_BLAST );
 	}
 
-	SetThink( &CEnvExplosion::Smoke );
+	// SetThink( &CEnvExplosion::Smoke );
+	m_bSmoking = true;
 	pev->nextthink = gpGlobals->time + 0.3;
 
 	// draw sparks
@@ -250,6 +255,12 @@ void CEnvExplosion::Smoke( void )
 	{
 		UTIL_Remove( this );
 	}
+}
+
+void CEnvExplosion::Think()
+{
+	CBaseToggle::Think();
+	if(m_bSmoking) Smoke();
 }
 
 // HACKHACK -- create one of these and fake a keyvalue to get the right explosion setup

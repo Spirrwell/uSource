@@ -34,34 +34,43 @@ extern void SetMovedir( entvars_t *ev );
 class CBaseDoor : public CBaseToggle
 {
 public:
-	void Spawn( void );
-	void Precache( void );
-	virtual void KeyValue( KeyValueData *pkvd );
-	virtual void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	virtual void Blocked( CBaseEntity *pOther );
+	CBaseDoor();
 
-	virtual int ObjectCaps( void ) 
+	virtual void Spawn( void ) override;
+	virtual void Precache( void ) override;
+	virtual void KeyValue( KeyValueData *pkvd ) override;
+	virtual void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value ) override;
+	virtual void Blocked( CBaseEntity *pOther ) override;
+
+	virtual int ObjectCaps( void ) override
 	{ 
 		if( pev->spawnflags & SF_ITEM_USE_ONLY )
 			return ( CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION ) | FCAP_IMPULSE_USE;
 		else
 			return (CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION);
 	};
-	virtual int Save( CSave &save );
-	virtual int Restore( CRestore &restore );
+
+	virtual int Save( CSave &save ) override;
+	virtual int Restore( CRestore &restore ) override;
 	static TYPEDESCRIPTION m_SaveData[];
 
-	virtual void SetToggleState( int state );
+	virtual void SetToggleState( int state ) override;
+
+	/* Base entity overrides */
+	void Touch(CBaseEntity* other) override;
+	void Think() override;
 
 	// used to selectivly override defaults
-	void EXPORT DoorTouch( CBaseEntity *pOther );
+	void DoorTouch( CBaseEntity *pOther );
 
 	// local functions
 	int DoorActivate();
-	void EXPORT DoorGoUp( void );
-	void EXPORT DoorGoDown( void );
-	void EXPORT DoorHitTop( void );
-	void EXPORT DoorHitBottom( void );
+	void DoorGoUp( void );
+	void DoorGoDown( void );
+	void DoorHitTop( void );
+	void DoorHitBottom( void );
+
+	virtual void MoveDone() override;
 
 	BYTE m_bHealthValue;// some doors are medi-kit doors, they give players health
 
@@ -74,6 +83,11 @@ public:
 	BYTE m_bLockedSentence;	
 	BYTE m_bUnlockedSound;	
 	BYTE m_bUnlockedSentence;
+
+	bool m_bTouchEnable : 1;
+	bool m_bDoorDown : 1;
+	bool m_bDoorGoingDown : 1;
+	bool m_bDoorGoingUp : 1;
 };
 
 TYPEDESCRIPTION	CBaseDoor::m_SaveData[] =
@@ -183,6 +197,15 @@ void PlayLockSounds( entvars_t *pev, locksound_t *pls, int flocked, int fbutton 
 			pls->flwaitSentence = gpGlobals->time + DOOR_SENTENCEWAIT;
 		}
 	}
+}
+
+CBaseDoor::CBaseDoor() :
+	m_bDoorDown(false),
+	m_bTouchEnable(false),
+	m_bDoorGoingDown(false),
+	m_bDoorGoingUp(false)
+{
+
 }
 
 //
@@ -315,10 +338,12 @@ void CBaseDoor::Spawn()
 	// if the door is flagged for USE button activation only, use NULL touch function
 	if( FBitSet( pev->spawnflags, SF_DOOR_USE_ONLY ) )
 	{
-		SetTouch( NULL );
+		m_bTouchEnable = false;
+		// SetTouch( NULL );
 	}
 	else // touchable button
-		SetTouch( &CBaseDoor::DoorTouch );
+		m_bTouchEnable = true;
+		// SetTouch( &CBaseDoor::DoorTouch );
 }
  
 void CBaseDoor::SetToggleState( int state )
@@ -544,7 +569,8 @@ void CBaseDoor::DoorTouch( CBaseEntity *pOther )
 	m_hActivator = pOther;// remember who activated the door
 
 	if( DoorActivate())
-		SetTouch( NULL ); // Temporarily disable the touch function, until movement is finished.
+		m_bTouchEnable = false;
+		//SetTouch( NULL ); // Temporarily disable the touch function, until movement is finished.
 }
 
 //
@@ -611,7 +637,8 @@ void CBaseDoor::DoorGoUp( void )
 
 	m_toggle_state = TS_GOING_UP;
 
-	SetMoveDone( &CBaseDoor::DoorHitTop );
+	// SetMoveDone( &CBaseDoor::DoorHitTop );
+	m_bDoorGoingUp = true;
 	if( FClassnameIs( pev, "func_door_rotating" ) )		// !!! BUGBUG Triggered doors don't work with this yet
 	{
 		float sign = 1.0;
@@ -659,13 +686,15 @@ void CBaseDoor::DoorHitTop( void )
 	{
 		// Re-instate touch method, movement is complete
 		if( !FBitSet( pev->spawnflags, SF_DOOR_USE_ONLY ) )
-			SetTouch( &CBaseDoor::DoorTouch );
+			//SetTouch( &CBaseDoor::DoorTouch );
+			m_bTouchEnable = true;
 	}
 	else
 	{
 		// In flWait seconds, DoorGoDown will fire, unless wait is -1, then door stays open
 		pev->nextthink = pev->ltime + m_flWait;
-		SetThink( &CBaseDoor::DoorGoDown );
+		// SetThink( &CBaseDoor::DoorGoDown );
+		m_bDoorDown = true;
 
 		if( m_flWait == -1 )
 		{
@@ -693,7 +722,8 @@ void CBaseDoor::DoorGoDown( void )
 #endif // DOOR_ASSERT
 	m_toggle_state = TS_GOING_DOWN;
 
-	SetMoveDone( &CBaseDoor::DoorHitBottom );
+	// SetMoveDone( &CBaseDoor::DoorHitBottom );
+	m_bDoorGoingDown = true;
 	if( FClassnameIs( pev, "func_door_rotating" ) )//rotating door
 		AngularMove( m_vecAngle1, pev->speed );
 	else
@@ -718,10 +748,12 @@ void CBaseDoor::DoorHitBottom( void )
 	if( FBitSet( pev->spawnflags, SF_DOOR_USE_ONLY ) )
 	{
 		// use only door
-		SetTouch( NULL );
+		// SetTouch( NULL );
+		m_bTouchEnable = false;
 	}
 	else // touchable door
-		SetTouch( &CBaseDoor::DoorTouch );
+		//SetTouch( &CBaseDoor::DoorTouch );
+		m_bTouchEnable = true;
 
 	SUB_UseTargets( m_hActivator, USE_TOGGLE, 0 ); // this isn't finished
 
@@ -811,6 +843,25 @@ void CBaseDoor::Blocked( CBaseEntity *pOther )
 			}
 		}
 	}
+}
+
+void CBaseDoor::Touch(CBaseEntity *other)
+{
+	CBaseEntity::Touch(other);
+	if(m_bTouchEnable) this->DoorTouch(other);
+}
+
+void CBaseDoor::Think()
+{
+	CBaseEntity::Think();
+	if(m_bDoorDown) DoorGoDown();
+}
+
+void CBaseDoor::MoveDone()
+{
+	CBaseToggle::MoveDone();
+	if(m_bDoorGoingDown) DoorHitBottom();
+	if(m_bDoorGoingUp) DoorHitTop();
 }
 
 /*QUAKED FuncRotDoorSpawn (0 .5 .8) ? START_OPEN REVERSE  
@@ -905,10 +956,12 @@ void CRotDoor::Spawn( void )
 
 	if( FBitSet( pev->spawnflags, SF_DOOR_USE_ONLY ) )
 	{
-		SetTouch( NULL );
+		// SetTouch( NULL );
+		m_bTouchEnable = false;
 	}
 	else // touchable button
-		SetTouch( &CBaseDoor::DoorTouch );
+		//SetTouch( &CBaseDoor::DoorTouch );
+		m_bTouchEnable = true;
 }
 
 void CRotDoor::SetToggleState( int state )
@@ -924,21 +977,28 @@ void CRotDoor::SetToggleState( int state )
 class CMomentaryDoor : public CBaseToggle
 {
 public:
-	void Spawn( void );
-	void Precache( void );
-	void EXPORT MomentaryMoveDone( void );
-	void EXPORT StopMoveSound( void );
+	CMomentaryDoor();
 
-	void KeyValue( KeyValueData *pkvd );
-	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	virtual int ObjectCaps( void ) { return CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	virtual void Spawn( void ) override;
+	virtual void Precache( void ) override;
+	virtual void MoveDone( void ) override;
+	void StopMoveSound( void );
 
-	virtual int Save( CSave &save );
-	virtual int Restore( CRestore &restore );
+	virtual void Think() override;
+
+	virtual void KeyValue( KeyValueData *pkvd ) override;
+	virtual void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value ) override;
+	virtual int ObjectCaps( void ) override { return CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+
+	virtual int Save( CSave &save ) override;
+	virtual int Restore( CRestore &restore ) override;
 	static TYPEDESCRIPTION m_SaveData[];
 
 	BYTE m_bMoveSnd;			// sound a door makes while moving	
 	BYTE m_bStopSnd;			// sound a door makes when it stops
+
+	bool m_bTouchEnable;
+	bool m_bStopSound;
 };
 
 LINK_ENTITY_TO_CLASS( momentary_door, CMomentaryDoor )
@@ -950,6 +1010,13 @@ TYPEDESCRIPTION	CMomentaryDoor::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CMomentaryDoor, CBaseToggle )
+
+CMomentaryDoor::CMomentaryDoor() :
+	m_bTouchEnable(false),
+	m_bStopSound(false)
+{
+
+}
 
 void CMomentaryDoor::Spawn( void )
 {
@@ -977,7 +1044,8 @@ void CMomentaryDoor::Spawn( void )
 		m_vecPosition2 = m_vecPosition1;
 		m_vecPosition1 = pev->origin;
 	}
-	SetTouch( NULL );
+	// SetTouch( NULL );
+	m_bTouchEnable = false;
 
 	Precache();
 }
@@ -1114,13 +1182,13 @@ void CMomentaryDoor::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 			return;
 
 		LinearMove( move, speed );
-		SetMoveDone( &CMomentaryDoor::MomentaryMoveDone );
+		//SetMoveDone( &CMomentaryDoor::MomentaryMoveDone );
 	}
 }
 
-void CMomentaryDoor::MomentaryMoveDone( void )
+void CMomentaryDoor::MoveDone( void )
 {
-	SetThink(&CMomentaryDoor::StopMoveSound);
+	m_bStopSound = true;
 	pev->nextthink = pev->ltime + 0.1;
 }
 
@@ -1129,5 +1197,11 @@ void CMomentaryDoor::StopMoveSound()
 	STOP_SOUND( ENT( pev ), CHAN_STATIC, STRING( pev->noiseMoving ) );
 	EMIT_SOUND( ENT( pev ), CHAN_STATIC, STRING( pev->noiseArrived ), 1, ATTN_NORM );
 	pev->nextthink = -1;
-	ResetThink();
+	m_bStopSound = false;
+}
+
+void CMomentaryDoor::Think()
+{
+	CBaseEntity::Think();
+	if(m_bStopSound) StopMoveSound();
 }

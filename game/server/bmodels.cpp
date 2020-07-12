@@ -262,20 +262,25 @@ void CFuncMonsterClip::Spawn( void )
 class CFuncRotating : public CBaseEntity
 {
 public:
+	CFuncRotating();
+
 	// basic functions
-	void Spawn( void  );
-	void Precache( void  );
-	void EXPORT SpinUp( void );
-	void EXPORT SpinDown( void );
-	void KeyValue( KeyValueData* pkvd);
-	void EXPORT HurtTouch( CBaseEntity *pOther );
-	void EXPORT RotatingUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	void EXPORT Rotate( void );
+	virtual void Spawn( void  ) override;
+	virtual void Precache( void  ) override;
+	void SpinUp( void );
+	void SpinDown( void );
+	virtual void KeyValue( KeyValueData* pkvd) override;
+	void HurtTouch( CBaseEntity *pOther );
+	void Rotate( void );
 	void RampPitchVol(int fUp );
-	void Blocked( CBaseEntity *pOther );
-	virtual int ObjectCaps( void ) { return CBaseEntity :: ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
-	virtual int Save( CSave &save );
-	virtual int Restore( CRestore &restore );
+	virtual void Blocked( CBaseEntity *pOther ) override;
+	virtual int ObjectCaps( void ) override { return CBaseEntity :: ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	virtual int Save( CSave &save ) override;
+	virtual int Restore( CRestore &restore ) override;
+
+	virtual void Think() override;
+	virtual void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value ) override;
+	virtual void Touch(CBaseEntity* toucher) override;
 
 	static TYPEDESCRIPTION m_SaveData[];
 
@@ -284,6 +289,12 @@ public:
 	float m_flVolume;
 	float m_pitch;
 	int m_sounds;
+
+	bool m_bSpinDown;
+	bool m_bSpinUp;
+	bool m_bEnableHurt;
+	bool m_bRotate;
+	bool m_bDelayUse;
 };
 
 TYPEDESCRIPTION	CFuncRotating::m_SaveData[] =
@@ -298,6 +309,16 @@ TYPEDESCRIPTION	CFuncRotating::m_SaveData[] =
 IMPLEMENT_SAVERESTORE( CFuncRotating, CBaseEntity )
 
 LINK_ENTITY_TO_CLASS( func_rotating, CFuncRotating )
+
+CFuncRotating::CFuncRotating() :
+	m_bSpinDown(false),
+	m_bSpinUp(false),
+	m_bEnableHurt(false),
+	m_bDelayUse(false),
+	m_bRotate(false)
+{
+
+}
 
 void CFuncRotating::KeyValue( KeyValueData* pkvd )
 {
@@ -404,7 +425,7 @@ void CFuncRotating::Spawn()
 	UTIL_SetOrigin( pev, pev->origin );
 	SET_MODEL( ENT( pev ), STRING( pev->model ) );
 
-	SetUse( &CFuncRotating::RotatingUse );
+	// SetUse( &CFuncRotating::RotatingUse );
 	// did level designer forget to assign speed?
 	if( pev->speed <= 0 )
 		pev->speed = 0;
@@ -416,13 +437,15 @@ void CFuncRotating::Spawn()
 	// instant-use brush?
 	if( FBitSet( pev->spawnflags, SF_BRUSH_ROTATE_INSTANT ) )
 	{
-		SetThink( &CBaseEntity::SUB_CallUseToggle );
+		// SetThink( &CBaseEntity::SUB_CallUseToggle );
+		m_bDelayUse = true;
 		pev->nextthink = pev->ltime + 1.5;	// leave a magic delay for client to start up
 	}
 	// can this brush inflict pain?
 	if( FBitSet( pev->spawnflags, SF_BRUSH_HURT ) )
 	{
-		SetTouch( &CFuncRotating::HurtTouch );
+		// SetTouch( &CFuncRotating::HurtTouch );
+		m_bEnableHurt = true;
 	}
 
 	Precache();
@@ -475,7 +498,8 @@ void CFuncRotating::Precache( void )
 		// if fan was spinning, and we went through transition or save/restore,
 		// make sure we restart the sound.  1.5 sec delay is magic number. KDB
 
-		SetThink( &CFuncRotating::SpinUp );
+		// SetThink( &CFuncRotating::SpinUp );
+		m_bSpinUp = true;
 		pev->nextthink = pev->ltime + 1.5;
 	}
 }
@@ -563,7 +587,8 @@ void CFuncRotating::SpinUp( void )
 		EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, STRING( pev->noiseRunning ), 
 			m_flVolume, m_flAttenuation, SND_CHANGE_PITCH | SND_CHANGE_VOL, FANPITCHMAX );
 
-		SetThink( &CFuncRotating::Rotate );
+		// SetThink( &CFuncRotating::Rotate );
+		m_bRotate = true;
 		Rotate();
 	} 
 	else
@@ -604,7 +629,8 @@ void CFuncRotating::SpinDown( void )
 		EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, STRING( pev->noiseRunning /* Stop */ ),
 				0, 0, SND_STOP, (int)m_pitch );
 
-		SetThink( &CFuncRotating::Rotate );
+		// SetThink( &CFuncRotating::Rotate );
+		m_bRotate = true;
 		Rotate();
 	} 
 	else
@@ -621,15 +647,18 @@ void CFuncRotating::Rotate( void )
 //=========================================================
 // Rotating Use - when a rotating brush is triggered
 //=========================================================
-void CFuncRotating::RotatingUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+void CFuncRotating::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
+	CBaseEntity::Use(pActivator, pCaller, useType, value);
+
 	// is this a brush that should accelerate and decelerate when turned on/off (fan)?
 	if( FBitSet ( pev->spawnflags, SF_BRUSH_ACCDCC ) )
 	{
 		// fan is spinning, so stop it.
 		if( pev->avelocity != g_vecZero )
 		{
-			SetThink( &CFuncRotating::SpinDown );
+			//SetThink( &CFuncRotating::SpinDown );
+			m_bSpinDown = true;
 			//EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, STRING( pev->noiseStop ),
 			//	m_flVolume, m_flAttenuation, 0, m_pitch );
 
@@ -637,7 +666,8 @@ void CFuncRotating::RotatingUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 		}
 		else// fan is not moving, so start it
 		{
-			SetThink( &CFuncRotating::SpinUp );
+			//SetThink( &CFuncRotating::SpinUp );
+			m_bSpinUp = true;
 			EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, STRING( pev->noiseRunning ),
 				0.01, m_flAttenuation, 0, FANPITCHMIN );
 
@@ -649,7 +679,8 @@ void CFuncRotating::RotatingUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 		if( pev->avelocity != g_vecZero )
 		{
 			// play stopping sound here
-			SetThink( &CFuncRotating::SpinDown );
+			//SetThink( &CFuncRotating::SpinDown );
+			m_bSpinDown = true;
 
 			// EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, STRING( pev->noiseStop ),
 			//	m_flVolume, m_flAttenuation, 0, m_pitch );
@@ -663,7 +694,8 @@ void CFuncRotating::RotatingUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 				m_flVolume, m_flAttenuation, 0, FANPITCHMAX );
 			pev->avelocity = pev->movedir * pev->speed;
 
-			SetThink( &CFuncRotating::Rotate );
+			//SetThink( &CFuncRotating::Rotate );
+			m_bRotate = true;
 			Rotate();
 		}
 	}
@@ -676,21 +708,42 @@ void CFuncRotating::Blocked( CBaseEntity *pOther )
 {
 	pOther->TakeDamage( pev, pev, pev->dmg, DMG_CRUSH );
 }
+
+void CFuncRotating::Touch(CBaseEntity *toucher)
+{
+	CBaseEntity::Touch(toucher);
+
+	if(m_bEnableHurt) HurtTouch(toucher);
+}
+
+void CFuncRotating::Think()
+{
+	CBaseEntity::Think();
+	if(m_bSpinUp) this->SpinUp();
+	if(m_bSpinDown) this->SpinDown();
+	if(m_bRotate) this->Rotate();
+	if(m_bDelayUse) SUB_CallUseToggle();
+}
+
 //#endif
 class CPendulum : public CBaseEntity
 {
 public:
-	void Spawn( void );
-	void KeyValue( KeyValueData *pkvd );
-	void EXPORT Swing( void );
-	void EXPORT PendulumUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	void EXPORT Stop( void );
-	void Touch( CBaseEntity *pOther );
-	void EXPORT RopeTouch( CBaseEntity *pOther );// this touch func makes the pendulum a rope
-	virtual int ObjectCaps( void ) { return CBaseEntity :: ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
-	virtual int Save( CSave &save );
-	virtual int Restore( CRestore &restore );
-	void Blocked( CBaseEntity *pOther );
+	CPendulum();
+
+	virtual void Spawn( void ) override;
+	virtual void KeyValue( KeyValueData *pkvd ) override;
+	void Swing( void );
+	virtual void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value ) override;
+	void Stop( void );
+	virtual void Touch( CBaseEntity *pOther ) override;
+	void RopeTouch( CBaseEntity *pOther );// this touch func makes the pendulum a rope
+	virtual int ObjectCaps( void ) override { return CBaseEntity :: ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	virtual int Save( CSave &save ) override;
+	virtual int Restore( CRestore &restore ) override;
+	void Blocked( CBaseEntity *pOther ) override;
+
+	virtual void Think() override;
 
 	static TYPEDESCRIPTION m_SaveData[];
 
@@ -702,6 +755,11 @@ public:
 	float m_dampSpeed;
 	vec3_t m_center;
 	vec3_t m_start;
+
+	bool m_bDelayUse;
+	bool m_bSwinging;
+	bool m_bStop;
+	bool m_bAllowTouch;
 };
 
 LINK_ENTITY_TO_CLASS( func_pendulum, CPendulum )
@@ -719,6 +777,15 @@ TYPEDESCRIPTION	CPendulum::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CPendulum, CBaseEntity )
+
+CPendulum::CPendulum() :
+	m_bDelayUse(false),
+	m_bSwinging(false),
+	m_bStop(false),
+	m_bAllowTouch(false)
+{
+
+}
 
 void CPendulum::KeyValue( KeyValueData *pkvd )
 {
@@ -762,20 +829,24 @@ void CPendulum::Spawn( void )
 
 	if( FBitSet( pev->spawnflags, SF_BRUSH_ROTATE_INSTANT ) )
 	{	
-		SetThink( &CBaseEntity::SUB_CallUseToggle );
+		// SetThink( &CBaseEntity::SUB_CallUseToggle );
+		m_bDelayUse = true;
 		pev->nextthink = gpGlobals->time + 0.1;
 	}
 	pev->speed = 0;
-	SetUse( &CPendulum::PendulumUse );
+	// SetUse( &CPendulum::PendulumUse );
 
 	if( FBitSet( pev->spawnflags, SF_PENDULUM_SWING ) )
 	{
-		SetTouch( &CPendulum::RopeTouch );
+		// SetTouch( &CPendulum::RopeTouch );
+		m_bAllowTouch = true;
 	}
 }
 
-void CPendulum::PendulumUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+void CPendulum::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
+	CBaseEntity::Use(pActivator, pCaller, useType, value);
+
 	if( pev->speed )		// Pendulum is moving, stop it and auto-return if necessary
 	{
 		if( FBitSet( pev->spawnflags, SF_PENDULUM_AUTO_RETURN ) )
@@ -786,12 +857,14 @@ void CPendulum::PendulumUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 
 			pev->avelocity = m_maxSpeed * pev->movedir;
 			pev->nextthink = pev->ltime + ( delta / m_maxSpeed );
-			SetThink( &CPendulum::Stop );
+			// SetThink( &CPendulum::Stop );
+			m_bStop = true;
 		}
 		else
 		{
 			pev->speed = 0;		// Dead stop
-			SetThink( NULL );
+			// SetThink( NULL );
+			m_bSwinging = false;
 			pev->avelocity = g_vecZero;
 		}
 	}
@@ -799,7 +872,8 @@ void CPendulum::PendulumUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 	{
 		pev->nextthink = pev->ltime + 0.1;		// Start the pendulum moving
 		m_time = gpGlobals->time;		// Save time to calculate dt
-		SetThink( &CPendulum::Swing );
+		// SetThink( &CPendulum::Swing );
+		m_bSwinging = true;
 		m_dampSpeed = m_maxSpeed;
 	}
 }
@@ -808,8 +882,9 @@ void CPendulum::Stop( void )
 {
 	pev->angles = m_start;
 	pev->speed = 0;
-	SetThink( NULL );
+	// SetThink( NULL );
 	pev->avelocity = g_vecZero;
+	m_bStop = false;
 }
 
 void CPendulum::Blocked( CBaseEntity *pOther )
@@ -847,7 +922,8 @@ void CPendulum::Swing( void )
 		{
 			pev->angles = m_center;
 			pev->speed = 0;
-			SetThink( NULL );
+			// SetThink( NULL );
+			m_bSwinging = false;
 			pev->avelocity = g_vecZero;
 		}
 		else if( pev->speed > m_dampSpeed )
@@ -877,6 +953,8 @@ void CPendulum::Touch( CBaseEntity *pOther )
 	pOther->TakeDamage( pev, pev, damage, DMG_CRUSH );
 
 	pevOther->velocity = ( pevOther->origin - VecBModelOrigin( pev ) ).Normalize() * damage;
+
+	if(m_bAllowTouch) RopeTouch(pOther);
 }
 
 void CPendulum::RopeTouch( CBaseEntity *pOther )
@@ -899,4 +977,13 @@ void CPendulum::RopeTouch( CBaseEntity *pOther )
 	pev->enemy = pOther->edict();
 	pevOther->velocity = g_vecZero;
 	pevOther->movetype = MOVETYPE_NONE;
+}
+
+void CPendulum::Think()
+{
+	CBaseEntity::Think();
+
+	if(m_bStop) this->Stop();
+	if(m_bSwinging) this->Swing();
+	if(m_bDelayUse) SUB_CallUseToggle();
 }

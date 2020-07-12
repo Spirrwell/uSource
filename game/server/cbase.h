@@ -52,8 +52,9 @@ CBaseEntity
 #include "game/server/ai/ai_monsterevent.h"
 #endif
 
-// C functions for external declarations that call the appropriate C++ methods
+#include "tier1/dbg.h"
 
+// C functions for external declarations that call the appropriate C++ methods
 #include "exportdef.h"
 
 extern "C" EXPORT int GetEntityAPI( DLL_FUNCTIONS *pFunctionTable, int interfaceVersion );
@@ -133,11 +134,16 @@ public:
 	CBaseEntity *operator ->();
 };
 
+#define MAX_DELAY_CALLS 4
+
 //
 // Base Entity.  All entity types derive from this
 //
 class CBaseEntity 
 {
+private:
+	bool m_bShouldRemove;
+
 public:
 	// Constructor.  Set engine to use C/C++ callback functions
 	// pointers to engine data
@@ -200,6 +206,9 @@ public:
 	virtual BOOL IsNetClient( void ) { return FALSE; }
 	virtual const char *TeamID( void ) { return ""; }
 
+	/* Utility functions */
+	void RemoveThis(float time = 0.1);
+
 	//virtual void SetActivator( CBaseEntity *pActivator ) {}
 	virtual CBaseEntity *GetNextTarget( void );
 	
@@ -209,7 +218,14 @@ public:
 	void ( CBaseEntity ::*m_pfnUse )( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void ( CBaseEntity ::*m_pfnBlocked )( CBaseEntity *pOther );
 
-	virtual void Think( void ) { if( m_pfnThink ) ( this->*m_pfnThink )(); }
+	virtual void Think( void )
+	{
+		if( m_pfnThink ) ( this->*m_pfnThink )();
+		if(m_bShouldRemove) SUB_Remove();
+		m_bShouldRemove = false;
+	}
+
+
 	virtual void Touch( CBaseEntity *pOther ) { if( m_pfnTouch ) (this->*m_pfnTouch)( pOther ); }
 	virtual void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 	{ 
@@ -282,33 +298,31 @@ public:
 	// Ugly code to lookup all functions to make sure they are exported when set.
 #ifdef _DEBUG
 	void FunctionCheck( void *pFunction, char *name ) 
-	{ 
-		if( pFunction && !NAME_FOR_FUNCTION( pFunction ) )
-			ALERT( at_error, "No EXPORT: %s:%s (%08lx)\n", STRING( pev->classname ), name, (size_t)pFunction );
+	{
 	}
 
 	BASEPTR	ThinkSet( BASEPTR func, char *name ) 
 	{ 
 		m_pfnThink = func; 
-		FunctionCheck( (void *)*( (int *)( (char *)this + ( offsetof( CBaseEntity, m_pfnThink ) ) ) ), name ); 
+		// FunctionCheck( (void *)*( (int *)( (char *)this + ( offsetof( CBaseEntity, m_pfnThink ) ) ) ), name );
 		return func;
 	}
 	ENTITYFUNCPTR TouchSet( ENTITYFUNCPTR func, char *name ) 
 	{
 		m_pfnTouch = func; 
-		FunctionCheck( (void *)*( (int *)( (char *)this + ( offsetof( CBaseEntity, m_pfnTouch ) ) ) ), name );
+		// FunctionCheck( (void *)*( (int *)( (char *)this + ( offsetof( CBaseEntity, m_pfnTouch ) ) ) ), name );
 		return func;
 	}
 	USEPTR UseSet( USEPTR func, char *name ) 
 	{ 
 		m_pfnUse = func; 
-		FunctionCheck( (void *)*( (int *)( (char *)this + ( offsetof( CBaseEntity, m_pfnUse ) ) ) ), name );
+		// FunctionCheck( (void *)*( (int *)( (char *)this + ( offsetof( CBaseEntity, m_pfnUse ) ) ) ), name );
 		return func;
 	}
 	ENTITYFUNCPTR BlockedSet( ENTITYFUNCPTR func, char *name ) 
 	{ 
 		m_pfnBlocked = func; 
-		FunctionCheck( (void *)*( (int *)( (char *)this + ( offsetof( CBaseEntity, m_pfnBlocked ) ) ) ), name ); 
+		// FunctionCheck( (void *)*( (int *)( (char *)this + ( offsetof( CBaseEntity, m_pfnBlocked ) ) ) ), name );
 		return func;
 	}
 #endif
@@ -356,16 +370,20 @@ public:
 // Ugly technique to override base member functions
 // Normally it's illegal to cast a pointer to a member function of a derived class to a pointer to a 
 // member function of a base class.  static_cast is a sleezy way around that problem.
+/* What on fucking earth valve? Seriously? what the fuck are you guys even doing??? */
+/* I'm in awe at this. It's the most clever yet the most lazy and dumb thing ever */
+/* Why the fuck are you changing think and touch functions on the fly!? */
+#if 1 /* I swear to god, one day this 1 will be changed to 0!!! */
+// #ifdef _DEBUG
 
-#ifdef _DEBUG
+// #define SetThink( a ) ThinkSet( static_cast <void (CBaseEntity::*)(void)> (a), #a )
+// #define SetTouch( a ) TouchSet( static_cast <void (CBaseEntity::*)(CBaseEntity *)> (a), #a )
+// #define SetUse( a ) UseSet( static_cast <void (CBaseEntity::*)(	CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )> (a), #a )
+// #define SetBlocked( a ) BlockedSet( static_cast <void (CBaseEntity::*)(CBaseEntity *)> (a), #a )
+// #define ResetThink( ) m_pfnThink = static_cast <void (CBaseEntity::*)(void)> (NULL)
+// #define SetMoveDone( a ) m_pfnCallWhenMoveDone = static_cast <void (CBaseToggle::*)(void)> (a)
 
-#define SetThink( a ) ThinkSet( static_cast <void (CBaseEntity::*)(void)> (a), #a )
-#define SetTouch( a ) TouchSet( static_cast <void (CBaseEntity::*)(CBaseEntity *)> (a), #a )
-#define SetUse( a ) UseSet( static_cast <void (CBaseEntity::*)(	CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )> (a), #a )
-#define SetBlocked( a ) BlockedSet( static_cast <void (CBaseEntity::*)(CBaseEntity *)> (a), #a )
-#define ResetThink( ) m_pfnThink = static_cast <void (CBaseEntity::*)(void)> (NULL)
-
-#else
+// #else
 
 #define SetThink( a ) m_pfnThink = static_cast <void (CBaseEntity::*)(void)> (a)
 #define SetTouch( a ) m_pfnTouch = static_cast <void (CBaseEntity::*)(CBaseEntity *)> (a)
@@ -374,8 +392,10 @@ public:
 #define ResetThink( ) m_pfnThink = static_cast <void (CBaseEntity::*)(void)> (NULL)
 #define ResetTouch( ) m_pfnTouch = static_cast <void (CBaseEntity::*)(CBaseEntity *)> (NULL)
 #define ResetUse( ) m_pfnUse = static_cast <void (CBaseEntity::*)( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )> (NULL)
+#define SetMoveDone( a ) m_pfnCallWhenMoveDone = static_cast <void (CBaseToggle::*)(void)> (a)
 #define ResetBlocked( ) m_pfnBlocked = static_cast <void (CBaseEntity::*)(CBaseEntity *)> (NULL)
 
+// #endif
 #endif
 
 class CPointEntity : public CBaseEntity
@@ -495,7 +515,24 @@ public:
 class CBaseToggle : public CBaseAnimating
 {
 public:
-	void				KeyValue( KeyValueData *pkvd );
+	CBaseToggle() :
+		m_bAngMoveDone(false),
+		m_bLinearMoveDone(false)
+	{
+
+	}
+
+
+	virtual void		KeyValue( KeyValueData *pkvd ) override;
+
+	virtual void            Think() override
+	{
+		CBaseEntity::Think();
+#ifndef CLIENT_DLL
+		if(m_bAngMoveDone) AngularMoveDone();
+		if(m_bLinearMoveDone) LinearMoveDone();
+#endif
+	}
 
 	TOGGLE_STATE		m_toggle_state;
 	float				m_flActivateFinished;//like attack_finished, but for doors
@@ -519,13 +556,13 @@ public:
 
 	int					m_bitsDamageInflict;	// DMG_ damage type that the door or tigger does
 
-	virtual int		Save( CSave &save );
-	virtual int		Restore( CRestore &restore );
+	virtual int		Save( CSave &save ) override;
+	virtual int		Restore( CRestore &restore ) override;
 
 	static	TYPEDESCRIPTION m_SaveData[];
 
-	virtual int		GetToggleState( void ) { return m_toggle_state; }
-	virtual float	GetDelay( void ) { return m_flWait; }
+	virtual int		GetToggleState( void ) override { return m_toggle_state; }
+	virtual float	GetDelay( void ) override { return m_flWait; }
 
 	// common member functions
 	void LinearMove( Vector	vecDest, float flSpeed );
@@ -533,6 +570,9 @@ public:
 	void AngularMove( Vector vecDestAngle, float flSpeed );
 	void EXPORT AngularMoveDone( void );
 	BOOL IsLockedByMaster( void );
+
+	/* Override this in place of SetMoveDone */
+	virtual void MoveDone() {};
 
 	static float		AxisValue( int flags, const Vector &angles );
 	static void			AxisDir( entvars_t *pev );
@@ -543,8 +583,9 @@ public:
 							// of the switches in the multisource have been triggered, then
 							// the button will be allowed to operate. Otherwise, it will be
 							// deactivated.
+	bool m_bAngMoveDone : 1;
+	bool m_bLinearMoveDone : 1;
 };
-#define SetMoveDone( a ) m_pfnCallWhenMoveDone = static_cast <void (CBaseToggle::*)(void)> (a)
 
 
 

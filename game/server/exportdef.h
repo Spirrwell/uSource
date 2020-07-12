@@ -1,6 +1,7 @@
 #pragma once
 #ifndef EXPORTDEF_H
 #define EXPORTDEF_H
+#undef EXPORT
 #if defined _WIN32 || defined __CYGWIN__
 	#ifdef __GNUC__
 		#define EXPORT __attribute__ ((dllexport))
@@ -14,6 +15,7 @@
 		#define EXPORT
 	#endif
 #endif
+#undef DLLEXPORT
 #define DLLEXPORT EXPORT
 #define _DLLEXPORT EXPORT
 #endif // EXPORTDEF_H

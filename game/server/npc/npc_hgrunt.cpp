@@ -123,40 +123,40 @@ enum
 class CHGrunt : public CSquadMonster
 {
 public:
-	void Spawn( void );
-	void Precache( void );
-	void SetYawSpeed( void );
-	int Classify( void );
-	int ISoundMask( void );
-	void HandleAnimEvent( MonsterEvent_t *pEvent );
-	BOOL FCanCheckAttacks( void );
-	BOOL CheckMeleeAttack1( float flDot, float flDist );
-	BOOL CheckRangeAttack1( float flDot, float flDist );
-	BOOL CheckRangeAttack2( float flDot, float flDist );
-	void CheckAmmo( void );
-	void SetActivity( Activity NewActivity );
-	void StartTask( Task_t *pTask );
-	void RunTask( Task_t *pTask );
-	void DeathSound( void );
-	void PainSound( void );
-	void IdleSound( void );
-	Vector GetGunPosition( void );
+	virtual void Spawn( void ) override;
+	virtual void Precache( void ) override;
+	virtual void SetYawSpeed( void ) override;
+	virtual int Classify( void ) override;
+	virtual int ISoundMask( void ) override;
+	virtual void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
+	virtual BOOL FCanCheckAttacks( void ) override;
+	virtual BOOL CheckMeleeAttack1( float flDot, float flDist ) override;
+	virtual BOOL CheckRangeAttack1( float flDot, float flDist ) override;
+	virtual BOOL CheckRangeAttack2( float flDot, float flDist ) override;
+	virtual void CheckAmmo( void ) override;
+	virtual void SetActivity( Activity NewActivity ) override;
+	virtual void StartTask( Task_t *pTask ) override;
+	virtual void RunTask( Task_t *pTask ) override;
+	virtual void DeathSound( void ) override;
+	virtual void PainSound( void ) override;
+	virtual void IdleSound( void ) override;
+	virtual Vector GetGunPosition( void ) override;
 	void Shoot( void );
 	void Shotgun( void );
-	void PrescheduleThink( void );
-	void GibMonster( void );
+	virtual void PrescheduleThink( void ) override;
+	virtual void GibMonster( void ) override;
 	void SpeakSentence( void );
 
-	int Save( CSave &save ); 
-	int Restore( CRestore &restore );
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
 
 	CBaseEntity *Kick( void );
-	Schedule_t *GetSchedule( void );
-	Schedule_t *GetScheduleOfType( int Type );
-	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
-	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
+	virtual Schedule_t *GetSchedule( void ) override;
+	virtual Schedule_t *GetScheduleOfType( int Type ) override;
+	virtual void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType) override;
+	virtual int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType ) override;
 
-	int IRelationship( CBaseEntity *pTarget );
+	virtual int IRelationship( CBaseEntity *pTarget ) override;
 
 	BOOL FOkToSpeak( void );
 	void JustSpoke( void );
@@ -2349,9 +2349,9 @@ Schedule_t *CHGrunt::GetScheduleOfType( int Type )
 class CHGruntRepel : public CBaseMonster
 {
 public:
-	void Spawn( void );
-	void Precache( void );
-	void EXPORT RepelUse ( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	virtual void Spawn( void ) override;
+	virtual void Precache( void ) override;
+	virtual void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value ) override;
 	int m_iSpriteTexture;	// Don't save, precache
 };
 
@@ -2362,7 +2362,7 @@ void CHGruntRepel::Spawn( void )
 	Precache();
 	pev->solid = SOLID_NOT;
 
-	SetUse( &CHGruntRepel::RepelUse );
+	// SetUse( &CHGruntRepel::RepelUse );
 }
 
 void CHGruntRepel::Precache( void )
@@ -2371,7 +2371,7 @@ void CHGruntRepel::Precache( void )
 	m_iSpriteTexture = PRECACHE_MODEL( "sprites/rope.spr" );
 }
 
-void CHGruntRepel::RepelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+void CHGruntRepel::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
 	TraceResult tr;
 	UTIL_TraceLine( pev->origin, pev->origin + Vector( 0, 0, -4096.0 ), dont_ignore_monsters, ENT( pev ), &tr );
@@ -2392,7 +2392,8 @@ void CHGruntRepel::RepelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 	pBeam->PointEntInit( pev->origin + Vector( 0, 0, 112 ), pGrunt->entindex() );
 	pBeam->SetFlags( BEAM_FSOLID );
 	pBeam->SetColor( 255, 255, 255 );
-	pBeam->SetThink( &CBaseEntity::SUB_Remove );
+	// pBeam->SetThink( &CBaseEntity::SUB_Remove );
+	pBeam->RemoveThis();
 	pBeam->pev->nextthink = gpGlobals->time + -4096.0 * tr.flFraction / pGrunt->pev->velocity.z + 0.5;
 
 	UTIL_Remove( this );

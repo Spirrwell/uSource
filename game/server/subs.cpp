@@ -416,7 +416,8 @@ void CBaseToggle::LinearMove( Vector vecDest, float flSpeed )
 
 	// set nextthink to trigger a call to LinearMoveDone when dest is reached
 	pev->nextthink = pev->ltime + flTravelTime;
-	SetThink( &CBaseToggle::LinearMoveDone );
+	// SetThink( &CBaseToggle::LinearMoveDone );
+	m_bLinearMoveDone = true;
 
 	// scale the destdelta vector by the time spent traveling to get velocity
 	pev->velocity = vecDestDelta / flTravelTime;
@@ -483,7 +484,8 @@ void CBaseToggle::AngularMove( Vector vecDestAngle, float flSpeed )
 
 	// set nextthink to trigger a call to AngularMoveDone when dest is reached
 	pev->nextthink = pev->ltime + flTravelTime;
-	SetThink( &CBaseToggle::AngularMoveDone );
+	// SetThink( &CBaseToggle::AngularMoveDone );
+	m_bAngMoveDone = true;
 
 	// scale the destdelta vector by the time spent traveling to get velocity
 	pev->avelocity = vecDestDelta / flTravelTime;
@@ -499,8 +501,11 @@ void CBaseToggle::AngularMoveDone( void )
 	pev->angles = m_vecFinalAngle;
 	pev->avelocity = g_vecZero;
 	pev->nextthink = -1;
-	if( m_pfnCallWhenMoveDone )
-		( this->*m_pfnCallWhenMoveDone )();
+	if (m_pfnCallWhenMoveDone)
+	{
+		(this->*m_pfnCallWhenMoveDone)();
+		this->MoveDone();
+	}
 }
 
 float CBaseToggle::AxisValue( int flags, const Vector &angles )

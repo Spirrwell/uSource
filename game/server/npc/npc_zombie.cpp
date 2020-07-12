@@ -36,18 +36,18 @@
 class CZombie : public CBaseMonster
 {
 public:
-	void Spawn( void );
-	void Precache( void );
-	void SetYawSpeed( void );
-	int Classify( void );
-	void HandleAnimEvent( MonsterEvent_t *pEvent );
-	int IgnoreConditions( void );
+	virtual void Spawn( void ) override;
+	virtual void Precache( void ) override;
+	virtual void SetYawSpeed( void ) override;
+	virtual int Classify( void ) override;
+	virtual void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
+	virtual int IgnoreConditions( void ) override;
 
 	float m_flNextFlinch;
 
-	void PainSound( void );
-	void AlertSound( void );
-	void IdleSound( void );
+	virtual void PainSound( void ) override;
+	virtual void AlertSound( void ) override;
+	virtual void IdleSound( void ) override;
 	void AttackSound( void );
 
 	static const char *pAttackSounds[];
@@ -58,9 +58,9 @@ public:
 	static const char *pAttackMissSounds[];
 
 	// No range attacks
-	BOOL CheckRangeAttack1( float flDot, float flDist ) { return FALSE; }
-	BOOL CheckRangeAttack2( float flDot, float flDist ) { return FALSE; }
-	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
+	virtual BOOL CheckRangeAttack1( float flDot, float flDist ) override { return FALSE; }
+	virtual BOOL CheckRangeAttack2( float flDot, float flDist ) override { return FALSE; }
+	virtual int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType ) override;
 };
 
 LINK_ENTITY_TO_CLASS( monster_zombie, CZombie )

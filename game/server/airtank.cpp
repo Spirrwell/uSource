@@ -23,15 +23,15 @@
 
 class CAirtank : public CGrenade
 {
-	void Spawn( void );
-	void Precache( void );
-	void EXPORT TankThink( void );
-	void EXPORT TankTouch( CBaseEntity *pOther );
-	int  BloodColor( void ) { return DONT_BLEED; };
-	void Killed( entvars_t *pevAttacker, int iGib );
+	virtual void Spawn( void ) override;
+	virtual void Precache( void ) override;
+	virtual void Think( void ) override;
+	virtual void Touch( CBaseEntity *pOther ) override;
+	virtual int  BloodColor( void ) override { return DONT_BLEED; };
+	virtual void Killed( entvars_t *pevAttacker, int iGib ) override;
 
-	virtual int Save( CSave &save ); 
-	virtual int Restore( CRestore &restore );
+	virtual int Save( CSave &save ) override;
+	virtual int Restore( CRestore &restore ) override;
 
 	static	TYPEDESCRIPTION m_SaveData[];
 
@@ -58,8 +58,8 @@ void CAirtank::Spawn( void )
 	UTIL_SetSize( pev, Vector( -16, -16, 0), Vector( 16, 16, 36 ) );
 	UTIL_SetOrigin( pev, pev->origin );
 
-	SetTouch( &CAirtank::TankTouch );
-	SetThink( &CAirtank::TankThink );
+	// SetTouch( &CAirtank::TankTouch );
+	// SetThink( &CAirtank::TankThink );
 
 	pev->flags |= FL_MONSTER;
 	pev->takedamage = DAMAGE_YES;
@@ -83,15 +83,18 @@ void CAirtank::Killed( entvars_t *pevAttacker, int iGib )
 	Explode( pev->origin, Vector( 0, 0, -1 ) );
 }
 
-void CAirtank::TankThink( void )
+void CAirtank::Think( void )
 {
+	CGrenade::Think();
 	// Fire trigger
 	m_state = 1;
 	SUB_UseTargets( this, USE_TOGGLE, 0 );
 }
 
-void CAirtank::TankTouch( CBaseEntity *pOther )
+void CAirtank::Touch( CBaseEntity *pOther )
 {
+	CGrenade::Touch(pOther);
+
 	if( !pOther->IsPlayer() )
 		return;
 

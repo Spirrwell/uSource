@@ -32,6 +32,8 @@
 class CRecharge : public CBaseToggle
 {
 public:
+	CRecharge();
+
 	void Spawn();
 	void Precache( void );
 	void EXPORT Off(void);
@@ -41,6 +43,7 @@ public:
 	virtual int ObjectCaps( void ) { return ( CBaseToggle::ObjectCaps() | FCAP_CONTINUOUS_USE ) & ~FCAP_ACROSS_TRANSITION; }
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
+	void Think() override;
 
 	static TYPEDESCRIPTION m_SaveData[];
 
@@ -49,6 +52,8 @@ public:
 	int m_iJuice;
 	int m_iOn;			// 0 = off, 1 = startup, 2 = going
 	float m_flSoundTime;
+	bool m_bRecharging;
+	bool m_bTurningOff;
 };
 
 TYPEDESCRIPTION CRecharge::m_SaveData[] =
@@ -81,6 +86,12 @@ void CRecharge::KeyValue( KeyValueData *pkvd )
 	}
 	else
 		CBaseToggle::KeyValue( pkvd );
+}
+
+CRecharge::CRecharge() :
+	m_bRecharging(false),
+	m_bTurningOff(false)
+{
 }
 
 void CRecharge::Spawn()
@@ -129,7 +140,8 @@ void CRecharge::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 	}
 
 	pev->nextthink = pev->ltime + 0.25;
-	SetThink( &CRecharge::Off );
+	// SetThink( &CRecharge::Off );
+	m_bTurningOff = true;
 
 	// Time to recharge yet?
 	if( m_flNextCharge >= gpGlobals->time )
@@ -176,7 +188,8 @@ void CRecharge::Recharge( void )
 {
 	m_iJuice = (int)gSkillData.suitchargerCapacity;
 	pev->frame = 0;	
-	SetThink( &CBaseEntity::SUB_DoNothing );
+	// SetThink( &CBaseEntity::SUB_DoNothing );
+
 }
 
 void CRecharge::Off( void )
@@ -190,8 +203,17 @@ void CRecharge::Off( void )
 	if( ( !m_iJuice ) &&  ( ( m_iReactivate = (int)g_pGameRules->FlHEVChargerRechargeTime() ) > 0 ) )
 	{
 		pev->nextthink = pev->ltime + m_iReactivate;
-		SetThink( &CRecharge::Recharge );
+		// SetThink( &CRecharge::Recharge );
+		m_bRecharging = true;
 	}
 	else
-		SetThink( &CBaseEntity::SUB_DoNothing );
+		// SetThink( &CBaseEntity::SUB_DoNothing );
+		m_bRecharging = false;
+}
+
+void CRecharge::Think()
+{
+	CBaseToggle::Think();
+	if(m_bRecharging) this->Recharge();
+	if(m_bTurningOff) this->Off();
 }
