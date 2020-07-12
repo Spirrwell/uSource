@@ -71,7 +71,7 @@ public:
 	inline Vector( const Vector& v ): x( 0.0f ), y( 0.0f ), z( 0.0f )	{ x = v.x; y = v.y; z = v.z;			} 
 	inline Vector( float rgfl[3] ): x( 0.0f ), y( 0.0f ), z( 0.0f )	{ x = rgfl[0]; y = rgfl[1]; z = rgfl[2];	}
 
-	// Operators
+	/* Operators */
 	inline Vector operator-( void ) const			{ return Vector( -x, -y, -z );			}
 	inline int operator==( const Vector& v ) const		{ return x==v.x && y==v.y && z==v.z;		}
 	inline int operator!=( const Vector& v ) const		{ return !( *this==v );				}
@@ -79,6 +79,7 @@ public:
 	inline Vector operator-( const Vector& v ) const	{ return Vector( x - v.x, y - v.y, z - v.z );	}
 	inline Vector operator*( float fl) const		{ return Vector( x * fl, y * fl, z * fl );	}
 	inline Vector operator/( float fl) const		{ return Vector( x / fl, y / fl, z / fl );	}
+	inline Vector& operator=(const Vector& v)               { x = v.x; y = v.y; z = v.z; return *this; };
 
 	// Methods
 	inline void CopyToArray( float* rgfl ) const		{ rgfl[0] = x, rgfl[1] = y, rgfl[2] = z; }
