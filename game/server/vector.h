@@ -17,12 +17,7 @@
 #define VECTOR_H
 
 #define NO_VECTOR_FUNCTIONS
-#define NEW_VEC_TYPES
-#include "mathlib/vector.h"
-
-#if 0
-#undef CrossProduct
-#undef DotProduct
+#include "mathlib/mathlib.h"
 
 //=========================================================
 // 2DVector - used for many pathfinding and many other 
@@ -116,7 +111,4 @@ public:
 inline Vector operator*( float fl, const Vector& v ) { return v * fl; }
 inline float DotProduct( const Vector& a, const Vector& b ) { return( a.x * b.x + a.y * b.y + a.z * b.z); }
 inline Vector CrossProduct( const Vector& a, const Vector& b ) { return Vector( a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x ); }
-
-#endif
-
 #endif

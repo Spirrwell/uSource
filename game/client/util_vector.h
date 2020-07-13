@@ -23,11 +23,9 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "math.h"
-
-#define NEW_VEC_TYPES
 #include "mathlib.h"
 
-#if 0
+#if 1
 // Header file containing definition of globalvars_t and entvars_t
 typedef unsigned int func_t;					//
 typedef int string_t;				// from engine's pr_comp.h;
