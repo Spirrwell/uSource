@@ -13,7 +13,7 @@
 *
 ****/
 
-#include	"extdll.h"
+#include        "../shared/extdll.h"
 #include        "../shared/util.h"
 #include	"cbase.h"
 #include        "ai/ai_monsters.h"

@@ -13,7 +13,7 @@
 *
 ****/
 
-#include "game/server/extdll.h"
+#include "extdll.h"
 #include "util.h"
 #include "game/server/cbase.h"
 #include "ai/ai_monsters.h"

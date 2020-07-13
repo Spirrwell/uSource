@@ -5,7 +5,7 @@
 // $NoKeywords: $
 //=============================================================================
 
-#include "extdll.h"
+#include "../shared/extdll.h"
 #include "../shared/util.h"
 
 #include "cbase.h"

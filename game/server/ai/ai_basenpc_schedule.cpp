@@ -16,7 +16,7 @@
 // schedule.cpp - functions and data pertaining to the 
 // monsters' AI scheduling system.
 //=========================================================
-#include "../extdll.h"
+#include "../../shared/extdll.h"
 #include "../../shared/util.h"
 #include "../cbase.h"
 #include "ai_monsters.h"
