@@ -22,7 +22,7 @@
 #include "game/server/info_node.h"
 #include "game/server/player.h"
 #include "game/server/gamerules.h"
-#include "basegrenade.h"
+#include "base_grenade.h"
 
 enum satchel_state
 {

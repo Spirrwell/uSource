@@ -1,7 +1,7 @@
 #pragma once
 
 #include "game/server/weapons.h"
-#include "basegrenade.h"
+#include "base_grenade.h"
 
 class CRpgRocket : public CGrenade
 {

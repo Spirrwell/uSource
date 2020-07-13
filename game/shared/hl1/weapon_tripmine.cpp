@@ -22,7 +22,7 @@
 #include "game/server/player.h"
 #include "game/server/effects.h"
 #include "game/server/gamerules.h"
-#include "basegrenade.h"
+#include "base_grenade.h"
 
 #define	TRIPMINE_PRIMARY_VOLUME		450
 
