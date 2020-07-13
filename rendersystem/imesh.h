@@ -2,7 +2,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include "common/common.h"
+#include "common.h"
 
 /**
  * An extremely basic mesh
