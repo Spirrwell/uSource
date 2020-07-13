@@ -152,7 +152,8 @@ static void SubdividePolygon_r( msurface_t *warpface, int numverts, float *verts
 		ClearBits( warpface->flags, SURF_DRAWTURB_QUADS ); 
 
 	// add a point in the center to help keep warp valid
-	poly = Mem_Calloc( loadmodel->mempool, sizeof( glpoly_t ) + (numverts - 4) * VERTEXSIZE * sizeof( float ));
+	poly = static_cast<glpoly_t *>(Mem_Calloc(loadmodel->mempool,
+	                                          sizeof(glpoly_t) + (numverts - 4) * VERTEXSIZE * sizeof(float)));
 	poly->next = warpface->polys;
 	poly->flags = warpface->flags;
 	warpface->polys = poly;
@@ -306,7 +307,8 @@ void GL_BuildPolygonFromSurface( model_t *mod, msurface_t *fa )
 	fa->polys = NULL;
 
 	// quake simple models (healthkits etc) need to be reconstructed their polys because LM coords has changed after the map change
-	poly = Mem_Realloc( mod->mempool, poly, sizeof( glpoly_t ) + ( lnumverts - 4 ) * VERTEXSIZE * sizeof( float ));
+	poly = static_cast<glpoly_t *>(Mem_Realloc(mod->mempool, poly,
+	                                           sizeof(glpoly_t) + (lnumverts - 4) * VERTEXSIZE * sizeof(float)));
 	poly->next = fa->polys;
 	poly->flags = fa->flags;
 	fa->polys = poly;
@@ -700,7 +702,7 @@ static void LM_UploadBlock( qboolean dynamic )
 		r_lightmap.size = r_lightmap.width * r_lightmap.height * 4;
 		r_lightmap.flags = IMAGE_HAS_COLOR;
 		r_lightmap.buffer = gl_lms.lightmap_buffer;
-		tr.lightmapTextures[i] = GL_LoadTextureInternal( lmName, &r_lightmap, TF_FONT|TF_ATLAS_PAGE );
+		tr.lightmapTextures[i] = GL_LoadTextureInternal( lmName, &r_lightmap, (TF_FONT|TF_ATLAS_PAGE ));
 
 		if( ++gl_lms.current_lightmap_texture == MAX_LIGHTMAPS )
 			gEngfuncs.Host_Error( "AllocBlock: full\n" );
@@ -1802,7 +1804,7 @@ void R_GenerateVBO()
 	if( CVAR_TO_BOOL( r_vbo ) )
 		r_vbo->flags |= FCVAR_ARCHIVE;
 
-	vbos.mempool = Mem_AllocPool("Render VBO Zone");
+	vbos.mempool = (byte*)Mem_AllocPool("Render VBO Zone");
 
 	vbos.minarraysplit_tex = INT_MAX;
 	vbos.maxarraysplit_tex = 0;
@@ -1813,11 +1815,13 @@ void R_GenerateVBO()
 	vbos.mintexture = INT_MAX;
 	vbos.maxtexture = 0;
 
-	vbos.textures = Mem_Calloc( vbos.mempool, numtextures * numlightmaps * sizeof( vbotexture_t ) );
-	vbos.surfdata = Mem_Calloc( vbos.mempool, WORLDMODEL->numsurfaces * sizeof( vbosurfdata_t ) );
-	vbos.arraylist = vbo = Mem_Calloc( vbos.mempool, sizeof( vboarray_t ) );
-	vbos.decaldata = Mem_Calloc( vbos.mempool, sizeof( vbodecaldata_t ) );
-	vbos.decaldata->lm = Mem_Calloc( vbos.mempool, sizeof( msurface_t* ) * numlightmaps );
+	vbos.textures = static_cast<vbotexture_t *>(Mem_Calloc(vbos.mempool,
+	                                                       numtextures * numlightmaps * sizeof(vbotexture_t)));
+	vbos.surfdata = static_cast<vbosurfdata_t *>(Mem_Calloc(vbos.mempool,
+	                                                        WORLDMODEL->numsurfaces * sizeof(vbosurfdata_t)));
+	vbos.arraylist = vbo = static_cast<vboarray_t *>(Mem_Calloc(vbos.mempool, sizeof(vboarray_t)));
+	vbos.decaldata = static_cast<vbodecaldata_t *>(Mem_Calloc(vbos.mempool, sizeof(vbodecaldata_t)));
+	vbos.decaldata->lm = static_cast<msurface_t **>(Mem_Calloc(vbos.mempool, sizeof(msurface_t *) * numlightmaps));
 
 	// count array lengths
 	for( k = 0; k < numlightmaps; k++ )
@@ -1845,11 +1849,15 @@ void R_GenerateVBO()
 				if( vbo->array_len + surf->polys->numverts > USHRT_MAX )
 				{
 					// generate new array and new vbotexture node
-					vbo->array = Mem_Calloc( vbos.mempool, sizeof( vbovertex_t ) * vbo->array_len );
+					vbo->array = static_cast<vbovertex_t *>(Mem_Calloc(vbos.mempool,
+					                                                   sizeof(vbovertex_t) *
+					                                                   vbo->array_len));
 					gEngfuncs.Con_Printf( "R_GenerateVBOs: allocated array of %d verts, texture %d\n", vbo->array_len, j );
-					vbo->next = Mem_Calloc( vbos.mempool, sizeof( vboarray_t ) );
+					vbo->next = static_cast<vboarray_s *>(Mem_Calloc(vbos.mempool,
+					                                                 sizeof(vboarray_t)));
 					vbo = vbo->next;
-					vbotex->next = Mem_Calloc( vbos.mempool, sizeof( vbotexture_t ) );
+					vbotex->next = static_cast<vbotexture_s *>(Mem_Calloc(vbos.mempool,
+					                                                      sizeof(vbotexture_t)));
 					vbotex = vbotex->next;
 
 					// never skip this textures and lightmaps
@@ -1873,7 +1881,7 @@ void R_GenerateVBO()
 	}
 
 	// allocate last array
-	vbo->array = Mem_Calloc( vbos.mempool, sizeof( vbovertex_t ) * vbo->array_len );
+	vbo->array = static_cast<vbovertex_t *>(Mem_Calloc(vbos.mempool, sizeof(vbovertex_t) * vbo->array_len));
 	gEngfuncs.Con_Printf( "R_GenerateVBOs: allocated array of %d verts\n", vbo->array_len );
 
 	// switch to list begin
@@ -1890,7 +1898,9 @@ void R_GenerateVBO()
 			vbotexture_t *vbotex = &vbos.textures[k * numtextures + j];
 
 			// preallocate index arrays
-			vbotex->indexarray = Mem_Calloc( vbos.mempool, sizeof( unsigned short ) * 6 *  vbotex->len );
+			vbotex->indexarray = static_cast<unsigned short *>(Mem_Calloc(vbos.mempool,
+			                                                              sizeof(unsigned short) * 6 *
+			                                                              vbotex->len));
 			vbotex->lightmaptexturenum = k;
 
 			if( maxindex < vbotex->len )
@@ -1922,7 +1932,9 @@ void R_GenerateVBO()
 
 					vbo = vbo->next;
 					vbotex = vbotex->next;
-					vbotex->indexarray = Mem_Calloc( vbos.mempool, sizeof( unsigned short ) * 6 *  vbotex->len );
+					vbotex->indexarray = static_cast<unsigned short *>(Mem_Calloc(vbos.mempool,
+					                                                              sizeof(unsigned short) *
+					                                                              6 * vbotex->len));
 					vbotex->lightmaptexturenum = k;
 
 					// calculate limits for dlights
@@ -1970,10 +1982,13 @@ void R_GenerateVBO()
 	pglBufferDataARB( GL_ARRAY_BUFFER_ARB, sizeof( vbovertex_t ) * DECAL_VERTS_CUT * MAX_RENDER_DECALS, vbos.decaldata->decalarray, GL_DYNAMIC_DRAW_ARB );
 
 	// preallocate dlight arrays
-	vbos.dlight_index = Mem_Calloc( vbos.mempool, maxindex * sizeof( unsigned short ) * 6 );
+	vbos.dlight_index = static_cast<unsigned short *>(Mem_Calloc(vbos.mempool,
+	                                                             maxindex * sizeof(unsigned short) * 6));
 
 	// select maximum possible length for dlight
-	vbos.dlight_tc = Mem_Calloc( vbos.mempool, sizeof( vec2_t ) * (int)(vbos.arraylist->next?USHRT_MAX + 1:vbos.arraylist->array_len + 1) );
+	vbos.dlight_tc = static_cast<vec2_t *>(Mem_Calloc(vbos.mempool, sizeof(vec2_t) *
+	                                                                (int) (vbos.arraylist->next ? USHRT_MAX + 1 :
+	                                                                       vbos.arraylist->array_len + 1)));
 
 	if( CVAR_TO_BOOL(r_vbo_dlightmode) )
 	{

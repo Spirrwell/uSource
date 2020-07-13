@@ -315,10 +315,12 @@ void GL_MakeAliasModelDisplayLists( model_t *m )
 	// save the data out
 	m_pAliasHeader->poseverts = g_numorder;
 
-	m_pAliasHeader->commands = Mem_Malloc( m->mempool, g_numcommands * 4 );
+	m_pAliasHeader->commands = static_cast<int *>(Mem_Malloc(m->mempool, g_numcommands * 4));
 	memcpy( m_pAliasHeader->commands, g_commands, g_numcommands * 4 );
 
-	m_pAliasHeader->posedata = Mem_Malloc( m->mempool, m_pAliasHeader->numposes * m_pAliasHeader->poseverts * sizeof( trivertex_t ));
+	m_pAliasHeader->posedata = static_cast<trivertex_t *>(Mem_Malloc(m->mempool, m_pAliasHeader->numposes *
+	                                                                             m_pAliasHeader->poseverts *
+	                                                                             sizeof(trivertex_t)));
 	verts = m_pAliasHeader->posedata;
 
 	for( i = 0; i < m_pAliasHeader->numposes; i++ )
@@ -454,7 +456,7 @@ rgbdata_t *Mod_CreateSkinData( model_t *mod, byte *data, int width, int height )
 		i = mod->numtextures;
 		mod->textures = (texture_t **)Mem_Realloc( mod->mempool, mod->textures, ( i + 1 ) * sizeof( texture_t* ));
 		size = width * height + 768;
-		tx = Mem_Calloc( mod->mempool, sizeof( *tx ) + size );
+		tx = static_cast<texture_t *>(Mem_Calloc(mod->mempool, sizeof(*tx) + size));
 		mod->textures[i] = tx;
 
 		Q_strncpy( tx->name, "DM_Skin", sizeof( tx->name ));
@@ -521,7 +523,7 @@ void *Mod_LoadGroupSkin( daliasskintype_t *pskintype, int skinnum, int size )
 	pskintype++;
 	pinskingroup = (daliasskingroup_t *)pskintype;
 	pinskinintervals = (daliasskininterval_t *)(pinskingroup + 1);
-	pskintype = (void *)(pinskinintervals + pinskingroup->numskins);
+	pskintype = static_cast<daliasskintype_t *>((void *) (pinskinintervals + pinskingroup->numskins));
 
 	for( i = 0; i < pinskingroup->numskins; i++ )
 	{
@@ -641,13 +643,13 @@ void Mod_LoadAliasModel( model_t *mod, const void *buffer, qboolean *loaded )
 	if( pinmodel->numverts <= 0 || pinmodel->numtris <= 0 || pinmodel->numframes <= 0 )
 		return; // how to possible is make that?
 
-	mod->mempool = Mem_AllocPool( va( "^2%s^7", mod->name ));
+	mod->mempool = static_cast<byte *>(Mem_AllocPool(va("^2%s^7", mod->name)));
 
 	// allocate space for a working header, plus all the data except the frames,
 	// skin and group info
 	size = sizeof( aliashdr_t ) + (pinmodel->numframes - 1) * sizeof( maliasframedesc_t );
 
-	m_pAliasHeader = Mem_Calloc( mod->mempool, size );
+	m_pAliasHeader = static_cast<aliashdr_t *>(Mem_Calloc(mod->mempool, size));
 	mod->flags = pinmodel->flags;	// share effects flags
 
 	// endian-adjust and copy the data, starting with the alias model header
@@ -678,7 +680,7 @@ void Mod_LoadAliasModel( model_t *mod, const void *buffer, qboolean *loaded )
 
 	// load the skins
 	pskintype = (daliasskintype_t *)&pinmodel[1];
-	pskintype = Mod_LoadAllSkins( m_pAliasHeader->numskins, pskintype );
+	pskintype = static_cast<daliasskintype_t *>(Mod_LoadAllSkins(m_pAliasHeader->numskins, pskintype));
 
 	// load base s and t vertices
 	pinstverts = (stvert_t *)pskintype;
@@ -733,7 +735,7 @@ void Mod_AliasUnloadTextures( void *data )
 	aliashdr_t	*palias;
 	int		i, j;
 
-	palias = data;
+	palias = static_cast<aliashdr_t *>(data);
 	if( !palias ) return; // already freed
 
 	for( i = 0; i < MAX_SKINS; i++ )

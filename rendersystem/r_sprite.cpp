@@ -53,13 +53,13 @@ upload a single frame
 */
 static const dframetype_t *R_SpriteLoadFrame( model_t *mod, const void *pin, mspriteframe_t **ppframe, int num )
 {
-	const dspriteframe_t	pinframe;
+	const dspriteframe_t	pinframe = {};
 	mspriteframe_t	*pspriteframe;
 	int		gl_texturenum = 0;
 	char		texname[128];
 	int		bytes = 1;
 
-	memcpy( &pinframe, pin, sizeof(dspriteframe_t));
+	memcpy((void *) &pinframe, pin, sizeof(dspriteframe_t));
 
 	if( sprite_version == SPRITE_VERSION_32 )
 		bytes = 4;
@@ -68,16 +68,16 @@ static const dframetype_t *R_SpriteLoadFrame( model_t *mod, const void *pin, msp
 	if( FBitSet( mod->flags, MODEL_CLIENT )) // it's a HUD sprite
 	{
 		Q_snprintf( texname, sizeof( texname ), "#HUD/%s(%s:%i%i).spr", sprite_name, group_suffix, num / 10, num % 10 );
-		gl_texturenum = GL_LoadTexture( texname, pin, pinframe.width * pinframe.height * bytes, r_texFlags );
+		gl_texturenum = GL_LoadTexture( texname, (byte*)pin, pinframe.width * pinframe.height * bytes, r_texFlags );
 	}
 	else
 	{
 		Q_snprintf( texname, sizeof( texname ), "#%s(%s:%i%i).spr", sprite_name, group_suffix, num / 10, num % 10 );
-		gl_texturenum = GL_LoadTexture( texname, pin, pinframe.width * pinframe.height * bytes, r_texFlags );
+		gl_texturenum = GL_LoadTexture( texname, (byte*)pin, pinframe.width * pinframe.height * bytes, r_texFlags );
 	}	
 
 	// setup frame description
-	pspriteframe = Mem_Malloc( mod->mempool, sizeof( mspriteframe_t ));
+	pspriteframe = static_cast<mspriteframe_t *>(Mem_Malloc(mod->mempool, sizeof(mspriteframe_t)));
 	pspriteframe->width = pinframe.width;
 	pspriteframe->height = pinframe.height;
 	pspriteframe->up = pinframe.origin[1];
@@ -111,12 +111,12 @@ static const dframetype_t *R_SpriteLoadGroup( model_t *mod, const void *pin, msp
 	numframes = pingroup->numframes;
 
 	groupsize = sizeof( mspritegroup_t ) + (numframes - 1) * sizeof( pspritegroup->frames[0] );
-	pspritegroup = Mem_Calloc( mod->mempool, groupsize );
+	pspritegroup = static_cast<mspritegroup_t *>(Mem_Calloc(mod->mempool, groupsize));
 	pspritegroup->numframes = numframes;
 
 	*ppframe = (mspriteframe_t *)pspritegroup;
 	pin_intervals = (const dspriteinterval_t *)(pingroup + 1);
-	poutintervals = Mem_Calloc( mod->mempool, numframes * sizeof( float ));
+	poutintervals = static_cast<float *>(Mem_Calloc(mod->mempool, numframes * sizeof(float)));
 	pspritegroup->intervals = poutintervals;
 
 	for( i = 0; i < numframes; i++ )
@@ -152,8 +152,8 @@ void Mod_LoadSpriteModel( model_t *mod, const void *buffer, qboolean *loaded, ui
 	msprite_t		*psprite;
 	int		i;
 
-	pin = buffer;
-	psprite = mod->cache.data;
+	pin = static_cast<const dsprite_t *>(buffer);
+	psprite = static_cast<msprite_t *>(mod->cache.data);
 
 	if( pin->version == SPRITE_VERSION_Q1 || pin->version == SPRITE_VERSION_32 )
 		numi = NULL;
@@ -252,7 +252,7 @@ void Mod_LoadMapSprite( model_t *mod, const void *buffer, size_t size, qboolean 
 	if( loaded ) *loaded = false;
 	Q_snprintf( texname, sizeof( texname ), "#%s", mod->name );
 	gEngfuncs.Image_SetForceFlags( IL_OVERVIEW );
-	pix = gEngfuncs.FS_LoadImage( texname, buffer, size );
+	pix = gEngfuncs.FS_LoadImage(texname, static_cast<const byte *>(buffer), size );
 	gEngfuncs.Image_ClearForceFlags();
 	if( !pix ) return;	// bad image or something else
 
@@ -281,8 +281,9 @@ void Mod_LoadMapSprite( model_t *mod, const void *buffer, size_t size, qboolean 
 
 	// determine how many frames we needs
 	numframes = (pix->width * pix->height) / (w * h);
-	mod->mempool = Mem_AllocPool( va( "^2%s^7", mod->name ));
-	psprite = Mem_Calloc( mod->mempool, sizeof( msprite_t ) + ( numframes - 1 ) * sizeof( psprite->frames ));
+	mod->mempool = static_cast<byte *>(Mem_AllocPool(va("^2%s^7", mod->name)));
+	psprite = static_cast<msprite_t *>(Mem_Calloc(mod->mempool,
+	                                              sizeof(msprite_t) + (numframes - 1) * sizeof(psprite->frames)));
 	mod->cache.data = psprite;	// make link to extradata
 
 	psprite->type = SPR_FWD_PARALLEL_ORIENTED;
@@ -302,7 +303,7 @@ void Mod_LoadMapSprite( model_t *mod, const void *buffer, size_t size, qboolean 
 	temp.type = pix->type;
 	temp.flags = pix->flags;
 	temp.size = w * h * gEngfuncs.Image_GetPFDesc(temp.type)->bpp;
-	temp.buffer = Mem_Malloc( r_temppool, temp.size );
+	temp.buffer = static_cast<byte *>(Mem_Malloc(r_temppool, temp.size));
 	temp.palette = NULL;
 
 	// chop the image and upload into video memory
@@ -327,7 +328,8 @@ void Mod_LoadMapSprite( model_t *mod, const void *buffer, size_t size, qboolean 
 		// build uinque frame name
 		Q_snprintf( texname, sizeof( texname ), "#MAP/%s_%i%i.spr", mod->name, i / 10, i % 10 );
 
-		psprite->frames[i].frameptr = Mem_Calloc( mod->mempool, sizeof( mspriteframe_t ));
+		psprite->frames[i].frameptr = static_cast<mspriteframe_t *>(Mem_Calloc(mod->mempool,
+		                                                                       sizeof(mspriteframe_t)));
 		pspriteframe = psprite->frames[i].frameptr;
 		pspriteframe->width = w;
 		pspriteframe->height = h;
@@ -365,7 +367,7 @@ void Mod_SpriteUnloadTextures( void *data )
 	mspriteframe_t	*pspriteframe;
 	int		i, j;
 
-	psprite = data;
+	psprite = static_cast<msprite_t *>(data);
 
 	if( psprite )
 	{
@@ -408,7 +410,7 @@ mspriteframe_t *R_GetSpriteFrame( const model_t *pModel, int frame, float yaw )
 	float		targettime;
 
 	Assert( pModel != NULL );
-	psprite = pModel->cache.data;
+	psprite = static_cast<msprite_t *>(pModel->cache.data);
 
 	if( frame < 0 )
 	{
@@ -472,7 +474,7 @@ float R_GetSpriteFrameInterpolant( cl_entity_t *ent, mspriteframe_t **oldframe, 
 	float		*pintervals, fullinterval, targettime;
 	int		m_fDoInterp;
 
-	psprite = ent->model->cache.data;
+	psprite = static_cast<msprite_t *>(ent->model->cache.data);
 	frame = (int)ent->curstate.frame;
 	lerpFrac = 1.0f;
 
