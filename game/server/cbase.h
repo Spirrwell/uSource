@@ -56,6 +56,7 @@ extern "C" EXPORT int GetEntityAPI( DLL_FUNCTIONS *pFunctionTable, int interface
 extern "C" EXPORT int GetEntityAPI2( DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion );
 extern "C" EXPORT int Server_GetPhysicsInterface( int iVersion, server_physics_api_t *pfuncsFromEngine, physics_interface_t *pFunctionTable );
 
+#ifndef CLIENT_DLL
 extern int DispatchSpawn( edict_t *pent );
 extern void DispatchKeyValue( edict_t *pentKeyvalue, KeyValueData *pkvd );
 extern void DispatchTouch( edict_t *pentTouched, edict_t *pentOther );
@@ -70,8 +71,11 @@ extern void SaveReadFields( SAVERESTOREDATA *pSaveData, const char *pname, void 
 extern void SaveGlobalState( SAVERESTOREDATA *pSaveData );
 extern void RestoreGlobalState( SAVERESTOREDATA *pSaveData );
 extern void ResetGlobalState( void );
+#endif
 
+#ifndef CLIENT_DLL
 extern void FireTargets( const char *targetName, CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+#endif
 
 typedef void(CBaseEntity::*BASEPTR)( void );
 typedef void(CBaseEntity::*ENTITYFUNCPTR)( CBaseEntity *pOther );
@@ -684,6 +688,7 @@ typedef struct _SelAmmo
 //
 // This spawns first when each level begins.
 //=======================
+#ifndef CLIENT_DLL
 class CWorld : public CBaseEntity
 {
 public:
@@ -691,4 +696,6 @@ public:
 	void Precache( void );
 	void KeyValue( KeyValueData *pkvd );
 };
+#endif
+
 #endif

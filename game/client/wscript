@@ -18,8 +18,12 @@ def build(bld):
 	#source = bld.path.parent.ant_glob([
 	#])
 	source = []
-	source += bld.path.ant_glob(['hl/*.cpp'])
+	# source += bld.path.ant_glob(['hl/*.cpp'])
 	source += [
+		'hl/hl_baseentity.cpp',
+		'hl/hl_events.cpp',
+		'hl/hl_objects.cpp',
+		'hl/hl_weapons.cpp',
 		'../../pm_shared/pm_shared.cpp',
 		'../../pm_shared/pm_math.cpp',
 		'../../pm_shared/pm_debug.cpp',
@@ -65,7 +69,7 @@ def build(bld):
 	includes.append('./hl/')
 	includes.append('../../')
 
-	defines = ['CLIENT_DLL']
+	defines = ['CLIENT_DLL', 'CLIENT_WEAPONS']
 	if bld.env.GOLDSRC:
 		defines += ['GOLDSOURCE_SUPPORT']
 
