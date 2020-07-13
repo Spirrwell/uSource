@@ -6,7 +6,7 @@
 //=============================================================================
 
 #include "extdll.h"
-#include "util.h"
+#include "../shared/util.h"
 
 #include "cbase.h"
 #include "player.h"

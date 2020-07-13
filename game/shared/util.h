@@ -19,15 +19,15 @@
 // Misc utility code
 //
 #ifndef ACTIVITY_H
-#include "activity.h"
+#include "../server/activity.h"
 #endif
 
 #ifndef ENGINECALLBACK_H
-#include "enginecallback.h"
+#include "../server/enginecallback.h"
 #endif
 
 #ifndef PHYSCALLBACK_H
-#include "physcallback.h"
+#include "../server/physcallback.h"
 #endif
 
 #include <string.h>

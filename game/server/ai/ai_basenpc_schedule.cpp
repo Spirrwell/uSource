@@ -17,7 +17,7 @@
 // monsters' AI scheduling system.
 //=========================================================
 #include "../extdll.h"
-#include "../util.h"
+#include "../../shared/util.h"
 #include "../cbase.h"
 #include "ai_monsters.h"
 #include "../animation.h"
