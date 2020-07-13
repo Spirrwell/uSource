@@ -1313,3 +1313,56 @@ CONCOMMAND(screen_stats, "Prints out some UI stats", 0)
 	Msg("Screen scale X: %f\nScreen scale Y: %f\n", uiStatic.scaleX, uiStatic.scaleY);
 	Msg("BtnDrawWidth: %u\nBtnDrawHeight: %u\n", uiStatic.buttons_draw_width, uiStatic.buttons_draw_height);
 }
+
+/* TODO: Once we move mainui fully to AppFramework, we will need to manage dependencies properly! */
+class CMainUIGui : public IGuiInterface
+{
+public:
+	virtual bool PreInit() override { return true; };
+	virtual bool Init() override { return true; };
+	virtual const char* GetParentInterface() override { return IGUI_INTERFACE; };
+	virtual const char* GetName() override { return "CMainUIGui001"; };
+	virtual void Shutdown() override {};
+
+	virtual int RegisterFont(const char* name, int size_tall, int weight, int outline, int blur, float brighten, bool italic, bool underline, bool bold, bool strike) override
+	{
+		unsigned int flags = 0;
+		flags |= (italic ? FONT_ITALIC : 0);
+		flags |= (underline ? FONT_UNDERLINE : 0);
+		flags |= (strike ? FONT_STRIKEOUT : 0);
+		return CFontBuilder(name, size_tall, weight).SetBlurParams(blur, brighten).SetFlags(flags).Create();
+	}
+
+	virtual int DrawString(int font, int x, int y, int w, int h, const char *str, int r, int g, int b, int a, int charH, unsigned int justify, unsigned int flags = 0 ) override
+	{
+		unsigned int color = PackRGBA(r, g, b, a);
+		return UI_DrawString(font, x, y, w, h, str, color, charH, justify, flags);
+	}
+
+	virtual void DrawPic(int x, int y, int w, int h, int r, int g, int b, int a, const char *pic, EGuiRenderMode mode = EGuiRenderMode::DRAWTRANS ) override
+	{
+		unsigned int color = PackRGBA(r, g, b, a);
+		UI_DrawPic(x, y, w, h, color, pic, (ERenderMode)mode);
+	}
+
+	virtual void FillRect(int x, int y, int w, int h, int r, int g, int b, int a = 255, int corner_radius = -1) override
+	{
+		unsigned int color = PackRGBA(r, g, b, a);
+		if(corner_radius <= 0)
+			UI_FillRect(x, y, w, h, color);
+	}
+
+	virtual void FillCircle(int x, int y, int w, int h, int r, int g, int b, int a = 255) override
+	{
+
+	}
+
+	virtual void GetScreenSize(int &w, int &h) override
+	{
+		w = ScreenWidth;
+		h = ScreenHeight;
+	}
+};
+
+EXPOSE_INTERFACE(CMainUIGui);
+MODULE_INTERFACE_IMPL();

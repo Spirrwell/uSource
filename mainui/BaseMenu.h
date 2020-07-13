@@ -32,6 +32,8 @@ GNU General Public License for more details.
 #include "public/containers/list.h"
 #include "public/containers/array.h"
 
+#include "gui_int.h"
+
 #define UI_MAX_MENUDEPTH		64
 #define UI_MAX_MENUITEMS		64
 
