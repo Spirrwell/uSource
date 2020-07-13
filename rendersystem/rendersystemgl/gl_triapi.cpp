@@ -112,22 +112,11 @@ void CTriangleAPI_GL::Vertex3f(float x, float y, float z)
 }
 
 
-void _TriColor4f( float r, float g, float b, float a )
-{
-	pglColor4f( r, g, b, a );
-}
-
-void _TriColor4ub( byte r, byte g, byte b, byte a )
-{
-	pglColor4ub( r, g, b, a );
-}
-
-
 void CTriangleAPI_GL::Color4f(float r, float g, float b, float a)
 {
 	if( ds.renderMode == kRenderTransAlpha )
 		TriColor4ub( r * 255.9f, g * 255.9f, b * 255.9f, a * 255.0f );
-	else _TriColor4f( r * a, g * a, b * a, 1.0 );
+	else pglColor4f( r * a, g * a, b * a, 1.0 );
 
 	ds.triRGBA[0] = r;
 	ds.triRGBA[1] = g;
@@ -142,7 +131,7 @@ void CTriangleAPI_GL::Color4ub(byte r, byte g, byte b, byte a)
 	ds.triRGBA[2] = b * (1.0f / 255.0f);
 	ds.triRGBA[3] = a * (1.0f / 255.0f);
 
-	_TriColor4f( ds.triRGBA[0], ds.triRGBA[1], ds.triRGBA[2], 1.0f );
+	pglColor4f( ds.triRGBA[0], ds.triRGBA[1], ds.triRGBA[2], 1.0f );
 }
 
 void CTriangleAPI_GL::Brightness(float brightness)
@@ -153,7 +142,7 @@ void CTriangleAPI_GL::Brightness(float brightness)
 	g = ds.triRGBA[1] * ds.triRGBA[3] * brightness;
 	b = ds.triRGBA[2] * ds.triRGBA[3] * brightness;
 
-	_TriColor4f( r, g, b, 1.0f );
+	pglColor4f( r, g, b, 1.0f );
 }
 
 int CTriangleAPI_GL::WorldToScreen(const float *world, float *screen)
