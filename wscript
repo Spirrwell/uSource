@@ -28,7 +28,7 @@ SUBDIRS = [
 	Subproject('ref_gl'),
 	#Subproject('ref_soft'),
 	Subproject('mainui'),
-	Subproject('vgui_support'),
+	# Subproject('vgui_support'),
 	Subproject('engine', dedicated=False),
 	#Subproject('game/server'),
 	#Subproject('game/client', dedicated=False)
