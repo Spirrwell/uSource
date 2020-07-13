@@ -32,7 +32,15 @@ CBaseEntity
 				CBaseGroup
 */
 
+// #include "saverestore.h"
+
+class CSave;
+class CRestore;
+
+#ifndef CLIENT_DLL
 #include "saverestore.h"
+#endif
+
 #include "game/server/ai/ai_schedule.h"
 
 #ifndef MONSTEREVENT_H
