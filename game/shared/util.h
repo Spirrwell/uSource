@@ -15,6 +15,9 @@
 #pragma once
 #ifndef UTIL_H
 #define UTIL_H
+
+#include "base_defs.h"
+
 //
 // Misc utility code
 //
@@ -89,12 +92,6 @@ inline edict_t *FIND_ENTITY_BY_TARGET(edict_t *entStart, const char *pszName)
 // Until we figure out why "const" gives the compiler problems, we'll just have to use
 // this bogus "empty" define to mark things as constant.
 #define CONSTANT
-
-// More explicit than "int"
-typedef int EOFFSET;
-
-// In case it's not alread defined
-typedef int BOOL;
 
 // In case this ever changes
 #ifndef M_PI
