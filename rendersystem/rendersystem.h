@@ -14,6 +14,7 @@
 #include "ishader.h"
 #include "ibuffer.h"
 #include "imaterial.h"
+#include "itriapi.h"
 
 #include "gl_local.h"
 
@@ -49,8 +50,11 @@ public:
 
 	/* Creates an empty material */
 	virtual IMaterial* CreateEmptyMaterial() = 0;
+
+	/* API Accessors */
+	virtual ITriangleAPI* GetTriAPI() = 0;
 };
 
 /* This is the only function you must implement within your backend implementation */
 /* Internally you'll need to implement the Ixxxx classes, but those implementations should not be exposed */
-IRenderSystem* CreateRenderSystem(); 
+IRenderSystem* CreateRenderSystem();
