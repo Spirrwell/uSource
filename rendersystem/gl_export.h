@@ -45,6 +45,7 @@ typedef int GLsizeiptrARB;
 typedef char GLcharARB;
 typedef uint GLhandleARB;
 typedef float GLmatrix[16];
+typedef char GLchar;
 
 #define GL_MODELVIEW			0x1700
 #define GL_PROJECTION			0x1701
@@ -1357,6 +1358,11 @@ GL_EXTERN void GL_FUNCTION( glDeleteVertexArrays )( GLsizei n, const GLuint *arr
 GL_EXTERN void GL_FUNCTION( glGenVertexArrays )( GLsizei n, const GLuint *arrays );
 GL_EXTERN GLboolean GL_FUNCTION( glIsVertexArray )( GLuint array );
 GL_EXTERN void GL_FUNCTION( glSwapInterval ) ( int interval );
+
+/* OpenGL 2.0 and higher functions */
+GL_EXTERN GLint GL_FUNCTION(glCreateShader)(GLenum shaderType);
+GL_EXTERN void GL_FUNCTION(glShaderSource)(GLuint shader, GLsizei count, const GLchar** string, const GLint* length);
+GL_EXTERN void GL_FUNCTION(glCompileShader)(GLuint shader);
 
 #if defined( XASH_GL_STATIC ) && !defined( REF_GL_KEEP_MANGLED_FUNCTIONS )
 #define pglGetError glGetError

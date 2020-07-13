@@ -46,10 +46,16 @@ public:
 	virtual ITexture* CreateTextureFromImage(const rgbdata_t* img) = 0;
 
 	/* Creates a new render target which will reside in shared memory */
-	virtual ITexture* CreateRenderTarget(ETextureFormat fmt) = 0;
+	virtual ITexture* CreateRenderTarget(const char* name, ETextureFormat fmt, int width, int height, int flags) = 0;
 
-	/* Creates an empty material */
-	virtual IMaterial* CreateEmptyMaterial() = 0;
+	/* Creates a new shader program */
+	virtual IShaderProgram* CreateProgram(const char* name) = 0;
+
+	/* Creates new shaders */
+	virtual IGeomShader* CreateGeometryShader() = 0;
+	virtual IVertexShader* CreateVertexShader() = 0;
+	virtual IFragShader* CreateFragShader() = 0;
+
 
 	/* API Accessors */
 	virtual ITriangleAPI* GetTriAPI() = 0;

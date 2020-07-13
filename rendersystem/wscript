@@ -75,6 +75,16 @@ def build(bld):
 		if glstatic: return ['XASH_GL_STATIC']
 		else: return []
 
+
+	if bld.env.GL and bld.env.DEST_OS in ['linux', 'darwin', 'freebsd']:
+		print("Using system GLEW libraries")
+		libs += ['GLEW']
+	else:
+		print("Using packaged GLEW")
+		source += ["../thirdparty/glew/src/glew.c"]
+		includes += ["../thirdparty/glew/include/"]
+
+
 	if bld.env.GL:
 		source += source_gl 
 		bld.shlib(

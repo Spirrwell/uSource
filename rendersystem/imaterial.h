@@ -10,6 +10,10 @@ enum class ETextureFormat
 	RGBA16161616,
 	GRAY16, 	/* 16 bits per pixel grayscale */
 	GRAY8,		/* 8 bits per pixel grayscale */
+	DXT1,
+	DXT5,
+	ATI2N,
+	ATI1N,
 };
 
 class ITexture
