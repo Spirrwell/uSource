@@ -16,9 +16,19 @@ enum class ETextureFormat
 	ATI1N,
 };
 
+enum ETextureFlags
+{
+	TEXFLAGS_NONE = 0,
+	TEXFLAGS_FRAMEBUFFER = 1, /* This flag indicates that this is a backbuffer */
+	TEXFLAGS_DEPTH = 2, /* the texture is a depth buffer */
+	TEXFLAGS_STENCIL = 4, /* The texture is a stencil buffer */
+};
+
 class ITexture
 {
 public:
+	virtual ETextureFlags Flags() const = 0;
+
 	virtual ETextureFormat GetFormat() const = 0;
 	
 	virtual ITexture* Convert(ETextureFormat fmt) = 0;

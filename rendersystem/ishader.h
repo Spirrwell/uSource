@@ -13,6 +13,7 @@
 struct shader_param_t 
 {
 	char* name;
+	int index;
 };
 
 enum class ESourceCodeType
@@ -131,8 +132,25 @@ public:
 	/* Links the shaders together. This is another thing basically ripped from Gl. */
 	virtual bool Link() = 0;
 
+	/* Resolves shader parameters in the GLSL */
+	virtual void SetupParams(const char** params, size_t length) = 0;
+
+	/* Adds a fragment shader output, aka render target */
+	/* param should corrsepond to the output param's name */
+	/* Index should line up with the output layout in the shader. If index is -1, we will assign one */
+	virtual void AddRenderTarget(const char* param, int &index, ITexture* pTexture) = 0;
+	virtual void ClearRenderTargets() = 0;
+
+	/* Pre-draw event. Do all setup here */
+	virtual void PreDraw() = 0;
+
+	/* Post draw callback */
+	virtual void PostDraw() = 0;
+
 	/* Returns the info log if the operation failed */
 	virtual const char* GetInfoLog() = 0;
+
+	virtual void EnableDepthWrite(bool b) = 0;
 
 	/* Lots of parameter setting functions here, oh well! */
 	virtual void SetTextureParam(const char* param, ITexture* pTex) = 0;

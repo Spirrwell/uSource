@@ -2,6 +2,8 @@
 #define GL_IMPL
 #include "gl_local.h"
 
+#include "tier1/tier1.h"
+
 cvar_t	*gl_extensions;
 cvar_t	*gl_texture_anisotropy;
 cvar_t	*gl_texture_lodbias;
@@ -890,6 +892,9 @@ R_Init
 */
 qboolean R_Init( void )
 {
+
+	ConnectTier1Libraries();
+
 	if( glw_state.initialized )
 		return true;
 

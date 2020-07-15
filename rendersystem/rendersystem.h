@@ -35,7 +35,6 @@ public:
 
 	virtual void OnParamsChanged(const render_params_t& params) = 0;
 
-	virtual IStaticMesh* CreateEmptyStaticMesh() = 0;
 	virtual IVertexBuffer* CreateEmptyVertexBuffer(EVertexFormat fmt, EBufferType type) = 0;
 	virtual IIndexBuffer* CreateEmptyIndexBuffer(EIndexFormat fmt, EBufferType type) = 0;
 	virtual IBuffer* CreateEmptyBuffer(EBufferType type) = 0;
@@ -55,7 +54,7 @@ public:
 	virtual IGeomShader* CreateGeometryShader() = 0;
 	virtual IVertexShader* CreateVertexShader() = 0;
 	virtual IFragShader* CreateFragShader() = 0;
-
+	virtual IShaderProgram* CreateShaderProgram(const char* name) = 0;
 
 	/* API Accessors */
 	virtual ITriangleAPI* GetTriAPI() = 0;

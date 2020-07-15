@@ -12,4 +12,10 @@ class CRenderSystem_GL : public IRenderSystem
 public:
 
 	virtual ITriangleAPI* GetTriAPI() override;
+	virtual IShaderProgram* CreateShaderProgram(const char* name) override;
 };
+
+namespace GL
+{
+	unsigned int GetParam(unsigned long param);
+}
