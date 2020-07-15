@@ -19,7 +19,7 @@ enum class ETextureFormat
 enum ETextureFlags
 {
 	TEXFLAGS_NONE = 0,
-	TEXFLAGS_FRAMEBUFFER = 1, /* This flag indicates that this is a backbuffer */
+	TEXFLAGS_RENDERBUFFER = 1, /* This flag indicates that this is a backbuffer */
 	TEXFLAGS_DEPTH = 2, /* the texture is a depth buffer */
 	TEXFLAGS_STENCIL = 4, /* The texture is a stencil buffer */
 };

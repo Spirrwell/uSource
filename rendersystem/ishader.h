@@ -134,6 +134,7 @@ public:
 
 	/* Resolves shader parameters in the GLSL */
 	virtual void SetupParams(const char** params, size_t length) = 0;
+	virtual void SetupOutputs(const char** outputs, size_t length) = 0;
 
 	/* Adds a fragment shader output, aka render target */
 	/* param should corrsepond to the output param's name */
@@ -158,18 +159,18 @@ public:
 	virtual void SetFloat2Param(const char* param, float v[2]) = 0;
 	virtual void SetFloat3Param(const char* param, float v[3]) = 0;
 	virtual void SetFloat4Param(const char* param, float v[4]) = 0;
-	virtual void SetDoubleParam(const char* param, float f) = 0;
-	virtual void SetDouble2Param(const char* param, float v[2]) = 0;
-	virtual void SetDouble3Param(const char* param, float v[3]) = 0;
-	virtual void SetDouble4Param(const char* param, float v[4]) = 0;
-	virtual void SetIntParam(const char* param, float f) = 0;
-	virtual void SetInt2Param(const char* param, float v[2]) = 0;
-	virtual void SetInt3Param(const char* param, float v[3]) = 0;
-	virtual void SetInt4Param(const char* param, float v[4]) = 0;
-	virtual void SetShortParam(const char* param, float f) = 0;
-	virtual void SetShort2Param(const char* param, float v[2]) = 0;
-	virtual void SetShort3Param(const char* param, float v[3]) = 0;
-	virtual void SetShort4Param(const char* param, float v[4]) = 0;
+	virtual void SetDoubleParam(const char* param, double f) = 0;
+	virtual void SetDouble2Param(const char* param, double v[2]) = 0;
+	virtual void SetDouble3Param(const char* param, double v[3]) = 0;
+	virtual void SetDouble4Param(const char* param, double v[4]) = 0;
+	virtual void SetIntParam(const char* param, int f) = 0;
+	virtual void SetInt2Param(const char* param, int v[2]) = 0;
+	virtual void SetInt3Param(const char* param, int v[3]) = 0;
+	virtual void SetInt4Param(const char* param, int v[4]) = 0;
+	virtual void SetShortParam(const char* param, short f) = 0;
+	virtual void SetShort2Param(const char* param, short v[2]) = 0;
+	virtual void SetShort3Param(const char* param, short v[3]) = 0;
+	virtual void SetShort4Param(const char* param, short v[4]) = 0;
 
 	/* Uniform param setting */
 	virtual void SetMat2x2Uniform(const char* param, float mat[2][2]) = 0;
@@ -181,12 +182,16 @@ public:
 	virtual void SetMat4x3Uniform(const char* param, float mat[4][3]) = 0;
 	virtual void SetMat2x4Uniform(const char* param, float mat[2][4]) = 0;
 	virtual void SetMat4x2Uniform(const char* param, float mat[4][2]) = 0;
-	virtual void SetIntUniform(const char* param, float f) = 0;
-	virtual void SetInt2Uniform(const char* param, float v[2]) = 0;
-	virtual void SetInt3Uniform(const char* param, float v[3]) = 0;
-	virtual void SetInt4Uniform(const char* param, float v[4]) = 0;
+	virtual void SetIntUniform(const char* param, int f) = 0;
+	virtual void SetInt2Uniform(const char* param, int v[2]) = 0;
+	virtual void SetInt3Uniform(const char* param, int v[3]) = 0;
+	virtual void SetInt4Uniform(const char* param, int v[4]) = 0;
 	virtual void SetFloatUniform(const char* param, float f) = 0;
 	virtual void SetFloat2Uniform(const char* param, float v[2]) = 0;
 	virtual void SetFloat3Uniform(const char* param, float v[3]) = 0;
 	virtual void SetFloat4Uniform(const char* param, float v[4]) = 0;
+	virtual void SetDoubleUniform(const char* param, double d) = 0;
+	virtual void SetDouble2Uniform(const char* param, double d[2]) = 0;
+	virtual void SetDouble3Uniform(const char* param, double d[3]) = 0;
+	virtual void SetDouble4Uniform(const char* param, double d[4]) = 0;
 };

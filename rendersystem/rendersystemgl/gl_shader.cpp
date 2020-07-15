@@ -116,6 +116,17 @@ public:
 	} m_depthTarget, m_stencilTarget;
 	List<rendertarget_t> m_renderTargets;
 
+	struct shader_params_t
+	{
+		String name;
+		GLint index;
+	};
+	Array<shader_params_t> m_shaderParams;
+	Array<shader_params_t> m_shaderOutputs;
+
+	GLint FindParamIndex(const char* s);
+	GLint FindOutputIndex(const char* s);
+
 	CShaderProgram_GL(const char* m_name);
 	~CShaderProgram_GL();
 
@@ -136,6 +147,7 @@ public:
 	virtual const char* GetInfoLog();
 
 	virtual void SetupParams(const char** params, size_t length);
+	virtual void SetupOutputs(const char** outputs, size_t length);
 	virtual void AddRenderTarget(const char* param, int &index, ITexture* pTexture);
 	virtual void ClearRenderTargets();
 	virtual void PostDraw();
@@ -143,24 +155,27 @@ public:
 
 	virtual void EnableDepthWrite(bool enable);
 
+	inline bool CheckParamType(GLint param, GLenum type);
+	inline bool CheckUniformType(GLint param, GLenum type);
+
 	/* Lots of parameter setting functions here, oh well! */
 	virtual void SetTextureParam(const char* param, ITexture* pTex);
 	virtual void SetFloatParam(const char* param, float f);
 	virtual void SetFloat2Param(const char* param, float v[2]);
 	virtual void SetFloat3Param(const char* param, float v[3]);
 	virtual void SetFloat4Param(const char* param, float v[4]);
-	virtual void SetDoubleParam(const char* param, float f);
-	virtual void SetDouble2Param(const char* param, float v[2]);
-	virtual void SetDouble3Param(const char* param, float v[3]);
-	virtual void SetDouble4Param(const char* param, float v[4]);
-	virtual void SetIntParam(const char* param, float f);
-	virtual void SetInt2Param(const char* param, float v[2]);
-	virtual void SetInt3Param(const char* param, float v[3]);
-	virtual void SetInt4Param(const char* param, float v[4]);
-	virtual void SetShortParam(const char* param, float f);
-	virtual void SetShort2Param(const char* param, float v[2]);
-	virtual void SetShort3Param(const char* param, float v[3]);
-	virtual void SetShort4Param(const char* param, float v[4]);
+	virtual void SetDoubleParam(const char* param, double f);
+	virtual void SetDouble2Param(const char* param, double v[2]);
+	virtual void SetDouble3Param(const char* param, double v[3]);
+	virtual void SetDouble4Param(const char* param, double v[4]);
+	virtual void SetIntParam(const char* param, int f);
+	virtual void SetInt2Param(const char* param, int v[2]);
+	virtual void SetInt3Param(const char* param, int v[3]);
+	virtual void SetInt4Param(const char* param, int v[4]);
+	virtual void SetShortParam(const char* param, short f);
+	virtual void SetShort2Param(const char* param, short v[2]);
+	virtual void SetShort3Param(const char* param, short v[3]);
+	virtual void SetShort4Param(const char* param, short v[4]);
 
 	/* Uniform param setting */
 	virtual void SetMat2x2Uniform(const char* param, float mat[2][2]);
@@ -172,14 +187,18 @@ public:
 	virtual void SetMat4x3Uniform(const char* param, float mat[4][3]);
 	virtual void SetMat2x4Uniform(const char* param, float mat[2][4]);
 	virtual void SetMat4x2Uniform(const char* param, float mat[4][2]);
-	virtual void SetIntUniform(const char* param, float f);
-	virtual void SetInt2Uniform(const char* param, float v[2]);
-	virtual void SetInt3Uniform(const char* param, float v[3]);
-	virtual void SetInt4Uniform(const char* param, float v[4]);
+	virtual void SetIntUniform(const char* param, int f);
+	virtual void SetInt2Uniform(const char* param, int v[2]);
+	virtual void SetInt3Uniform(const char* param, int v[3]);
+	virtual void SetInt4Uniform(const char* param, int v[4]);
 	virtual void SetFloatUniform(const char* param, float f);
 	virtual void SetFloat2Uniform(const char* param, float v[2]);
 	virtual void SetFloat3Uniform(const char* param, float v[3]);
 	virtual void SetFloat4Uniform(const char* param, float v[4]);
+	virtual void SetDoubleUniform(const char* param, double d);
+	virtual void SetDouble2Uniform(const char* param, double d[2]);
+	virtual void SetDouble3Uniform(const char* param, double d[3]);
+	virtual void SetDouble4Uniform(const char* param, double d[4]);
 };
 
 //=============================================================================================================================================//
@@ -301,6 +320,36 @@ CShaderProgram_GL::~CShaderProgram_GL()
 	glDeleteProgram(m_programIndex);
 }
 
+GLint CShaderProgram_GL::FindOutputIndex(const char* s)
+{
+	for(auto x : m_shaderOutputs)
+	{
+		if(x.name.equals(s))
+			return x.index;
+	}
+	return -1;
+}
+
+GLint CShaderProgram_GL::FindParamIndex(const char* s)
+{
+	for(auto x : m_shaderParams)
+	{
+		if(x.name.equals(s))
+			return x.index;
+	}
+	return -1;
+}
+
+bool CShaderProgram_GL::CheckParamType(GLint param, GLenum type)
+{
+	return false;
+}
+
+bool CShaderProgram_GL::CheckUniformType(GLint param, GLenum type)
+{
+
+}
+
 const char *CShaderProgram_GL::GetName() const
 {
 	return m_name;
@@ -354,14 +403,36 @@ bool CShaderProgram_GL::Link()
 	return m_linked;
 }
 
+void CShaderProgram_GL::SetupOutputs(const char **outputs, size_t length)
+{
+	for(int i = 0; i < length; i++)
+	{
+		shader_params_t output;
+		Assert(outputs[i]);
+		output.index = glGetFragDataIndex(m_programIndex, outputs[i]);
+		output.name = outputs[i];
+		m_shaderOutputs.push_back(output);
+	}
+}
+
 void CShaderProgram_GL::SetupParams(const char** params, size_t length)
 {
-
+	for(int i = 0; i < length; i++)
+	{
+		shader_params_t param;
+		Assert(params[i]);
+		param.index = glGetAttribLocation(m_programIndex, params[i]);
+		param.name = params[i];
+		m_shaderParams.push_back(param);
+	}
 }
 
 void CShaderProgram_GL::ClearRenderTargets()
 {
-
+	m_renderTargets.clear();
+	m_depth = false;
+	m_stencil = false;
+	m_currentColorBuffer = 0;
 }
 
 void CShaderProgram_GL::EnableDepthWrite(bool enable)
@@ -383,6 +454,12 @@ void CShaderProgram_GL::AddRenderTarget(const char* param, int& index, ITexture*
 		GL_COLOR_ATTACHMENT7
 	};
 
+	if(index == -1)
+	{
+		index = FindOutputIndex(param);
+		if(index == -1) return;
+	}
+
 	unsigned int flags = pTexture->Flags();
 	if(flags & TEXFLAGS_DEPTH)
 	{
@@ -400,7 +477,7 @@ void CShaderProgram_GL::AddRenderTarget(const char* param, int& index, ITexture*
 		m_stencilTarget.index = index;
 		m_stencilTarget.name = param;
 	}
-	else if(flags & TEXFLAGS_FRAMEBUFFER)
+	else if(flags & TEXFLAGS_RENDERBUFFER)
 	{
 		Assert(m_currentColorBuffer < 8);
 		rendertarget_t tgt;
@@ -448,166 +525,262 @@ void CShaderProgram_GL::SetTextureParam(const char *param, ITexture *pTex)
 
 void CShaderProgram_GL::SetFloatParam(const char *param, float f)
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glVertexAttrib1f(iparam, f);
 }
 
 void CShaderProgram_GL::SetFloat2Param(const char *param, float *v)
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glVertexAttrib2fv(iparam, v);
 }
 
 void CShaderProgram_GL::SetFloat3Param(const char *param, float *v)
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glVertexAttrib3fv(iparam, v);
 }
 
 void CShaderProgram_GL::SetFloat4Param(const char *param, float *v)
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glVertexAttrib4fv(iparam, v);
 }
 
-void CShaderProgram_GL::SetDoubleParam(const char *param, float f)
+void CShaderProgram_GL::SetDoubleParam(const char *param, double f)
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glVertexAttrib1d(iparam, f);
 }
 
-void CShaderProgram_GL::SetDouble2Param(const char *param, float *v)
+void CShaderProgram_GL::SetDouble2Param(const char *param, double *v)
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glVertexAttrib2dv(iparam, v);
 }
 
-void CShaderProgram_GL::SetDouble3Param(const char *param, float *v)
+void CShaderProgram_GL::SetDouble3Param(const char *param, double *v)
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glVertexAttrib3dv(iparam, v);
 }
 
-void CShaderProgram_GL::SetDouble4Param(const char *param, float *v)
+void CShaderProgram_GL::SetDouble4Param(const char *param, double *v)
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glVertexAttrib4dv(iparam, v);
 }
 
-void CShaderProgram_GL::SetIntParam(const char *param, float f)
+void CShaderProgram_GL::SetIntParam(const char *param, int f)
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glVertexAttribI1i(iparam, f);
 }
 
-void CShaderProgram_GL::SetInt2Param(const char *param, float *v)
+void CShaderProgram_GL::SetInt2Param(const char *param, int *v)
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glVertexAttribI2iv(iparam, v);
 }
 
-void CShaderProgram_GL::SetInt3Param(const char *param, float *v)
+void CShaderProgram_GL::SetInt3Param(const char *param, int *v)
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glVertexAttribI3iv(iparam, v);
 }
 
-void CShaderProgram_GL::SetInt4Param(const char *param, float *v)
+void CShaderProgram_GL::SetInt4Param(const char *param, int *v)
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glVertexAttrib4iv(iparam, v);
 }
 
-void CShaderProgram_GL::SetShortParam(const char *param, float f)
+void CShaderProgram_GL::SetShortParam(const char *param, short f)
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glVertexAttrib1s(iparam, f);
 }
 
-void CShaderProgram_GL::SetShort2Param(const char *param, float *v)
+void CShaderProgram_GL::SetShort2Param(const char *param, short *v)
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glVertexAttrib2sv(iparam, v);
 }
 
-void CShaderProgram_GL::SetShort3Param(const char *param, float *v)
+void CShaderProgram_GL::SetShort3Param(const char *param, short *v)
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glVertexAttrib3sv(iparam, v);
 }
 
-void CShaderProgram_GL::SetShort4Param(const char *param, float *v)
+void CShaderProgram_GL::SetShort4Param(const char *param, short *v)
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glVertexAttrib4sv(iparam, v);
 }
 
 void CShaderProgram_GL::SetMat2x2Uniform(const char *param, float (*mat)[2])
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glUniformMatrix2fv(iparam, 1, true, reinterpret_cast<const GLfloat *>(mat));
 }
 
 void CShaderProgram_GL::SetMat3x3Uniform(const char *param, float (*mat)[3])
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glUniformMatrix3fv(iparam, 1, true, reinterpret_cast<const GLfloat *>(mat));
 }
 
 void CShaderProgram_GL::SetMat4x4Uniform(const char *param, float (*mat)[4])
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glUniformMatrix4fv(iparam, 1, true, reinterpret_cast<const GLfloat *>(mat));
 }
 
 void CShaderProgram_GL::SetMat2x3Uniform(const char *param, float (*mat)[3])
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glUniformMatrix2x3fv(iparam, 1, true, reinterpret_cast<const GLfloat *>(mat));
 }
 
 void CShaderProgram_GL::SetMat3x2Uniform(const char *param, float (*mat)[2])
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glUniformMatrix3x2fv(iparam, 1, true, reinterpret_cast<const GLfloat *>(mat));
 }
 
 void CShaderProgram_GL::SetMat3x4Uniform(const char *param, float (*mat)[4])
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glUniformMatrix3x4fv(iparam, 1, true, reinterpret_cast<const GLfloat *>(mat));
 }
 
 void CShaderProgram_GL::SetMat4x3Uniform(const char *param, float (*mat)[3])
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glUniformMatrix4x3fv(iparam, 1, true, reinterpret_cast<const GLfloat *>(mat));
 }
 
 void CShaderProgram_GL::SetMat2x4Uniform(const char *param, float (*mat)[4])
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glUniformMatrix2x4fv(iparam, 1, true, reinterpret_cast<const GLfloat *>(mat));
 }
 
 void CShaderProgram_GL::SetMat4x2Uniform(const char *param, float (*mat)[2])
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glUniformMatrix4x2fv(iparam, 1, true, reinterpret_cast<const GLfloat *>(mat));
 }
 
-void CShaderProgram_GL::SetIntUniform(const char *param, float f)
+void CShaderProgram_GL::SetIntUniform(const char *param, int f)
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glUniform1i(iparam, f);
 }
 
-void CShaderProgram_GL::SetInt2Uniform(const char *param, float *v)
+void CShaderProgram_GL::SetInt2Uniform(const char *param, int *v)
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glUniform2iv(iparam, 1, v);
 }
 
-void CShaderProgram_GL::SetInt3Uniform(const char *param, float *v)
+void CShaderProgram_GL::SetInt3Uniform(const char *param, int *v)
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glUniform3iv(iparam, 1, v);
 }
 
-void CShaderProgram_GL::SetInt4Uniform(const char *param, float *v)
+void CShaderProgram_GL::SetInt4Uniform(const char *param, int *v)
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glUniform4iv(iparam, 1, v);
 }
 
 void CShaderProgram_GL::SetFloatUniform(const char *param, float f)
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glUniform1f(iparam, f);
 }
 
 void CShaderProgram_GL::SetFloat2Uniform(const char *param, float *v)
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glUniform2fv(iparam, 1, v);
 }
 
 void CShaderProgram_GL::SetFloat3Uniform(const char *param, float *v)
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glUniform3fv(iparam, 1, v);
 }
 
 void CShaderProgram_GL::SetFloat4Uniform(const char *param, float *v)
 {
-
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glUniform4fv(iparam, 1, v);
 }
+
+void CShaderProgram_GL::SetDoubleUniform(const char *param, double d)
+{
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glUniform1d(iparam, d);
+}
+
+void CShaderProgram_GL::SetDouble2Uniform(const char *param, double *d)
+{
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glUniform2dv(iparam, 1, d);
+}
+
+void CShaderProgram_GL::SetDouble3Uniform(const char *param, double *d)
+{
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glUniform3dv(iparam, 1, d);
+}
+
+void CShaderProgram_GL::SetDouble4Uniform(const char *param, double *d)
+{
+	GLint iparam = FindParamIndex(param);
+	Assert(iparam != -1);
+	glUniform4dv(iparam, 1, d);
+}
+
+
 //=============================================================================================================================================//
