@@ -12,7 +12,7 @@
 #include "tier1/dbg.h"
 #include "rendersystemgl.h"
 #include <memory.h>
-
+#include "gl_material.h"
 
 /* Avoiding a bit of code duplication here */
 class CGenericShader_GL
@@ -125,9 +125,18 @@ public:
 	Array<shader_params_t> m_shaderOutputs;
 	Array<shader_params_t> m_shaderUniforms;
 
+	struct texture_uniform_t
+	{
+		String name;
+		GLint index;
+		GLint unit;
+	};
+	Array<texture_uniform_t> m_shaderTextures;
+
 	GLint FindParamIndex(const char* s);
 	GLint FindOutputIndex(const char* s);
 	GLint FindUniformIndex(const char* s);
+	texture_uniform_t FindTexParam(const char* s);
 
 	CShaderProgram_GL(const char* m_name);
 	~CShaderProgram_GL();
@@ -151,6 +160,7 @@ public:
 	virtual void SetupParams(const char** params, size_t length);
 	virtual void SetupOutputs(const char** outputs, size_t length);
 	virtual void SetupUniforms(const char** outputs, size_t length);
+	virtual void SetupTextureUniforms(const char** uniforms, size_t length);
 	virtual void AddRenderTarget(const char* param, int &index, ITexture* pTexture);
 	virtual void ClearRenderTargets();
 	virtual void PostDraw();
@@ -354,7 +364,15 @@ GLint CShaderProgram_GL::FindUniformIndex(const char* s)
 	return -1;
 }
 
-
+CShaderProgram_GL::texture_uniform_t CShaderProgram_GL::FindTexParam(const char* s)
+{
+	for(auto x : m_shaderTextures)
+	{
+		if(x.name.equals(s))
+			return x;
+	}
+	return texture_uniform_t();
+}
 
 bool CShaderProgram_GL::CheckParamType(GLint param, GLenum type)
 {
@@ -795,8 +813,50 @@ void CShaderProgram_GL::SetDouble4Uniform(const char *param, double *d)
 
 void CShaderProgram_GL::SetTextureUniform(const char *param, ITexture *pTex)
 {
-	GLint iparam = FindUniformIndex(param);
-	Assert(iparam != -1);
+	CShaderProgram_GL::texture_uniform_t texparam = FindTexParam(param);
+	Assert(texparam.index != -1);
+	Assert(pTex);
+	CTexture_GL* pTexture = (CTexture_GL*)pTex;
+	AssertMsg(pTexture->IsTexture(), "Texture passed to function is NOT a texture!");
+
+	static GLint tex_unit_map[] = {
+		GL_TEXTURE0,
+		GL_TEXTURE1,
+		GL_TEXTURE2,
+		GL_TEXTURE3,
+		GL_TEXTURE4,
+		GL_TEXTURE5,
+		GL_TEXTURE6,
+		GL_TEXTURE7,
+		GL_TEXTURE8,
+		GL_TEXTURE9,
+		GL_TEXTURE10,
+		GL_TEXTURE11,
+		GL_TEXTURE12,
+		GL_TEXTURE13,
+		GL_TEXTURE14,
+		GL_TEXTURE15,
+		GL_TEXTURE16,
+		GL_TEXTURE17,
+		GL_TEXTURE18,
+		GL_TEXTURE19,
+		GL_TEXTURE20,
+		GL_TEXTURE21,
+		GL_TEXTURE22,
+		GL_TEXTURE23,
+		GL_TEXTURE24,
+		GL_TEXTURE25,
+		GL_TEXTURE26,
+		GL_TEXTURE27,
+		GL_TEXTURE28,
+		GL_TEXTURE29,
+		GL_TEXTURE30,
+		GL_TEXTURE31,
+	};
+	glActiveTexture(tex_unit_map[texparam.unit]);
+	glBindTexture(GL_TEXTURE_2D, pTexture->m_texture);
+	glUniform1i(texparam.index, texparam.unit);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void CShaderProgram_GL::SetupUniforms(const char **outputs, size_t length)
@@ -809,6 +869,22 @@ void CShaderProgram_GL::SetupUniforms(const char **outputs, size_t length)
 		param.name = outputs[i];
 		param.index = glGetUniformLocation(m_programIndex, outputs[i]);
 		m_shaderUniforms.push_back(param);
+	}
+}
+
+void CShaderProgram_GL::SetupTextureUniforms(const char **uniforms, size_t length)
+{
+	Assert(uniforms);
+	GLint active_unit = 0;
+	for(int i = 0; i < length; i++)
+	{
+		texture_uniform_t param;
+		Assert(uniforms[i]);
+		param.name = uniforms[i];
+		param.index = glGetUniformLocation(m_programIndex, uniforms[i]);
+		param.unit = active_unit;
+		active_unit++;
+		m_shaderTextures.push_back(param);
 	}
 }
 

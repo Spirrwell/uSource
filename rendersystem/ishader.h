@@ -136,6 +136,7 @@ public:
 	virtual void SetupParams(const char** params, size_t length) = 0;
 	virtual void SetupUniforms(const char** params, size_t length) = 0;
 	virtual void SetupOutputs(const char** outputs, size_t length) = 0;
+	virtual void SetupTextureUniforms(const char** outputs, size_t length) = 0;
 
 	/* Adds a fragment shader output, aka render target */
 	/* param should corrsepond to the output param's name */
