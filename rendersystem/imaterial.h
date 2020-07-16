@@ -19,9 +19,39 @@ enum class ETextureFormat
 enum ETextureFlags
 {
 	TEXFLAGS_NONE = 0,
-	TEXFLAGS_RENDERBUFFER = 1, /* This flag indicates that this is a backbuffer */
-	TEXFLAGS_DEPTH = 2, /* the texture is a depth buffer */
-	TEXFLAGS_STENCIL = 4, /* The texture is a stencil buffer */
+	TEXFLAGS_RENDERBUFFER   = 0b0001, /* This flag indicates that this is a backbuffer */
+	TEXFLAGS_DEPTH          = 0b0011, /* the texture is a depth buffer */
+	TEXFLAGS_STENCIL        = 0b0101, /* The texture is a stencil buffer */
+	TEXFLAGS_CUBEMAP        = 0b000000001000,
+	TEXFLAGS_CUBEMAP_POS_X  = 0b000000011000,
+	TEXFLAGS_CUBEMAP_NEG_X  = 0b000000101000,
+	TEXFLAGS_CUBEMAP_POS_Y  = 0b000001001000,
+	TEXFLAGS_CUBEMAP_NEG_Y  = 0b000010001000,
+	TEXFLAGS_CUBEMAP_POS_Z  = 0b000100001000,
+	TEXFLAGS_CUBEMAP_NEG_Z  = 0b001000001000,
+};
+
+enum class ETextureDimension
+{
+	S = 0,  // x
+	T,      // y
+	R,       // z
+	MAX_DIMENSIONS
+};
+
+enum class ETextureWrapFlags
+{
+	WRAP_CLAMP_EDGE         = 0,
+	WRAP_CLAMP_BORDER,
+	WRAP_REPEAT,
+	WRAP_MIRROR_REPEAT,
+	MAX_WRAP_FLAGS,
+};
+
+enum class ETextureFiltering
+{
+	BILINEAR,
+	TRILINEAR,
 };
 
 class ITexture
@@ -35,9 +65,31 @@ public:
 
 	virtual void ConvertInPlace(ETextureFormat fmt) = 0;
 
-	virtual void* GetData() = 0;
+	/* Returns the width/height of the render target or texture */
+	virtual int Width() const = 0;
+	virtual int Height() const = 0;
 
-	virtual size_t GetSize() const = 0;
+	/**
+	 * Sets the internal data of this ITexture to the data of buffer.
+	 * buffer must be in a simple RGB or RGBA format, and not compressed. If you wish to use a compressed format
+	 * use LoadFromCompressedImage
+	 */
+	virtual void LoadFromImage(int w, int h, ETextureFormat fmt, void* buffer) = 0;
+	virtual void LoadFromCompressedImage(int w, int h, ETextureFormat fmt, void* buffer) = 0;
+
+	/* Copies the internal data of this texture to an output buffer */
+	/* Note: The texture output format must be a simple RGB, RGBA or Grayscale format. No copying into compressed buffers */
+	/* the mip param only applies to textures. */
+	virtual void CopyToBuffer(void* dst, ETextureFormat dstfmt, int mip = 0) = 0;
+
+	/* Generates mips on this texture if it's not a render target */
+	virtual void GenerateMips(int levels = 1) = 0;
+
+	/* Checks if this texture is a normal texture or a render target */
+	virtual bool IsTexture() const = 0;
+	virtual bool IsRenderTarget() const = 0;
+
+	virtual void SetTextureWrapParams(ETextureDimension dim, ETextureWrapFlags flags) = 0;
 };
 
 enum class EMaterialParamType
@@ -82,3 +134,16 @@ public:
 	virtual IMaterial* Copy() const = 0;
 };
 
+/* Returns the size of one pixel of the specified format */
+static inline unsigned long long GetFormatSize(ETextureFormat fmt)
+{
+	static unsigned long long size_mapping[] = {
+		3, /* RGB888 */
+		6, /* RGB161616 */
+		4, /* RGBA8888 */
+		8, /* RGBA16161616 */
+		2, /* 16bit grayscale */
+		1, /* 8bit grayscale */
+
+	};
+}

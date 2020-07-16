@@ -134,6 +134,7 @@ public:
 
 	/* Resolves shader parameters in the GLSL */
 	virtual void SetupParams(const char** params, size_t length) = 0;
+	virtual void SetupUniforms(const char** params, size_t length) = 0;
 	virtual void SetupOutputs(const char** outputs, size_t length) = 0;
 
 	/* Adds a fragment shader output, aka render target */
@@ -154,7 +155,6 @@ public:
 	virtual void EnableDepthWrite(bool b) = 0;
 
 	/* Lots of parameter setting functions here, oh well! */
-	virtual void SetTextureParam(const char* param, ITexture* pTex) = 0;
 	virtual void SetFloatParam(const char* param, float f) = 0;
 	virtual void SetFloat2Param(const char* param, float v[2]) = 0;
 	virtual void SetFloat3Param(const char* param, float v[3]) = 0;
@@ -194,4 +194,6 @@ public:
 	virtual void SetDouble2Uniform(const char* param, double d[2]) = 0;
 	virtual void SetDouble3Uniform(const char* param, double d[3]) = 0;
 	virtual void SetDouble4Uniform(const char* param, double d[4]) = 0;
+
+	virtual void SetTextureUniform(const char* param, ITexture* pTex) = 0;
 };
