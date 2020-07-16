@@ -8,10 +8,11 @@
 #include "rendersystemgl.h"
 #include "rendersystem/imaterial.h"
 #include "gl_material.h"
+#include "tier1/dbg.h"
 
 CTexture_GL* CTexture_GL::Create(int w, int h, ETextureFlags flags, ETextureFormat fmt)
 {
-	return new CTexture_GL(w, h, flags, fmt);
+	return nullptr;
 }
 
 static void GetGLTexFormat(ETextureFormat fmt, GLenum& outfmt, GLenum& outpixdat)

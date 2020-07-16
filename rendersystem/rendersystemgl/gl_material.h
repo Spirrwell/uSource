@@ -1,6 +1,6 @@
 #pragma once
 
-#include "imaterial.h"
+#include "rendersystem/imaterial.h"
 #include <GL/glew.h>
 
 class CTexture_GL : public ITexture

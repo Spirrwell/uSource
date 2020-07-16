@@ -50,6 +50,11 @@ def configure(conf):
 	if conf.env.DEST_OS2 == 'android':
 		conf.check_cc(lib='log')
 
+	if conf.env.GL and conf.env.DEST_OS in ['linux', 'darwin', 'freebsd']:
+		conf.check_cc(lib='GLEW')
+		conf.check_cc(lib='GLX')
+		conf.check_cc(lib='GL')
+
 def build(bld):
 	libs = [ 'public', 'M', 'mathlib', 'tier1' ]
 
@@ -78,7 +83,7 @@ def build(bld):
 
 	if bld.env.GL and bld.env.DEST_OS in ['linux', 'darwin', 'freebsd']:
 		print("Using system GLEW libraries")
-		libs += ['GLEW']
+		libs += ['GLEW', 'GLX', 'GL']
 	else:
 		print("Using packaged GLEW")
 		source += ["../thirdparty/glew/src/glew.c"]

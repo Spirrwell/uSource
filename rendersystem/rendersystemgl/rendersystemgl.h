@@ -5,7 +5,6 @@
 #include "rendersystem/ishader.h"
 #include "rendersystem/material.h"
 #include "rendersystem/ibuffer.h"
-#include "rendersystem/itriapi.h"
 
 extern byte* g_pGLPool;
 
@@ -15,7 +14,7 @@ public:
 	virtual void Init(const render_params_t& params) override;
 	virtual void Shutdown() override;
 
-	virtual ITriangleAPI* GetTriAPI() override;
+	virtual class ITriangleAPI* GetTriAPI() override;
 	virtual IShaderProgram* CreateShaderProgram(const char* name) override;
 };
 

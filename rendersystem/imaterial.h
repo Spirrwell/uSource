@@ -147,4 +147,5 @@ static inline unsigned long long GetFormatSize(ETextureFormat fmt)
 		1, /* 8bit grayscale */
 
 	};
+	return 0;
 }

@@ -14,9 +14,6 @@
 #include "ishader.h"
 #include "ibuffer.h"
 #include "imaterial.h"
-#include "itriapi.h"
-
-#include "gl_local.h"
 
 struct render_params_t
 {
@@ -115,7 +112,7 @@ public:
 
 	/* Creates a new image from the rgb data that has been specified */
 	/* This won't be using the same buffers as the rgbdata, so you will want to call FreeImage on the rgbdata after this */
-	virtual ITexture* CreateTextureFromImage(const rgbdata_t* img) = 0;
+	virtual ITexture* CreateTextureFromImage(const void* img) = 0;
 
 	/* Creates a new render target which will reside in shared memory */
 	virtual ITexture* CreateRenderTarget(const char* name, ETextureFormat fmt, int width, int height, int flags) = 0;
@@ -130,7 +127,7 @@ public:
 	virtual IShaderProgram* CreateShaderProgram(const char* name) = 0;
 
 	/* API Accessors */
-	virtual ITriangleAPI* GetTriAPI() = 0;
+	virtual class ITriangleAPI* GetTriAPI() = 0;
 
 	virtual void SetDepthFunc(EShaderDepthFunc func) = 0;
 	virtual void SetBlendEquation(EShaderBlendEq func) = 0;

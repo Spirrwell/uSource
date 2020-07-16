@@ -381,7 +381,7 @@ bool CShaderProgram_GL::CheckParamType(GLint param, GLenum type)
 
 bool CShaderProgram_GL::CheckUniformType(GLint param, GLenum type)
 {
-
+	return false;
 }
 
 const char *CShaderProgram_GL::GetName() const
