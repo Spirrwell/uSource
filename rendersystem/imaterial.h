@@ -90,6 +90,7 @@ public:
 	virtual bool IsRenderTarget() const = 0;
 
 	virtual void SetTextureWrapParams(ETextureDimension dim, ETextureWrapFlags flags) = 0;
+	virtual void SetTextureFiltering(ETextureFiltering filtering) = 0;
 };
 
 enum class EMaterialParamType

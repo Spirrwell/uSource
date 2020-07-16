@@ -26,6 +26,79 @@ struct render_params_t
 	int refresh_rate;
 };
 
+
+enum class EShaderDepthFunc
+{
+	NEVER,
+	NEARER,
+	EQUAL,
+	NEAREROREQUAL,
+	FARTHER,
+	NOTEQUAL,
+	FARTHEROREQUAL,
+	ALWAYS
+};
+
+enum class EShaderBlendFunc
+{
+	ZERO,
+	ONE,
+	DST_COLOR,
+	ONE_MINUS_DST_COLOR,
+	SRC_ALPHA,
+	ONE_MINUS_SRC_ALPHA,
+	DST_ALPHA,
+	ONE_MINUS_DST_ALPHA,
+	SRC_ALPHA_SATURATE,
+	SRC_COLOR,
+	ONE_MINUS_SRC_COLOR
+};
+
+enum class EShaderBlendEq
+{
+	ADD,
+	SUBTRACT,
+	REVSUBTRACT,
+	MIN,
+	MAX
+};
+
+enum class EShaderAlphaFunc
+{
+	NEVER,
+	LESS,
+	EQUAL,
+	LEQUAL,
+	GREATER,
+	NOTEQUAL,
+	GEQUAL,
+	ALWAYS
+};
+
+enum class EShaderStencilFunc
+{
+	NEVER = 0,
+	LESS,
+	EQUAL,
+	LEQUAL,
+	GREATER,
+	NOTEQUAL,
+	GEQUAL,
+	ALWAYS
+};
+
+enum class EShaderStencilOp
+{
+	KEEP = 0,
+	ZERO,
+	SET_TO_REFERENCE,
+	INCREMENT_CLAMP,
+	DECREMENT_CLAMP,
+	INVERT,
+	INCREMENT_WRAP,
+	DECREMENT_WRAP,
+};
+
 /* You must implement this in your own backend */
 class IRenderSystem
 {
@@ -58,6 +131,13 @@ public:
 
 	/* API Accessors */
 	virtual ITriangleAPI* GetTriAPI() = 0;
+
+	virtual void SetDepthFunc(EShaderDepthFunc func) = 0;
+	virtual void SetBlendEquation(EShaderBlendEq func) = 0;
+	virtual void SetBlendFunc(EShaderBlendFunc func) = 0;
+	virtual void SetAlphaFunc(EShaderAlphaFunc func) = 0;
+	virtual void SetStencilFunc(EShaderStencilFunc func) = 0;
+	virtual void SetStencilOp(EShaderStencilOp op) = 0;
 };
 
 /* This is the only function you must implement within your backend implementation */

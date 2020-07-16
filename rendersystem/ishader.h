@@ -74,6 +74,8 @@ enum class EParamType
 	MAX_PARAM_TYPE
 };
 
+
+
 /**
  * This is the base class for all shaders. 
  * Note that this is pretty similar to OpenGL's shader pipeline. APIs that use pre-compiled bytecode, 
@@ -197,4 +199,40 @@ public:
 	virtual void SetDouble4Uniform(const char* param, double d[4]) = 0;
 
 	virtual void SetTextureUniform(const char* param, ITexture* pTex) = 0;
+};
+
+/**
+ * IShaderShadow
+ * 	Backend management class that goes with each shader.
+ * 	The rendersystem calls each of the internal methods. Ideally this will only be called in one thread, so maintaining
+ * 	state should be OK. However, this isn't 100% guaranteed in the future.
+ */
+class IShaderShadow
+{
+public:
+	/**
+	 * Called to initialize the shader program. This is only called once.
+	 * In here, you'll want to call SetupParams, SetupUniforms, SetupOutputs and SetupTextureUniforms
+	 * @param pShader
+	 */
+	virtual void Init(IShaderProgram* pShader) = 0;
+
+	/**
+	 * Called immediately before drawing with the shader. Here you'll want to be setting the uniforms and other params.
+	 * @param pDrawMesh Pointer to the mesh we will be drawing
+	 * @param pShader
+	 */
+	virtual void PreDraw(class IMesh* pDrawMesh, IShaderProgram* pShader) = 0;
+
+	/**
+	 * Called after drawing with the shader.
+	 * @param pDrawMesh Pointer to the mesh we drew
+	 * @param pShader
+	 */
+	virtual void PostDraw(class IMesh* pDrawMesh, IShaderProgram* pShader) = 0;
+
+	/**
+	 * Called to destroy the shader. Cleanup goes here
+	 */
+	virtual void Shutdown() = 0;
 };

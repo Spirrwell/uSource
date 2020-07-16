@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ibuffer.h"
-#include "ishader.h"
 
 enum EMeshFlags
 {
@@ -19,7 +18,7 @@ public:
 
 	virtual IVertexBuffer* VertexBuffer() const = 0;
 
-	virtual void Draw(IShaderProgram* pShader) = 0;
+	virtual void Draw(class IShaderProgram* pShader) = 0;
 
 	virtual EMeshFlags Flags() const = 0;
 };
