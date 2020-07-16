@@ -18,6 +18,10 @@ public:
 
 	virtual IVertexBuffer* VertexBuffer() const = 0;
 
+	/**
+	 * Internally, this will lookup the corresponding shader backend and call those funcs
+	 * @param pShader
+	 */
 	virtual void Draw(class IShaderProgram* pShader) = 0;
 
 	virtual EMeshFlags Flags() const = 0;
