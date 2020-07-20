@@ -1,4 +1,6 @@
-//
-// Created by jeremy on 7/19/20.
-//
-
+/*
+ *
+ * netvar.cpp - Networked variable implementation
+ *
+ */
+#include "netvar.h"
