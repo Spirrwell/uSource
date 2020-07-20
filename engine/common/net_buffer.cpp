@@ -17,6 +17,7 @@ GNU General Public License for more details.
 #include "protocol.h"
 #include "net_buffer.h"
 #include "mathlib.h"
+#include "net_int.h"
 
 //#define DEBUG_NET_MESSAGES_SEND
 //#define DEBUG_NET_MESSAGES_READ
@@ -62,7 +63,7 @@ void MSG_InitExt( sizebuf_t *sb, const char *pDebugName, void *pData, int nBytes
 void MSG_StartWriting( sizebuf_t *sb, void *pData, int nBytes, int iStartBit, int nBits )
 {
 	// make sure it's dword aligned and padded.
-	Assert(((dword)pData & 3 ) == 0 );
+	Assert((*(dword*)&pData & 3 ) == 0 );
 
 	sb->pDebugName = "Unnamed";
 	sb->pData = (byte *)pData;
@@ -227,7 +228,7 @@ qboolean MSG_WriteBits( sizebuf_t *sb, const void *pData, int nBits )
 	int	nBitsLeft = nBits;
 
 	// get output dword-aligned.
-	while((( dword )pOut & 3 ) != 0 && nBitsLeft >= 8 )
+	while(((*( dword* )&pOut) & 3 ) != 0 && nBitsLeft >= 8 )
 	{
 		MSG_WriteUBitLong( sb, *pOut, 8 );
 
@@ -486,7 +487,7 @@ qboolean MSG_ReadBits( sizebuf_t *sb, void *pOutData, int nBits )
 	int	nBitsLeft = nBits;
 	
 	// get output dword-aligned.
-	while((( dword )pOut & 3) != 0 && nBitsLeft >= 8 )
+	while(((*( dword* )&pOut) & 3) != 0 && nBitsLeft >= 8 )
 	{
 		*pOut = (byte)MSG_ReadUBitLong( sb, 8 );
 		++pOut;
@@ -684,4 +685,214 @@ void MSG_ExciseBits( sizebuf_t *sb, int startbit, int bitstoremove )
 
 	MSG_SeekToBit( sb, startbit, SEEK_SET );
 	sb->nDataBits -= bitstoremove;
+}
+
+/**
+ *
+ * Engine netsystem implementation
+ *
+ */
+
+
+class CEngineNetsystem001 : public IEngineNetsystem
+{
+public:
+	virtual const char* GetName() override { return "CEngineNetsystem001"; };
+	virtual const char* GetParentInterface() override { return INETSYSTEM_INTERFACE; };
+	virtual bool Init() override { return true; }
+	virtual bool PreInit() override { return true; }
+	virtual void Shutdown() override {};
+	virtual void HookServerNetsystemMsg(void(*pfnHook)(edict_t*, void*)) override;
+	virtual void HookClientNetsystemMsg(void(*pfnHook)(void*)) override;
+	virtual void HookServerMsg(int cmd, void(*pfnHook)(edict_t*, void*)) override;
+	virtual void HookClientMsg(int cmd, void(*pfnHook)(void*)) override;
+	virtual void BeginClientNetsystemCmd() override;
+	virtual void BeginServerNetsystemCmd(edict_t* client) override;
+	virtual void WriteBytes(void* pBuf, unsigned long long len) override;
+	virtual void WriteString(const char* str) override;
+	virtual void WriteByte(byte _byte) override;
+	virtual void WriteShort(short _short) override;
+	virtual void WriteInt(int _int) override;
+	virtual void WriteLong(long long _long) override;
+	virtual void WriteFloat(float _fl) override;
+	virtual void WriteVector(vec3_t _vec) override;
+	virtual void EndMessage() override;
+	virtual void ReadBytes(void* pBuffer, void* pOutbuf, unsigned long long num) override;
+	virtual void ReadString(void* pBuffer, char* pOutbuf, unsigned long long num) override;
+	virtual byte ReadByte(void* pBuffer) override;
+	virtual short ReadShort(void* pBuffer) override;
+	virtual int ReadInt(void* pBuffer) override;
+	virtual long long ReadLong(void* pBuffer) override;
+	virtual float ReadFloat(void* pBuffer) override;
+	virtual void ReadVector(void* pBuffer, vec3_t outvec) override;
+	virtual void BeginServerMessage(int cmd, edict_t* client) override;
+	virtual void BeginClientMessage(int cmd) override;
+};
+
+EXPOSE_INTERFACE(CEngineNetsystem001);
+
+extern void pfnHookClientNetsystemMsg(void(*pfnHook)(void*));
+extern void pfnHookServerNetsystemMsg(void(*pfnHook)(edict_t*,void*));
+extern void pfnHookServerMsg(int cmd, void (*pfnHook)(edict_t*,void *));
+extern void pfnHookClientMsg(int cmd, void (*pfnHook)(void *));
+extern sizebuf_t* pfnBeginClientCmd(int msg);
+extern sizebuf_t* pfnBeginServerCmd(edict_t* client, int msg);
+
+static sizebuf_t* g_current_sizebuf = nullptr;
+
+void CEngineNetsystem001::HookServerNetsystemMsg(void (*pfnHook)(edict_t*, void *))
+{
+	pfnHookServerNetsystemMsg(pfnHook);
+}
+
+void CEngineNetsystem001::HookClientNetsystemMsg(void (*pfnHook)(void *))
+{
+	pfnHookClientNetsystemMsg(pfnHook);
+}
+
+void CEngineNetsystem001::HookServerMsg(int cmd, void (*pfnHook)(edict_t*, void *))
+{
+	pfnHookServerMsg(cmd, pfnHook);
+}
+
+void CEngineNetsystem001::HookClientMsg(int cmd, void (*pfnHook)(void *))
+{
+	pfnHookClientMsg(cmd, pfnHook);
+}
+
+void CEngineNetsystem001::BeginClientNetsystemCmd()
+{
+	Assert(g_current_sizebuf == nullptr);
+	g_current_sizebuf = pfnBeginClientCmd(clc_netsystem);
+}
+
+void CEngineNetsystem001::BeginServerNetsystemCmd(edict_t* client)
+{
+	Assert(g_current_sizebuf == nullptr);
+	g_current_sizebuf = pfnBeginServerCmd(client, svc_netsystem);
+}
+
+void CEngineNetsystem001::WriteBytes(void *pBuf, unsigned long long int len)
+{
+	Assert(g_current_sizebuf != nullptr);
+	if(!g_current_sizebuf) return;
+	bool overflowed = MSG_WriteBytes(g_current_sizebuf, pBuf, len);
+	if(overflowed)
+	{
+		Con_Printf("[CEngineNetsystem001] Internal buffer overflowed due to usermessage. Length of write=%llu\n", len);
+	}
+}
+
+void CEngineNetsystem001::WriteString(const char *str)
+{
+	Assert(g_current_sizebuf != nullptr);
+	if(!g_current_sizebuf) return;
+	MSG_WriteString(g_current_sizebuf, str);
+}
+
+void CEngineNetsystem001::WriteByte(byte _byte)
+{
+	Assert(g_current_sizebuf != nullptr);
+	if(!g_current_sizebuf) return;
+	MSG_WriteByte(g_current_sizebuf, _byte);
+}
+
+void CEngineNetsystem001::WriteShort(short _short)
+{
+	Assert(g_current_sizebuf != nullptr);
+	if(!g_current_sizebuf) return;
+	MSG_WriteShort(g_current_sizebuf, _short);
+}
+
+void CEngineNetsystem001::WriteInt(int _int)
+{
+	Assert(g_current_sizebuf != nullptr);
+	if(!g_current_sizebuf) return;
+	MSG_WriteLong(g_current_sizebuf, _int);
+}
+
+void CEngineNetsystem001::WriteLong(long long int _long)
+{
+	Assert(g_current_sizebuf != nullptr);
+	if(!g_current_sizebuf) return;
+	MSG_WriteBytes(g_current_sizebuf, &_long, sizeof(long long int));
+}
+
+void CEngineNetsystem001::WriteFloat(float _fl)
+{
+	Assert(g_current_sizebuf != nullptr);
+	if(!g_current_sizebuf) return;
+	MSG_WriteFloat(g_current_sizebuf, _fl);
+}
+
+void CEngineNetsystem001::WriteVector(vec_t *_vec)
+{
+	Assert(g_current_sizebuf != nullptr);
+	if(!g_current_sizebuf) return;
+	MSG_WriteVec3Coord(g_current_sizebuf, _vec);
+}
+
+void CEngineNetsystem001::EndMessage()
+{
+	g_current_sizebuf = nullptr;
+}
+
+void CEngineNetsystem001::ReadBytes(void *pBuffer, void *pOutbuf, unsigned long long int num)
+{
+	Assert(pBuffer != nullptr);
+}
+
+void CEngineNetsystem001::ReadString(void *pBuffer, char *pOutbuf, unsigned long long int num)
+{
+
+	Assert(pBuffer != nullptr);
+}
+
+byte CEngineNetsystem001::ReadByte(void *pBuffer)
+{
+	Assert(pBuffer != nullptr);
+	return 0;
+}
+
+short CEngineNetsystem001::ReadShort(void *pBuffer)
+{
+	Assert(pBuffer != nullptr);
+	return 0;
+}
+
+int CEngineNetsystem001::ReadInt(void *pBuffer)
+{
+	Assert(pBuffer != nullptr);
+	return 0;
+}
+
+long long CEngineNetsystem001::ReadLong(void *pBuffer)
+{
+	Assert(pBuffer != nullptr);
+	return 0;
+}
+
+float CEngineNetsystem001::ReadFloat(void *pBuffer)
+{
+	Assert(pBuffer != nullptr);
+	return 0;
+}
+
+void CEngineNetsystem001::ReadVector(void* pBuffer, vec_t *outvec)
+{
+	Assert(pBuffer != nullptr);
+}
+
+void CEngineNetsystem001::BeginClientMessage(int cmd)
+{
+	Assert(g_current_sizebuf == nullptr);
+	if(g_current_sizebuf) Con_Printf("BeginMessage call not terminated with EndMessage!");
+	g_current_sizebuf = pfnBeginClientCmd(cmd);
+}
+
+void CEngineNetsystem001::BeginServerMessage(int cmd, edict_t *client)
+{
+	Assert(g_current_sizebuf == nullptr);
+	if(g_current_sizebuf) Con_Printf("BeginMessage call not terminated with EndMessage!");
+	g_current_sizebuf = pfnBeginServerCmd(client, cmd);
 }

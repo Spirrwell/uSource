@@ -521,6 +521,7 @@ qboolean SV_ShouldUpdatePing( sv_client_t *cl );
 const char *SV_GetClientIDString( sv_client_t *cl );
 sv_client_t *SV_ClientById( int id );
 sv_client_t *SV_ClientByName( const char *name );
+sv_client_t *SV_ClientByEdict(edict_t* edict);
 void SV_FullClientUpdate( sv_client_t *cl, sizebuf_t *msg );
 void SV_FullUpdateMovevars( sv_client_t *cl, sizebuf_t *msg );
 void SV_GetPlayerStats( sv_client_t *cl, int *ping, int *packet_loss );

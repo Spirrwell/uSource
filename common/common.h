@@ -29,18 +29,6 @@ Common definitions and such
 /* Basic types */
 #include "common/types.h"
 
-/* Superceded by mathlib stuff
-typedef float		vec_t;
-typedef vec_t		vec2_t[2];
-typedef vec_t		vec3_t[3];
-typedef vec_t		vec4_t[4];
-typedef vec_t		quat_t[4];
-typedef byte		rgba_t[4];	// unsigned byte colorpack
-typedef byte		rgb_t[3];		// unsigned byte colorpack
-typedef vec_t		matrix3x4[3][4];
-typedef vec_t		matrix4x4[4][4];
-*/
-
 /*============================
 Disable warnings 
 ==============================*/

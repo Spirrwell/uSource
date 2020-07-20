@@ -54,7 +54,9 @@ def build(bld):
 		'overview.cpp', 'parsemsg.cpp', 'saytext.cpp',
 		'status_icons.cpp', 'statusbar.cpp', 'studio_util.cpp',
 		'StudioModelRenderer.cpp', 'text_message.cpp', 'train.cpp',
-		'tri.cpp', 'util.cpp', 'view.cpp', 'scoreboard.cpp', 'MOTD.cpp'
+		'tri.cpp', 'util.cpp', 'view.cpp', 'scoreboard.cpp', 'MOTD.cpp',
+		'c_base_entity.cpp',
+		'../shared/core/netvar.cpp'
 	]
 	#includes = Utils.to_list('. hl/ ../dlls ../dlls/wpn_shared ../common ../engine ../pm_shared ../game_shared ../public ../utils/false_vgui/include')
 	includes = list()

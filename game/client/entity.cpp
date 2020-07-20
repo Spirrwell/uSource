@@ -42,6 +42,7 @@ extern "C"
 ========================
 HUD_AddEntity
 	Return 0 to filter entity from visible list for rendering
+        Called each frame to add entities to the draw list
 ========================
 */
 int DLLEXPORT HUD_AddEntity( int type, struct cl_entity_s *ent, const char *modelname )

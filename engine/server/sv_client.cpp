@@ -724,6 +724,25 @@ sv_client_t *SV_ClientByName( const char *name )
 	return NULL;
 }
 
+sv_client_t* SV_ClientByEdict(edict_t* ed)
+{
+	sv_client_t *cl;
+	int i;
+
+	ASSERT( ed );
+
+	for( i = 0, cl = svs.clients; i < svgame.globals->maxClients; i++, cl++ )
+	{
+		if( !cl->state )
+			continue;
+
+		if( cl->edict == ed )
+			return cl;
+	}
+
+	return NULL;
+}
+
 /*
 ================
 SV_TestBandWidth
@@ -2497,6 +2516,43 @@ void SV_ParseCvarValue2( sv_client_t *cl, sizebuf_t *msg )
 	Con_Reportf( "Cvar query response: name:%s, request ID %d, cvar:%s, value:%s\n", cl->name, requestID, name, value );
 }
 
+typedef void(*pfnMsgHook_t)(edict_t*,void*);
+static List<pfnMsgHook_t> g_sv_msg_hooks[clc_lastmsg+1];
+
+void SV_ExecuteMsgHooks(int cmd, sv_client_t* cl, sizebuf_t* msg)
+{
+	if(cmd > clc_lastmsg || cmd < 0) return;
+	if(!cl || !msg) return;
+	for(auto fn : g_sv_msg_hooks[cmd])
+	{
+		fn(cl->edict, msg);
+	}
+}
+
+void pfnHookServerNetsystemMsg(void(*pfnHook)(edict_t*,void*))
+{
+	g_sv_msg_hooks[clc_netsystem].push_back(pfnHook);
+}
+
+void pfnHookServerMsg(int cmd, void (*pfnHook)(edict_t*,void *))
+{
+	Assert(cmd > 0 && cmd <= clc_lastmsg);
+	if(cmd < 0 || cmd > clc_lastmsg)
+	{
+		return;
+	}
+	g_sv_msg_hooks[cmd].push_back(pfnHook);
+}
+
+sizebuf_t* pfnBeginServerCmd(edict_t* client, int msg)
+{
+	sv_client_t* cl = SV_ClientByEdict(client);
+	Assert(cl != nullptr);
+	if(!cl) return nullptr;
+	MSG_BeginServerCmd(&cl->netchan.message, msg);
+	return &cl->netchan.message;
+}
+
 /*
 ===================
 SV_ExecuteClientMessage
@@ -2544,6 +2600,7 @@ void SV_ExecuteClientMessage( sv_client_t *cl, sizebuf_t *msg )
 
 		c = MSG_ReadClientCmd( msg );
 
+		SV_ExecuteMsgHooks(c, cl, msg);
 		switch( c )
 		{
 		case clc_nop:
@@ -2560,6 +2617,10 @@ void SV_ExecuteClientMessage( sv_client_t *cl, sizebuf_t *msg )
 			SV_ExecuteClientCommand( cl, MSG_ReadString( msg ));
 			if( cl->state == cs_zombie )
 				return; // disconnect command
+			break;
+		case clc_netsystem:
+			// SV_ParseNetsystemMsg(cl, msg);
+			// Stub for right now, because everything is done from the networksystem library
 			break;
 		case clc_resourcelist:
 			SV_ParseResourceList( cl, msg );

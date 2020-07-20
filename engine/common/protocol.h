@@ -46,7 +46,7 @@ GNU General Public License for more details.
 #define svc_setpause		24	// [byte] 0 = unpaused, 1 = paused
 #define svc_signonnum		25	// [byte] used for the signon sequence
 #define svc_centerprint		26	// [string] to put in center of the screen
-// reserved
+#define svc_netsystem           27      // Various things related to the networked variable and action system
 // reserved
 // reserved
 #define svc_intermission		30	// empty message (event)
@@ -87,7 +87,7 @@ GNU General Public License for more details.
 #define clc_stringcmd		3	// [string] message
 #define clc_delta			4	// [byte] sequence number, requests delta compression of message
 #define clc_resourcelist		5
-// reserved
+#define clc_netsystem                   6       // Related to the networked variable/action system
 #define clc_fileconsistency		7
 #define clc_voicedata		8
 #define clc_requestcvarvalue		9

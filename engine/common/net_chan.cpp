@@ -508,7 +508,7 @@ void Netchan_OutOfBand( int net_socket, netadr_t adr, int length, byte *data )
 	if( !CL_IsPlaybackDemo( ))
 	{
 		// send the datagram
-		NET_SendPacket( net_socket, MSG_GetNumBytesWritten( &send ), MSG_GetData( &send ), adr );
+		NET_SendPacket(static_cast<netsrc_t>(net_socket), MSG_GetNumBytesWritten(&send ), MSG_GetData(&send ), adr );
 	}
 }
 
@@ -1209,7 +1209,7 @@ qboolean Netchan_CopyFileFragments( netchan_t *chan, sizebuf_t *msg )
 		p = p->next;
 	}
 
-	buffer = Mem_Calloc( net_mempool, nsize + 1 );
+	buffer = static_cast<byte *>(Mem_Calloc(net_mempool, nsize + 1));
 	p = chan->incomingbufs[FRAG_FILE_STREAM];
 	pos = 0;
 
@@ -1242,7 +1242,7 @@ qboolean Netchan_CopyFileFragments( netchan_t *chan, sizebuf_t *msg )
 	if( LZSS_IsCompressed( buffer ))
 	{
 		uint	uncompressedSize = LZSS_GetActualSize( buffer ) + 1;
-		byte	*uncompressedBuffer = Mem_Calloc( net_mempool, uncompressedSize );
+		byte	*uncompressedBuffer = (byte*)Mem_Calloc( net_mempool, uncompressedSize );
 
 		nsize = LZSS_Decompress( buffer, uncompressedBuffer );
 		Mem_Free( buffer );

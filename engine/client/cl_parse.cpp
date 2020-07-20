@@ -2791,6 +2791,41 @@ void CL_LegacyParseResourceList( sizebuf_t *msg )
 	}
 }
 
+typedef void(*pfnMsgHook_t)(void*);
+static List<pfnMsgHook_t> g_cl_msg_hooks[svc_lastmsg+1];
+
+void CL_ExecuteMsgHooks(int cmd, sizebuf_t* msg)
+{
+	if(cmd < 0 || cmd > svc_lastmsg) return;
+	Assert(msg != nullptr);
+	if(!msg) return;
+	for(auto fn : g_cl_msg_hooks[cmd])
+	{
+		fn(msg);
+	}
+}
+
+void pfnHookClientNetsystemMsg(void(*pfnHook)(void*))
+{
+	Assert(pfnHook != nullptr);
+	g_cl_msg_hooks[svc_netsystem].push_back(pfnHook);
+}
+
+void pfnHookClientMsg(int cmd, void (*pfnHook)(void *))
+{
+	Assert(pfnHook != nullptr);
+	Assert(cmd >= 0 && cmd < svc_lastmsg+1);
+	if(cmd < 0 || cmd > svc_lastmsg) return;
+	g_cl_msg_hooks[cmd].push_back(pfnHook);
+}
+
+sizebuf_t* pfnBeginClientCmd(int msg)
+{
+	MSG_BeginClientCmd(&cls.datagram, msg);
+	return &cls.datagram;
+}
+
+
 /*
 =====================
 CL_ParseLegacyServerMessage
@@ -2843,6 +2878,8 @@ void CL_ParseLegacyServerMessage( sizebuf_t *msg, qboolean normal_message )
 		// record command for debugging spew on parse problem
 		CL_Parse_RecordCommand( cmd, bufStart );
 
+		CL_ExecuteMsgHooks(cmd, msg);
+
 		// other commands
 		switch( cmd )
 		{
@@ -2856,10 +2893,10 @@ void CL_ParseLegacyServerMessage( sizebuf_t *msg, qboolean normal_message )
 			CL_Drop ();
 			Host_AbortCurrentFrame ();
 			break;
-		case svc_legacy_event:
-			CL_ParseEvent( msg );
-			cl.frames[cl.parsecountmod].graphdata.event += MSG_GetNumBytesRead( msg ) - bufStart;
-			break;
+		// case svc_legacy_event: // Jeremy L., July 19th. Disable legacy event handling
+		// 	CL_ParseEvent( msg );
+		// 	cl.frames[cl.parsecountmod].graphdata.event += MSG_GetNumBytesRead( msg ) - bufStart;
+		// 	break;
 		case svc_legacy_changing:
 			old_background = cl.background;
 			if( MSG_ReadOneBit( msg ))
@@ -2981,6 +3018,10 @@ void CL_ParseLegacyServerMessage( sizebuf_t *msg, qboolean normal_message )
 			break;
 		case svc_centerprint:
 			CL_CenterPrint( MSG_ReadString( msg ), 0.25f );
+			break;
+		case svc_netsystem:
+			// CL_ParseNetsystemMsg(msg);
+			// Stub for right now as everything is done in the networksystem dll
 			break;
 		case svc_intermission:
 			cl.intermission = 1;

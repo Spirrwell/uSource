@@ -63,7 +63,8 @@ def build(bld):
 		'../shared/hl1/weapon_squeakgrenade.cpp',
 		'../shared/hl1/weapon_tripmine.cpp',
 		'../shared/hl1/weapon_glock.cpp',
-		'../shared/game_shared.cpp']
+		'../shared/game_shared.cpp',
+		'../shared/core/netvar.cpp']
 		
 	if bld.env.VOICEMGR:
 		source += bld.path.parent.ant_glob([
@@ -88,6 +89,8 @@ def build(bld):
 		install_path = os.path.join(str(bld.env.GAMEDIR), str(bld.env.SERVER_DIR))
 	else:
 		install_path = bld.env.PREFIX
+
+	defines += ['SERVER_DLL']
 
 	bld.shlib(
 		source   = source,
