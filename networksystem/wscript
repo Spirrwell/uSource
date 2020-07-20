@@ -18,7 +18,7 @@ def configure(conf):
 def build(bld):
 	libs = [ 'public', 'M' ]
 
-	source = ['networksystem.cpp']
+	source = ['networksystem.cpp', 'netvar.cpp', 'netact.cpp', 'netproto.cpp']
 
 	includes = list()
 	includes.append(str(bld.env.ENGINE))

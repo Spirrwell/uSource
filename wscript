@@ -344,6 +344,7 @@ def configure(conf):
 	conf.recurse('game/client')
 	conf.recurse('tier1')
 	conf.recurse('tier2')
+	conf.recurse('networksystem')
 
 	conf.env.ENABLE_RENDERER2 = conf.options.ENABLE_RENDERER2
 
@@ -368,6 +369,7 @@ def build(bld):
 	bld.recurse('public')
 	bld.recurse('tier1')
 	bld.recurse('tier2')
+	bld.recurse('networksystem')
 
 	if bld.env.ENABLE_RENDERER2:
 		bld.recurse('rendersystem')
