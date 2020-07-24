@@ -128,12 +128,55 @@ _inline float LittleFloat( float f )
 
 	return dat2.f;
 }
+
+template<class T>
+T ToLittleEndian(T& x)
+{
+	if(sizeof(T) == 1) return x;
+	T y = x;
+	x = 0;
+	for(int i = 0; i < sizeof(T); i++)
+	{
+		x += (y&255) << (i*8);
+		y >>= 8;
+	}
+	return x;
+}
+
+template<class T>
+T ToBigEndian(T& x)
+{
+	return x;
+}
+
 #else
 #define LittleLong(x) (x)
 #define LittleLongSW(x)
 #define LittleShort(x) (x)
 #define LittleShortSW(x)
 #define LittleFloat(x) (x)
+
+template<class T>
+T ToLittleEndian(T& x)
+{
+	return x;
+}
+
+template<class T>
+T ToBigEndian(T& x)
+{
+	if(sizeof(T) == 1) return x;
+	T y = x;
+	x = 0;
+	for(int i = 0; i < sizeof(T); i++)
+	{
+		x += (y&255) >> (i*8);
+		y <<= 8;
+	}
+	return x;
+}
+
+
 #endif
 
 typedef char		string[MAX_STRING];

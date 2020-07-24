@@ -1,16 +1,19 @@
 #pragma once
 
 #include "net_int.h"
+#include "engine_int.h"
 #include "const.h"
+#include "reflection.h"
 
 extern IEngineNetsystem* g_pNetworkSystem;
 
 void ConnectNetsystemLibraries();
 void NetworksystemInit();
+void NetworksystemShutdown();
 
 class CNetworkMessage;
 
-namespace NetSystem
+namespace NetworkSystem
 {
 	/**
 	 * Thread-safe methods to send messages to clients and the server
@@ -32,7 +35,37 @@ namespace NetSystem
 	void RecvFromServer(int msgid, pfnRecvServerMsgCallback callback);
 	void RecvFromClient(int msgid, edict_t* client, pfnRecvClientMsgCallback callback);
 	void RecvFromClients(int msgid, pfnRecvClientMsgCallback callback);
+
+	extern IEngineMalloc *g_pMalloc;
+	extern byte* g_pNetworkPool;
+
+	void* Mem_Alloc(unsigned long long size);
+	void* Mem_Realloc(void* ptr, unsigned long long size);
+	void Mem_Free(void* ptr);
+
+	/* Network byte-order functions */
+	/* NOTE: These are ONLY for Networksystem!!! */
+	short htons(short in);
+	int htoni(int in);
+	long htonl(int in);
+	long long htonll(long long in);
+
+	short ntohs(short in);
+	int ntohi(int in);
+	long ntohl(long in);
+	long long ntohll(long long in);
 }
+
+enum class ENetworkType
+{
+	BYTE,
+	SHORT,
+	INT,
+	LONG, /* Note: always 64bit long */
+	FLOAT,
+	DOUBLE,
+	STRING
+};
 
 /**
  * Network message class. Internally converted to a sizebuf structure
@@ -43,7 +76,9 @@ private:
 	void* m_data;
 	unsigned long m_size;
 	unsigned long m_bufpos;
-	bool m_overflowed;
+	bool m_overflowed : 1;
+	bool m_init : 1;
+
 public:
 	enum {
 		ABSOLUTE,
@@ -53,6 +88,9 @@ public:
 	CNetworkMessage(const CNetworkMessage& other);
 	CNetworkMessage(CNetworkMessage&& other) noexcept;
 	~CNetworkMessage();
+
+	void InitStorage();
+	bool WasInit() const { return m_init; }
 
 	void WriteInt64(long long l);
 	void WriteUInt64(unsigned long long l);
@@ -72,6 +110,7 @@ public:
 	char ReadChar();
 	long long ReadInt64();
 	unsigned long long ReadUInt64();
+	void ReadBytes(void* outbuf, unsigned long num);
 
 	unsigned long Size() const { return m_size; };
 	unsigned long BufferPos() const { return m_bufpos; }

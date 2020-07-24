@@ -18,7 +18,7 @@ namespace NetworkSystem
 
 	struct msg_hdr_t
 	{
-		unsigned int type; /* HDR_USRMSG, etc. */
+		unsigned short type; /* HDR_USRMSG, etc. */
 	};
 
 	struct usrmsg_hdr_t
@@ -29,7 +29,8 @@ namespace NetworkSystem
 
 	struct varupd_hdr_t
 	{
-
+		unsigned long long classid;
+		unsigned long long objectid;
 	};
 
 	struct action_hdr_t
@@ -39,3 +40,4 @@ namespace NetworkSystem
 
 #pragma pack()
 }
+
