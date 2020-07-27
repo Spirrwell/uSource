@@ -6,12 +6,14 @@
 #pragma once
 
 #include "static_helpers.h"
+#include "containers/buffer.h"
 
 #include <typeinfo>
 #include <type_traits>
 #include <cstddef>
 #include <unordered_map>
 #include <typeindex>
+
 
 struct STypeInfo_t
 {
@@ -75,6 +77,10 @@ namespace reflection
 		if(std::is_union<T>::value) fl |= TYPEFLAGS_UNION;
 		return fl;
 	}
+
+	/**
+	 * Serializes a class to a buffer
+	 */
 }
 
 //=====================================================================================//
@@ -137,16 +143,27 @@ static SFieldInfo_t* g_networkedFields; \
 unsigned long g_networkedFieldsCount; \
 virtual SFieldInfo_t* GetSaveInfo(unsigned long long& num) { num = g_networkedFieldsCount; return g_networkedFields; };
 
+/**
+ * Saveable classes are classes that can be saved by the game's save system
+ * All classes with reflection enabled can be serialized, but not all of them can be saved to the game's save file format.
+ * The idea is that you might want reflection info for a bunch of fields, but only want to save a few of them
+ */
 #define DECLARE_CLASS_SAVEABLE(_class) \
 DECLARE_CLASS(_class) \
 _DECLARE_CLASS_SAVABLE_INTERNAL(_class)
 
+/**
+ * Same idea as "savable" classes. Networked classes can have a special subset of fields in them as to
+ * allow programmers to add reflection info for certain types and only send a subset of them
+ */
 #define DECLARE_CLASS_NETWORKED(_class) \
 DECLARE_CLASS(_class) \
 _DECLARE_CLASS_NETWORKED_INTERNAL(_class)
 
 /* Classes that are both networkable and saveable */
 #define DECLARE_CLASS_NETWORKED_SAVEABLE(_class) \
+_DECLARE_CLASS_NETWORKED_INTERNAL(_class) \
+_DECLARE_CLASS_SAVABLE_INTERNAL(_class)
 
 //=====================================================================================//
 
