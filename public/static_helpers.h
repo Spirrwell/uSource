@@ -26,6 +26,20 @@ public:
 	}
 };
 
+class CLambdaStaticInitWrapper
+{
+public:
+	CLambdaStaticInitWrapper(void(*fn)())
+	{
+		fn();
+	}
+
+	~CLambdaStaticInitWrapper()
+	{
+
+	}
+};
+
 template<void(*fn)()>
 class CStaticDestructionWrapper
 {
