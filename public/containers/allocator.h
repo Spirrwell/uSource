@@ -1,7 +1,7 @@
 #pragma once
 
 #undef max
-#undef min 
+#undef min
 
 #include <memory>
 #include <cstdlib>
