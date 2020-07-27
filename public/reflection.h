@@ -11,11 +11,34 @@
 #include <type_traits>
 #include <cstddef>
 #include <unordered_map>
+#include <typeindex>
 
-template <typename T1, typename T2>
-inline size_t constexpr offset_of(T1 T2::*member) {
-	constexpr T2 object {};
-	return size_t(&(object.*member)) - size_t(&object);
+#if 0
+namespace reflection
+{
+	enum ETypeFlags {
+		TYPEFLAGS_CONST                 = 0b0000000000000001,
+		TYPEFLAGS_NONTRIVIAL            = 0b0000000000000010,
+		TYPEFLAGS_CLASS                 = 0b0000000000000110,
+		TYPEFLAGS_UNION                 = 0b0000000000001010,
+	};
+
+	template<typename T1, typename T2>
+	inline size_t constexpr offset_of(T1 T2::*member)
+	{
+		constexpr T2 object{};
+		return size_t(&(object.*member)) - size_t(&object);
+	}
+
+	template<class T>
+	constexpr unsigned int ComputeTypeFlags()
+	{
+		unsigned int fl = 0;
+		if(std::is_const<T>::value) fl |= TYPEFLAGS_CONST;
+		if(std::is_class<T>::value) fl |= TYPEFLAGS_CLASS;
+		if(std::is_union<T>::value) fl |= TYPEFLAGS_UNION;
+		return fl;
+	}
 }
 
 struct STypeInfo_t
@@ -43,7 +66,8 @@ public:
 
 struct SStructInfo_t
 {
-	SFieldInfo_t fields[];
+	SFieldInfo_t *fields;
+	unsigned int nfields;
 };
 
 struct SMethodInfo_t
@@ -54,48 +78,22 @@ struct SMethodInfo_t
 	SFieldInfo_t params[];
 };
 
-template<class R, class...T>
-constexpr SFieldInfo_t* method_param_unpacker(R(*fn)(T...))
-{
-	return nullptr;
-}
-
 class IObject
 {
 public:
 	virtual SFieldInfo_t* GetFieldInfo() = 0;
+	virtual SMethodInfo_t* GetMethodInfo() = 0;
 };
-
-enum ETypeFlags {
-	TYPEFLAGS_CONST                 = 0b0000000000000001,
-	TYPEFLAGS_NONTRIVIAL            = 0b0000000000000010,
-	TYPEFLAGS_CLASS                 = 0b0000000000000110,
-	TYPEFLAGS_UNION                 = 0b0000000000001010,
-};
-
-template<class T>
-constexpr unsigned int ComputeTypeFlags()
-{
-	unsigned int fl = 0;
-	if(std::is_const<T>::value) fl |= TYPEFLAGS_CONST;
-	if(std::is_class<T>::value) fl |= TYPEFLAGS_CLASS;
-	if(std::is_union<T>::value) fl |= TYPEFLAGS_UNION;
-	return fl;
-}
-
-/**
- * Basic class declaration macro
- * Use this to enable runtime reflection on your classes
- */
-#define DECLARE_CLASS() static SFieldInfo_t* g_fieldInfo; \
-static SMethodInfo_t* g_methodInfo;\
-SFieldInfo_t* GetFieldInfo() override { return g_fieldInfo; }
 
 //=====================================================================================//
 /**
  * Use this to declare a primitive "struct" type that you wish to use as a reflected type
  */
-extern std::unordered_map<const std::type_info&, SStructInfo_t>* g_pStructFieldInfos;
+namespace reflection
+{
+	extern std::unordered_map<std::type_index, SStructInfo_t *> *g_pStructFieldInfos;
+}
+
 #define DECLARE_DATA_STRUCT()
 
 #define BEGIN_STRUCT_FIELD_INFO(_struct) \
@@ -104,13 +102,14 @@ typedef _struct BaseClass; \
 constexpr char* BaseStructString1 = #_struct; \
 constexpr static SFieldInfo_t __field_infos[] = {
 
-#define STRUCT_FIELD(_type, _x) {BaseStructString1, #_x, offsetof(BaseClass, _x), sizeof(BaseClass::_x), typeid(_type), ComputeTypeFlags<_type>()}
+#define STRUCT_FIELD(_type, _x) {BaseStructString1, #_x, offsetof(BaseClass, _x), sizeof(BaseClass::_x), typeid(_type), reflection::ComputeTypeFlags<_type>()}
 
 #define END_STRUCT_FIELD_INFO(_struct) \
+}; \
 static CLambdaStaticInitWrapper __struct_init_wrapper([]() { \
-	static SStructInfo_t info; \
-	info.fields = __field_infos; \
-	g_pStructFieldInfos->insert(std::make_pair<const std::type_info&, SStructInfo_t>(typeid(_struct), &info)); \
+	using namespace reflection; \
+	static SStructInfo_t info = { (SFieldInfo_t*)__field_infos, (sizeof(__field_infos) / sizeof(SFieldInfo_t))}; \
+	g_pStructFieldInfos->insert({std::type_index(typeid(_struct)), &info}); \
 }); }
 
 struct TestStruct
@@ -119,9 +118,22 @@ struct TestStruct
 	bool b_Bitch;
 };
 
+
 BEGIN_STRUCT_FIELD_INFO(TestStruct)
 	STRUCT_FIELD(bool, b_Bitch),
 END_STRUCT_FIELD_INFO(TestStruct)
+
+//=====================================================================================//
+/**
+ * Basic class declaration macro
+ * Use this to enable runtime reflection on your classes
+ */
+#define DECLARE_CLASS() \
+static SFieldInfo_t g_fieldInfo[]; \
+static SMethodInfo_t g_methodInfo[];\
+SFieldInfo_t* GetFieldInfo(unsigned long long& num) override { return g_fieldInfo; } \
+SMethodInfo_t* GetMethodInfo(unsigned long long& num) override { return g_methodInfo; } \
+//=====================================================================================//
 
 
 //=====================================================================================//
@@ -130,13 +142,14 @@ typedef _class BaseClass; \
 constexpr char* BaseClassString = #_class;\
 static constexpr SFieldInfo_t __g__ ## _class ## _field_info[] = {
 
-#define FIELD(_type, _x) { BaseClassString, #_x, offsetof(BaseClass, _x), sizeof(BaseClass::_x), typeid(_type), ComputeTypeFlags<_type>()}
+#define FIELD(_type, _x) { BaseClassString, #_x, offsetof(BaseClass, _x), sizeof(BaseClass::_x), typeid(_type), reflection::ComputeTypeFlags<_type>()}
 
 #define END_FIELD_INFO(_class) };} SFieldInfo_t* _class::g_fieldInfo = (SFieldInfo_t*)C__## _class ## __wrapper::__g__ ## _class ## _field_info;
 //=====================================================================================//
 
 
 //=====================================================================================//
+#if 0
 #define BEGIN_METHOD_INFO(_class) namespace C__##_class##__wrapper {\
 typedef _class BaseClass; \
 constexpr char* BaseClassString2 = #_class;\
@@ -144,7 +157,14 @@ static constexpr SMethodInfo_t __g__ ## _class ## _method_info[] = {
 
 #define METHOD(_x) {#_x, BaseClassString2, nullptr, {}}
 
-#define END_METHOD_INFO(_class) };} SMethodInfo_t* _class::g_methodInfo = (SMethodInfo_t*)C__##_class##__wrapper::__g__##_class##_method_info;
+#define END_METHOD_INFO(_class) };} //SMethodInfo_t* _class::g_methodInfo = (SMethodInfo_t*)C__##_class##__wrapper::__g__##_class##_method_info;
+#else
+#define BEGIN_METHOD_INFO(_class) SMethodInfo_t _class::g_methodInfo[] = {
+
+#define METHOD(_x) {#_x}
+
+#define END_METHOD_INFO(_class) };
+#endif
 //=====================================================================================//
 
 //=====================================================================================//
@@ -171,3 +191,4 @@ END_FIELD_INFO(CClass)
 BEGIN_METHOD_INFO(CClass)
 	METHOD(TestFunc)
 END_METHOD_INFO(CClass)
+#endif 
