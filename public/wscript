@@ -16,7 +16,8 @@ def configure(conf):
 	return
 
 def build(bld):
-	source = ['crtlib.cpp', 'crclib.cpp', 'appframework.cpp', 'threadtools.cpp', 'keyvalues.cpp', 'containers/string.cpp', 'xprof.cpp', 'platform.cpp']
+	source = ['crtlib.cpp', 'crclib.cpp', 'appframework.cpp', 'threadtools.cpp', 'keyvalues.cpp', 'containers/string.cpp', 'xprof.cpp', 'platform.cpp',
+			  'reflection.cpp']
 	libs = []
 	includes = list()
 	includes.append(str(bld.env.COMMON))
