@@ -33,6 +33,19 @@ struct SFieldInfo_t
 	const char* description; /* Optional description of the fields function. Generally you'll use this for scripting support */
 };
 
+enum class ENetworkedFieldType :
+	unsigned short
+{
+	SERVER_TO_CLIENT,
+	CLIENT_TO_SERVER
+};
+
+struct SNetworkedField_t
+{
+	SFieldInfo_t info;
+	ENetworkedFieldType type;
+};
+
 /**
  * Basic inputs are most commonly found in Hammer and other editors
  * Used by the "entity IO" system
@@ -221,9 +234,9 @@ virtual SFieldInfo_t* GetSaveInfo(unsigned long long& num) { num = g_saveInfoCou
 
 
 #define _DECLARE_CLASS_NETWORKED_INTERNAL \
-static SFieldInfo_t* g_networkedFields; \
+static SNetworkedField_t* g_networkedFields; \
 unsigned long g_networkedFieldsCount; \
-virtual SFieldInfo_t* GetSaveInfo(unsigned long long& num) { num = g_networkedFieldsCount; return g_networkedFields; };
+virtual SNetworkedField_t* GetNetworkedFields(unsigned long long& num) { num = g_networkedFieldsCount; return g_networkedFields; };
 #define CLASS_NETWORKED _DECLARE_CLASS_NETWORKED_INTERNAL
 
 #define _DECLARE_CLASS_SCRIPTABLE_INTERNAL \
@@ -258,6 +271,19 @@ static constexpr SFieldInfo_t __g__ ## _class ## _field_info ## _tablename [] = 
 //=====================================================================================//
 
 //=====================================================================================//
+#define BEGIN_NET_INFO(_class) namespace C__## _class ## __wrapper {\
+typedef _class BaseClass; \
+static constexpr SNetworkedField_t __g__ ## _class ## _netvar_tablename [] = {
+
+#define NETWORKED_FIELD(_type, _x, _t) {{ BaseClass::BaseClassString, #_x, offsetof(BaseClass, _x), sizeof(BaseClass::_x), typeid(_type), reflection::ComputeTypeFlags<_type>()}, _t}
+
+#define NETWORKED_ARRAY(_type, _x, _length, _t)
+
+#define END_NET_INFO(_class) \
+};} SNetworkedField_t* _class::g_networkedFields = (SNetworkedField_t*)C__## _class ## __wrapper::__g__ ## _class ## _netvar_tablename;
+//=====================================================================================//
+
+//=====================================================================================//
 #define BEGIN_SCRIPT_FIELDS(_class) _BEGIN_FIELD_INFO_INTERNAL(_class, g_scriptFields, g_scriptFieldsCount)
 
 #define SCRIPT_FIELD(_type, _x, _desc) {BaseClass::BaseClassString, #_x, offsetof(BaseClass, _x), sizeof(BaseClass::_x), typeid(_type), reflection::ComputeTypeFlags<_type>(), _desc}
@@ -266,9 +292,6 @@ static constexpr SFieldInfo_t __g__ ## _class ## _field_info ## _tablename [] = 
 
 #define SCRIPT_INFO(_desc) \
 virtual void GetScriptDescription() const { return (_desc); }
-
-
-
 //=====================================================================================//
 
 //=====================================================================================//
@@ -294,7 +317,7 @@ class CClass
 {
 public:
 	//DECLARE_CLASS_SAVEABLE(CClass);
-	DECLARE_CLASS_MULTITYPE(CClass, CClass, CLASS_SAVABLE);
+	DECLARE_CLASS_MULTITYPE(CClass, CClass, CLASS_NETWORKED);
 	bool m_bBool;
 	void TestFunc() {};
 };
@@ -303,10 +326,6 @@ BEGIN_FIELD_INFO(CClass)
 	FIELD(bool, m_bBool),
 END_FIELD_INFO(CClass)
 
-BEGIN_METHOD_INFO(CClass)
-	METHOD(TestFunc)
-END_METHOD_INFO(CClass)
-
-BEGIN_SAVE_INFO(CClass)
-
-END_SAVE_INFO(CClass)
+BEGIN_NET_INFO(CClass)
+	NETWORKED_FIELD(bool, m_bBool, ENetworkedFieldType::CLIENT_TO_SERVER),
+END_NET_INFO(CClass)
