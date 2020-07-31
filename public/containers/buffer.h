@@ -34,13 +34,13 @@ public:
 
 
 template<class CharT = char, class AllocatorT = DefaultAllocator<CharT>, class SizePolicyT = BufferSizePolicyLinear>
-class Buffer
+class BufferT
 {
 public:
 	typedef long long BufferPos;
 	typedef long long BufferSize;
 
-	Buffer& operator=(const Buffer& other)
+	BufferT& operator=(const BufferT& other)
 	{
 		this->m_data = m_allocator.allocate(m_size * sizeof(CharT));
 		memcpy(this->m_data, other.m_data, sizeof(CharT) * m_size);
@@ -50,7 +50,7 @@ public:
 		return *this;
 	}
 
-	Buffer& operator=(Buffer&& other) noexcept
+	BufferT& operator=(BufferT&& other) noexcept
 	{
 		this->m_data = other.m_data;
 		this->m_bufPos = other.m_bufPos;
@@ -83,7 +83,7 @@ private:
 	}
 
 public:
-	Buffer(BufferSize sz) :
+	BufferT(BufferSize sz) :
 		m_size(sz),
 		m_bufPos(0),
 		m_maxWrite(-1)
@@ -91,7 +91,7 @@ public:
 		m_data = m_allocator.allocate(sizeof(CharT) * m_size);
 	}
 
-	Buffer(const Buffer& other)
+	BufferT(const BufferT& other)
 	{
 		this->m_data = m_allocator.allocate(m_size * sizeof(CharT));
 		memcpy(this->m_data, other.m_data, sizeof(CharT) * m_size);
@@ -100,7 +100,7 @@ public:
 		this->m_maxWrite = other.m_maxWrite;
 	}
 
-	Buffer(Buffer&& other) noexcept
+	BufferT(BufferT&& other) noexcept
 	{
 		this->m_data = other.m_data;
 		this->m_bufPos = other.m_bufPos;
@@ -112,7 +112,7 @@ public:
 		other.m_bufPos = 0;
 	}
 
-	virtual ~Buffer()
+	virtual ~BufferT()
 	{
 		if(m_data)
 			m_allocator.deallocate(m_data);
@@ -372,19 +372,21 @@ public:
 	}
 };
 
-template<class CharT, unsigned long long N>
-class FixedBuffer : public Buffer<CharT, StaticAllocator<CharT, N>, BufferSizePolicyFixed>
+template<unsigned long long N, class CharT = unsigned char>
+class FixedBufferT : public BufferT<CharT, StaticAllocator<CharT, N>, BufferSizePolicyFixed>
 {
 public:
-	typedef Buffer<CharT, StaticAllocator<CharT, N>, BufferSizePolicyFixed> BaseClass;
+	typedef BufferT<CharT, StaticAllocator<CharT, N>, BufferSizePolicyFixed> BaseClass;
 
-	FixedBuffer() :
+	FixedBufferT() :
 		BaseClass(N)
 	{
 
 	}
 
-	virtual ~FixedBuffer()
+	virtual ~FixedBufferT()
 	{
 	}
 };
+
+typedef BufferT<unsigned char> Buffer;

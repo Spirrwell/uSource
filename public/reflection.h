@@ -7,6 +7,7 @@
 
 #include "static_helpers.h"
 #include "containers/buffer.h"
+#include "containers/array.h"
 
 #include <typeinfo>
 #include <type_traits>
@@ -32,6 +33,20 @@ struct SFieldInfo_t
 	const char* description; /* Optional description of the fields function. Generally you'll use this for scripting support */
 };
 
+/**
+ * Basic inputs are most commonly found in Hammer and other editors
+ * Used by the "entity IO" system
+ */
+struct SBasicInput
+{
+	const char* name;
+};
+
+struct SBasicOutput
+{
+	const char* name;
+};
+
 class IMethodInfoWrapper
 {
 public:
@@ -44,13 +59,20 @@ struct SStructInfo_t
 	unsigned int nfields;
 };
 
+struct SMethodParameterInfo_t
+{
+	unsigned long long size;
+	const std::type_info& info;
+	unsigned int flags;
+};
+
 struct SMethodInfo_t
 {
 	const char* name;
-	const char* classname;
-	void* ptr;
-	SFieldInfo_t params[];
+	SMethodParameterInfo_t returnT;
+	Array<SMethodParameterInfo_t> params;
 };
+
 
 namespace reflection
 {
@@ -78,9 +100,52 @@ namespace reflection
 		return fl;
 	}
 
-	/**
-	 * Serializes a class to a buffer
-	 */
+	template<class R>
+	Array<SMethodParameterInfo_t>& RecursiveParameterUnpacker(Array<SMethodParameterInfo_t>& list)
+	{
+		return list;
+	}
+
+	template<class R, class M, class ...T>
+	Array<SMethodParameterInfo_t>& RecursiveParameterUnpacker(Array<SMethodParameterInfo_t>& list)
+	{
+		SMethodParameterInfo_t info = {sizeof(R), typeid(R), ComputeTypeFlags<R>()};
+		list.push_back(info);
+		return RecursiveParameterUnpacker<M, T...>(list);
+	}
+
+	template<class ReturnT, class...ParamT>
+	constexpr SMethodParameterInfo_t GetMethodReturnType(ReturnT(*fn)(ParamT...))
+	{
+		return {sizeof(ReturnT), typeid(ReturnT), ComputeTypeFlags<ReturnT>()};
+	}
+
+	template<class ReturnT, class...ParamT>
+	Array<SMethodParameterInfo_t> GetMethodParamTypes(ReturnT(*fn)(ParamT...))
+	{
+		Array<SMethodParameterInfo_t> list;
+		if constexpr (sizeof...(ParamT) >= 1)
+			return RecursiveParameterUnpacker<ParamT...>(list);
+		return list;
+	}
+
+	template<class T>
+	void Serialize(T* _class, Buffer& buffer)
+	{
+
+	}
+
+	inline void Serialize(bool b, Buffer& buffer);
+	inline void Serialize(short s, Buffer& buffer);
+	inline void Serialize(int i, Buffer& buffer);
+	inline void Serialize(long long l, Buffer& buffer);
+	inline void Serialize(float f, Buffer& buffer);
+	inline void Serialize(double d, Buffer& buffer);
+	inline void Serialize(float f[3], Buffer& buffer);
+	inline void Serialize(float f[2], Buffer& buffer);
+	inline void Serialize(float f[4], Buffer& buffer);
+
+
 }
 
 //=====================================================================================//
@@ -126,44 +191,47 @@ END_STRUCT_FIELD_INFO(TestStruct)
  * Basic class declaration macro
  * Use this to enable runtime reflection on your classes
  */
-#define DECLARE_CLASS(_class) \
+#define _DECLARE_CLASS_INTERNAL(_class) \
+typedef _class ThisClass; \
 static constexpr char* BaseClassString = #_class;\
 static SFieldInfo_t* g_fieldInfo; unsigned long g_fieldInfoCount; \
 static SMethodInfo_t* g_methodInfo; unsigned long g_methodInfoCount; \
 virtual SFieldInfo_t* GetFieldInfo(unsigned long long& num) { num = g_fieldInfoCount; return g_fieldInfo; } \
 virtual SMethodInfo_t* GetMethodInfo(unsigned long long& num) { num = g_methodInfoCount; return g_methodInfo; } \
 
-#define _DECLARE_CLASS_SAVABLE_INTERNAL(_class) \
+#define DECLARE_CLASS_NOBASE(_class) _DECLARE_CLASS_INTERNAL(_class)
+
+#define DECLARE_CLASS(_class, _base) \
+typedef _base BaseClass; \
+_DECLARE_CLASS_INTERNAL(_class)
+
+#define DECLARE_CLASS_MULTITYPE_NOBASE(_class, ...) \
+_DECLARE_CLASS_INTERNAL(_class); \
+__VA_ARGS__
+
+#define DECLARE_CLASS_MULTITYPE(_class, _base, ...) \
+DECLARE_CLASS(_class, _base); \
+__VA_ARGS__
+
+#define _DECLARE_CLASS_SAVABLE_INTERNAL \
 static SFieldInfo_t* g_saveInfo; \
 unsigned long g_saveInfoCount; \
 virtual SFieldInfo_t* GetSaveInfo(unsigned long long& num) { num = g_saveInfoCount; return g_saveInfo;}
+#define CLASS_SAVABLE _DECLARE_CLASS_SAVABLE_INTERNAL
 
-#define _DECLARE_CLASS_NETWORKED_INTERNAL(_class) \
+
+#define _DECLARE_CLASS_NETWORKED_INTERNAL \
 static SFieldInfo_t* g_networkedFields; \
 unsigned long g_networkedFieldsCount; \
 virtual SFieldInfo_t* GetSaveInfo(unsigned long long& num) { num = g_networkedFieldsCount; return g_networkedFields; };
+#define CLASS_NETWORKED _DECLARE_CLASS_NETWORKED_INTERNAL
 
-/**
- * Saveable classes are classes that can be saved by the game's save system
- * All classes with reflection enabled can be serialized, but not all of them can be saved to the game's save file format.
- * The idea is that you might want reflection info for a bunch of fields, but only want to save a few of them
- */
-#define DECLARE_CLASS_SAVEABLE(_class) \
-DECLARE_CLASS(_class) \
-_DECLARE_CLASS_SAVABLE_INTERNAL(_class)
+#define _DECLARE_CLASS_SCRIPTABLE_INTERNAL \
+static SFieldInfo_t* g_scriptFields; \
+unsigned long g_scriptFieldsCount; \
+virtual SFieldInfo_t* GetScriptFieldInfo(unsigned long long& num) { num = g_scriptFieldsCount; return g_scriptFields; }
+#define CLASS_SCRIPTABLE _DECLARE_CLASS_SCRIPTABLE_INTERNAL
 
-/**
- * Same idea as "savable" classes. Networked classes can have a special subset of fields in them as to
- * allow programmers to add reflection info for certain types and only send a subset of them
- */
-#define DECLARE_CLASS_NETWORKED(_class) \
-DECLARE_CLASS(_class) \
-_DECLARE_CLASS_NETWORKED_INTERNAL(_class)
-
-/* Classes that are both networkable and saveable */
-#define DECLARE_CLASS_NETWORKED_SAVEABLE(_class) \
-_DECLARE_CLASS_NETWORKED_INTERNAL(_class) \
-_DECLARE_CLASS_SAVABLE_INTERNAL(_class)
 
 //=====================================================================================//
 
@@ -186,6 +254,21 @@ static constexpr SFieldInfo_t __g__ ## _class ## _field_info ## _tablename [] = 
 #define BEGIN_SAVE_INFO(_class) _BEGIN_FIELD_INFO_INTERNAL_(_class, g_saveInfo, g_saveInfoCount)
 
 #define END_SAVE_INFO(_class) _END_FIELD_INFO_INTERNAL(_class, g_saveInfo, g_saveInfoCount)
+
+//=====================================================================================//
+
+//=====================================================================================//
+#define BEGIN_SCRIPT_FIELDS(_class) _BEGIN_FIELD_INFO_INTERNAL(_class, g_scriptFields, g_scriptFieldsCount)
+
+#define SCRIPT_FIELD(_type, _x, _desc) {BaseClass::BaseClassString, #_x, offsetof(BaseClass, _x), sizeof(BaseClass::_x), typeid(_type), reflection::ComputeTypeFlags<_type>(), _desc}
+
+#define END_SCRIPT_FIELDS(_class) _END_FIELD_INFO_INTERNAL(_class g_scriptFields, g_scriptFieldsCount)
+
+#define SCRIPT_INFO(_desc) \
+virtual void GetScriptDescription() const { return (_desc); }
+
+
+
 //=====================================================================================//
 
 //=====================================================================================//
@@ -210,7 +293,8 @@ static constexpr SMethodInfo_t __g__ ## _class ## _method_info[] = {
 class CClass
 {
 public:
-	DECLARE_CLASS_SAVEABLE(CClass);
+	//DECLARE_CLASS_SAVEABLE(CClass);
+	DECLARE_CLASS_MULTITYPE(CClass, CClass, CLASS_SAVABLE);
 	bool m_bBool;
 	void TestFunc() {};
 };
