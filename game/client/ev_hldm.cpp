@@ -1055,7 +1055,7 @@ void EV_FireGauss( event_args_t *args )
 
 						VectorSubtract( beam_tr.endpos, tr.endpos, delta );
 
-						n = Length( delta );
+						n = delta.Length();
 
 						if( n < flDamage )
 						{

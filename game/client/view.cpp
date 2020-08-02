@@ -49,10 +49,6 @@ extern "C" void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams );
 void PM_ParticleLine( float *start, float *end, int pcolor, float life, float vert );
 int PM_GetVisEntInfo( int ent );
 int PM_GetPhysEntInfo( int ent );
-void InterpolateAngles( float * start, float * end, float * output, float frac );
-void NormalizeAngles( float * angles );
-float Distance( const float * v1, const float * v2 );
-float AngleBetweenVectors(  const float * v1,  const float * v2 );
 float vJumpOrigin[3];
 float vJumpAngles[3];
 
@@ -663,7 +659,7 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 
 		VectorSubtract( pparams->simorg, lastorg, delta );
 
-		if( Length( delta ) != 0.0 )
+		if( ( delta.Length() ) != 0.0 )
 		{
 			VectorCopy( pparams->simorg, ViewInterp.Origins[ViewInterp.CurrentOrigin & ORIGIN_MASK] );
 			ViewInterp.OriginTime[ViewInterp.CurrentOrigin & ORIGIN_MASK] = pparams->time;
@@ -711,7 +707,7 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 				VectorMA( ViewInterp.Origins[foundidx & ORIGIN_MASK], frac, delta, neworg );
 
 				// Dont interpolate large changes
-				if( Length( delta ) < 64 )
+				if( delta.Length() < 64 )
 				{
 					VectorSubtract( neworg, pparams->simorg, delta );
 
@@ -865,7 +861,7 @@ void V_GetChaseOrigin( float * angles, float * origin, float distance, float * r
 			break;
 
 		// if close enought to end pos, stop, otherwise continue trace
-		if( Distance( trace->endpos, vecEnd ) < 1.0f )
+		if( mathlib::VectorDistance( trace->endpos, vecEnd ) < 1.0f )
 		{
 			break;
 		}
@@ -885,7 +881,7 @@ void V_GetChaseOrigin( float * angles, float * origin, float distance, float * r
 
 	VectorMA( trace->endpos, 4, trace->plane.normal, returnvec );
 
-	v_lastDistance = Distance( trace->endpos, origin );	// real distance without offset
+	v_lastDistance = mathlib::VectorDistance( trace->endpos, origin );	// real distance without offset
 }
 
 /*void V_GetDeathCam( cl_entity_t * ent1, cl_entity_t * ent2, float * angle, float * origin )
@@ -1259,7 +1255,7 @@ void V_GetMapFreePosition( float *cl_angles, float *origin, float *angles )
 
 	AngleVectors( angles, forward, NULL, NULL );
 
-	VectorNormalize( forward );
+	mathlib::VectorNormalize( forward );
 
 	VectorMA( zScaledTarget, -( 4096.0f / gHUD.m_Spectator.m_mapZoom ), forward, origin );
 }
@@ -1302,7 +1298,7 @@ void V_GetMapChasePosition( int target, float *cl_angles, float *origin, float *
 
 	AngleVectors( angles, forward, NULL, NULL );
 
-	VectorNormalize( forward );
+	mathlib::VectorNormalize( forward );
 
 	VectorMA( origin, -1536, forward, origin ); 
 }
@@ -1562,7 +1558,7 @@ void V_DropPunchAngle( float frametime, float *ev_punchangle )
 {
 	float len;
 
-	len = VectorNormalize( ev_punchangle );
+	len = mathlib::VectorNormalize( ev_punchangle );
 	len -= ( 10.0 + len * 0.5 ) * frametime;
 	len = max( len, 0.0 );
 	VectorScale( ev_punchangle, len, ev_punchangle );

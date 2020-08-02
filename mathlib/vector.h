@@ -14,6 +14,204 @@ typedef float vec_t;
 #include <stdio.h>
 #include <math.h>
 
+#if defined(CLIENT_DLL) || defined(SERVER_DLL)
+
+
+//========================================================================================================//
+typedef unsigned int func_t;
+typedef int string_t;
+typedef float vec_t;
+//========================================================================================================//
+
+//========================================================================================================//
+//=========================================================
+// 2DVector - used for many pathfinding and many other
+// operations that are treated as planar rather than 3d.
+//=========================================================
+class Vector2D
+{
+public:
+	inline Vector2D( void )					{ }
+	inline Vector2D( float X, float Y )			{ x = X; y = Y; }
+	inline Vector2D operator+( const Vector2D& v )	const	{ return Vector2D(x+v.x, y+v.y); }
+	inline Vector2D operator-( const Vector2D& v )	const	{ return Vector2D(x-v.x, y-v.y); }
+	inline Vector2D operator*( float fl )		const	{ return Vector2D(x*fl, y*fl); }
+	inline Vector2D operator/( float fl )		const	{ return Vector2D(x/fl, y/fl); }
+
+	inline float Length( void )						const	{ return (float)sqrt(x*x + y*y );		}
+
+	inline Vector2D Normalize( void ) const
+	{
+		Vector2D vec2;
+
+		float flLen = Length();
+		if( flLen == 0 )
+		{
+			return Vector2D( (float)0, (float)0 );
+		}
+		else
+		{
+			flLen = 1 / flLen;
+			return Vector2D( x * flLen, y * flLen );
+		}
+	}
+
+	vec_t	x, y;
+};
+
+#undef DotProduct
+#undef CrossProduct
+
+//========================================================================================================//
+
+inline float DotProduct( const Vector2D& a, const Vector2D& b ) { return( a.x * b.x + a.y * b.y ); }
+inline Vector2D operator*( float fl, const Vector2D& v ) { return v * fl; }
+
+//========================================================================================================//
+
+
+//========================================================================================================//
+//=========================================================
+// 3D Vector
+//=========================================================
+class Vector						// same data-layout as engine's vec3_t,
+{								//which is a vec_t[3]
+public:
+	// Construction/destruction
+	inline Vector( void )					{ }
+	inline Vector( float X, float Y, float Z )		{ x = X; y = Y; z = Z; }
+	//inline Vector( double X, double Y, double Z )		{ x = (float)X; y = (float)Y; z = (float)Z; }
+	//inline Vector( int X, int Y, int Z )			{ x = (float)X; y = (float)Y; z = (float)Z; }
+	inline Vector( const Vector& v )			{ x = v.x; y = v.y; z = v.z; }
+	inline Vector( float rgfl[3] )				{ x = rgfl[0]; y = rgfl[1]; z = rgfl[2]; }
+
+	// Operators
+	inline Vector operator-( void ) const			{ return Vector( -x, -y, -z ); }
+	inline int operator==( const Vector& v ) const		{ return x == v.x && y == v.y && z == v.z; }
+	inline int operator!=( const Vector& v ) const		{ return !( *this == v ); }
+	inline Vector operator+( const Vector& v ) const	{ return Vector( x + v.x, y + v.y, z + v.z ); }
+	inline Vector operator-( const Vector& v ) const	{ return Vector( x - v.x, y - v.y, z - v.z ); }
+	inline Vector operator*( float fl ) const		{ return Vector( x * fl, y * fl, z * fl ); }
+	inline Vector operator/( float fl ) const		{ return Vector( x / fl, y / fl, z / fl ); }
+
+	// Methods
+	inline void CopyToArray( float* rgfl ) const		{ rgfl[0] = x, rgfl[1] = y, rgfl[2] = z; }
+	inline float Length( void ) const			{ return (float)sqrt( x * x + y * y + z * z); }
+	operator float *()					{ return &x; } // Vectors will now automatically convert to float * when needed
+	operator const float *() const				{ return &x; } // Vectors will now automatically convert to float * when needed
+
+	inline Vector Normalize( void ) const
+	{
+		float flLen = Length();
+		if( flLen == 0 ) return Vector( 0, 0, 1); // ????
+		flLen = 1 / flLen;
+		return Vector( x * flLen, y * flLen, z * flLen );
+	}
+
+	inline Vector2D Make2D( void ) const
+	{
+		Vector2D Vec2;
+
+		Vec2.x = x;
+		Vec2.y = y;
+
+		return Vec2;
+	}
+
+	inline float Length2D( void ) const
+	{
+		return (float)sqrt( x * x + y * y );
+	}
+
+	// Members
+	vec_t x, y, z;
+
+	Vector& operator=(const Vector& other)
+	{
+		this->x = other.x;
+		this->y = other.y;
+		this->z = other.z;
+		return *this;
+	}
+};
+
+//========================================================================================================//
+
+inline Vector operator*( float fl, const Vector& v ) { return v * fl; }
+inline float DotProduct( const Vector& a, const Vector& b) { return( a.x * b.x + a.y * b.y + a.z * b.z ); }
+inline Vector CrossProduct(const Vector& a, const Vector& b) { return Vector( a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x ); }
+
+//========================================================================================================//
+// Type definitions
+#define vec3_t Vector
+typedef vec_t vec4_t[4];
+typedef vec_t vec2_t[2];
+//========================================================================================================//
+
+namespace mathlib
+{
+	template<class X, class Y>
+	static float VectorDot(const X a, const Y b)
+	{
+		return( a[0] * b[0] + a[1] * b[1] + a[2] * b[2] );
+	}
+
+	template<class X>
+	static float VectorLength(const X x)
+	{
+		return (float)sqrtf(x[0]*x[0] + x[1]*x[1] + x[2]*x[2]);
+	}
+
+	template<class X>
+	static float VectorNormalize(X& v)
+	{
+		float ilength = (float)sqrt(DotProduct(v, v));
+		if (ilength) ilength = 1.0f / ilength;
+		v[0] *= ilength;
+		v[1] *= ilength;
+		v[2] *= ilength;
+		return ilength;
+	}
+
+	template<class X, class Y>
+	static float VectorDistance(X a, Y b)
+	{
+		return ((a)[0] - (b)[0]) * ((a)[0] - (b)[0]) + ((a)[1] - (b)[1]) * ((a)[1] - (b)[1]) + ((a)[2] - (b)[2]) * ((a)[2] - (b)[2]);
+	}
+
+	template<class X, class Y>
+	static float AngleBetweenVectors( const X v1, const Y v2 )
+	{
+		float angle;
+		float l1 = mathlib::VectorLength( v1 );
+		float l2 = mathlib::VectorLength( v2 );
+
+		if( !l1 || !l2 )
+			return 0.0f;
+
+		angle = acos( DotProduct( v1, v2 ) / ( l1 * l2 ) );
+		angle = ( angle  * 180.0f ) / M_PI;
+
+		return angle;
+	}
+
+	template<class X>
+	static void VectorInverse( X& v )
+	{
+		v[0] = -v[0];
+		v[1] = -v[1];
+		v[2] = -v[2];
+	}
+}
+
+#else
+
+typedef vec_t vec3_t[3];
+typedef vec_t vec4_t[4];
+typedef vec_t vec2_t[2];
+
+#endif
+
 #ifdef NEW_VEC_TYPES
 
 /*=========================================================
@@ -342,9 +540,7 @@ Vector3 CrossProduct		(const Vector3& v1, const Vector3& v2);
 #define Vector4D Vector4
 #define vec4_t Vector4
 #else
-typedef vec_t vec3_t[3];
-typedef vec_t vec4_t[4];
-typedef vec_t vec2_t[2];
+
 #endif
 
 #ifdef NEW_VEC_TYPES
@@ -471,6 +667,9 @@ inline void VectorNegate(const Vector3& x, Vector3& y) { y = -x; };
 
 #define VectorIsNAN(v) (IS_NAN(v[0]) || IS_NAN(v[1]) || IS_NAN(v[2]))
 #define DotProduct(x,y) ((x)[0]*(y)[0]+(x)[1]*(y)[1]+(x)[2]*(y)[2])
+//template<class X, class Y>
+//float DotProduct(X x, Y y) { return x[0] * y[0] + x[1] * y[1] + x[2] * y[2]; }
+
 #define DotProductAbs(x,y) (abs((x)[0]*(y)[0])+abs((x)[1]*(y)[1])+abs((x)[2]*(y)[2]))
 #define DotProductFabs(x,y) (fabs((x)[0]*(y)[0])+fabs((x)[1]*(y)[1])+fabs((x)[2]*(y)[2]))
 #define CrossProduct(a,b,c) ((c)[0]=(a)[1]*(b)[2]-(a)[2]*(b)[1],(c)[1]=(a)[2]*(b)[0]-(a)[0]*(b)[2],(c)[2]=(a)[0]*(b)[1]-(a)[1]*(b)[0])

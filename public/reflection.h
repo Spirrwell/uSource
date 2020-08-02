@@ -8,6 +8,7 @@
 #include "static_helpers.h"
 #include "containers/buffer.h"
 #include "containers/array.h"
+#include "build.h"
 
 #include <typeinfo>
 #include <type_traits>
@@ -142,23 +143,49 @@ namespace reflection
 		return list;
 	}
 
-	template<class T>
-	void Serialize(T* _class, Buffer& buffer)
-	{
-
-	}
-
 	inline void Serialize(bool b, Buffer& buffer);
 	inline void Serialize(short s, Buffer& buffer);
+	inline void Serialize(unsigned short s, Buffer& buffer);
 	inline void Serialize(int i, Buffer& buffer);
+	inline void Serialize(unsigned int i, Buffer& buffer);
 	inline void Serialize(long long l, Buffer& buffer);
+	inline void Serialize(unsigned long long l, Buffer& buffer);
 	inline void Serialize(float f, Buffer& buffer);
 	inline void Serialize(double d, Buffer& buffer);
 	inline void Serialize(float f[3], Buffer& buffer);
 	inline void Serialize(float f[2], Buffer& buffer);
 	inline void Serialize(float f[4], Buffer& buffer);
 
+	template<int MaxT = 8>
+	void ArrayToLittleEndian(void* dst, size_t sz)
+	{
+		char tmp[MaxT];
+		char* dstt = (char*)dst;
+		for(size_t i = 0; i < sz; i++, sz--)
+			tmp[i] = dstt[sz];
+		memcpy(dst, tmp, sz);
+	}
 
+	template<int MaxT = 8>
+	void ArrayToBigEndian(void* dst, size_t sz)
+	{
+		char tmp[MaxT];
+		char* dstt = (char*)dst;
+		for(size_t i = 0; i < sz; i++, sz--)
+			tmp[sz] = dstt[i];
+		memcpy(dst, tmp, sz);
+	}
+
+	template<class T>
+	inline T Deserialize(Buffer& buffer)
+	{
+		char data[sizeof(T)];
+		buffer.gets(data, sizeof(T));
+#ifndef XASH_LITTLE_ENDIAN
+		ArrayToBigEndian<sizeof(T)>(data);
+#endif
+		return (T)data;
+	}
 }
 
 //=====================================================================================//

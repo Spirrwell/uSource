@@ -39,12 +39,12 @@ public:
 
 	static TYPEDESCRIPTION m_SaveData[];
 
-	virtual void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
-	virtual int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
-	virtual int TakeHealth( float flHealth, int bitsDamageType );
-	virtual void Killed( entvars_t *pevAttacker, int iGib );
+	virtual void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType) {};
+	virtual int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType ) { return 0; };
+	virtual int TakeHealth( float flHealth, int bitsDamageType ) { return 0; };
+	virtual void Killed( entvars_t *pevAttacker, int iGib ) {};
 	virtual int BloodColor( void ) { return 0; }
-	virtual void TraceBleed( float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
+	virtual void TraceBleed( float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType ) {};
 	virtual bool IsTriggered( C_BaseEntity *pActivator ) {return true; }
 	virtual C_BaseMonster *MyMonsterPointer( void ) { return NULL; }
 	virtual C_SquadMonster *MySquadMonsterPointer( void ) { return NULL; }
@@ -57,7 +57,7 @@ public:
 	virtual float GetDelay( void ) { return 0; }
 	virtual int IsMoving( void ) { return pev->velocity == Vector(0,0,0); };
 	virtual void OverrideReset( void ) {}
-	virtual int DamageDecal( int bitsDamageType );
+	virtual int DamageDecal( int bitsDamageType ) { return 0; };
 	// This is ONLY used by the node graph to test movement through a door
 	virtual void SetToggleState( int state ) {}
 	virtual void StartSneaking( void ) {}
@@ -68,7 +68,7 @@ public:
 	virtual bool IsBSPModel( void ) { return pev->solid == SOLID_BSP || pev->movetype == MOVETYPE_PUSHSTEP; }
 	virtual bool ReflectGauss( void ) { return ( IsBSPModel() && !pev->takedamage ); }
 	virtual bool HasTarget( string_t targetname ) { return false; }
-	virtual bool IsInWorld( void );
+	virtual bool IsInWorld( void ) { return false; };
 	virtual	bool IsPlayer( void ) { return false; }
 	virtual bool IsNetClient( void ) { return false; }
 	virtual const char *TeamID( void ) { return ""; }
@@ -86,8 +86,8 @@ public:
 	virtual void UpdateOnRemove( void );
 
 	int ShouldToggle( USE_TYPE useType, BOOL currentState );
-	void FireBullets( ULONG cShots, Vector  vecSrc, Vector	vecDirShooting,	Vector	vecSpread, float flDistance, int iBulletType, int iTracerFreq = 4, int iDamage = 0, entvars_t *pevAttacker = NULL  );
-	Vector FireBulletsPlayer( ULONG cShots, Vector  vecSrc, Vector	vecDirShooting,	Vector	vecSpread, float flDistance, int iBulletType, int iTracerFreq = 4, int iDamage = 0, entvars_t *pevAttacker = NULL, int shared_rand = 0 );
+	void FireBullets( int cShots, Vector  vecSrc, Vector	vecDirShooting,	Vector	vecSpread, float flDistance, int iBulletType, int iTracerFreq = 4, int iDamage = 0, entvars_t *pevAttacker = NULL  );
+	Vector FireBulletsPlayer( int cShots, Vector  vecSrc, Vector	vecDirShooting,	Vector	vecSpread, float flDistance, int iBulletType, int iTracerFreq = 4, int iDamage = 0, entvars_t *pevAttacker = NULL, int shared_rand = 0 );
 
 	virtual C_BaseEntity *Respawn( void ) { return NULL; }
 
@@ -97,16 +97,10 @@ public:
 	int IsDormant( void );
 	bool IsLockedByMaster( void ) { return false; }
 
-	static C_BaseEntity *Instance( edict_t *pent )
-	{
-		if( !pent )
-			pent = ENT( 0 );
-		C_BaseEntity *pEnt = (C_BaseEntity *)GET_PRIVATE( pent );
-		return pEnt;
-	}
+	static C_BaseEntity *Instance( edict_t *pent );
 
-	static C_BaseEntity *Instance( entvars_t *pev ) { return Instance( ENT( pev ) ); }
-	static C_BaseEntity *Instance( int eoffset) { return Instance( ENT( eoffset) ); }
+	static C_BaseEntity *Instance( entvars_t *pev );
+	static C_BaseEntity *Instance( int eoffset);
 
 	C_BaseMonster *GetMonsterPointer( entvars_t *pevMonster )
 	{
@@ -130,17 +124,17 @@ public:
 
 	static C_BaseEntity *Create( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = NULL );
 
-	virtual BOOL FBecomeProne( void ) {return FALSE;};
-	edict_t *edict() { return ENT( pev ); };
-	EOFFSET eoffset() { return OFFSET( pev ); };
-	int entindex() { return ENTINDEX( edict() ); };
+	virtual bool FBecomeProne( void ) {return false;};
+	edict_t *edict();
+	EOFFSET eoffset();
+	int entindex();
 
-	virtual Vector Center() { return ( pev->absmax + pev->absmin ) * 0.5; }; // center point of entity
-	virtual Vector EyePosition() { return pev->origin + pev->view_ofs; };			// position of eyes
-	virtual Vector EarPosition() { return pev->origin + pev->view_ofs; };			// position of ears
-	virtual Vector BodyTarget( const Vector &posSrc ) { return Center(); };		// position to shoot at
+	virtual Vector Center();
+	virtual Vector EyePosition();
+	virtual Vector EarPosition();
+	virtual Vector BodyTarget( const Vector &posSrc );
 
-	virtual int Illumination() { return GETENTITYILLUM( ENT( pev ) ); };
+	virtual int Illumination();
 
 	virtual	BOOL FVisible( C_BaseEntity *pEntity );
 	virtual	BOOL FVisible( const Vector &vecOrigin );

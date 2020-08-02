@@ -904,3 +904,126 @@ void AngleVectorsTranspose( const vec3_t angles, vec3_t forward, vec3_t right, v
 		up[2] = cr * cp;
 	}
 }
+
+void AngleMatrix( const vec3_t angles, float (*matrix)[4] )
+{
+	float angle;
+	float sr, sp, sy, cr, cp, cy;
+
+	angle = angles[YAW] * ( M_PI * 2 / 360 );
+	sy = sin( angle );
+	cy = cos( angle );
+	angle = angles[PITCH] * ( M_PI * 2 / 360 );
+	sp = sin( angle );
+	cp = cos( angle );
+	angle = angles[ROLL] * ( M_PI * 2 / 360 );
+	sr = sin( angle );
+	cr = cos( angle );
+
+	// matrix = ( YAW * PITCH ) * ROLL
+	matrix[0][0] = cp * cy;
+	matrix[1][0] = cp * sy;
+	matrix[2][0] = -sp;
+	matrix[0][1] = sr * sp * cy + cr * -sy;
+	matrix[1][1] = sr * sp * sy + cr * cy;
+	matrix[2][1] = sr * cp;
+	matrix[0][2] = ( cr * sp * cy + -sr * -sy );
+	matrix[1][2] = ( cr * sp * sy + -sr * cy );
+	matrix[2][2] = cr * cp;
+	matrix[0][3] = 0.0;
+	matrix[1][3] = 0.0;
+	matrix[2][3] = 0.0;
+}
+
+void AngleIMatrix( const vec3_t angles, float matrix[3][4] )
+{
+	float angle;
+	float sr, sp, sy, cr, cp, cy;
+
+	angle = angles[YAW] * ( M_PI * 2 / 360 );
+	sy = sin( angle );
+	cy = cos( angle );
+	angle = angles[PITCH] * ( M_PI * 2 / 360 );
+	sp = sin( angle );
+	cp = cos( angle );
+	angle = angles[ROLL] * ( M_PI * 2 / 360 );
+	sr = sin( angle );
+	cr = cos( angle );
+
+	// matrix = ( YAW * PITCH ) * ROLL
+	matrix[0][0] = cp * cy;
+	matrix[0][1] = cp * sy;
+	matrix[0][2] = -sp;
+	matrix[1][0] = sr * sp * cy + cr * -sy;
+	matrix[1][1] = sr * sp * sy + cr * cy;
+	matrix[1][2] = sr * cp;
+	matrix[2][0] = ( cr * sp * cy + -sr * -sy );
+	matrix[2][1] = ( cr * sp * sy + -sr * cy );
+	matrix[2][2] = cr * cp;
+	matrix[0][3] = 0.0;
+	matrix[1][3] = 0.0;
+	matrix[2][3] = 0.0;
+}
+
+void VectorTransform( const vec3_t in1, float in2[3][4], vec3_t out )
+{
+	out[0] = DotProduct( in1, in2[0] ) + in2[0][3];
+	out[1] = DotProduct( in1, in2[1] ) + in2[1][3];
+	out[2] = DotProduct( in1, in2[2] ) + in2[2][3];
+}
+
+void NormalizeAngles( float *angles )
+{
+	int i;
+	// Normalize angles
+	for( i = 0; i < 3; i++ )
+	{
+		if( angles[i] > 180.0 )
+		{
+			angles[i] -= 360.0;
+		}
+		else if( angles[i] < -180.0 )
+		{
+			angles[i] += 360.0;
+		}
+	}
+}
+
+/*
+===================
+InterpolateAngles
+
+Interpolate Euler angles.
+FIXME:  Use Quaternions to avoid discontinuities
+Frac is 0.0 to 1.0 ( i.e., should probably be clamped, but doesn't have to be )
+===================
+*/
+void InterpolateAngles( float *start, float *end, float *output, float frac )
+{
+	int i;
+	float ang1, ang2;
+	float d;
+
+	NormalizeAngles( start );
+	NormalizeAngles( end );
+
+	for( i = 0; i < 3; i++ )
+	{
+		ang1 = start[i];
+		ang2 = end[i];
+
+		d = ang2 - ang1;
+		if( d > 180 )
+		{
+			d -= 360;
+		}
+		else if( d < -180 )
+		{
+			d += 360;
+		}
+
+		output[i] = ang1 + d * frac;
+	}
+
+	NormalizeAngles( output );
+}

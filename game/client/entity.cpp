@@ -812,7 +812,7 @@ void DLLEXPORT HUD_TempEntUpdate (
 							//
 							VectorScale( pTemp->entity.baseline.origin, 0.6, pTemp->entity.baseline.origin );
 
-							if( Length( pTemp->entity.baseline.origin ) < 10 )
+							if( mathlib::VectorLength( pTemp->entity.baseline.origin ) < 10 )
 							{
 								pTemp->entity.baseline.framerate = 0.0;								
 							}

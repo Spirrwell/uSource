@@ -77,35 +77,44 @@ float anglemod( float a );
 uint16_t FloatToHalf( float v );
 float HalfToFloat( uint16_t h );
 float SimpleSpline( float value );
-void RoundUpHullSize( vec3_t size );
-int SignbitsForPlane( const vec3_t normal );
-int PlaneTypeForNormal( const vec3_t normal );
+void RoundUpHullSize( float size[3] );
+int SignbitsForPlane( const float normal[3] );
+int PlaneTypeForNormal( const float normal[3] );
 int NearestPOW( int value, qboolean roundDown );
 void SinCos( float radians, float *sine, float *cosine );
-float VectorNormalizeLength2( const vec3_t v, vec3_t out );
-qboolean VectorCompareEpsilon( const vec3_t vec1, const vec3_t vec2, vec_t epsilon );
-void VectorVectors( const vec3_t forward, vec3_t right, vec3_t up );
+float VectorNormalizeLength2( const float v[3], float out[3] );
+qboolean VectorCompareEpsilon( const float vec1[3], const float vec2[3], vec_t epsilon );
+void VectorVectors( const float forward[3], float right[3], float up[3] );
 void VectorAngles( const float *forward, float *angles );
-void AngleVectors( const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up );
-void VectorsAngles( const vec3_t forward, const vec3_t right, const vec3_t up, vec3_t angles );
-qboolean PlanesGetIntersectionPoint( const struct mplane_s *plane1, const struct mplane_s *plane2, const struct mplane_s *plane3, vec3_t out );
-void PlaneIntersect( const struct mplane_s *plane, const vec3_t p0, const vec3_t p1, vec3_t out );
+void AngleVectors( const float angles[3], float forward[3], float right[3], float up[3] );
+void VectorsAngles( const float forward[3], const float right[3], const float up[3], float angles[3] );
+qboolean PlanesGetIntersectionPoint( const struct mplane_s *plane1, const struct mplane_s *plane2, const struct mplane_s *plane3, float out[3] );
+void PlaneIntersect( const struct mplane_s *plane, const float p0[3], const float p1[3], float out[3] );
 
-void ClearBounds( vec3_t mins, vec3_t maxs );
-void AddPointToBounds( const vec3_t v, vec3_t mins, vec3_t maxs );
-qboolean BoundsIntersect( const vec3_t mins1, const vec3_t maxs1, const vec3_t mins2, const vec3_t maxs2 );
-qboolean BoundsAndSphereIntersect( const vec3_t mins, const vec3_t maxs, const vec3_t origin, float radius );
-qboolean SphereIntersect( const vec3_t vSphereCenter, float fSphereRadiusSquared, const vec3_t vLinePt, const vec3_t vLineDir );
-float RadiusFromBounds( const vec3_t mins, const vec3_t maxs );
-void ExpandBounds( vec3_t mins, vec3_t maxs, float offset );
+//=============================================================================================//
+// Originally in pm_math.cpp
+void AngleMatrix( const float *angles, float (*matrix)[4] );
+void VectorTransform( const float *in1, float in2[3][4], float *out );
+void AngleIMatrix( const float angles[3], float matrix[3][4] );
+void InterpolateAngles( float *start, float *end, float *output, float frac );
+void NormalizeAngles( float *angles );
+//=============================================================================================//
 
-void AngleQuaternion( const vec3_t angles, vec4_t q, qboolean studio );
-void QuaternionAngle( const vec4_t q, vec3_t angles );
+void ClearBounds( float mins[3], float maxs[3] );
+void AddPointToBounds( const float v[3], float mins[3], float maxs[3] );
+qboolean BoundsIntersect( const float mins1[3], const float maxs1[3], const float mins2[3], const float maxs2[3] );
+qboolean BoundsAndSphereIntersect( const float mins[3], const float maxs[3], const float origin[3], float radius );
+qboolean SphereIntersect( const float vSphereCenter[3], float fSphereRadiusSquared, const float vLinePt[3], const float vLineDir[3] );
+float RadiusFromBounds( const float mins[3], const float maxs[3] );
+void ExpandBounds( float mins[3], float maxs[3], float offset );
+
+void AngleQuaternion( const float angles[3], vec4_t q, qboolean studio );
+void QuaternionAngle( const vec4_t q, float angles[3] );
 void QuaternionSlerp( const vec4_t p, const vec4_t q, float t, vec4_t qt );
 float RemapVal( float val, float A, float B, float C, float D );
 float ApproachVal( float target, float value, float speed );
 
-void AngleVectorsTranspose (const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
+void AngleVectorsTranspose (const float angles[3], float forward[3], float right[3], float up[3]);
 
 
 extern vec3_t		vec3_origin;

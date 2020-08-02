@@ -5,9 +5,13 @@
  */
 #pragma once
 
+#include "reflection.h"
+
 namespace NetworkSystem
 {
-
+	struct usrmsg_hdr_t;
+	struct varupd_hdr_t;
+	struct action_hdr_t;
 #pragma pack(1)
 
 	enum {
@@ -29,8 +33,13 @@ namespace NetworkSystem
 
 	struct varupd_hdr_t
 	{
-		unsigned long long classid;
-		unsigned long long objectid;
+
+	};
+
+	/* Description for a class that is to be updated */
+	struct varupd_desc_t
+	{
+
 	};
 
 	struct action_hdr_t
@@ -39,5 +48,8 @@ namespace NetworkSystem
 	};
 
 #pragma pack()
+
+	Buffer& BuildVarUpdateMessage();
+	Buffer& BuildActionMessage();
 }
 

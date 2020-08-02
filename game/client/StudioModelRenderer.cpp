@@ -533,7 +533,7 @@ void CStudioModelRenderer::StudioSetUpTransform( int trivial_accept )
 
 		VectorCopy( m_vRight, viewmatrix[0] );
 		VectorCopy( m_vUp, viewmatrix[1] );
-		VectorInverse( viewmatrix[1] );
+		mathlib::VectorInverse( viewmatrix[1] );
 		VectorCopy( m_vNormal, viewmatrix[2] );
 
 		(*m_protationmatrix)[0][3] = modelpos[0] - m_vRenderOrigin[0];
@@ -1208,7 +1208,7 @@ void CStudioModelRenderer::StudioEstimateGait( entity_state_t *pplayer )
 	{
 		VectorSubtract( m_pCurrentEntity->origin, m_pPlayerInfo->prevgaitorigin, est_velocity );
 		VectorCopy( m_pCurrentEntity->origin, m_pPlayerInfo->prevgaitorigin );
-		m_flGaitMovement = Length( est_velocity );
+		m_flGaitMovement = mathlib::VectorLength( est_velocity );
 		if( dt <= 0 || m_flGaitMovement / dt < 5 )
 		{
 			m_flGaitMovement = 0;
@@ -1219,7 +1219,7 @@ void CStudioModelRenderer::StudioEstimateGait( entity_state_t *pplayer )
 	else
 	{
 		VectorCopy( pplayer->velocity, est_velocity );
-		m_flGaitMovement = Length( est_velocity ) * dt;
+		m_flGaitMovement = est_velocity.Length() * dt;
 	}
 
 	if( est_velocity[1] == 0 && est_velocity[0] == 0 )

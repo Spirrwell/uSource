@@ -15,10 +15,10 @@ def configure(conf):
 
 def build(bld):
 	defines = []
-	source = bld.path.parent.ant_glob([
-		'pm_shared/*.cpp',
-	])
 	source = []
+	source += bld.path.parent.ant_glob([
+		'shared/*.cpp'
+	])
 	source += [
 		'../../pm_shared/pm_debug.cpp',
 		'../../pm_shared/pm_shared.cpp',
@@ -63,7 +63,7 @@ def build(bld):
 		'../shared/hl1/weapon_squeakgrenade.cpp',
 		'../shared/hl1/weapon_tripmine.cpp',
 		'../shared/hl1/weapon_glock.cpp',
-		'../shared/game_shared.cpp',
+		#'../shared/game_shared.cpp',
 		'../shared/core/netvar.cpp']
 		
 	if bld.env.VOICEMGR:

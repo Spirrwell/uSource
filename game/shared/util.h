@@ -15,6 +15,9 @@
 #pragma once
 #ifndef UTIL_H
 #define UTIL_H
+
+#include "common.h"
+
 //
 // Misc utility code
 //
