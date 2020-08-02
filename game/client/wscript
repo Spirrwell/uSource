@@ -49,7 +49,7 @@ def build(bld):
 		'flashlight.cpp', 'GameStudioModelRenderer.cpp', 'geiger.cpp',
 		'health.cpp', 'hud.cpp', 'hud_msg.cpp', 'hud_redraw.cpp',
 		'hud_spectator.cpp', 'hud_update.cpp', 'in_camera.cpp',
-		'input.cpp', 'input_goldsource.cpp', 'input_mouse.cpp',
+		'input.cpp', 'input_mouse.cpp',
 		'input_xash3d.cpp', 'menu.cpp', 'message.cpp',
 		'overview.cpp', 'parsemsg.cpp', 'saytext.cpp',
 		'status_icons.cpp', 'statusbar.cpp', 'studio_util.cpp',

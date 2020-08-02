@@ -8,7 +8,7 @@ Vector dead_viewangles(0, 0, 0);
 cvar_t      *sensitivity;
 cvar_t  *in_joystick;
 
-FWGSInput fwgsInput;
+CInput fwgsInput;
 
 #ifdef SUPPORT_GOLDSOURCE_INPUT
 GoldSourceInput goldSourceInput;

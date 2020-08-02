@@ -124,7 +124,7 @@ void IN_ToggleButtons( float forwardmove, float sidemove )
 	}
 }
 
-void FWGSInput::IN_ClientMoveEvent( float forwardmove, float sidemove )
+void CInput::IN_ClientMoveEvent(float forwardmove, float sidemove )
 {
 	//gEngfuncs.Con_Printf("IN_MoveEvent\n");
 
@@ -133,14 +133,14 @@ void FWGSInput::IN_ClientMoveEvent( float forwardmove, float sidemove )
 	ac_movecount++;
 }
 
-void FWGSInput::IN_ClientLookEvent( float relyaw, float relpitch )
+void CInput::IN_ClientLookEvent(float relyaw, float relpitch )
 {
 	rel_yaw += relyaw;
 	rel_pitch += relpitch;
 }
 
 // Rotate camera and add move values to usercmd
-void FWGSInput::IN_Move( float frametime, usercmd_t *cmd )
+void CInput::IN_Move(float frametime, usercmd_t *cmd )
 {
 	Vector viewangles;
 	bool fLadder = false;
@@ -224,7 +224,7 @@ void FWGSInput::IN_Move( float frametime, usercmd_t *cmd )
 	ac_movecount = 0;
 }
 
-void FWGSInput::IN_MouseEvent( int mstate )
+void CInput::IN_MouseEvent(int mstate )
 {
 	static int mouse_oldbuttonstate;
 	// perform button actions
@@ -246,37 +246,37 @@ void FWGSInput::IN_MouseEvent( int mstate )
 
 // Stubs
 
-void FWGSInput::IN_ClearStates( void )
+void CInput::IN_ClearStates(void )
 {
 	//gEngfuncs.Con_Printf( "IN_ClearStates\n" );
 }
 
-void FWGSInput::IN_ActivateMouse( void )
+void CInput::IN_ActivateMouse(void )
 {
 	//gEngfuncs.Con_Printf( "IN_ActivateMouse\n" );
 }
 
-void FWGSInput::IN_DeactivateMouse( void )
+void CInput::IN_DeactivateMouse(void )
 {
 	//gEngfuncs.Con_Printf( "IN_DeactivateMouse\n" );
 }
 
-void FWGSInput::IN_Accumulate( void )
+void CInput::IN_Accumulate(void )
 {
 	//gEngfuncs.Con_Printf( "IN_Accumulate\n" );
 }
 
-void FWGSInput::IN_Commands( void )
+void CInput::IN_Commands(void )
 {
 	//gEngfuncs.Con_Printf( "IN_Commands\n" );
 }
 
-void FWGSInput::IN_Shutdown( void )
+void CInput::IN_Shutdown(void )
 {
 }
 
 // Register cvars and reset data
-void FWGSInput::IN_Init( void )
+void CInput::IN_Init(void )
 {
 	sensitivity = gEngfuncs.pfnRegisterVariable( "sensitivity", "3", FCVAR_ARCHIVE );
 	in_joystick = gEngfuncs.pfnRegisterVariable( "joystick", "0", FCVAR_ARCHIVE );
