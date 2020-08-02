@@ -538,7 +538,7 @@ static inline byte* Mem_AllocPool(const char* name) { return _Mem_AllocPool(name
 static inline void Mem_FreePool(byte** name) { _Mem_FreePool(name, "UNKNOWN", 0); };
 static inline void Mem_EmptyPool(byte* name) { _Mem_EmptyPool(name, "UNKNOWN", 0); };
 static inline qboolean Mem_IsAllocated(byte* pool) { return Mem_IsAllocatedExt(NULL, pool); };
-static inline void Mem_Check() { _Mem_Check("UNKNOWN", NULL); };
+static inline void Mem_Check() { _Mem_Check("UNKNOWN", 0); };
 #endif
 //
 // filesystem.c
