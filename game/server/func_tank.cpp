@@ -89,7 +89,7 @@ public:
 	virtual int	Restore( CRestore &restore );
 	static	TYPEDESCRIPTION m_SaveData[];
 
-	BOOL OnControls( entvars_t *pevTest );
+	bool OnControls(entvars_t *pevTest );
 	BOOL StartControl( CBasePlayer* pController );
 	void StopControl( void );
 	void ControllerPostFrame( void );
@@ -324,7 +324,7 @@ void CFuncTank::KeyValue( KeyValueData *pkvd )
 
 //==================================================================================
 // TANK CONTROLLING
-BOOL CFuncTank::OnControls( entvars_t *pevTest )
+bool CFuncTank::OnControls( entvars_t *pevTest )
 {
 	if( !( pev->spawnflags & SF_TANK_CANCONTROL ) )
 		return FALSE;

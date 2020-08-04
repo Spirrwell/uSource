@@ -1654,7 +1654,7 @@ int CBasePlayer::Classify( void )
 	return CLASS_PLAYER;
 }
 
-void CBasePlayer::AddPoints( int score, BOOL bAllowNegativeScore )
+void CBasePlayer::AddPoints(int score, bool bAllowNegativeScore )
 {
 	// Positive score always adds
 	if( score < 0 )
@@ -1682,7 +1682,7 @@ void CBasePlayer::AddPoints( int score, BOOL bAllowNegativeScore )
 	MESSAGE_END();
 }
 
-void CBasePlayer::AddPointsToTeam( int score, BOOL bAllowNegativeScore )
+void CBasePlayer::AddPointsToTeam(int score, bool bAllowNegativeScore )
 {
 	int index = entindex();
 
@@ -3604,7 +3604,7 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 //
 // Add a weapon to the player (Item == Weapon == Selectable Object)
 //
-int CBasePlayer::AddPlayerItem( CBasePlayerItem *pItem )
+bool CBasePlayer::AddPlayerItem( CBasePlayerItem *pItem )
 {
 	CBasePlayerItem *pInsert;
 
@@ -4120,7 +4120,7 @@ void CBasePlayer::UpdateClientData( void )
 // FBecomeProne - Overridden for the player to set the proper
 // physics flags when a barnacle grabs player.
 //=========================================================
-BOOL CBasePlayer::FBecomeProne( void )
+bool CBasePlayer::FBecomeProne( void )
 {
 	m_afPhysicsFlags |= PFLAG_ONBARNACLE;
 	return TRUE;

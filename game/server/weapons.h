@@ -319,6 +319,15 @@ public:
 	// hle time creep vars
 	float	m_flPrevPrimaryAttack;
 	float	m_flLastFireTime;
+
+	//Special stuff for grenades and satchels.
+	float m_flStartThrow;
+	float m_flReleaseThrow;
+	int m_chargeReady;
+	int m_fInAttack;
+
+	enum EGON_FIRESTATE { FIRE_OFF, FIRE_CHARGE };
+	int m_fireState;
 };
 
 class CBasePlayerAmmo : public CBaseEntity

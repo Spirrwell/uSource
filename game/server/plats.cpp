@@ -1299,7 +1299,7 @@ void CFuncTrackTrain::SetControls( entvars_t *pevControls )
 	m_controlMaxs = pevControls->maxs + offset;
 }
 
-BOOL CFuncTrackTrain::OnControls( entvars_t *pevTest )
+bool CFuncTrackTrain::OnControls(entvars_t *pevTest )
 {
 	Vector offset = pevTest->origin - pev->origin;
 

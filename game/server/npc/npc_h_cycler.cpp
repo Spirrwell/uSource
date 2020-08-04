@@ -43,7 +43,7 @@ public:
 	void Use ( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
 	// Don't treat as a live target
-	virtual BOOL IsAlive( void ) { return FALSE; }
+	virtual bool IsAlive(void ) { return FALSE; }
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );

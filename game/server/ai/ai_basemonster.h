@@ -124,7 +124,7 @@ public:
 	virtual void RunAI( void );// core ai function!	
 	void Listen( void );
 
-	virtual BOOL IsAlive( void ) { return ( pev->deadflag != DEAD_DEAD ); }
+	virtual bool IsAlive(void ) { return (pev->deadflag != DEAD_DEAD ); }
 	virtual BOOL ShouldFadeOnDeath( void );
 
 	// Basic Monster AI functions
@@ -260,7 +260,7 @@ public:
 	virtual CSound* PBestScent( void );
 	virtual float HearingSensitivity( void ) { return 1.0; };
 
-	BOOL FBecomeProne( void );
+	bool FBecomeProne(void );
 	virtual void BarnacleVictimBitten( entvars_t *pevBarnacle );
 	virtual void BarnacleVictimReleased( void );
 

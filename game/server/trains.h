@@ -90,7 +90,7 @@ public:
 
 	void SetTrack( CPathTrack *track ) { m_ppath = track->Nearest( pev->origin ); }
 	void SetControls( entvars_t *pevControls );
-	BOOL OnControls( entvars_t *pev );
+	bool OnControls(entvars_t *pev );
 
 	void StopSound( void );
 	void UpdateSound( void );

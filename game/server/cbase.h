@@ -13,9 +13,6 @@
 *
 ****/
 #pragma once
-#ifndef CBASE_H
-#define CBASE_H
-
 #include "base_defs.h"
 
 /*
@@ -51,6 +48,9 @@ class CRestore;
 
 // C functions for external declarations that call the appropriate C++ methods
 #include "exportdef.h"
+
+/* Entity base classes */
+#include "c_base_entity.h"
 
 extern "C" EXPORT int GetEntityAPI( DLL_FUNCTIONS *pFunctionTable, int interfaceVersion );
 extern "C" EXPORT int GetEntityAPI2( DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion );
@@ -108,6 +108,7 @@ public:
 
 #define MAX_DELAY_CALLS 4
 
+#if 0
 //
 // Base Entity.  All entity types derive from this
 //
@@ -150,14 +151,14 @@ public:
 	virtual void Killed( entvars_t *pevAttacker, int iGib );
 	virtual int BloodColor( void ) { return DONT_BLEED; }
 	virtual void TraceBleed( float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
-	virtual BOOL IsTriggered( CBaseEntity *pActivator ) {return TRUE; }
+	virtual bool IsTriggered(CBaseEntity *pActivator ) {return TRUE; }
 	virtual CBaseMonster *MyMonsterPointer( void ) { return NULL; }
 	virtual CSquadMonster *MySquadMonsterPointer( void ) { return NULL; }
 	virtual	int GetToggleState( void ) { return TS_AT_TOP; }
-	virtual void AddPoints( int score, BOOL bAllowNegativeScore ) {}
-	virtual void AddPointsToTeam( int score, BOOL bAllowNegativeScore ) {}
-	virtual BOOL AddPlayerItem( CBasePlayerItem *pItem ) { return 0; }
-	virtual BOOL RemovePlayerItem( CBasePlayerItem *pItem ) { return 0; }
+	virtual void AddPoints(int score, bool bAllowNegativeScore ) {}
+	virtual void AddPointsToTeam(int score, bool bAllowNegativeScore ) {}
+	virtual bool AddPlayerItem(CBasePlayerItem *pItem ) { return 0; }
+	virtual bool RemovePlayerItem(CBasePlayerItem *pItem ) { return 0; }
 	virtual int GiveAmmo( int iAmount, const char *szName, int iMax ) { return -1; };
 	virtual float GetDelay( void ) { return 0; }
 	virtual int IsMoving( void ) { return pev->velocity != g_vecZero; }
@@ -167,15 +168,15 @@ public:
 	virtual void SetToggleState( int state ) {}
 	virtual void StartSneaking( void ) {}
 	virtual void StopSneaking( void ) {}
-	virtual BOOL OnControls( entvars_t *pev ) { return FALSE; }
-	virtual BOOL IsSneaking( void ) { return FALSE; }
-	virtual BOOL IsAlive( void ) { return (pev->deadflag == DEAD_NO) && pev->health > 0; }
-	virtual BOOL IsBSPModel( void ) { return pev->solid == SOLID_BSP || pev->movetype == MOVETYPE_PUSHSTEP; }
-	virtual BOOL ReflectGauss( void ) { return ( IsBSPModel() && !pev->takedamage ); }
-	virtual BOOL HasTarget( string_t targetname ) { return FStrEq(STRING(targetname), STRING(pev->targetname) ); }
-	virtual BOOL IsInWorld( void );
-	virtual	BOOL IsPlayer( void ) { return FALSE; }
-	virtual BOOL IsNetClient( void ) { return FALSE; }
+	virtual bool OnControls(entvars_t *pev ) { return FALSE; }
+	virtual bool IsSneaking(void ) { return FALSE; }
+	virtual bool IsAlive(void ) { return (pev->deadflag == DEAD_NO) && pev->health > 0; }
+	virtual bool IsBSPModel(void ) { return pev->solid == SOLID_BSP || pev->movetype == MOVETYPE_PUSHSTEP; }
+	virtual bool ReflectGauss(void ) { return (IsBSPModel() && !pev->takedamage ); }
+	virtual bool HasTarget(string_t targetname ) { return FStrEq(STRING(targetname), STRING(pev->targetname) ); }
+	virtual bool IsInWorld(void );
+	virtual bool IsPlayer(void ) { return FALSE; }
+	virtual bool IsNetClient(void ) { return FALSE; }
 	virtual const char *TeamID( void ) { return ""; }
 
 	/* Utility functions */
@@ -228,7 +229,7 @@ public:
 	void EXPORT SUB_StartFadeOut ( void );
 	void EXPORT SUB_FadeOut( void );
 	void EXPORT SUB_CallUseToggle( void ) { this->Use( this, this, USE_TOGGLE, 0 ); }
-	int ShouldToggle( USE_TYPE useType, BOOL currentState );
+	int ShouldToggle(USE_TYPE useType, bool currentState );
 	void FireBullets( ULONG cShots, Vector  vecSrc, Vector	vecDirShooting,	Vector	vecSpread, float flDistance, int iBulletType, int iTracerFreq = 4, int iDamage = 0, entvars_t *pevAttacker = NULL  );
 	Vector FireBulletsPlayer( ULONG cShots, Vector  vecSrc, Vector	vecDirShooting,	Vector	vecSpread, float flDistance, int iBulletType, int iTracerFreq = 4, int iDamage = 0, entvars_t *pevAttacker = NULL, int shared_rand = 0 );
 
@@ -239,7 +240,7 @@ public:
 	int Intersects( CBaseEntity *pOther );
 	void MakeDormant( void );
 	int IsDormant( void );
-	BOOL IsLockedByMaster( void ) { return FALSE; }
+	bool IsLockedByMaster(void ) { return FALSE; }
 
 	static CBaseEntity *Instance( edict_t *pent )
 	{
@@ -266,38 +267,6 @@ public:
 			return pEntity->MyMonsterPointer();
 		return NULL;
 	}
-
-	// Ugly code to lookup all functions to make sure they are exported when set.
-#ifdef _DEBUG
-	void FunctionCheck( void *pFunction, char *name ) 
-	{
-	}
-
-	BASEPTR	ThinkSet( BASEPTR func, char *name ) 
-	{ 
-		m_pfnThink = func; 
-		// FunctionCheck( (void *)*( (int *)( (char *)this + ( offsetof( CBaseEntity, m_pfnThink ) ) ) ), name );
-		return func;
-	}
-	ENTITYFUNCPTR TouchSet( ENTITYFUNCPTR func, char *name ) 
-	{
-		m_pfnTouch = func; 
-		// FunctionCheck( (void *)*( (int *)( (char *)this + ( offsetof( CBaseEntity, m_pfnTouch ) ) ) ), name );
-		return func;
-	}
-	USEPTR UseSet( USEPTR func, char *name ) 
-	{ 
-		m_pfnUse = func; 
-		// FunctionCheck( (void *)*( (int *)( (char *)this + ( offsetof( CBaseEntity, m_pfnUse ) ) ) ), name );
-		return func;
-	}
-	ENTITYFUNCPTR BlockedSet( ENTITYFUNCPTR func, char *name ) 
-	{ 
-		m_pfnBlocked = func; 
-		// FunctionCheck( (void *)*( (int *)( (char *)this + ( offsetof( CBaseEntity, m_pfnBlocked ) ) ) ), name );
-		return func;
-	}
-#endif
 	// virtual functions used by a few classes
 	
 	// used by monsters that are created by the MonsterMaker
@@ -305,7 +274,7 @@ public:
 
 	static CBaseEntity *Create( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = NULL );
 
-	virtual BOOL FBecomeProne( void ) {return FALSE;};
+	virtual bool FBecomeProne(void ) {return FALSE;};
 	edict_t *edict() { return ENT( pev ); };
 	EOFFSET eoffset() { return OFFSET( pev ); };
 	int entindex() { return ENTINDEX( edict() ); };
@@ -317,8 +286,8 @@ public:
 
 	virtual int Illumination() { return GETENTITYILLUM( ENT( pev ) ); };
 
-	virtual	BOOL FVisible( CBaseEntity *pEntity );
-	virtual	BOOL FVisible( const Vector &vecOrigin );
+	virtual bool FVisible(CBaseEntity *pEntity );
+	virtual bool FVisible(const Vector &vecOrigin );
 
 	//We use this variables to store each ammo count.
 	int ammo_9mm;
@@ -338,6 +307,7 @@ public:
 	enum EGON_FIRESTATE { FIRE_OFF, FIRE_CHARGE };
 	int m_fireState;
 };
+#endif
 
 // Ugly technique to override base member functions
 // Normally it's illegal to cast a pointer to a member function of a derived class to a pointer to a 
@@ -345,18 +315,7 @@ public:
 /* What on fucking earth valve? Seriously? what the fuck are you guys even doing??? */
 /* I'm in awe at this. It's the most clever yet the most lazy and dumb thing ever */
 /* Why the fuck are you changing think and touch functions on the fly!? */
-#if 1 /* I swear to god, one day this 1 will be changed to 0!!! */
-// #ifdef _DEBUG
-
-// #define SetThink( a ) ThinkSet( static_cast <void (CBaseEntity::*)(void)> (a), #a )
-// #define SetTouch( a ) TouchSet( static_cast <void (CBaseEntity::*)(CBaseEntity *)> (a), #a )
-// #define SetUse( a ) UseSet( static_cast <void (CBaseEntity::*)(	CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )> (a), #a )
-// #define SetBlocked( a ) BlockedSet( static_cast <void (CBaseEntity::*)(CBaseEntity *)> (a), #a )
-// #define ResetThink( ) m_pfnThink = static_cast <void (CBaseEntity::*)(void)> (NULL)
-// #define SetMoveDone( a ) m_pfnCallWhenMoveDone = static_cast <void (CBaseToggle::*)(void)> (a)
-
-// #else
-
+#if 1 /*I swear to god, one day this 1 will be changed to 0!!! */
 #define SetThink( a ) m_pfnThink = static_cast <void (CBaseEntity::*)(void)> (a)
 #define SetTouch( a ) m_pfnTouch = static_cast <void (CBaseEntity::*)(CBaseEntity *)> (a)
 #define SetUse( a ) m_pfnUse = static_cast <void (CBaseEntity::*)( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )> (a)
@@ -366,8 +325,6 @@ public:
 #define ResetUse( ) m_pfnUse = static_cast <void (CBaseEntity::*)( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )> (NULL)
 #define SetMoveDone( a ) m_pfnCallWhenMoveDone = static_cast <void (CBaseToggle::*)(void)> (a)
 #define ResetBlocked( ) m_pfnBlocked = static_cast <void (CBaseEntity::*)(CBaseEntity *)> (NULL)
-
-// #endif
 #endif
 
 class CPointEntity : public CBaseEntity
@@ -410,7 +367,7 @@ public:
 	void KeyValue( KeyValueData *pkvd );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	int ObjectCaps( void ) { return ( CPointEntity::ObjectCaps() | FCAP_MASTER ); }
-	BOOL IsTriggered( CBaseEntity *pActivator );
+	bool IsTriggered(CBaseEntity *pActivator );
 	void EXPORT Register( void );
 
 	virtual int Save( CSave &save );
@@ -541,7 +498,7 @@ public:
 	void EXPORT LinearMoveDone( void );
 	void AngularMove( Vector vecDestAngle, float flSpeed );
 	void EXPORT AngularMoveDone( void );
-	BOOL IsLockedByMaster( void );
+	bool IsLockedByMaster(void );
 
 	/* Override this in place of SetMoveDone */
 	virtual void MoveDone() {};
@@ -696,6 +653,4 @@ public:
 	void Precache( void );
 	void KeyValue( KeyValueData *pkvd );
 };
-#endif
-
 #endif

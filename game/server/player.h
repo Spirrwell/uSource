@@ -213,12 +213,12 @@ public:
 	virtual Vector BodyTarget( const Vector &posSrc ) { return Center( ) + pev->view_ofs * RANDOM_FLOAT( 0.5, 1.1 ); };		// position to shoot at
 	virtual void StartSneaking( void ) { m_tSneaking = gpGlobals->time - 1; }
 	virtual void StopSneaking( void ) { m_tSneaking = gpGlobals->time + 30; }
-	virtual BOOL IsSneaking( void ) { return m_tSneaking <= gpGlobals->time; }
-	virtual BOOL IsAlive( void ) { return (pev->deadflag == DEAD_NO) && pev->health > 0; }
+	virtual bool IsSneaking(void ) { return m_tSneaking <= gpGlobals->time; }
+	virtual bool IsAlive(void ) { return (pev->deadflag == DEAD_NO) && pev->health > 0; }
 	virtual BOOL ShouldFadeOnDeath( void ) { return FALSE; }
-	virtual	BOOL IsPlayer( void ) { return TRUE; }			// Spectators should return FALSE for this, they aren't "players" as far as game logic is concerned
+	virtual bool IsPlayer(void ) { return TRUE; }			// Spectators should return FALSE for this, they aren't "players" as far as game logic is concerned
 
-	virtual BOOL IsNetClient( void ) { return TRUE; }		// Bots should return FALSE for this, they can't receive NET messages
+	virtual bool IsNetClient(void ) { return TRUE; }		// Bots should return FALSE for this, they can't receive NET messages
 															// Spectators should return TRUE for this
 	virtual const char *TeamID( void );
 
@@ -258,9 +258,9 @@ public:
 	void StartObserver( Vector vecPosition, Vector vecViewAngle );
 	void StopObserver();
 
-	void AddPoints( int score, BOOL bAllowNegativeScore );
-	void AddPointsToTeam( int score, BOOL bAllowNegativeScore );
-	BOOL AddPlayerItem( CBasePlayerItem *pItem );
+	void AddPoints(int score, bool bAllowNegativeScore );
+	void AddPointsToTeam(int score, bool bAllowNegativeScore );
+	bool AddPlayerItem(CBasePlayerItem *pItem );
 	BOOL RemovePlayerItem( CBasePlayerItem *pItem, bool bCallHoster );
 	void DropPlayerItem ( char *pszItemName );
 	BOOL HasPlayerItem( CBasePlayerItem *pCheckItem );
@@ -287,7 +287,7 @@ public:
 	void UpdateGeigerCounter( void );
 	void CheckTimeBasedDamage( void );
 
-	BOOL FBecomeProne ( void );
+	bool FBecomeProne (void );
 	void BarnacleVictimBitten ( entvars_t *pevBarnacle );
 	void BarnacleVictimReleased ( void );
 	static int GetAmmoIndex(const char *psz);
@@ -326,6 +326,16 @@ public:
 	float m_flNextChatTime;
 
 	bool m_bSentBhopcap; // If false, the player just joined and needs a bhopcap message.
+
+	//We use this variables to store each ammo count.
+	int ammo_9mm;
+	int ammo_357;
+	int ammo_bolts;
+	int ammo_buckshot;
+	int ammo_rockets;
+	int ammo_uranium;
+	int ammo_hornets;
+	int ammo_argrens;
 };
 
 #define AUTOAIM_2DEGREES  0.0348994967025

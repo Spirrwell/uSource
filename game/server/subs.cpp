@@ -58,7 +58,7 @@ class CBaseDMStart : public CPointEntity
 {
 public:
 	void KeyValue( KeyValueData *pkvd );
-	BOOL IsTriggered( CBaseEntity *pEntity );
+	bool IsTriggered(CBaseEntity *pEntity );
 
 private:
 };
@@ -79,55 +79,11 @@ void CBaseDMStart::KeyValue( KeyValueData *pkvd )
 		CPointEntity::KeyValue( pkvd );
 }
 
-BOOL CBaseDMStart::IsTriggered( CBaseEntity *pEntity )
+bool CBaseDMStart::IsTriggered(CBaseEntity *pEntity )
 {
 	BOOL master = UTIL_IsMasterTriggered( pev->netname, pEntity );
 
 	return master;
-}
-
-// This updates global tables that need to know about entities being removed
-void CBaseEntity::UpdateOnRemove( void )
-{
-	int i;
-
-	if( FBitSet( pev->flags, FL_GRAPHED ) )
-	{
-		// this entity was a LinkEnt in the world node graph, so we must remove it from
-		// the graph since we are removing it from the world.
-		for( i = 0; i < WorldGraph.m_cLinks; i++ )
-		{
-			if( WorldGraph.m_pLinkPool[i].m_pLinkEnt == pev )
-			{
-				// if this link has a link ent which is the same ent that is removing itself, remove it!
-				WorldGraph.m_pLinkPool[i].m_pLinkEnt = NULL;
-			}
-		}
-	}
-
-	if( pev->globalname )
-		gGlobalState.EntitySetState( pev->globalname, GLOBAL_DEAD );
-
-	// tell owner ( if any ) that we're dead.This is mostly for MonsterMaker functionality.
-	//Killtarget didn't do this before, so the counter broke. - Solokiller
-	if( CBaseEntity* pOwner = pev->owner ? Instance( pev->owner ) : 0 )
-	{
-		pOwner->DeathNotice( pev );
-	}
-}
-
-// Convenient way to delay removing oneself
-void CBaseEntity::SUB_Remove( void )
-{
-	UpdateOnRemove();
-	if( pev->health > 0 )
-	{
-		// this situation can screw up monsters who can't tell their entity pointers are invalid.
-		pev->health = 0;
-		ALERT( at_aiconsole, "SUB_Remove called on entity with health > 0\n" );
-	}
-
-	REMOVE_ENTITY( ENT( pev ) );
 }
 
 // Convenient way to explicitly do nothing (passed to functions that require a method)
@@ -445,7 +401,7 @@ void CBaseToggle::LinearMoveDone( void )
 		( this->*m_pfnCallWhenMoveDone )();
 }
 
-BOOL CBaseToggle::IsLockedByMaster( void )
+bool CBaseToggle::IsLockedByMaster(void )
 {
 	if( m_sMaster && !UTIL_IsMasterTriggered( m_sMaster, m_hActivator ) )
 		return TRUE;
