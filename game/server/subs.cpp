@@ -33,13 +33,6 @@ extern BOOL FEntIsVisible( entvars_t *pev, entvars_t *pevTarget );
 
 extern DLL_GLOBAL int g_iSkillLevel;
 
-// Landmark class
-void CPointEntity::Spawn( void )
-{
-	pev->solid = SOLID_NOT;
-	//UTIL_SetSize( pev, g_vecZero, g_vecZero );
-}
-
 class CNullEntity : public CBaseEntity
 {
 public:
@@ -86,11 +79,6 @@ bool CBaseDMStart::IsTriggered(CBaseEntity *pEntity )
 	return master;
 }
 
-// Convenient way to explicitly do nothing (passed to functions that require a method)
-void CBaseEntity::SUB_DoNothing( void )
-{
-}
-
 // Global Savedata for Delay
 TYPEDESCRIPTION	CBaseDelay::m_SaveData[] =
 {
@@ -115,32 +103,6 @@ void CBaseDelay::KeyValue( KeyValueData *pkvd )
 	else
 	{
 		CBaseEntity::KeyValue( pkvd );
-	}
-}
-
-/*
-==============================
-SUB_UseTargets
-
-If self.delay is set, a DelayedUse entity will be created that will actually
-do the SUB_UseTargets after that many seconds have passed.
-
-Removes all entities with a targetname that match self.killtarget,
-and removes them, so some events can remove other triggers.
-
-Search for (string)targetname in all entities that
-match (string)self.target and call their .use function (if they have one)
-
-==============================
-*/
-void CBaseEntity::SUB_UseTargets( CBaseEntity *pActivator, USE_TYPE useType, float value )
-{
-	//
-	// fire targets
-	//
-	if( !FStringNull( pev->target ) )
-	{
-		FireTargets( STRING( pev->target ), pActivator, this, useType, value );
 	}
 }
 

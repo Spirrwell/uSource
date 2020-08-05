@@ -807,7 +807,7 @@ void DLLEXPORT CL_CreateMove( float frametime, struct usercmd_s *cmd, int active
 		cmd->upmove -= cl_upspeed->value * CL_KeyState( &in_down );
 
 		if( !(in_klook.state & 1 ) )
-		{	
+		{
 			cmd->forwardmove += cl_forwardspeed->value * CL_KeyState( &in_forward );
 			cmd->forwardmove -= cl_backspeed->value * CL_KeyState( &in_back );
 		}

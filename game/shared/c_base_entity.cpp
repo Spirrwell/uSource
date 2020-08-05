@@ -561,3 +561,42 @@ void CBaseEntity::SUB_Remove( void )
 	REMOVE_ENTITY( ENT( pev ) );
 #endif 
 }
+
+#ifndef CLIENT_DLL
+extern void FireTargets( const char *targetName, CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+#endif
+
+/*
+==============================
+SUB_UseTargets
+
+If self.delay is set, a DelayedUse entity will be created that will actually
+do the SUB_UseTargets after that many seconds have passed.
+
+Removes all entities with a targetname that match self.killtarget,
+and removes them, so some events can remove other triggers.
+
+Search for (string)targetname in all entities that
+match (string)self.target and call their .use function (if they have one)
+
+==============================
+*/
+void CBaseEntity::SUB_UseTargets( CBaseEntity *pActivator, USE_TYPE useType, float value )
+{
+#ifdef SERVER_DLL
+	//
+	// fire targets
+	//
+	if( !FStringNull( pev->target ) )
+	{
+		FireTargets( STRING( pev->target ), pActivator, this, useType, value );
+	}
+#else
+
+#endif
+}
+
+// Convenient way to explicitly do nothing (passed to functions that require a method)
+void CBaseEntity::SUB_DoNothing( void )
+{
+}

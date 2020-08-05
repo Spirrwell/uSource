@@ -13,8 +13,6 @@
 *
 ****/
 #pragma once
-#ifndef UTIL_H
-#define UTIL_H
 
 #include "common.h"
 
@@ -110,9 +108,13 @@ typedef int BOOL;
 // This is the glue that hooks .MAP entity class names to our CPP classes
 // The _declspec forces them to be exported by name so we can do a lookup with GetProcAddress()
 // The function is used to intialize / allocate the object for the entity
-
 #define LINK_ENTITY_TO_CLASS(mapClassName,DLLClassName) extern "C" EXPORT void mapClassName( entvars_t *pev ); void mapClassName( entvars_t *pev ) { GetClassPtr( (DLLClassName *)pev ); }
 
+#ifdef CLIENT_DLL
+#define IMPLEMENT_SAVERESTORE(derivedClass,baseClass) \
+int derivedClass::Save(class CSave& s) { return 1; }; \
+int derivedClass::Restore(class CRestore& r) { return 1; };
+#endif
 //
 // Conversion among the three types of "entity", including identity-conversions.
 //
@@ -581,4 +583,47 @@ int UTIL_SharedRandomLong( unsigned int seed, int low, int high );
 float UTIL_SharedRandomFloat( unsigned int seed, float low, float high );
 
 float UTIL_WeaponTimeBase( void );
-#endif // UTIL_H
+
+//
+// Converts a entvars_t * to a class pointer
+// It will allocate the class and entity if necessary
+//
+template <class T> T * GetClassPtr( T *a )
+{
+	entvars_t *pev = (entvars_t *)a;
+
+	// allocate entity if necessary
+	if( pev == NULL )
+		pev = VARS( CREATE_ENTITY() );
+
+	// get the private data
+	a = (T *)GET_PRIVATE( ENT( pev ) );
+
+	if( a == NULL )
+	{
+		// allocate private data
+		a = new( pev ) T;
+		a->pev = pev;
+	}
+	return a;
+}
+
+//
+// EHANDLE. Safe way to point to CBaseEntities who may die between frames
+//
+class EHANDLE
+{
+private:
+	edict_t *m_pent;
+	int m_serialnumber;
+public:
+	edict_t *Get( void );
+	edict_t *Set( edict_t *pent );
+
+	operator int ();
+
+	operator CBaseEntity *();
+
+	CBaseEntity *operator = ( CBaseEntity *pEntity );
+	CBaseEntity *operator ->();
+};
