@@ -1,0 +1,1 @@
+#include "c_base_weapon.h"

@@ -9,6 +9,7 @@
 #ifdef SERVER_DLL
 #include "weapons.h"
 #include "info_node.h"
+#include "skill.h"
 #else
 
 #endif
@@ -599,4 +600,251 @@ void CBaseEntity::SUB_UseTargets( CBaseEntity *pActivator, USE_TYPE useType, flo
 // Convenient way to explicitly do nothing (passed to functions that require a method)
 void CBaseEntity::SUB_DoNothing( void )
 {
+}
+
+
+/*
+================
+FireBullets
+
+Go to the trouble of combining multiple pellets into a single damage call.
+
+This version is used by Monsters.
+================
+*/
+void CBaseEntity::FireBullets( ULONG cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int iDamage, entvars_t *pevAttacker )
+{
+#ifdef SERVER_DLL
+	static int tracerCount;
+	int tracer;
+	TraceResult tr;
+	Vector vecRight = gpGlobals->v_right;
+	Vector vecUp = gpGlobals->v_up;
+
+	if( pevAttacker == NULL )
+		pevAttacker = pev;  // the default attacker is ourselves
+
+	ClearMultiDamage();
+	gMultiDamage.type = DMG_BULLET | DMG_NEVERGIB;
+
+	for( ULONG iShot = 1; iShot <= cShots; iShot++ )
+	{
+		// get circular gaussian spread
+		float x, y, z;
+		do {
+			x = RANDOM_FLOAT( -0.5, 0.5 ) + RANDOM_FLOAT( -0.5, 0.5 );
+			y = RANDOM_FLOAT( -0.5, 0.5 ) + RANDOM_FLOAT( -0.5, 0.5 );
+			z = x * x + y * y;
+		} while (z > 1);
+
+		Vector vecDir = vecDirShooting +
+		                x * vecSpread.x * vecRight +
+		                y * vecSpread.y * vecUp;
+		Vector vecEnd;
+
+		vecEnd = vecSrc + vecDir * flDistance;
+		UTIL_TraceLine( vecSrc, vecEnd, dont_ignore_monsters, ENT( pev )/*pentIgnore*/, &tr );
+
+		tracer = 0;
+		if( iTracerFreq != 0 && ( tracerCount++ % iTracerFreq ) == 0 )
+		{
+			Vector vecTracerSrc;
+
+			if( IsPlayer() )
+			{
+				// adjust tracer position for player
+				vecTracerSrc = vecSrc + Vector( 0, 0, -4 ) + gpGlobals->v_right * 2 + gpGlobals->v_forward * 16;
+			}
+			else
+			{
+				vecTracerSrc = vecSrc;
+			}
+
+			if( iTracerFreq != 1 )		// guns that always trace also always decal
+				tracer = 1;
+			switch( iBulletType )
+			{
+				case BULLET_MONSTER_MP5:
+				case BULLET_MONSTER_9MM:
+				case BULLET_MONSTER_12MM:
+				default:
+					MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, vecTracerSrc );
+					WRITE_BYTE( TE_TRACER );
+					WRITE_COORD( vecTracerSrc.x );
+					WRITE_COORD( vecTracerSrc.y );
+					WRITE_COORD( vecTracerSrc.z );
+					WRITE_COORD( tr.vecEndPos.x );
+					WRITE_COORD( tr.vecEndPos.y );
+					WRITE_COORD( tr.vecEndPos.z );
+					MESSAGE_END();
+					break;
+			}
+		}
+		// do damage, paint decals
+		if( tr.flFraction != 1.0 )
+		{
+			CBaseEntity *pEntity = CBaseEntity::Instance( tr.pHit );
+
+			if( iDamage )
+			{
+				pEntity->TraceAttack( pevAttacker, iDamage, vecDir, &tr, DMG_BULLET | ( ( iDamage > 16 ) ? DMG_ALWAYSGIB : DMG_NEVERGIB ) );
+
+				TEXTURETYPE_PlaySound( &tr, vecSrc, vecEnd, iBulletType );
+				DecalGunshot( &tr, iBulletType );
+			}
+			else switch( iBulletType )
+				{
+					default:
+					case BULLET_MONSTER_9MM:
+						pEntity->TraceAttack( pevAttacker, gSkillData.monDmg9MM, vecDir, &tr, DMG_BULLET );
+
+						TEXTURETYPE_PlaySound( &tr, vecSrc, vecEnd, iBulletType );
+						DecalGunshot( &tr, iBulletType );
+						break;
+					case BULLET_MONSTER_MP5:
+						pEntity->TraceAttack( pevAttacker, gSkillData.monDmgMP5, vecDir, &tr, DMG_BULLET );
+
+						TEXTURETYPE_PlaySound( &tr, vecSrc, vecEnd, iBulletType );
+						DecalGunshot( &tr, iBulletType );
+						break;
+					case BULLET_MONSTER_12MM:
+						pEntity->TraceAttack( pevAttacker, gSkillData.monDmg12MM, vecDir, &tr, DMG_BULLET );
+						if( !tracer )
+						{
+							TEXTURETYPE_PlaySound( &tr, vecSrc, vecEnd, iBulletType );
+							DecalGunshot( &tr, iBulletType );
+						}
+						break;
+					case BULLET_NONE: // FIX
+						pEntity->TraceAttack( pevAttacker, 50, vecDir, &tr, DMG_CLUB );
+						TEXTURETYPE_PlaySound( &tr, vecSrc, vecEnd, iBulletType );
+						// only decal glass
+						if( !FNullEnt( tr.pHit ) && VARS( tr.pHit )->rendermode != 0 )
+						{
+							UTIL_DecalTrace( &tr, DECAL_GLASSBREAK1 + RANDOM_LONG( 0, 2 ) );
+						}
+
+						break;
+				}
+		}
+		// make bullet trails
+		UTIL_BubbleTrail( vecSrc, tr.vecEndPos, (int)( ( flDistance * tr.flFraction ) / 64.0 ) );
+	}
+	ApplyMultiDamage( pev, pevAttacker );
+#endif
+}
+
+/*
+================
+FireBullets
+
+Go to the trouble of combining multiple pellets into a single damage call.
+
+This version is used by Players, uses the random seed generator to sync client and server side shots.
+================
+*/
+Vector CBaseEntity::FireBulletsPlayer( ULONG cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int iDamage, entvars_t *pevAttacker, int shared_rand )
+{
+#ifdef SERVER_DLL
+	static int tracerCount;
+	TraceResult tr;
+	Vector vecRight = gpGlobals->v_right;
+	Vector vecUp = gpGlobals->v_up;
+	float x = 0.0f, y = 0.0f;
+	float z;
+
+	if( pevAttacker == NULL )
+		pevAttacker = pev;  // the default attacker is ourselves
+
+	ClearMultiDamage();
+	gMultiDamage.type = DMG_BULLET | DMG_NEVERGIB;
+
+	for( ULONG iShot = 1; iShot <= cShots; iShot++ )
+	{
+		//Use player's random seed.
+		// get circular gaussian spread
+		x = UTIL_SharedRandomFloat( shared_rand + iShot, -0.5, 0.5 ) + UTIL_SharedRandomFloat( shared_rand + ( 1 + iShot ) , -0.5, 0.5 );
+		y = UTIL_SharedRandomFloat( shared_rand + ( 2 + iShot ), -0.5, 0.5 ) + UTIL_SharedRandomFloat( shared_rand + ( 3 + iShot ), -0.5, 0.5 );
+		//z = x * x + y * y;
+
+		Vector vecDir = vecDirShooting +
+		                x * vecSpread.x * vecRight +
+		                y * vecSpread.y * vecUp;
+		Vector vecEnd;
+
+		vecEnd = vecSrc + vecDir * flDistance;
+		UTIL_TraceLine( vecSrc, vecEnd, dont_ignore_monsters, ENT( pev )/*pentIgnore*/, &tr );
+
+		// do damage, paint decals
+		if( tr.flFraction != 1.0 )
+		{
+			CBaseEntity *pEntity = CBaseEntity::Instance( tr.pHit );
+
+			if( iDamage )
+			{
+				pEntity->TraceAttack( pevAttacker, iDamage, vecDir, &tr, DMG_BULLET | ( ( iDamage > 16 ) ? DMG_ALWAYSGIB : DMG_NEVERGIB ) );
+
+				TEXTURETYPE_PlaySound( &tr, vecSrc, vecEnd, iBulletType );
+				DecalGunshot( &tr, iBulletType );
+			}
+			else switch( iBulletType )
+				{
+					default:
+					case BULLET_PLAYER_9MM:
+						pEntity->TraceAttack( pevAttacker, gSkillData.plrDmg9MM, vecDir, &tr, DMG_BULLET );
+						break;
+					case BULLET_PLAYER_MP5:
+						pEntity->TraceAttack( pevAttacker, gSkillData.plrDmgMP5, vecDir, &tr, DMG_BULLET );
+						break;
+					case BULLET_PLAYER_BUCKSHOT:
+						// make distance based!
+						pEntity->TraceAttack( pevAttacker, gSkillData.plrDmgBuckshot, vecDir, &tr, DMG_BULLET );
+						break;
+					case BULLET_PLAYER_357:
+						pEntity->TraceAttack( pevAttacker, gSkillData.plrDmg357, vecDir, &tr, DMG_BULLET );
+						break;
+					case BULLET_NONE: // FIX
+						pEntity->TraceAttack( pevAttacker, 50, vecDir, &tr, DMG_CLUB );
+						TEXTURETYPE_PlaySound( &tr, vecSrc, vecEnd, iBulletType );
+						// only decal glass
+						if( !FNullEnt( tr.pHit ) && VARS( tr.pHit )->rendermode != 0 )
+						{
+							UTIL_DecalTrace( &tr, DECAL_GLASSBREAK1 + RANDOM_LONG( 0, 2 ) );
+						}
+
+						break;
+				}
+		}
+		// make bullet trails
+		UTIL_BubbleTrail( vecSrc, tr.vecEndPos, (int)( ( flDistance * tr.flFraction ) / 64.0 ) );
+	}
+	ApplyMultiDamage( pev, pevAttacker );
+
+	return Vector( x * vecSpread.x, y * vecSpread.y, 0.0 );
+#else
+	float x = 0.0f, y = 0.0f, z;
+
+	for( ULONG iShot = 1; iShot <= cShots; iShot++ )
+	{
+		if( pevAttacker == NULL )
+		{
+			// get circular gaussian spread
+			do {
+				x = RANDOM_FLOAT( -0.5, 0.5 ) + RANDOM_FLOAT( -0.5, 0.5 );
+				y = RANDOM_FLOAT( -0.5, 0.5 ) + RANDOM_FLOAT( -0.5, 0.5 );
+				z = x * x + y * y;
+			} while( z > 1 );
+		}
+		else
+		{
+			//Use player's random seed.
+			// get circular gaussian spread
+			x = UTIL_SharedRandomFloat( shared_rand + iShot, -0.5, 0.5 ) + UTIL_SharedRandomFloat( shared_rand + ( 1 + iShot ) , -0.5, 0.5 );
+			y = UTIL_SharedRandomFloat( shared_rand + ( 2 + iShot ), -0.5, 0.5 ) + UTIL_SharedRandomFloat( shared_rand + ( 3 + iShot ), -0.5, 0.5 );
+			z = x * x + y * y;
+		}
+	}
+
+	return Vector( x * vecSpread.x, y * vecSpread.y, 0.0 );
+#endif
 }
