@@ -5,8 +5,9 @@
  */
 #pragma once
 
-//#include "game_shared.h"
+#include "game_shared.h"
 #include "util.h"
+#include "base_defs.h"
 
 class CSave;
 class CRestore;

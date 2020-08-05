@@ -221,10 +221,11 @@ struct TestStruct
 	bool b_Bitch;
 };
 
-
+#if 0
 BEGIN_STRUCT_FIELD_INFO(TestStruct)
 	STRUCT_FIELD(bool, b_Bitch),
 END_STRUCT_FIELD_INFO(TestStruct)
+#endif
 
 //=====================================================================================//
 /**

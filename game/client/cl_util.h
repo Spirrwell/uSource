@@ -40,6 +40,8 @@
 							{ \
 								gHUD.y.UserCmd_##x( ); \
 							}
+#undef CVAR_GET_FLOAT
+#undef CVAR_GET_STRING
 
 inline float CVAR_GET_FLOAT( const char *x ) {	return gEngfuncs.pfnGetCvarFloat( (char*)x ); }
 inline char* CVAR_GET_STRING( const char *x ) {	return const_cast<char *>(gEngfuncs.pfnGetCvarString(

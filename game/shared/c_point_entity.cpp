@@ -1,7 +1,7 @@
 #include "game_shared.h"
 #include "c_point_entity.h"
-#include "c_base_entity.h"
 #include "base_defs.h"
+#include "c_base_entity.h"
 
 void CPointEntity::Spawn( void )
 {

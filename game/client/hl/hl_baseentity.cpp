@@ -290,39 +290,9 @@ int DamageDecal( CBaseEntity *pEntity, int bitsDamageType ) { return 0; }
 void DecalGunshot( TraceResult *pTrace, int iBulletType ) { }
 void EjectBrass( const Vector &vecOrigin, const Vector &vecVelocity, float rotation, int model, int soundtype ) { }
 void AddAmmoNameToAmmoRegistry( const char *szAmmoname ) { }
-int CBasePlayerItem::Restore( class CRestore & ) { return 1; }
-int CBasePlayerItem::Save( class CSave & ) { return 1; }
-int CBasePlayerWeapon::Restore( class CRestore & ) { return 1; }
-int CBasePlayerWeapon::Save( class CSave & ) { return 1; }
-float CBasePlayerWeapon::GetNextAttackDelay( float flTime ) { return flTime; }
-void CBasePlayerItem::SetObjectCollisionBox( void ) { }
-void CBasePlayerItem::FallInit( void ) { }
-void CBasePlayerItem::FallThink( void ) { }
-void CBasePlayerItem::Materialize( void ) { }
-void CBasePlayerItem::AttemptToMaterialize( void ) { }
-void CBasePlayerItem::CheckRespawn( void ) { }
-CBaseEntity *CBasePlayerItem::Respawn( void ) { return NULL; }
-void CBasePlayerItem::DefaultTouch( CBaseEntity *pOther ) { }
-void CBasePlayerItem::DestroyItem( void ) { }
-int CBasePlayerItem::AddToPlayer( CBasePlayer *pPlayer ) { return TRUE; }
-void CBasePlayerItem::Drop( void ) { }
-void CBasePlayerItem::Kill( void ) { }
-void CBasePlayerItem::Holster( int skiplocal ) { }
-void CBasePlayerItem::AttachToPlayer ( CBasePlayer *pPlayer ) { }
-int CBasePlayerWeapon::AddDuplicate( CBasePlayerItem *pOriginal ) { return 0; }
-int CBasePlayerWeapon::AddToPlayer( CBasePlayer *pPlayer ) { return FALSE; }
-int CBasePlayerWeapon::UpdateClientData( CBasePlayer *pPlayer ) { return 0; }
-BOOL CBasePlayerWeapon::AddPrimaryAmmo( int iCount, char *szName, int iMaxClip, int iMaxCarry ) { return TRUE; }
-BOOL CBasePlayerWeapon::AddSecondaryAmmo( int iCount, char *szName, int iMax ) { return TRUE; }
-BOOL CBasePlayerWeapon::IsUseable( void ) { return TRUE; }
-int CBasePlayerWeapon::PrimaryAmmoIndex( void ) { return -1; }
-int CBasePlayerWeapon::SecondaryAmmoIndex( void ) { return -1; }
 void CBasePlayerAmmo::Spawn( void ) { }
 CBaseEntity* CBasePlayerAmmo::Respawn( void ) { return this; }
 void CBasePlayerAmmo::Materialize( void ) { }
 void CBasePlayerAmmo::DefaultTouch( CBaseEntity *pOther ) { }
-int CBasePlayerWeapon::ExtractAmmo( CBasePlayerWeapon *pWeapon ) { return 0; }
-int CBasePlayerWeapon::ExtractClipAmmo( CBasePlayerWeapon *pWeapon ) { return 0; }	
-void CBasePlayerWeapon::RetireWeapon( void ) { }
 void CSoundEnt::InsertSound( int iType, const Vector &vecOrigin, int iVolume, float flDuration ) {}
 void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType ){}

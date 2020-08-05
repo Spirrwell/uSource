@@ -44,58 +44,6 @@ enum SS_INTERRUPT
 #define SCRIPT_FINISHSCHED_DEFAULT	0
 #define SCRIPT_FINISHSCHED_AMBUSH	1
 
-class CCineMonster : public CBaseMonster
-{
-public:
-	void Spawn( void );
-	virtual void KeyValue( KeyValueData *pkvd );
-	virtual void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	virtual void Blocked( CBaseEntity *pOther );
-	virtual void Touch( CBaseEntity *pOther );
-	virtual int	 ObjectCaps( void ) { return (CBaseMonster :: ObjectCaps() & ~FCAP_ACROSS_TRANSITION); }
-	virtual void Activate( void );
-
-	virtual int		Save( CSave &save );
-	virtual int		Restore( CRestore &restore );
-	
-	static	TYPEDESCRIPTION m_SaveData[];
-
-	// void EXPORT CineSpawnThink( void );
-	void EXPORT CineThink( void );
-	void Pain( void );
-	void Die( void );
-	void DelayStart( int state );
-	BOOL FindEntity( void );
-	virtual void PossessEntity( void );
-
-	void ReleaseEntity( CBaseMonster *pEntity );
-	void CancelScript( void );
-	virtual BOOL StartSequence( CBaseMonster *pTarget, int iszSeq, BOOL completeOnEmpty );
-	virtual BOOL FCanOverrideState ( void );
-	void SequenceDone ( CBaseMonster *pMonster );
-	virtual void FixScriptMonsterSchedule( CBaseMonster *pMonster );
-	BOOL	CanInterrupt( void );
-	void	AllowInterrupt( BOOL fAllow );
-	int		IgnoreConditions( void );
-
-	string_t m_iszIdle;		// string index for idle animation
-	string_t m_iszPlay;		// string index for scripted animation
-	string_t m_iszEntity;	// entity that is wanted for this script
-	int m_fMoveTo;
-	int m_iFinishSchedule;
-	float m_flRadius;		// range to search
-	float m_flRepeat;	// repeat rate
-
-	int m_iDelay;
-	float m_startTime;
-
-	int	m_saved_movetype;
-	int	m_saved_solid;
-	int m_saved_effects;
-	//Vector m_vecOrigOrigin;
-	BOOL m_interruptable;
-};
-
 class CCineAI : public CCineMonster
 {
 	BOOL StartSequence( CBaseMonster *pTarget, int iszSeq, BOOL completeOnEmpty );
@@ -103,4 +51,5 @@ class CCineAI : public CCineMonster
 	BOOL FCanOverrideState ( void );
 	virtual void FixScriptMonsterSchedule( CBaseMonster *pMonster );
 };
+
 #endif //SCRIPTED_H

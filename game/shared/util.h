@@ -31,6 +31,8 @@
 #include "../server/physcallback.h"
 #endif
 
+class CBaseEntity;
+
 #include <string.h>
 #include <ctype.h>
 inline void MESSAGE_BEGIN( int msg_dest, int msg_type, const float *pOrigin, entvars_t *ent );  // implementation later in this file
@@ -226,8 +228,6 @@ inline BOOL FClassnameIs(entvars_t* pev, const char* szClassname)
 {
 	return FStrEq(STRING(pev->classname), szClassname);
 }
-
-class CBaseEntity;
 
 // Misc. Prototypes
 extern void			UTIL_SetSize			(entvars_t* pev, const Vector &vecMin, const Vector &vecMax);

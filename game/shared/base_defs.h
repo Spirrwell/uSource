@@ -252,3 +252,17 @@ enum decal_e
 #define SF_MULTI_INIT		1
 #define SF_GLOBAL_SET			1	// Set global state to initial state on spawn
 //================================================================================================================================================//
+#define AUTOAIM_2DEGREES  0.0348994967025
+#define AUTOAIM_5DEGREES  0.08715574274766
+#define AUTOAIM_8DEGREES  0.1391731009601
+#define AUTOAIM_10DEGREES 0.1736481776669
+//================================================================================================================================================//
+//
+// generic Toggle entity.
+//
+#define	SF_ITEM_USE_ONLY	256 //  ITEM_USE_ONLY = BUTTON_USE_ONLY = DOOR_USE_ONLY!!!
+
+
+#define	ROUTE_SIZE			8 // how many waypoints a monster can store at one time
+#define MAX_OLD_ENEMIES		4 // how many old enemies to remember
+//================================================================================================================================================//
