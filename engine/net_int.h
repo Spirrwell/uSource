@@ -37,6 +37,7 @@ enum class ENetSourceType {
 class IEngineNetsystem : public IAppInterface
 {
 public:
+	/* Hooks the network message with the svc_netsystem index. */
 	virtual void HookServerNetsystemMsg(void(*pfnHook)(edict_t*, void*)) = 0;
 	virtual void HookClientNetsystemMsg(void(*pfnHook)(void*)) = 0;
 

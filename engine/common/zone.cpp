@@ -14,6 +14,7 @@ GNU General Public License for more details.
 */
 
 #include "common.h"
+#include "engine_int.h"
 
 #define MEMHEADER_SENTINEL1	0xDEADF00D
 #define MEMHEADER_SENTINEL2	0xDF
@@ -150,7 +151,7 @@ void *_Mem_Realloc( byte *poolptr, void *memptr, size_t size, qboolean clear, co
 		if( size == memhdr->size ) return memptr;
 	}
 
-	nb = _Mem_Alloc( poolptr, size, clear, filename, fileline );
+	nb = static_cast<char *>(_Mem_Alloc(poolptr, size, clear, filename, fileline));
 
 	if( memptr ) // first allocate?
 	{ 
@@ -352,3 +353,40 @@ void Memory_Init( void )
 {
 	poolchain = NULL; // init mem chain
 }
+
+class CEngineMalloc : public IEngineMalloc
+{
+public:
+	virtual bool Init() override { return true; }
+	virtual bool PreInit() override { return true; }
+	virtual void Shutdown() override {}
+	virtual const char* GetParentInterface() override { return IENGINEMALLOC_INTERFACE; }
+	virtual const char* GetName() override { return "CEngineMalloc001"; };
+
+	virtual byte *Mem_AllocPool( const char *name, const char *filename, int fileline ) override
+	{
+		return ::_Mem_AllocPool(name, filename, fileline);
+	}
+
+	virtual void  Mem_FreePool( byte **poolptr, const char *filename, int fileline ) override
+	{
+		return ::_Mem_FreePool(poolptr, filename, fileline);
+	}
+
+	virtual void *Mem_Alloc( byte *poolptr, size_t size, qboolean clear, const char *filename, int fileline ) override
+	{
+		return ::_Mem_Alloc(poolptr, size, clear, filename, fileline);
+	}
+
+	virtual void *Mem_Realloc( byte *poolptr, void *memptr, size_t size, qboolean clear, const char *filename, int fileline ) override
+	{
+		return ::_Mem_Realloc(poolptr, memptr, size, clear, filename, fileline);
+	}
+
+	virtual void  Mem_Free( void *data, const char *filename, int fileline ) override
+	{
+		return ::_Mem_Free(data, filename, fileline);
+	}
+};
+
+EXPOSE_INTERFACE(CEngineMalloc);
