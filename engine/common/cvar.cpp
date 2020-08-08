@@ -17,6 +17,7 @@ GNU General Public License for more details.
 #include "common.h"
 #include "base_cmd.h"
 #include "engine_int.h"
+#include "tier1/dbg.h"
 
 convar_t	*cvar_vars = NULL; // head of list
 convar_t	*cmd_scripting;
@@ -938,6 +939,7 @@ Reads in all archived cvars
 */
 void Cvar_Init( void )
 {
+	AssertMsg(!cvar_was_init, "Cvar subsystem was initialized multiple times!\n");
 	if(!cvar_was_init)
 	{
 		cvar_vars = NULL;

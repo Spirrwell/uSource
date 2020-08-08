@@ -51,6 +51,8 @@ GNU General Public License for more details.
 #include "event_int.h"
 #include "demo_int.h"
 
+#include "tier1/tier1.h"
+
 /* Interface globals */
 ILogSystem* g_pLoggingSystem;
 

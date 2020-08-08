@@ -17,6 +17,7 @@ GNU General Public License for more details.
 #include "client.h"
 #include "server.h"
 #include "base_cmd.h"
+#include "tier1/dbg.h"
 
 #define MAX_CMD_BUFFER	32768
 #define MAX_CMD_LINE	2048
@@ -1245,6 +1246,7 @@ Cmd_Init
 */
 void Cmd_Init( void )
 {
+	AssertMsg(!cmd_was_init, "Concommand system was initialized multiple times!!");
 	if(!cmd_was_init)
 	{
 		Cbuf_Init();

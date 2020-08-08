@@ -3,7 +3,12 @@
  */ 
 #include "platformspec.h"
 #include "common/port.h"
+#include "containers/list.h"
 
+#include <stdlib.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <stdio.h>
 #ifndef _WIN32 
 #include <unistd.h>
 #include <sys/time.h>
@@ -36,4 +41,25 @@ unsigned long long platform::GetCurrentThreadId()
 #else
 	#error Implement me
 #endif 
+}
+
+typedef void(*fnFatalHook_t)(const char*);
+List<fnFatalHook_t> g_fatal_hooks;
+
+void platform::HookFatalError(void (*fnHook)(const char *))
+{
+	g_fatal_hooks.push_back(fnHook);
+}
+
+void platform::FatalError(const char *fmt, ...)
+{
+	char tmp[4096];
+	va_list va;
+	va_start(va, fmt);
+	vsnprintf(tmp, sizeof(tmp), fmt, va);
+	va_end(va);
+	for(auto x : g_fatal_hooks)
+		x(tmp);
+	fprintf(stderr, "%s", tmp);
+	abort();
 }
