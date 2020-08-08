@@ -341,6 +341,7 @@ static constexpr SMethodInfo_t __g__ ## _class ## _method_info[] = {
 
 //=====================================================================================//
 
+#if 0
 class CClass
 {
 public:
@@ -357,3 +358,4 @@ END_FIELD_INFO(CClass)
 BEGIN_NET_INFO(CClass)
 	NETWORKED_FIELD(bool, m_bBool, ENetworkedFieldType::CLIENT_TO_SERVER),
 END_NET_INFO(CClass)
+#endif
