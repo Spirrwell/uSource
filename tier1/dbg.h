@@ -21,7 +21,7 @@ const char* _vpaste(const char* fmt, ...);
 #undef MsgC
 
 #ifdef _DEBUG
-#define AssertM(_x) if(!(_x)) { g_pLogSystem->Error(LOGCHAN_ERROR, 0, _vpaste("Assertion failed: %s %s:%u\n", #_x, __FILE__, __LINE__));}
+#define AssertM(_x) if(!(_x)) { g_pLogSystem->Log(LOGCHAN_ERROR, LOGVERBO_HIGHEST, _vpaste("Assertion failed: %s %s:%u\n", #_x, __FILE__, __LINE__));}
 #define Assert(_x) {g_pEngineDebug->AssertFunction((_x), #_x, __FILE__, __LINE__, "");}
 #define AssertMsg(_x, ...) {g_pEngineDebug->AssertFunction((_x), #_x, __FILE__, __LINE__, _vpaste(__VA_ARGS__));}
 #else
@@ -32,7 +32,8 @@ const char* _vpaste(const char* fmt, ...);
 
 /* Absolutely fatal assertions regardless of debug build status */
 #define AssertF(_x) if(!(_x)) {g_pEngineDebug->HostError(_vpaste("Assertion failed: %s %s:%u", #_x, __FILE__, __LINE__));}
-#define AssertFMsg(_x, ...) if(!(_x)) { g_pEngineDebug->HostError(_vpaste(__VA_ARGS__));}
+#define AssertFMsg(_x, ...) if(!(_x)) { g_pLogSystem->Log(LOGCHAN_ERROR, LOGVERBO_HIGHEST, _vpaste("Assertion failed: %s %s:%u\n", #_x, __FILE__, __LINE__));\
+g_pEngineDebug->HostError(_vpaste(__VA_ARGS__));}
 
 void Msg(const char* fmt, ...);
 void Warn(const char* fmt, ...);
