@@ -37,7 +37,6 @@ GNU General Public License for more details.
 
 /* Global engine funcs */
 extern IEngineCvar* g_pEngineCvar;
-extern IEngineMalloc* g_pEngineMalloc;
 extern IEngineTrace* g_pEngineTrace;
 
 #ifndef offsetof

@@ -84,16 +84,6 @@ public:
 	virtual String GetFullPath(const char* file, bool gamedironly = false) = 0;
 };
 
-class IEngineMalloc : public IAppInterface
-{
-public:
-	virtual byte *Mem_AllocPool( const char *name, const char *filename, int fileline ) = 0;
-	virtual void  Mem_FreePool( byte **poolptr, const char *filename, int fileline ) = 0;
-	virtual void *Mem_Alloc( byte *poolptr, size_t size, qboolean clear, const char *filename, int fileline ) = 0;
-	virtual void *Mem_Realloc( byte *poolptr, void *memptr, size_t size, qboolean clear, const char *filename, int fileline ) = 0;
-	virtual void  Mem_Free( void *data, const char *filename, int fileline ) = 0;
-};
-
 class IEngineTrace : public IAppInterface
 {
 public:

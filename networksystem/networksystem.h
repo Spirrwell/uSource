@@ -1,5 +1,7 @@
 #pragma once
 
+#undef min
+#undef max
 #include "net_int.h"
 #include "engine_int.h"
 #include "const.h"
@@ -23,8 +25,8 @@ namespace NetworkSystem
 	 * @param msg the message itself
 	 * @param client The client to send the message to
 	 */
-	void SendToServer(int msgid, const CNetworkMessage& msg);
-	void SendToClient(int msgid, edict_t* client, const CNetworkMessage& msg);
+	void SendToServer(unsigned int msgname, const CNetworkMessage& msg);
+	void SendToClient(unsigned int msgname, edict_t* client, const CNetworkMessage& msg);
 
 	/**
 	 * Listens for the message on the client or server and calls the specified callback when the message
@@ -32,11 +34,10 @@ namespace NetworkSystem
 	 */
 	typedef void(*pfnRecvServerMsgCallback)(CNetworkMessage&);
 	typedef void(*pfnRecvClientMsgCallback)(edict_t*,CNetworkMessage&);
-	void RecvFromServer(int msgid, pfnRecvServerMsgCallback callback);
-	void RecvFromClient(int msgid, edict_t* client, pfnRecvClientMsgCallback callback);
-	void RecvFromClients(int msgid, pfnRecvClientMsgCallback callback);
+	void RecvFromServer(unsigned int msgname, pfnRecvServerMsgCallback callback);
+	void RecvFromClient(unsigned int msgname, edict_t* client, pfnRecvClientMsgCallback callback);
+	void RecvFromClients(unsigned int msgname, pfnRecvClientMsgCallback callback);
 
-	extern IEngineMalloc *g_pMalloc;
 	extern byte* g_pNetworkPool;
 
 	void* Mem_Alloc(unsigned long long size);
@@ -111,6 +112,8 @@ public:
 	long long ReadInt64();
 	unsigned long long ReadUInt64();
 	void ReadBytes(void* outbuf, unsigned long num);
+
+	const void* Data() const { return m_data; }
 
 	unsigned long Size() const { return m_size; };
 	unsigned long BufferPos() const { return m_bufpos; }

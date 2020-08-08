@@ -6,66 +6,114 @@
 #include "netproto.h"
 #include <memory.h>
 
+#include "public/mem.h"
+#include "tier1/convar.h"
+#include "tier1/dbg.h"
+
+Convar net_debug_messages("net_debug_messages", "0", FCVAR_CHEAT | FCVAR_ARCHIVE);
+
 IEngineNetsystem* g_pNetworkSystem;
-IEngineMalloc* NetworkSystem::g_pMalloc;
 byte* NetworkSystem::g_pNetworkPool;
 
 void SV_ParseNetsysMessage(edict_t* e, void* msg);
 void CL_ParseNetsysMessage(void* msg);
+
+bool bNetsysInitialized = false;
 
 using namespace NetworkSystem;
 
 void ConnectNetsystemLibraries()
 {
 	g_pNetworkSystem = static_cast<IEngineNetsystem*>(AppFramework::FindInterface(INETSYSTEM_INTERFACE));
-	NetworkSystem::g_pMalloc = static_cast<IEngineMalloc*>(AppFramework::FindInterface(IENGINEMALLOC_INTERFACE));
+	AssertFMsg(g_pNetworkSystem, "Unable to find the networksystem interface!!");
 }
 
 void NetworksystemInit()
 {
-	g_pNetworkPool = g_pMalloc->Mem_AllocPool("NetworksystemPool", __FILE__, __LINE__);
+	AssertMsg(!bNetsysInitialized, "NetworkSystem has already been initialized!");
+	bNetsysInitialized = true;
+	g_pNetworkPool = g_pZoneAllocator->_Mem_AllocPool("NetworksystemPool", __FILE__, __LINE__);
 	g_pNetworkSystem->HookServerNetsystemMsg(SV_ParseNetsysMessage);
 	g_pNetworkSystem->HookClientNetsystemMsg(CL_ParseNetsysMessage);
 }
 
 void NetworksystemShutdown()
 {
-	g_pMalloc->Mem_FreePool(&g_pNetworkPool, __FILE__, __LINE__);
+	AssertMsg(bNetsysInitialized, "NetworkSystem has not been initialized yet!");
+	g_pZoneAllocator->_Mem_FreePool(&g_pNetworkPool, __FILE__, __LINE__);
 }
-
-void SV_ParseNetsysMessage(edict_t* e, void* msg)
-{
-
-}
-
 
 //=========================================================================================================================//
 // Memory allocation
 void NetworkSystem::Mem_Free(void* ptr)
 {
-	g_pMalloc->Mem_Free(ptr, "", 0);
+	Assert(ptr);
+	g_pZoneAllocator->_Mem_Free(ptr, "", 0);
 }
 
 void* NetworkSystem::Mem_Alloc(unsigned long long size)
 {
-	return g_pMalloc->Mem_Alloc(g_pNetworkPool, size, false, "", 0);
+	Assert(size > 0);
+	return g_pZoneAllocator->_Mem_Alloc(g_pNetworkPool, size, false, "", 0);
 }
 
 void* NetworkSystem::Mem_Realloc(void *ptr, unsigned long long size)
 {
-	return g_pMalloc->Mem_Realloc(g_pNetworkPool, ptr, size, false, "", 0);
+	Assert(size > 0);
+	Assert(ptr);
+	return g_pZoneAllocator->_Mem_Realloc(g_pNetworkPool, ptr, size, false, "", 0);
 }
 
-void CL_ParseNetsysMessage(void* msg)
+void NetworkSystem::SendToServer(unsigned int msgname, const CNetworkMessage &msg)
 {
 
 }
+
+void NetworkSystem::SendToClient(unsigned int msgname, edict_t *client, const CNetworkMessage &msg)
+{
+
+}
+
+void NetworkSystem::RecvFromServer(unsigned int msgname, pfnRecvServerMsgCallback callback)
+{
+
+}
+
+void NetworkSystem::RecvFromClient(unsigned int msgname, edict_t *client, pfnRecvClientMsgCallback callback)
+{
+
+}
+
+void NetworkSystem::RecvFromClients(unsigned int msgname, pfnRecvClientMsgCallback callback)
+{
+
+}
+
+/**
+ * Parse a netsys message received from the server
+ */
+void CL_ParseNetsysMessage(void* msg)
+{
+	msg_hdr_t hdr;
+	hdr.type = g_pNetworkSystem->ReadShort(msg);
+
+	if(net_debug_messages.GetBool())
+		Msg("Received message: type=%u\n", (unsigned)hdr.type);
+
+}
+
+/* Parse a netsys message received from a client connected to the server */
+void SV_ParseNetsysMessage(edict_t* e, void* msg)
+{
+
+}
+
 //=========================================================================================================================//
 
 //=========================================================================================================================//
 // Network byte order functions
 // for networksystem, byte order is little endian
-short htons(short in)
+short NetworkSystem::htons(short in)
 {
 #ifdef XASH_BIG_ENDIAN
 	return ToLittleEndian(in);
@@ -74,7 +122,7 @@ short htons(short in)
 #endif
 }
 
-int htoni(int in)
+int NetworkSystem::htoni(int in)
 {
 #ifdef XASH_BIG_ENDIAN
 	return ToLittleEndian(in);
@@ -83,7 +131,7 @@ int htoni(int in)
 #endif
 }
 
-long htonl(int in)
+long NetworkSystem::htonl(int in)
 {
 #ifdef XASH_BIG_ENDIAN
 	return ToLittleEndian(in);
@@ -92,7 +140,7 @@ long htonl(int in)
 #endif
 }
 
-long long htonll(long long in)
+long long NetworkSystem::htonll(long long in)
 {
 #ifdef XASH_BIG_ENDIAN
 	return ToLittleEndian(in);
@@ -102,7 +150,7 @@ long long htonll(long long in)
 }
 
 
-short ntohs(short in)
+short NetworkSystem::ntohs(short in)
 {
 #ifdef XASH_BIG_ENDIAN
 	return ToBigEndian(in);
@@ -111,7 +159,7 @@ short ntohs(short in)
 #endif
 }
 
-int ntohi(int in)
+int NetworkSystem::ntohi(int in)
 {
 #ifdef XASH_BIG_ENDIAN
 	return ToBigEndian(in);
@@ -120,7 +168,7 @@ int ntohi(int in)
 #endif
 }
 
-long ntohl(long in)
+long NetworkSystem::ntohl(long in)
 {
 #ifdef XASH_BIG_ENDIAN
 	return ToBigEndian(in);
@@ -129,7 +177,7 @@ long ntohl(long in)
 #endif
 }
 
-long long ntohll(long long in)
+long long NetworkSystem::ntohll(long long in)
 {
 #ifdef XASH_BIG_ENDIAN
 	return ToBigEndian(in);
