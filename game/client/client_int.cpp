@@ -379,8 +379,6 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 	if( iVersion != CLDLL_INTERFACE_VERSION )
 		return 0;
 
-	GameSharedInit();
-
 	memcpy( &gEngfuncs, pEnginefuncs, sizeof(cl_enginefunc_t) );
 
 	EV_HookEvents();

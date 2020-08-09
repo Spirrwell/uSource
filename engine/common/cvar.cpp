@@ -939,9 +939,9 @@ Reads in all archived cvars
 */
 void Cvar_Init( void )
 {
-	AssertMsg(!cvar_was_init, "Cvar subsystem was initialized multiple times!\n");
 	if(!cvar_was_init)
 	{
+		cvar_was_init = true;
 		cvar_vars = NULL;
 		cmd_scripting = Cvar_Get( "cmd_scripting", "0", FCVAR_ARCHIVE, "enable simple condition checking and variable operations" );
 		Cvar_RegisterVariable (&host_developer); // early registering for dev 

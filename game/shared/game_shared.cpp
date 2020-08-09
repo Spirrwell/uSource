@@ -10,9 +10,16 @@
 #include "tier1/tier1.h"
 #include "tier1/convar.h"
 #include "tier1/concommand.h"
+#include "networksystem/networksystem.h"
 
 void GameSharedInit() 
 {
 	/* Load our global interfaces from the engine */
 	ConnectTier1Libraries();
+
+	/* Lod the networksystem libraries */
+	ConnectNetsystemLibraries();
+
+	/* Init networksystem */
+	NetworksystemInit();
 }
