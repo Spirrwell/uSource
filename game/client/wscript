@@ -75,7 +75,7 @@ def build(bld):
 	if bld.env.GOLDSRC:
 		defines += ['GOLDSOURCE_SUPPORT']
 
-	libs = ['public', 'mathlib', 'tier1', 'mainui']
+	libs = ['public', 'mathlib', 'mainui', 'networksystem', 'tier1']
 	if bld.env.GOLDSRC:
 		libs += ['DL']
 

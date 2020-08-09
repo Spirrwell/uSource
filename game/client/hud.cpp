@@ -25,7 +25,7 @@
 #include "parsemsg.h"
 #include "hud_servers.h"
 #include "crtlib.h"
-
+#include "game_shared.h"
 #include "demo.h"
 #include "demo_api.h"
 
@@ -155,6 +155,7 @@ int __MsgFunc_AllowSpec( const char *pszName, int iSize, void *pbuf )
 // This is called every time the DLL is loaded
 void CHud::Init( void )
 {
+	GameSharedInit();
 	HOOK_MESSAGE( Logo );
 	HOOK_MESSAGE( ResetHUD );
 	HOOK_MESSAGE( GameMode );

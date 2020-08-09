@@ -1246,9 +1246,10 @@ Cmd_Init
 */
 void Cmd_Init( void )
 {
-	AssertMsg(!cmd_was_init, "Concommand system was initialized multiple times!!");
 	if(!cmd_was_init)
 	{
+		cmd_was_init = true;
+
 		Cbuf_Init();
 
 		cmd_functions = NULL;
