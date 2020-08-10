@@ -865,6 +865,6 @@ void GameDLLInit( void )
 
 	SERVER_COMMAND( "exec skill.cfg\n" );
 
-	//GameSharedInit();
+	GameSharedInit();
 }
 
