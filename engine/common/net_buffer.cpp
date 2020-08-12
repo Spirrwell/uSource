@@ -717,7 +717,7 @@ public:
 	virtual void WriteFloat(float _fl) override;
 	virtual void WriteVector(vec3_t _vec) override;
 	virtual void EndMessage() override;
-	virtual void ReadBytes(void* pBuffer, void* pOutbuf, unsigned long long num) override;
+	virtual size_t ReadBytes(void* pBuffer, void* pOutbuf, unsigned long long num) override;
 	virtual void ReadString(void* pBuffer, char* pOutbuf, unsigned long long num) override;
 	virtual byte ReadByte(void* pBuffer) override;
 	virtual short ReadShort(void* pBuffer) override;
@@ -837,50 +837,56 @@ void CEngineNetsystem001::EndMessage()
 	g_current_sizebuf = nullptr;
 }
 
-void CEngineNetsystem001::ReadBytes(void *pBuffer, void *pOutbuf, unsigned long long int num)
+size_t CEngineNetsystem001::ReadBytes(void *pBuffer, void *pOutbuf, unsigned long long int num)
 {
 	Assert(pBuffer != nullptr);
+	if(MSG_ReadBytes((sizebuf_t*)pBuffer, pOutbuf, num))
+		return num;
+	return 0;
 }
 
 void CEngineNetsystem001::ReadString(void *pBuffer, char *pOutbuf, unsigned long long int num)
 {
 
 	Assert(pBuffer != nullptr);
+	char* out = MSG_ReadStringExt((sizebuf_t*)pBuffer, false);
+	strncpy(pOutbuf, out, num);
 }
 
 byte CEngineNetsystem001::ReadByte(void *pBuffer)
 {
 	Assert(pBuffer != nullptr);
-	return 0;
+	return MSG_ReadByte((sizebuf_t*)pBuffer);
 }
 
 short CEngineNetsystem001::ReadShort(void *pBuffer)
 {
 	Assert(pBuffer != nullptr);
-	return 0;
+	return MSG_ReadShort((sizebuf_t*)pBuffer);
 }
 
 int CEngineNetsystem001::ReadInt(void *pBuffer)
 {
 	Assert(pBuffer != nullptr);
-	return 0;
+	return MSG_ReadLong((sizebuf_t*)pBuffer);
 }
 
 long long CEngineNetsystem001::ReadLong(void *pBuffer)
 {
 	Assert(pBuffer != nullptr);
-	return 0;
+	return MSG_ReadBitLong((sizebuf_t*)pBuffer, 64, true);
 }
 
 float CEngineNetsystem001::ReadFloat(void *pBuffer)
 {
 	Assert(pBuffer != nullptr);
-	return 0;
+	return MSG_ReadFloat((sizebuf_t*)pBuffer);
 }
 
 void CEngineNetsystem001::ReadVector(void* pBuffer, vec_t *outvec)
 {
 	Assert(pBuffer != nullptr);
+	MSG_ReadVec3Coord((sizebuf_t*)pBuffer, outvec);
 }
 
 void CEngineNetsystem001::BeginClientMessage(int cmd)

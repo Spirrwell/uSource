@@ -65,12 +65,12 @@ public:
 	virtual void WriteVector(vec3_t _vec) = 0;
 
 	/* Used to decode a message. No state is held here */
-	virtual void ReadBytes(void* pBuffer, void* pOutbuf, unsigned long long num) = 0;
+	virtual size_t ReadBytes(void* pBuffer, void* pOutbuf, unsigned long long num) = 0;
 	virtual void ReadString(void* pBuffer, char* pOutbuf, unsigned long long num) = 0;
 	virtual byte ReadByte(void* pBuffer) = 0;
 	virtual short ReadShort(void* pBuffer) = 0;
 	virtual int ReadInt(void* pBuffer) = 0;
 	virtual long long ReadLong(void* pBuffer) = 0;
 	virtual float ReadFloat(void* pBuffer) = 0;
-	virtual void ReadVector(void* pBuffer, vec3_t outvec) = 0;
+	virtual void ReadVector(void* pBuffer, float outvec[3]) = 0;
 };
