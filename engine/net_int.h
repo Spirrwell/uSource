@@ -55,7 +55,7 @@ public:
 	virtual void BeginClientMessage(int cmd) = 0;
 	virtual void EndMessage() = 0;
 
-	virtual void WriteBytes(void* pBuf, unsigned long long len) = 0;
+	virtual void WriteBytes(const void* pBuf, unsigned long long len) = 0;
 	virtual void WriteString(const char* str) = 0;
 	virtual void WriteByte(byte _byte) = 0;
 	virtual void WriteShort(short _short) = 0;

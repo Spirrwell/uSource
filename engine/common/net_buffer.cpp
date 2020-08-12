@@ -708,7 +708,7 @@ public:
 	virtual void HookClientMsg(int cmd, void(*pfnHook)(void*)) override;
 	virtual void BeginClientNetsystemCmd() override;
 	virtual void BeginServerNetsystemCmd(edict_t* client) override;
-	virtual void WriteBytes(void* pBuf, unsigned long long len) override;
+	virtual void WriteBytes(const void* pBuf, unsigned long long len) override;
 	virtual void WriteString(const char* str) override;
 	virtual void WriteByte(byte _byte) override;
 	virtual void WriteShort(short _short) override;
@@ -772,7 +772,7 @@ void CEngineNetsystem001::BeginServerNetsystemCmd(edict_t* client)
 	g_current_sizebuf = pfnBeginServerCmd(client, svc_netsystem);
 }
 
-void CEngineNetsystem001::WriteBytes(void *pBuf, unsigned long long int len)
+void CEngineNetsystem001::WriteBytes(const void *pBuf, unsigned long long int len)
 {
 	Assert(g_current_sizebuf != nullptr);
 	if(!g_current_sizebuf) return;
