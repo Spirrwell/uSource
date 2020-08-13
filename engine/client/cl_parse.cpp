@@ -23,6 +23,7 @@ GNU General Public License for more details.
 #include "input.h"
 
 int CL_UPDATE_BACKUP = SINGLEPLAYER_BACKUP;
+void CL_ExecuteMsgHooks(int cmd, sizebuf_t* msg);
 
 /*
 ===============
@@ -2086,6 +2087,8 @@ void CL_ParseServerMessage( sizebuf_t *msg, qboolean normal_message )
 		// record command for debugging spew on parse problem
 		CL_Parse_RecordCommand( cmd, bufStart );
 
+		CL_ExecuteMsgHooks(cmd, msg);
+
 		// other commands
 		switch( cmd )
 		{
@@ -2216,6 +2219,8 @@ void CL_ParseServerMessage( sizebuf_t *msg, qboolean normal_message )
 			break;
 		case svc_centerprint:
 			CL_CenterPrint( MSG_ReadString( msg ), 0.25f );
+			break;
+		case svc_netsystem:
 			break;
 		case svc_intermission:
 			cl.intermission = 1;
