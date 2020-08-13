@@ -16,27 +16,25 @@ GNU General Public License for more details.
 #ifndef PRIMITIVE_H
 #define PRIMITIVE_H
 
-#define BIT( n )		( 1U << ( n ))
+#define BIT(n) (1U << (n))
 
 #ifdef _MSC_VER
-#pragma warning(disable:4244) // float->int
+#pragma warning(disable : 4244) // float->int
 #endif
 
-template<class T>
-inline bool isrange( T min, T value, T max )
-{ return (((value) >= (min))) && (((value) <= (max))); }
+template <class T> inline bool isrange(T min, T value, T max) { return (((value) >= (min))) && (((value) <= (max))); }
 
-#define bound( min, num, max )	((num) >= (min) ? ((num) < (max) ? (num) : (max)) : (min))
+#define bound(min, num, max) ((num) >= (min) ? ((num) < (max) ? (num) : (max)) : (min))
 #ifndef Q_min
-#define Q_min( a, b ) (((a) < (b)) ? (a) : (b))
+#define Q_min(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 #ifndef Q_max
-#define Q_max( a, b ) (((a) < (b)) ? (b) : (a))
+#define Q_max(a, b) (((a) < (b)) ? (b) : (a))
 #endif
 
-#define SetBits( iBitVector, bits )	((iBitVector) = (iBitVector) | (bits))
-#define ClearBits( iBitVector, bits )	((iBitVector) = (iBitVector) & ~(bits))
-#define FBitSet( iBitVector, bit )	((iBitVector) & (bit))
+#define SetBits(iBitVector, bits)   ((iBitVector) = (iBitVector) | (bits))
+#define ClearBits(iBitVector, bits) ((iBitVector) = (iBitVector) & ~(bits))
+#define FBitSet(iBitVector, bit)    ((iBitVector) & (bit))
 
 // engine constants
 enum
@@ -55,44 +53,43 @@ enum
 
 enum
 {
-	QMF_GRAYED             = BIT( 1 ), // Grays and disables
-	QMF_INACTIVE           = BIT( 2 ), // Disables any input
-	QMF_DROPSHADOW         = BIT( 4 ),
-	QMF_SILENT             = BIT( 5 ), // Don't play sounds
-	QMF_HASMOUSEFOCUS      = BIT( 6 ),
-	QMF_MOUSEONLY          = BIT( 7 ), // Only mouse input allowed
-	QMF_NOTIFY             = BIT( 9 ), // draw notify at right screen side
+	QMF_GRAYED	  = BIT(1), // Grays and disables
+	QMF_INACTIVE	  = BIT(2), // Disables any input
+	QMF_DROPSHADOW	  = BIT(4),
+	QMF_SILENT	  = BIT(5), // Don't play sounds
+	QMF_HASMOUSEFOCUS = BIT(6),
+	QMF_MOUSEONLY	  = BIT(7), // Only mouse input allowed
+	QMF_NOTIFY	  = BIT(9), // draw notify at right screen side
 	// deprecated: QMF_ACT_ONRELEASE      = BIT( 10 ), // call Key_Event when button is released
-	QMF_HASKEYBOARDFOCUS   = BIT( 11 ),
-	QMF_DIALOG             = BIT( 12 ), // modal windows. Will grab key, char and mousemove events
-	QMF_DISABLESCAILING    = BIT( 13 ), // disables CalcPosition and CalcSizes
-	QMF_EVENTSIGNOREFOCUS  = BIT( 14 ), // don't care if item have focus, it must get events anyway
+	QMF_HASKEYBOARDFOCUS  = BIT(11),
+	QMF_DIALOG	      = BIT(12), // modal windows. Will grab key, char and mousemove events
+	QMF_DISABLESCAILING   = BIT(13), // disables CalcPosition and CalcSizes
+	QMF_EVENTSIGNOREFOCUS = BIT(14), // don't care if item have focus, it must get events anyway
 
-	QMF_CLOSING            = BIT( 29 ), // INTERNAL USE ONLY: window is closing right now and we need only draw animation
-	QMF_HIDDENBYPARENT     = BIT( 30 ), // INTERNAL USE ONLY: parent set this flag and don't want to draw this control
-	QMF_HIDDEN             = BIT( 31 ), // INTERNAL USE ONLY: Use Show/Hide/SetVisibility/ToggleVisibility
+	QMF_CLOSING	   = BIT(29), // INTERNAL USE ONLY: window is closing right now and we need only draw animation
+	QMF_HIDDENBYPARENT = BIT(30), // INTERNAL USE ONLY: parent set this flag and don't want to draw this control
+	QMF_HIDDEN	   = BIT(31), // INTERNAL USE ONLY: Use Show/Hide/SetVisibility/ToggleVisibility
 };
-
 
 enum ETextAlignment
 {
-	QM_CENTER		 = 0,
-	QM_TOP           = BIT( 0 ),
-	QM_BOTTOM        = BIT( 1 ),
-	QM_LEFT          = BIT( 2 ),
-	QM_RIGHT         = BIT( 3 ),
+	QM_CENTER = 0,
+	QM_TOP	  = BIT(0),
+	QM_BOTTOM = BIT(1),
+	QM_LEFT	  = BIT(2),
+	QM_RIGHT  = BIT(3),
 
-	QM_TOPLEFT       = QM_TOP     | QM_LEFT,
-	QM_TOPRIGHT      = QM_TOP     | QM_RIGHT,
-	QM_BOTTOMLEFT    = QM_BOTTOM  | QM_LEFT,
-	QM_BOTTOMRIGHT   = QM_BOTTOM  | QM_RIGHT,
+	QM_TOPLEFT     = QM_TOP | QM_LEFT,
+	QM_TOPRIGHT    = QM_TOP | QM_RIGHT,
+	QM_BOTTOMLEFT  = QM_BOTTOM | QM_LEFT,
+	QM_BOTTOMRIGHT = QM_BOTTOM | QM_RIGHT,
 };
 
 enum EFocusAnimation
 {
 	QM_NOFOCUSANIMATION = 0,
-	QM_HIGHLIGHTIFFOCUS,      // just simple hightlight
-	QM_PULSEIFFOCUS           // pulse animation
+	QM_HIGHLIGHTIFFOCUS, // just simple hightlight
+	QM_PULSEIFFOCUS	     // pulse animation
 };
 
 enum ELetterCase
@@ -105,9 +102,9 @@ enum ELetterCase
 enum ERenderMode
 {
 	QM_DRAWNORMAL = 0, // normal RGB picture, ignore alpha
-	QM_DRAWHOLES,      // holes
-	QM_DRAWTRANS,      // RGBA
-	QM_DRAWADDITIVE    // additive
+	QM_DRAWHOLES,	   // holes
+	QM_DRAWTRANS,	   // RGBA
+	QM_DRAWADDITIVE	   // additive
 };
 
 struct Size;
@@ -115,102 +112,72 @@ struct Size;
 struct Point
 {
 	Point() : x(0), y(0) {}
-	Point( int x, int y ) : x(x), y(y) {}
+	Point(int x, int y) : x(x), y(y) {}
 
-	int x, y;
-	Point Scale();
-	friend Point operator +( const Point &a, const Point &b )
-	{
-		return Point( a.x + b.x, a.y + b.y );
-	}
+	int	     x, y;
+	Point	     Scale();
+	friend Point operator+(const Point& a, const Point& b) { return Point(a.x + b.x, a.y + b.y); }
 
-	friend Point operator -( const Point &a, const Point &b )
-	{
-		return Point( a.x - b.x, a.y - b.y );
-	}
+	friend Point operator-(const Point& a, const Point& b) { return Point(a.x - b.x, a.y - b.y); }
 
-	bool operator ==( const Point &a ) const
-	{
-		return x == a.x && y == a.y;
-	}
+	bool operator==(const Point& a) const { return x == a.x && y == a.y; }
 
-	Point& operator+=( const Point &a )
+	Point& operator+=(const Point& a)
 	{
 		x += a.x;
 		y += a.y;
 		return *this;
 	}
 
-	Point& operator-=( const Point &a )
+	Point& operator-=(const Point& a)
 	{
 		x -= a.x;
 		y -= a.y;
 		return *this;
 	}
 
-	Point& operator +=( const Size &a );
-	Point& operator -=( const Size &b );
+	Point& operator+=(const Size& a);
+	Point& operator-=(const Size& b);
 
-	Point operator *( const float scale ) { return Point( (int)(x * scale), (int)(y * scale) ); }
-	Point operator /( const float scale ) { return Point( (int)(x / scale), (int)(y / scale) ); }
+	Point operator*(const float scale) { return Point((int)(x * scale), (int)(y * scale)); }
+	Point operator/(const float scale) { return Point((int)(x / scale), (int)(y / scale)); }
 };
 
 struct Size
 {
 	Size() : w(0), h(0) {}
-	Size( int w, int h ) : w(w), h(h) {}
+	Size(int w, int h) : w(w), h(h) {}
 
-	friend Size operator +( const Size &a, const Size &b )
-	{
-		return Size( a.w + b.w, a.h + b.h );
-	}
+	friend Size operator+(const Size& a, const Size& b) { return Size(a.w + b.w, a.h + b.h); }
 
-	friend Size operator -( const Size &a, const Size &b )
-	{
-		return Size( a.w - b.w, a.h - b.h );
-	}
+	friend Size operator-(const Size& a, const Size& b) { return Size(a.w - b.w, a.h - b.h); }
 
-	bool operator ==( const Size &a ) const
-	{
-		return w == a.w && w == a.w;
-	}
+	bool operator==(const Size& a) const { return w == a.w && w == a.w; }
 
-	Size AddVertical( const Size &a )
-	{
-		return Size( w, a.h + h );
-	}
+	Size AddVertical(const Size& a) { return Size(w, a.h + h); }
 
-	Size AddHorizontal( const Size &a )
-	{
-		return Size( w + a.w, h );
-	}
+	Size AddHorizontal(const Size& a) { return Size(w + a.w, h); }
 
-	int w, h;
+	int  w, h;
 	Size Scale();
 
-	Size operator *( const float scale ) { return Size( (int)(w * scale), (int)(h * scale) ); }
-	Size operator /( const float scale ) { return Size( (int)(w / scale), (int)(h / scale) ); }
+	Size operator*(const float scale) { return Size((int)(w * scale), (int)(h * scale)); }
+	Size operator/(const float scale) { return Size((int)(w / scale), (int)(h / scale)); }
 };
 
 // rectangle in screen space
 struct Rect
 {
-	Rect( int x, int y, int w, int h ) :
-		pt( x, y ), sz( w, h ) { }
-	Rect( Point pt, Size sz ) :
-		pt( pt ), sz( sz ) { }
+	Rect(int x, int y, int w, int h) : pt(x, y), sz(w, h) {}
+	Rect(Point pt, Size sz) : pt(pt), sz(sz) {}
 
 	// true if this rect overlaps
 	// false otherwise
-	bool IsInside( const Rect &b ) const
+	bool IsInside(const Rect& b) const
 	{
-		Point l1( pt.x, pt.y ),
-			l2( b.pt.x, b.pt.y ),
-			r1( pt.x + sz.w, pt.y + sz.h ),
-			r2( b.pt.x + b.sz.w, b.pt.y + b.sz.h );
+		Point l1(pt.x, pt.y), l2(b.pt.x, b.pt.y), r1(pt.x + sz.w, pt.y + sz.h), r2(b.pt.x + b.sz.w, b.pt.y + b.sz.h);
 
-		if( l2.x >= l1.x && r2.x <= r1.x &&
-		    l2.y >= l1.y && r2.y <= r1.y )
+		if (l2.x >= l1.x && r2.x <= r1.x && l2.y >= l1.y && r2.y <= r1.y)
 			return true;
 		return false;
 	}
@@ -219,24 +186,18 @@ struct Rect
 	Size  sz;
 };
 
-inline Point operator +(const Point &a, const Size &b)
-{
-	return Point( a.x + b.w, a.y + b.h );
-}
+inline Point operator+(const Point& a, const Size& b) { return Point(a.x + b.w, a.y + b.h); }
 
-inline Point operator -(const Point &a, const Size &b)
-{
-	return Point( a.x + b.w, a.y + b.h );
-}
+inline Point operator-(const Point& a, const Size& b) { return Point(a.x + b.w, a.y + b.h); }
 
-inline Point& Point::operator +=(const Size &a)
+inline Point& Point::operator+=(const Size& a)
 {
 	x += a.w;
 	y += a.h;
 	return *this;
 }
 
-inline Point& Point::operator -=(const Size &a)
+inline Point& Point::operator-=(const Size& a)
 {
 	x -= a.w;
 	y -= a.h;

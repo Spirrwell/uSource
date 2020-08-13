@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -18,54 +18,53 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#include "Framework.h"
-#include "Bitmap.h"
-#include "PicButton.h"
 #include "Action.h"
+#include "Bitmap.h"
+#include "Framework.h"
+#include "PicButton.h"
 
-#define ART_BANNER		"gfx/shell/head_saveload"
+#define ART_BANNER "gfx/shell/head_saveload"
 
 class CMenuSaveLoad : public CMenuFramework
 {
 public:
-	CMenuSaveLoad() : CMenuFramework( "CMenuSaveLoad" ) { }
+	CMenuSaveLoad() : CMenuFramework("CMenuSaveLoad") {}
+
 private:
 	void _Init();
 
-	CMenuAction	hintMessage;
-	char		hintText[MAX_HINT_TEXT];
+	CMenuAction hintMessage;
+	char	    hintText[MAX_HINT_TEXT];
 };
 
-static CMenuSaveLoad	uiSaveLoad;
-
+static CMenuSaveLoad uiSaveLoad;
 
 /*
 =================
 UI_SaveLoad_Init
 =================
 */
-void CMenuSaveLoad::_Init( void )
+void CMenuSaveLoad::_Init(void)
 {
-	snprintf( hintText, sizeof( hintText ),
-		L( "During play, you can quickly save your game by pressing %s.\n"
-		"Load this game again by pressing %s." ),
-		EngFuncs::KeynumToString( KEY_GetKey( "save quick" ) ),
-		EngFuncs::KeynumToString( KEY_GetKey( "load quick" ) ) );
+	snprintf(hintText, sizeof(hintText),
+		 L("During play, you can quickly save your game by pressing %s.\n"
+		   "Load this game again by pressing %s."),
+		 EngFuncs::KeynumToString(KEY_GetKey("save quick")), EngFuncs::KeynumToString(KEY_GetKey("load quick")));
 
-	banner.SetPicture( ART_BANNER );
+	banner.SetPicture(ART_BANNER);
 
-	hintMessage.iFlags = QMF_INACTIVE;
+	hintMessage.iFlags    = QMF_INACTIVE;
 	hintMessage.colorBase = uiColorHelp;
-	hintMessage.SetCharSize( QM_SMALLFONT );
+	hintMessage.SetCharSize(QM_SMALLFONT);
 	hintMessage.szName = hintText;
-	hintMessage.SetCoord( 360, 480 );
+	hintMessage.SetCoord(360, 480);
 
-	AddItem( background );
-	AddItem( banner );
-	AddButton( L( "GameUI_LoadGame" ), L( "GameUI_LoadGameHelp" ), PC_LOAD_GAME, UI_LoadGame_Menu, QMF_NOTIFY );
-	AddButton( L( "GameUI_SaveGame" ), L( "GameUI_SaveGameHelp" ), PC_SAVE_GAME, UI_SaveGame_Menu, QMF_NOTIFY );
-	AddButton( L( "Done" ), L( "Go back to the Main menu" ), PC_DONE, VoidCb( &CMenuSaveLoad::Hide ), QMF_NOTIFY );
-	AddItem( hintMessage );
+	AddItem(background);
+	AddItem(banner);
+	AddButton(L("GameUI_LoadGame"), L("GameUI_LoadGameHelp"), PC_LOAD_GAME, UI_LoadGame_Menu, QMF_NOTIFY);
+	AddButton(L("GameUI_SaveGame"), L("GameUI_SaveGameHelp"), PC_SAVE_GAME, UI_SaveGame_Menu, QMF_NOTIFY);
+	AddButton(L("Done"), L("Go back to the Main menu"), PC_DONE, VoidCb(&CMenuSaveLoad::Hide), QMF_NOTIFY);
+	AddItem(hintMessage);
 }
 
 /*
@@ -73,19 +72,16 @@ void CMenuSaveLoad::_Init( void )
 UI_SaveLoad_Precache
 =================
 */
-void UI_SaveLoad_Precache( void )
-{
-	EngFuncs::PIC_Load( ART_BANNER );
-}
+void UI_SaveLoad_Precache(void) { EngFuncs::PIC_Load(ART_BANNER); }
 
 /*
 =================
 UI_SaveLoad_Menu
 =================
 */
-void UI_SaveLoad_Menu( void )
+void UI_SaveLoad_Menu(void)
 {
-	if( gMenu.m_gameinfo.gamemode == GAME_MULTIPLAYER_ONLY )
+	if (gMenu.m_gameinfo.gamemode == GAME_MULTIPLAYER_ONLY)
 	{
 		// completely ignore save\load menus for multiplayer_only
 		return;
@@ -93,4 +89,4 @@ void UI_SaveLoad_Menu( void )
 
 	uiSaveLoad.Show();
 }
-ADD_MENU( menu_saveload, UI_SaveLoad_Precache, UI_SaveLoad_Menu );
+ADD_MENU(menu_saveload, UI_SaveLoad_Precache, UI_SaveLoad_Menu);

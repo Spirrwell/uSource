@@ -21,89 +21,88 @@ GNU General Public License for more details.
 #include "SDL.h"
 #endif
 
-
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
-typedef void (*pfnChangeGame)( const char *progname );
+typedef void (*pfnChangeGame)(const char* progname);
 
 char szGameDir[128]; // safe place to keep gamedir
-int g_iArgc;
+int  g_iArgc;
 
-void Host_Shutdown( void );
-void Launcher_ChangeGame( const char *progname );
-void *Com_LoadLibrary( char *, int );
-int Host_Main( int szArgc, char **szArgv, const char *szGameDir, int chg, pfnChangeGame callback );
+void  Host_Shutdown(void);
+void  Launcher_ChangeGame(const char* progname);
+void* Com_LoadLibrary(char*, int);
+int   Host_Main(int szArgc, char** szArgv, const char* szGameDir, int chg, pfnChangeGame callback);
 
-char **g_pszArgv;
+char** g_pszArgv;
 
-void Launcher_ChangeGame( const char *progname )
+void Launcher_ChangeGame(const char* progname)
 {
-	strncpy( szGameDir, progname, sizeof( szGameDir ) - 1 );
-	Host_Shutdown( );
-	exit( Host_Main( g_iArgc, g_pszArgv, szGameDir, 1, &Launcher_ChangeGame ) );
+	strncpy(szGameDir, progname, sizeof(szGameDir) - 1);
+	Host_Shutdown();
+	exit(Host_Main(g_iArgc, g_pszArgv, szGameDir, 1, &Launcher_ChangeGame));
 }
 
 #ifdef XASH_NOCONHOST
 #include <windows.h>
 int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR cmdLine, int nShow)
 {
-	int szArgc;
-	char **szArgv;
+	int	szArgc;
+	char**	szArgv;
 	LPWSTR* lpArgv = CommandLineToArgvW(GetCommandLineW(), &szArgc);
-	int size, i = 0;
-	szArgv = (char**)malloc(szArgc*sizeof(char*));
+	int	size, i = 0;
+	szArgv = (char**)malloc(szArgc * sizeof(char*));
 	for (; i < szArgc; ++i)
 	{
-		size = wcslen(lpArgv[i]) + 1;
+		size	  = wcslen(lpArgv[i]) + 1;
 		szArgv[i] = (char*)malloc(size);
 		wcstombs(szArgv[i], lpArgv[i], size);
 	}
 	LocalFree(lpArgv);
-	main( szArgc, szArgv );
+	main(szArgc, szArgv);
 }
 #endif
-int main( int argc, char** argv )
+int main(int argc, char** argv)
 {
-	char gamedir_buf[32] = "";
-	const char *gamedir = getenv( "XASH3D_GAMEDIR" );
+	char	    gamedir_buf[32] = "";
+	const char* gamedir	    = getenv("XASH3D_GAMEDIR");
 
-	if( !gamedir )
+	if (!gamedir)
 	{
 		gamedir = "valve";
 	}
 	else
 	{
-		strncpy( gamedir_buf, gamedir, 32 );
+		strncpy(gamedir_buf, gamedir, 32);
 		gamedir = gamedir_buf;
 	}
 
 #ifdef __EMSCRIPTEN__
 #ifdef EMSCRIPTEN_LIB_FS
 	// For some unknown reason emscripten refusing to load libraries later
-	Com_LoadLibrary("menu", 0 );
-	Com_LoadLibrary("server", 0 );
-	Com_LoadLibrary("client", 0 );
+	Com_LoadLibrary("menu", 0);
+	Com_LoadLibrary("server", 0);
+	Com_LoadLibrary("client", 0);
 #endif
 #ifdef XASH_DEDICATED
 	// NodeJS support for debug
-	EM_ASM(try{
+	EM_ASM(try {
 		FS.mkdir('/xash');
-		FS.mount(NODEFS, { root: '.'}, '/xash' );
+		FS.mount(NODEFS, {root : '.'}, '/xash');
 		FS.chdir('/xash');
-	}catch(e){};);
+	} catch (e){};);
 #endif
 #endif
 
-	g_iArgc = argc;
+	g_iArgc	  = argc;
 	g_pszArgv = argv;
 #if TARGET_OS_IPHONE
 	{
-		void IOS_LaunchDialog( void );
+		void IOS_LaunchDialog(void);
 		IOS_LaunchDialog();
 	}
 #endif
-	return Host_Main( g_iArgc, g_pszArgv, gamedir, 0, &Launcher_ChangeGame );
+	return Host_Main(g_iArgc, g_pszArgv, gamedir, 0, &Launcher_ChangeGame);
 }
 
 #endif

@@ -1,29 +1,31 @@
 /**
- * 
+ *
  * convar.h
- * 
- * Near little adapters for console commands and vars 
- * 
- */ 
-#pragma once 
+ *
+ * Near little adapters for console commands and vars
+ *
+ */
+#pragma once
 
 #include "cvardef.h"
 
 class Convar
 {
 private:
-	const char* const name;
-	const char* const _default;
+	const char* const  name;
+	const char* const  _default;
 	const unsigned int flags;
-	const char* const desc;
-	void(*m_callback)(const char*,const char*);
-public:
-	Convar(const char* name, const char* _default, unsigned int flags = 0, const char* description = "", void(*callback)(const char*, const char*) = nullptr);
+	const char* const  desc;
+	void (*m_callback)(const char*, const char*);
 
-	float GetFloat() const;
-	int GetInt() const;
+public:
+	Convar(const char* name, const char* _default, unsigned int flags = 0, const char* description = "",
+	       void (*callback)(const char*, const char*) = nullptr);
+
+	float	    GetFloat() const;
+	int	    GetInt() const;
 	const char* GetString() const;
-	bool GetBool() const;
+	bool	    GetBool() const;
 
 	void SetFloat(float f);
 	void SetInt(int i);
@@ -34,9 +36,9 @@ public:
 	/* Resets to default */
 	void Reset();
 
-	const char* Default() { return _default; };
-	const char* Name() { return name; };
-	const char* Description() { return desc; };
+	const char*  Default() { return _default; };
+	const char*  Name() { return name; };
+	const char*  Description() { return desc; };
 	unsigned int Flags() { return flags; };
 
 	static void RegisterAllCvars();

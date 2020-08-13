@@ -1,19 +1,19 @@
 /**
- * 
+ *
  * string.h
- * 
+ *
  * Custom string class
- * 
- */ 
+ *
+ */
 #pragma once
 
 #include <stddef.h>
 #include <stdint.h>
 
-class String 
+class String
 {
 private:
-	char* _string;
+	char*		   _string;
 	unsigned long long _length;
 
 public:
@@ -36,17 +36,17 @@ public:
 	bool iequals(const String& other) const;
 	bool iequals(const char* other) const;
 
-	void to_lower();
-	void to_upper();
+	void   to_lower();
+	void   to_upper();
 	size_t replace(char c, char n, size_t max = 0);
 
-	String substr(size_t start, size_t end); 
+	String substr(size_t start, size_t end);
 
-	operator const char*() const;
+		 operator const char*() const;
 	explicit operator char*();
-	char operator[](size_t i) const;
-	String& operator=(const String& other);
-	String& operator=(String&& other);
+	char	 operator[](size_t i) const;
+	String&	 operator=(const String& other);
+	String&	 operator=(String&& other);
 
 	bool operator==(const String& other) const;
 	bool operator!=(const String& other) const;

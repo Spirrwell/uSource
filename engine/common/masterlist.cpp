@@ -17,16 +17,16 @@ GNU General Public License for more details.
 
 typedef struct master_s
 {
-	struct master_s *next;
-	qboolean sent;
-	qboolean save;
-	string address;
+	struct master_s* next;
+	qboolean	 sent;
+	qboolean	 save;
+	string		 address;
 } master_t;
 
 struct masterlist_s
 {
-	master_t *list;
-	qboolean modified;
+	master_t* list;
+	qboolean  modified;
 } ml;
 
 /*
@@ -37,48 +37,48 @@ Send request to all masterservers list
 return true if would block
 ========================
 */
-qboolean NET_SendToMasters( netsrc_t sock, size_t len, const void *data )
+qboolean NET_SendToMasters(netsrc_t sock, size_t len, const void* data)
 {
-	master_t *list;
-	qboolean wait = false;
+	master_t* list;
+	qboolean  wait = false;
 
-	for( list = ml.list; list; list = list->next )
+	for (list = ml.list; list; list = list->next)
 	{
 		netadr_t adr;
-		int res;
+		int	 res;
 
-		if( list->sent )
+		if (list->sent)
 			continue;
 
-		res = NET_StringToAdrNB( list->address, &adr );
+		res = NET_StringToAdrNB(list->address, &adr);
 
-		if( !res )
+		if (!res)
 		{
-			Con_Reportf( "Can't resolve adr: %s\n", list->address );
+			Con_Reportf("Can't resolve adr: %s\n", list->address);
 			list->sent = true;
 			continue;
 		}
 
-		if( res == 2 )
+		if (res == 2)
 		{
 			list->sent = false;
-			wait = true;
+			wait	   = true;
 			continue;
 		}
 
 		list->sent = true;
 
-		NET_SendPacket( sock, len, data, adr );
+		NET_SendPacket(sock, len, data, adr);
 	}
 
-	if( !wait )
+	if (!wait)
 	{
 		list = ml.list;
 
-		while( list )
+		while (list)
 		{
 			list->sent = false;
-			list = list->next;
+			list	   = list->next;
 		}
 	}
 
@@ -92,39 +92,39 @@ NET_AddMaster
 Add master to the list
 ========================
 */
-static void NET_AddMaster( const char *addr, qboolean save )
+static void NET_AddMaster(const char* addr, qboolean save)
 {
 	master_t *master, *last;
 
-	for( last = ml.list; last && last->next; last = last->next )
+	for (last = ml.list; last && last->next; last = last->next)
 	{
-		if( !Q_strcmp( last->address, addr ) ) // already exists
+		if (!Q_strcmp(last->address, addr)) // already exists
 			return;
 	}
 
-	master = Mem_Malloc( host.mempool, sizeof( master_t ) );
-	Q_strncpy( master->address, addr, MAX_STRING );
+	master = Mem_Malloc(host.mempool, sizeof(master_t));
+	Q_strncpy(master->address, addr, MAX_STRING);
 	master->sent = false;
 	master->save = save;
 	master->next = NULL;
 
 	// link in
-	if( last )
+	if (last)
 		last->next = master;
 	else
 		ml.list = master;
 }
 
-static void NET_AddMaster_f( void )
+static void NET_AddMaster_f(void)
 {
-	if( Cmd_Argc() != 2 )
+	if (Cmd_Argc() != 2)
 	{
-		Msg( S_USAGE "addmaster <address>\n");
+		Msg(S_USAGE "addmaster <address>\n");
 		return;
 	}
 
-	NET_AddMaster( Cmd_Argv( 1 ), true ); // save them into config
-	ml.modified = true; // save config
+	NET_AddMaster(Cmd_Argv(1), true); // save them into config
+	ml.modified = true;		  // save config
 }
 
 /*
@@ -134,13 +134,13 @@ NET_ClearMasters
 Clear master list
 ========================
 */
-static void NET_ClearMasters_f( void )
+static void NET_ClearMasters_f(void)
 {
-	while( ml.list )
+	while (ml.list)
 	{
-		master_t *prev = ml.list;
-		ml.list = ml.list->next;
-		Mem_Free( prev );
+		master_t* prev = ml.list;
+		ml.list	       = ml.list->next;
+		Mem_Free(prev);
 	}
 }
 
@@ -151,17 +151,16 @@ NET_ListMasters_f
 Display current master linked list
 ========================
 */
-static void NET_ListMasters_f( void )
+static void NET_ListMasters_f(void)
 {
-	master_t *list;
-	int i;
+	master_t* list;
+	int	  i;
 
-	Msg( "Master servers\n=============\n" );
+	Msg("Master servers\n=============\n");
 
-
-	for( i = 1, list = ml.list; list; i++, list = list->next )
+	for (i = 1, list = ml.list; list; i++, list = list->next)
 	{
-		Msg( "%d\t%s\n", i, list->address );
+		Msg("%d\t%s\n", i, list->address);
 	}
 }
 
@@ -172,34 +171,34 @@ NET_LoadMasters
 Load master server list from xashcomm.lst
 ========================
 */
-static void NET_LoadMasters( void )
+static void NET_LoadMasters(void)
 {
-	byte *afile;
-	char *pfile;
-	char token[MAX_TOKEN];
+	byte* afile;
+	char* pfile;
+	char  token[MAX_TOKEN];
 
-	afile = FS_LoadFile( "xashcomm.lst", NULL, true );
+	afile = FS_LoadFile("xashcomm.lst", NULL, true);
 
-	if( !afile ) // file doesn't exist yet
+	if (!afile) // file doesn't exist yet
 	{
-		Con_Reportf( "Cannot load xashcomm.lst\n" );
+		Con_Reportf("Cannot load xashcomm.lst\n");
 		return;
 	}
 
 	pfile = (char*)afile;
 
 	// format: master <addr>\n
-	while( ( pfile = COM_ParseFile( pfile, token ) ) )
+	while ((pfile = COM_ParseFile(pfile, token)))
 	{
-		if( !Q_strcmp( token, "master" ) ) // load addr
+		if (!Q_strcmp(token, "master")) // load addr
 		{
-			pfile = COM_ParseFile( pfile, token );
+			pfile = COM_ParseFile(pfile, token);
 
-			NET_AddMaster( token, true );
+			NET_AddMaster(token, true);
 		}
 	}
 
-	Mem_Free( afile );
+	Mem_Free(afile);
 
 	ml.modified = false;
 }
@@ -211,32 +210,32 @@ NET_SaveMasters
 Save master server list to xashcomm.lst, except for default
 ========================
 */
-void NET_SaveMasters( void )
+void NET_SaveMasters(void)
 {
-	file_t *f;
-	master_t *m;
+	file_t*	  f;
+	master_t* m;
 
-	if( !ml.modified )
+	if (!ml.modified)
 	{
-		Con_Reportf( "Master server list not changed\n" );
+		Con_Reportf("Master server list not changed\n");
 		return;
 	}
 
-	f = FS_Open( "xashcomm.lst", "w", true );
+	f = FS_Open("xashcomm.lst", "w", true);
 
-	if( !f )
+	if (!f)
 	{
-		Con_Reportf( S_ERROR  "Couldn't write xashcomm.lst\n" );
+		Con_Reportf(S_ERROR "Couldn't write xashcomm.lst\n");
 		return;
 	}
 
-	for( m = ml.list; m; m = m->next )
+	for (m = ml.list; m; m = m->next)
 	{
-		if( m->save )
-			FS_Printf( f, "master %s\n", m->address );
+		if (m->save)
+			FS_Printf(f, "master %s\n", m->address);
 	}
 
-	FS_Close( f );
+	FS_Close(f);
 }
 
 /*
@@ -246,14 +245,14 @@ NET_InitMasters
 Initialize master server list
 ========================
 */
-void NET_InitMasters( void )
+void NET_InitMasters(void)
 {
-	Cmd_AddRestrictedCommand( "addmaster", NET_AddMaster_f, "add address to masterserver list" );
-	Cmd_AddRestrictedCommand( "clearmasters", NET_ClearMasters_f, "clear masterserver list" );
-	Cmd_AddCommand( "listmasters", NET_ListMasters_f, "list masterservers" );
+	Cmd_AddRestrictedCommand("addmaster", NET_AddMaster_f, "add address to masterserver list");
+	Cmd_AddRestrictedCommand("clearmasters", NET_ClearMasters_f, "clear masterserver list");
+	Cmd_AddCommand("listmasters", NET_ListMasters_f, "list masterservers");
 
 	// keep main master always there
-	NET_AddMaster( MASTERSERVER_ADR, false );
-	NET_AddMaster( MASTERSERVER_ADR2, false );
-	NET_LoadMasters( );
+	NET_AddMaster(MASTERSERVER_ADR, false);
+	NET_AddMaster(MASTERSERVER_ADR2, false);
+	NET_LoadMasters();
 }

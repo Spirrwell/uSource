@@ -19,34 +19,32 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+#include "PlayerIntroduceDialog.h"
 #include "BaseWindow.h"
+#include "Field.h"
+#include "MessageBox.h"
 #include "PicButton.h"
 #include "YesNoMessageBox.h"
-#include "MessageBox.h"
-#include "Field.h"
-#include "PlayerIntroduceDialog.h"
 
 static class CMenuPlayerIntroduceDialog : public CMenuYesNoMessageBox
 {
 public:
-	CMenuPlayerIntroduceDialog() : CMenuYesNoMessageBox( false ), msgBox( true )
-	{
-	}
+	CMenuPlayerIntroduceDialog() : CMenuYesNoMessageBox(false), msgBox(true) {}
 
 	void WriteOrDiscard();
 	void _Init() override;
-	bool KeyDown( int key ) override;
+	bool KeyDown(int key) override;
 
-	CMenuBaseWindow *pCaller;
+	CMenuBaseWindow* pCaller;
 
 private:
-	CMenuField name;
+	CMenuField	     name;
 	CMenuYesNoMessageBox msgBox;
 } uiIntroduceDialog;
 
 void CMenuPlayerIntroduceDialog::WriteOrDiscard()
 {
-	if( !UI::Names::CheckIsNameValid( name.GetBuffer() ) )
+	if (!UI::Names::CheckIsNameValid(name.GetBuffer()))
 	{
 		msgBox.Show();
 	}
@@ -57,51 +55,50 @@ void CMenuPlayerIntroduceDialog::WriteOrDiscard()
 	}
 }
 
-bool CMenuPlayerIntroduceDialog::KeyDown( int key )
+bool CMenuPlayerIntroduceDialog::KeyDown(int key)
 {
-	if( UI::Key::IsEscape( key ) )
+	if (UI::Key::IsEscape(key))
 	{
 		return true; // handled
 	}
 
-	if( UI::Key::IsEnter( key ) && ItemAtCursor() == &name )
+	if (UI::Key::IsEnter(key) && ItemAtCursor() == &name)
 	{
 		WriteOrDiscard();
 	}
 
-	return CMenuYesNoMessageBox::KeyDown( key );
+	return CMenuYesNoMessageBox::KeyDown(key);
 }
 
 void CMenuPlayerIntroduceDialog::_Init()
 {
-	onPositive = VoidCb( &CMenuPlayerIntroduceDialog::WriteOrDiscard );
-	SET_EVENT_MULTI( onNegative,
-	{
-		CMenuPlayerIntroduceDialog *self = (CMenuPlayerIntroduceDialog*)pSelf;
-		self->Hide(); // hide ourselves first
+	onPositive = VoidCb(&CMenuPlayerIntroduceDialog::WriteOrDiscard);
+	SET_EVENT_MULTI(onNegative, {
+		CMenuPlayerIntroduceDialog* self = (CMenuPlayerIntroduceDialog*)pSelf;
+		self->Hide();	       // hide ourselves first
 		self->pCaller->Hide(); // hide our parent
 	});
 
-	SetMessage( L( "GameUI_PlayerName" ) );
+	SetMessage(L("GameUI_PlayerName"));
 
 	name.bAllowColorstrings = true;
-	name.SetRect( 188, 140, 270, 32 );
-	name.LinkCvar( "name" );
+	name.SetRect(188, 140, 270, 32);
+	name.LinkCvar("name");
 	name.iMaxLength = MAX_SCOREBOARDNAME;
 
-	msgBox.SetMessage( L( "Please, choose another player name" ) );
-	msgBox.Link( this );
+	msgBox.SetMessage(L("Please, choose another player name"));
+	msgBox.Link(this);
 
 	// don't close automatically
 	bAutoHide = false;
-	Link( this ); // i am my own son
+	Link(this); // i am my own son
 
 	CMenuYesNoMessageBox::_Init();
 
-	AddItem( name );
+	AddItem(name);
 }
 
-void UI_PlayerIntroduceDialog_Show( CMenuBaseWindow *pCaller )
+void UI_PlayerIntroduceDialog_Show(CMenuBaseWindow* pCaller)
 {
 	uiIntroduceDialog.pCaller = pCaller;
 	uiIntroduceDialog.Show();

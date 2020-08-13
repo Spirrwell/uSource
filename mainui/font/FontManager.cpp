@@ -12,10 +12,10 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
-#include <locale.h>
 #include "FontManager.h"
 #include "BaseMenu.h"
 #include "Utils.h"
+#include <locale.h>
 
 #include "BaseFontBackend.h"
 
@@ -31,96 +31,88 @@ GNU General Public License for more details.
 
 #if defined __ANDROID__ || defined CS16CLIENT
 #define DEFAULT_MENUFONT "RobotoCondensed"
-#define DEFAULT_CONFONT  "DroidSans"
-#define DEFAULT_WEIGHT   1000
+#define DEFAULT_CONFONT	 "DroidSans"
+#define DEFAULT_WEIGHT	 1000
 #else
 #define DEFAULT_MENUFONT "Trebuchet MS"
-#define DEFAULT_CONFONT  "Tahoma"
-#define DEFAULT_WEIGHT   500
+#define DEFAULT_CONFONT	 "Tahoma"
+#define DEFAULT_WEIGHT	 500
 #endif
 
-CFontManager *g_FontMgr;
+CFontManager* g_FontMgr;
 
 CFontManager::CFontManager()
 {
 #ifdef MAINUI_USE_FREETYPE
-	FT_Init_FreeType( &CFreeTypeFont::m_Library );
+	FT_Init_FreeType(&CFreeTypeFont::m_Library);
 #endif
-	m_Fonts.EnsureCapacity( 4 );
+	m_Fonts.EnsureCapacity(4);
 }
 
 CFontManager::~CFontManager()
 {
 	DeleteAllFonts();
 #ifdef MAINUI_USE_FREETYPE
-	FT_Done_FreeType( CFreeTypeFont::m_Library );
+	FT_Done_FreeType(CFreeTypeFont::m_Library);
 	CFreeTypeFont::m_Library = NULL;
 #endif
 }
 
-void CFontManager::VidInit( void )
+void CFontManager::VidInit(void)
 {
 	static float prevScale = 0;
 
 	float scale = uiStatic.scaleY;
 
-	if( !prevScale
+	if (!prevScale
 #ifndef SCALE_FONTS // complete disables font re-rendering
-	|| fabs( scale - prevScale ) > 0.1f
+	    || fabs(scale - prevScale) > 0.1f
 #endif
 	)
 	{
 		DeleteAllFonts();
-		uiStatic.hDefaultFont = CFontBuilder( DEFAULT_MENUFONT, UI_MED_CHAR_HEIGHT * scale, DEFAULT_WEIGHT )
-			.SetHandleNum( QM_DEFAULTFONT )
-			.Create();
-		uiStatic.hSmallFont   = CFontBuilder( DEFAULT_MENUFONT, UI_SMALL_CHAR_HEIGHT * scale, DEFAULT_WEIGHT )
-			.SetHandleNum( QM_SMALLFONT )
-			.Create();
-		uiStatic.hBigFont     = CFontBuilder( DEFAULT_MENUFONT, UI_BIG_CHAR_HEIGHT * scale, DEFAULT_WEIGHT )
-			.SetHandleNum( QM_BIGFONT )
-			.Create();
-		uiStatic.hBoldFont = CFontBuilder( DEFAULT_MENUFONT, UI_MED_CHAR_HEIGHT * scale, 1000 )
-			.SetHandleNum( QM_BOLDFONT )
-			.Create();
+		uiStatic.hDefaultFont =
+			CFontBuilder(DEFAULT_MENUFONT, UI_MED_CHAR_HEIGHT * scale, DEFAULT_WEIGHT).SetHandleNum(QM_DEFAULTFONT).Create();
+		uiStatic.hSmallFont =
+			CFontBuilder(DEFAULT_MENUFONT, UI_SMALL_CHAR_HEIGHT * scale, DEFAULT_WEIGHT).SetHandleNum(QM_SMALLFONT).Create();
+		uiStatic.hBigFont  = CFontBuilder(DEFAULT_MENUFONT, UI_BIG_CHAR_HEIGHT * scale, DEFAULT_WEIGHT).SetHandleNum(QM_BIGFONT).Create();
+		uiStatic.hBoldFont = CFontBuilder(DEFAULT_MENUFONT, UI_MED_CHAR_HEIGHT * scale, 1000).SetHandleNum(QM_BOLDFONT).Create();
 
 #ifdef MAINUI_RENDER_PICBUTTON_TEXT
-		uiStatic.hLightBlur = CFontBuilder( DEFAULT_MENUFONT, UI_MED_CHAR_HEIGHT * scale, 1000 )
-			.SetHandleNum( QM_LIGHTBLUR )
-			.SetBlurParams( 2, 1.0f )
-			.Create();
+		uiStatic.hLightBlur =
+			CFontBuilder(DEFAULT_MENUFONT, UI_MED_CHAR_HEIGHT * scale, 1000).SetHandleNum(QM_LIGHTBLUR).SetBlurParams(2, 1.0f).Create();
 
-		uiStatic.hHeavyBlur = CFontBuilder( DEFAULT_MENUFONT, UI_MED_CHAR_HEIGHT * scale, 1000 )
-			.SetHandleNum( QM_HEAVYBLUR )
-			.SetBlurParams( 8, 1.75f )
-			.Create();
+		uiStatic.hHeavyBlur =
+			CFontBuilder(DEFAULT_MENUFONT, UI_MED_CHAR_HEIGHT * scale, 1000).SetHandleNum(QM_HEAVYBLUR).SetBlurParams(8, 1.75f).Create();
 #endif
-		uiStatic.hConsoleFont = CFontBuilder( DEFAULT_CONFONT, UI_CONSOLE_CHAR_HEIGHT * scale, 500 )
-			.SetOutlineSize()
-			.Create();
-		prevScale = scale;
+		uiStatic.hConsoleFont = CFontBuilder(DEFAULT_CONFONT, UI_CONSOLE_CHAR_HEIGHT * scale, 500).SetOutlineSize().Create();
+		prevScale	      = scale;
 	}
 
 	/* Add all fonts that are specified in ClientScheme.res */
 	KeyValues* scheme = g_pClientScheme->GetChild("Scheme");
-	if(!scheme) return;
+	if (!scheme)
+		return;
 
-	KeyValues* fonts = nullptr;
-	int font_index = 10;
-	if((fonts = scheme->GetChild("Fonts")))
+	KeyValues* fonts      = nullptr;
+	int	   font_index = 10;
+	if ((fonts = scheme->GetChild("Fonts")))
 	{
-		for(auto kfont : fonts->child_sections)
+		for (auto kfont : fonts->child_sections)
 		{
 			font_t font;
-			int flags = 0;
+			int    flags = 0;
 			flags |= (kfont->GetBool("underline") ? FONT_UNDERLINE : 0);
 			flags |= (kfont->GetBool("italic") ? FONT_ITALIC : 0);
-			font.wide = kfont->GetInt("wide", 10);
-			font.wide = font.wide == 0 ? 10 : font.wide;
-			font.tall = kfont->GetInt("tall", 16);
+			font.wide   = kfont->GetInt("wide", 10);
+			font.wide   = font.wide == 0 ? 10 : font.wide;
+			font.tall   = kfont->GetInt("tall", 16);
 			font.weight = kfont->GetInt("weight", 500);
-			font.name = kfont->name;
-			font.font = CFontBuilder(kfont->GetString("name", "Tahoma"), font.tall * uiStatic.scaleY, font.weight).SetHandleNum(font_index).SetFlags(flags).Create();	
+			font.name   = kfont->name;
+			font.font   = CFontBuilder(kfont->GetString("name", "Tahoma"), font.tall * uiStatic.scaleY, font.weight)
+					    .SetHandleNum(font_index)
+					    .SetFlags(flags)
+					    .Create();
 			Assert(font.font > 3);
 			g_Fonts.push_back(font);
 			printf("Registered font %s\n", font.name);
@@ -131,7 +123,7 @@ void CFontManager::VidInit( void )
 
 void CFontManager::DeleteAllFonts()
 {
-	for( int i = 0; i < m_Fonts.Count(); i++ )
+	for (int i = 0; i < m_Fonts.Count(); i++)
 	{
 		delete m_Fonts[i];
 	}
@@ -140,8 +132,8 @@ void CFontManager::DeleteAllFonts()
 
 void CFontManager::DeleteFont(HFont hFont)
 {
-	CBaseFont *font = GetIFontFromHandle(hFont);
-	if( font )
+	CBaseFont* font = GetIFontFromHandle(hFont);
+	if (font)
 	{
 		m_Fonts[hFont] = NULL;
 
@@ -149,26 +141,26 @@ void CFontManager::DeleteFont(HFont hFont)
 	}
 }
 
-CBaseFont *CFontManager::GetIFontFromHandle(HFont font)
+CBaseFont* CFontManager::GetIFontFromHandle(HFont font)
 {
-	if( m_Fonts.IsValidIndex( font - 1 ) )
-		return m_Fonts[font-1];
+	if (m_Fonts.IsValidIndex(font - 1))
+		return m_Fonts[font - 1];
 
 	return NULL;
 }
 
 int CFontManager::GetEllipsisWide(HFont font)
 {
-	if( m_Fonts.IsValidIndex( font - 1 ) )
-		return m_Fonts[font-1]->GetEllipsisWide();
+	if (m_Fonts.IsValidIndex(font - 1))
+		return m_Fonts[font - 1]->GetEllipsisWide();
 	return 0;
 }
 
-void CFontManager::GetCharABCWide(HFont font, int ch, int &a, int &b, int &c)
+void CFontManager::GetCharABCWide(HFont font, int ch, int& a, int& b, int& c)
 {
-	CBaseFont *pFont = GetIFontFromHandle( font );
-	if( pFont )
-		pFont->GetCharABCWidths( ch, a, b, c );
+	CBaseFont* pFont = GetIFontFromHandle(font);
+	if (pFont)
+		pFont->GetCharABCWidths(ch, a, b, c);
 	else
 		a = b = c = 0;
 }
@@ -176,24 +168,24 @@ void CFontManager::GetCharABCWide(HFont font, int ch, int &a, int &b, int &c)
 int CFontManager::GetCharacterWidth(HFont font, int ch)
 {
 	int a, b, c;
-	GetCharABCWide( font, ch, a, b, c );
+	GetCharABCWide(font, ch, a, b, c);
 	return a + b + c;
 }
 
 int CFontManager::GetCharacterWidthScaled(HFont font, int ch, int height)
 {
-	return GetCharacterWidth( font, ch )
+	return GetCharacterWidth(font, ch)
 #ifdef SCALE_FONTS
-		* ((float)height / (float)GetFontTall( font ))
+	       * ((float)height / (float)GetFontTall(font))
 #endif
-	;
+		;
 }
 
-HFont CFontManager::GetFontByName(const char *name)
+HFont CFontManager::GetFontByName(const char* name)
 {
-	for( int i = 0; i < m_Fonts.Count(); i++ )
+	for (int i = 0; i < m_Fonts.Count(); i++)
 	{
-		if( !stricmp( name, m_Fonts[i]->GetName() ) )
+		if (!stricmp(name, m_Fonts[i]->GetName()))
 			return i;
 	}
 	return -1;
@@ -201,51 +193,53 @@ HFont CFontManager::GetFontByName(const char *name)
 
 int CFontManager::GetFontTall(HFont font)
 {
-	CBaseFont *pFont = GetIFontFromHandle( font );
-	if( pFont )
+	CBaseFont* pFont = GetIFontFromHandle(font);
+	if (pFont)
 		return pFont->GetTall();
 	return 0;
 }
 
 int CFontManager::GetFontAscent(HFont font)
 {
-	CBaseFont *pFont = GetIFontFromHandle( font );
-	if( pFont )
+	CBaseFont* pFont = GetIFontFromHandle(font);
+	if (pFont)
 		return pFont->GetAscent();
 	return 0;
 }
 
 bool CFontManager::GetFontUnderlined(HFont font)
 {
-	CBaseFont *pFont = GetIFontFromHandle( font );
-	if( pFont )
+	CBaseFont* pFont = GetIFontFromHandle(font);
+	if (pFont)
 		return pFont->GetFlags() & FONT_UNDERLINE;
 	return false;
 }
 
-void CFontManager::GetTextSize(HFont fontHandle, const char *text, int *wide, int *tall, int size )
+void CFontManager::GetTextSize(HFont fontHandle, const char* text, int* wide, int* tall, int size)
 {
-	CBaseFont *font = GetIFontFromHandle( fontHandle );
+	CBaseFont* font = GetIFontFromHandle(fontHandle);
 
-	if( !font || !text || !text[0] )
+	if (!font || !text || !text[0])
 	{
-		if( wide ) *wide = 0;
-		if( tall ) *tall = 0;
+		if (wide)
+			*wide = 0;
+		if (tall)
+			*tall = 0;
 		return;
 	}
 
-	int fontTall = font->GetHeight(), x = 0;
-	int _wide = 0, _tall;
-	const char *ch = text;
-	_tall = fontTall;
-	int i = 0;
+	int	    fontTall = font->GetHeight(), x = 0;
+	int	    _wide = 0, _tall;
+	const char* ch	  = text;
+	_tall		  = fontTall;
+	int i		  = 0;
 
-	EngFuncs::UtfProcessChar( 0 );
+	EngFuncs::UtfProcessChar(0);
 
-	while( *ch && ( size < 0 || i < size ) )
+	while (*ch && (size < 0 || i < size))
 	{
 		// Skip colorcodes
-		if( IsColorString( ch ) )
+		if (IsColorString(ch))
 		{
 			ch += 2;
 			continue;
@@ -253,10 +247,10 @@ void CFontManager::GetTextSize(HFont fontHandle, const char *text, int *wide, in
 
 		int uch;
 
-		uch = EngFuncs::UtfProcessChar( (unsigned char)*ch );
-		if( uch )
+		uch = EngFuncs::UtfProcessChar((unsigned char)*ch);
+		if (uch)
 		{
-			if( uch == '\n' && *( ch + 1 ) != '\0' )
+			if (uch == '\n' && *(ch + 1) != '\0')
 			{
 				_tall += fontTall;
 				x = 0;
@@ -264,94 +258,101 @@ void CFontManager::GetTextSize(HFont fontHandle, const char *text, int *wide, in
 			else
 			{
 				int a, b, c;
-				font->GetCharABCWidths( uch, a, b, c );
+				font->GetCharABCWidths(uch, a, b, c);
 				x += a + b + c;
-				if( x > _wide )
+				if (x > _wide)
 					_wide = x;
 			}
 		}
 		i++;
 		ch++;
 	}
-	EngFuncs::UtfProcessChar( 0 );
+	EngFuncs::UtfProcessChar(0);
 
-	if( tall ) *tall = _tall;
-	if( wide ) *wide = _wide;
+	if (tall)
+		*tall = _tall;
+	if (wide)
+		*wide = _wide;
 }
 
-int CFontManager::CutText(HFont fontHandle, const char *text, int height, int visibleSize, bool reverse, bool stopAtWhitespace, int *wide, bool *remaining )
+int CFontManager::CutText(HFont fontHandle, const char* text, int height, int visibleSize, bool reverse, bool stopAtWhitespace, int* wide,
+			  bool* remaining)
 {
-	CBaseFont *font = GetIFontFromHandle( fontHandle );
+	CBaseFont* font = GetIFontFromHandle(fontHandle);
 
-	if( remaining )
+	if (remaining)
 		*remaining = false;
 
-	if( !font || !text || !text[0] || visibleSize <= 0 )
+	if (!font || !text || !text[0] || visibleSize <= 0)
 		return 0;
 
-	int _wide = 0;
-	const char *ch = text;
+	int	    _wide = 0;
+	const char* ch	  = text;
 
 #ifdef SCALE_FONTS
-	visibleSize  = (float)visibleSize / (float)height * (float)font->GetTall();
+	visibleSize = (float)visibleSize / (float)height * (float)font->GetTall();
 #endif
 
-	EngFuncs::UtfProcessChar( 0 );
+	EngFuncs::UtfProcessChar(0);
 
 	int whiteSpacePos = 0;
 
 	// calculate full text wide
-	while( *ch )
+	while (*ch)
 	{
 		// skip colorcodes
-		if( IsColorString( ch ) )
+		if (IsColorString(ch))
 		{
 			ch += 2;
 			continue;
 		}
 
-		int uch = EngFuncs::UtfProcessChar( (unsigned char)*ch );
-		int x = 0;
-		if( uch )
+		int uch = EngFuncs::UtfProcessChar((unsigned char)*ch);
+		int x	= 0;
+		if (uch)
 		{
-			if( uch == '\n' )
+			if (uch == '\n')
 			{
 				ch++;
 				break; //
 			}
 
 			int a, b, c;
-			font->GetCharABCWidths( uch, a, b, c );
+			font->GetCharABCWidths(uch, a, b, c);
 			x = a + b + c;
 
-			if( uch == ' ' )
+			if (uch == ' ')
 			{
 				whiteSpacePos = ch - text;
 			}
 		}
 
-		if( !reverse && _wide + x >= visibleSize )
+		if (!reverse && _wide + x >= visibleSize)
 			break;
 
 		ch++;
 		_wide += x;
 	}
 
-	EngFuncs::UtfProcessChar( 0 );
+	EngFuncs::UtfProcessChar(0);
 
-	if( !reverse )
+	if (!reverse)
 	{
-		if( *ch && remaining ) *remaining = true;
-		if( wide ) *wide = _wide;
-		if( stopAtWhitespace && whiteSpacePos )
+		if (*ch && remaining)
+			*remaining = true;
+		if (wide)
+			*wide = _wide;
+		if (stopAtWhitespace && whiteSpacePos)
 			return whiteSpacePos;
 		return ch - text;
 	}
 
-	if( _wide < visibleSize )
+	if (_wide < visibleSize)
 	{
-		if( remaining ) *remaining = false;
-		if( wide ) *wide = _wide;
+		if (remaining)
+			*remaining = false;
+		if (wide)
+			*wide = _wide;
 		return 0;
 	}
 
@@ -360,24 +361,24 @@ int CFontManager::CutText(HFont fontHandle, const char *text, int height, int vi
 	whiteSpacePos = 0;
 
 	// now remove character one by one to fit
-	while( *ch && _wide > visibleSize )
+	while (*ch && _wide > visibleSize)
 	{
 		// skip colorcodes
-		if( IsColorString( ch ) )
+		if (IsColorString(ch))
 		{
 			ch += 2;
 			continue;
 		}
 
-		int uch = EngFuncs::UtfProcessChar( (unsigned char)*ch );
-		if( uch )
+		int uch = EngFuncs::UtfProcessChar((unsigned char)*ch);
+		if (uch)
 		{
 			// we don't need check for newlines here, it's only done for oneline Field widget
 			int a, b, c;
-			font->GetCharABCWidths( uch, a, b, c );
+			font->GetCharABCWidths(uch, a, b, c);
 			_wide -= a + b + c;
 
-			if( uch == ' ' )
+			if (uch == ' ')
 			{
 				whiteSpacePos = ch - text;
 			}
@@ -385,28 +386,30 @@ int CFontManager::CutText(HFont fontHandle, const char *text, int height, int vi
 		ch++;
 	}
 
-	EngFuncs::UtfProcessChar( 0 );
+	EngFuncs::UtfProcessChar(0);
 
-	if( remaining ) *remaining = true;
-	if( wide ) *wide = _wide;
-	if( stopAtWhitespace && whiteSpacePos ) return whiteSpacePos;
+	if (remaining)
+		*remaining = true;
+	if (wide)
+		*wide = _wide;
+	if (stopAtWhitespace && whiteSpacePos)
+		return whiteSpacePos;
 	return ch - text;
-
 }
 
-int CFontManager::GetTextWide(HFont font, const char *text, int size)
+int CFontManager::GetTextWide(HFont font, const char* text, int size)
 {
 	int wide;
 
-	GetTextSize( font, text, &wide, NULL, size );
+	GetTextSize(font, text, &wide, NULL, size);
 
 	return wide;
 }
 
-int CFontManager::GetTextHeight(HFont fontHandle, const char *text, int size )
+int CFontManager::GetTextHeight(HFont fontHandle, const char* text, int size)
 {
-	CBaseFont *font = GetIFontFromHandle( fontHandle );
-	if( !font || !text || !text[0] )
+	CBaseFont* font = GetIFontFromHandle(fontHandle);
+	if (!font || !text || !text[0])
 	{
 		return 0;
 	}
@@ -415,9 +418,9 @@ int CFontManager::GetTextHeight(HFont fontHandle, const char *text, int size )
 
 	// lightweight variant only for getting text height
 	int i = 0;
-	while( *text&&( size < 0 || i < size ) )
+	while (*text && (size < 0 || i < size))
 	{
-		if( *text == '\n' )
+		if (*text == '\n')
 			height += height;
 
 		text++;
@@ -426,21 +429,21 @@ int CFontManager::GetTextHeight(HFont fontHandle, const char *text, int size )
 	return height;
 }
 
-int CFontManager::GetTextHeightExt( HFont fontHandle, const char *text, int height, int w, int size )
+int CFontManager::GetTextHeightExt(HFont fontHandle, const char* text, int height, int w, int size)
 {
-	CBaseFont *font = GetIFontFromHandle( fontHandle );
-	if( !font || !text || !text[0] || !w )
+	CBaseFont* font = GetIFontFromHandle(fontHandle);
+	if (!font || !text || !text[0] || !w)
 	{
 		return 0;
 	}
 
-	const char *text2 = text;
-	int y = 0;
+	const char* text2 = text;
+	int	    y	  = 0;
 
-	while( *text2 && ( size < 0 || text2 - text < size ) )
+	while (*text2 && (size < 0 || text2 - text < size))
 	{
-		int pos = CutText( fontHandle, text2, height, w, false, true );
-		if( pos == 0 )
+		int pos = CutText(fontHandle, text2, height, w, false, true);
+		if (pos == 0)
 			break;
 
 		y += height;
@@ -448,69 +451,66 @@ int CFontManager::GetTextHeightExt( HFont fontHandle, const char *text, int heig
 	}
 
 	return y;
-
 }
 
-int CFontManager::GetTextWideScaled(HFont font, const char *text, const int height, int size)
+int CFontManager::GetTextWideScaled(HFont font, const char* text, const int height, int size)
 {
-	CBaseFont *pFont = GetIFontFromHandle( font );
-	if( pFont )
+	CBaseFont* pFont = GetIFontFromHandle(font);
+	if (pFont)
 	{
-		return GetTextWide( font, text, size )
+		return GetTextWide(font, text, size)
 #ifdef SCALE_FONTS
-			* ((float)height / (float)pFont->GetTall())
+		       * ((float)height / (float)pFont->GetTall())
 #endif
-		;
+			;
 	}
 
 	return 0;
 }
 
-void CFontManager::UploadTextureForFont(CBaseFont *font)
+void CFontManager::UploadTextureForFont(CBaseFont* font)
 {
 	// upload only latin needed for english and cyrillic needed for russian
 	// maybe it would be extended someday...
 
-	charRange_t range[] =
-	{
-	{ 33, 126, NULL, 0 },			// ascii printable range
-	{ 0, 0, table_cp1251, ARRAYSIZE( table_cp1251 ) }, // cp1251
-	{ 0x0400, 0x045F, NULL, 0 },		// cyrillic range
+	charRange_t range[] = {
+		{33, 126, NULL, 0},			       // ascii printable range
+		{0, 0, table_cp1251, ARRAYSIZE(table_cp1251)}, // cp1251
+		{0x0400, 0x045F, NULL, 0},		       // cyrillic range
 	};
 
-	font->UploadGlyphsForRanges( range, ARRAYSIZE( range ) );
+	font->UploadGlyphsForRanges(range, ARRAYSIZE(range));
 }
 
-int CFontManager::DrawCharacter(HFont fontHandle, int ch, Point pt, int charH, const unsigned int color, bool forceAdditive )
+int CFontManager::DrawCharacter(HFont fontHandle, int ch, Point pt, int charH, const unsigned int color, bool forceAdditive)
 {
-	CBaseFont *font = GetIFontFromHandle( fontHandle );
+	CBaseFont* font = GetIFontFromHandle(fontHandle);
 
-	if( !font )
+	if (!font)
 		return 0;
 
-	return font->DrawCharacter( ch, pt, charH, color, forceAdditive );
+	return font->DrawCharacter(ch, pt, charH, color, forceAdditive);
 }
 
 void CFontManager::DebugDraw(HFont fontHandle)
 {
-	CBaseFont *font = GetIFontFromHandle(fontHandle);
+	CBaseFont* font = GetIFontFromHandle(fontHandle);
 
 	font->DebugDraw();
 }
 
-
 HFont CFontBuilder::Create()
 {
-	CBaseFont *font;
+	CBaseFont* font;
 
 	// check existing font at first
-	if( !m_hForceHandle )
+	if (!m_hForceHandle)
 	{
-		for( int i = 0; i < g_FontMgr->m_Fonts.Count(); i++ )
+		for (int i = 0; i < g_FontMgr->m_Fonts.Count(); i++)
 		{
 			font = g_FontMgr->m_Fonts[i];
 
-			if( font->IsEqualTo( m_szName, m_iTall, m_iWeight, m_iBlur, m_iFlags ) )
+			if (font->IsEqualTo(m_szName, m_iTall, m_iWeight, m_iBlur, m_iFlags))
 				return i + 1;
 		}
 	}
@@ -527,7 +527,7 @@ HFont CFontBuilder::Create()
 
 	double starttime = Sys_DoubleTime();
 
-	if( !font->Create( m_szName, m_iTall, m_iWeight, m_iBlur, m_fBrighten, m_iOutlineSize, m_iScanlineOffset, m_fScanlineScale, m_iFlags ) )
+	if (!font->Create(m_szName, m_iTall, m_iWeight, m_iBlur, m_fBrighten, m_iOutlineSize, m_iScanlineOffset, m_fScanlineScale, m_iFlags))
 	{
 		delete font;
 
@@ -535,25 +535,26 @@ HFont CFontBuilder::Create()
 		font = new CBitmapFont();
 
 		// should never fail
-		if( !font->Create( "Bitmap Font", m_iTall, m_iWeight, m_iBlur, m_fBrighten, m_iOutlineSize, m_iScanlineOffset, m_fScanlineScale, m_iFlags ) )
+		if (!font->Create("Bitmap Font", m_iTall, m_iWeight, m_iBlur, m_fBrighten, m_iOutlineSize, m_iScanlineOffset, m_fScanlineScale,
+				  m_iFlags))
 		{
 			delete font;
 			return -1;
 		}
 	}
 
-	g_FontMgr->UploadTextureForFont( font );
+	g_FontMgr->UploadTextureForFont(font);
 
 	double endtime = Sys_DoubleTime();
 
-	Con_DPrintf( "Rendering %s(%i, %i) took %f seconds\n", font->GetName(), m_iTall, m_iWeight, endtime - starttime );
+	Con_DPrintf("Rendering %s(%i, %i) took %f seconds\n", font->GetName(), m_iTall, m_iWeight, endtime - starttime);
 
-	if( m_hForceHandle != -1 && g_FontMgr->m_Fonts.Count() != m_hForceHandle )
+	if (m_hForceHandle != -1 && g_FontMgr->m_Fonts.Count() != m_hForceHandle)
 	{
-		if( g_FontMgr->m_Fonts.IsValidIndex( m_hForceHandle ) )
+		if (g_FontMgr->m_Fonts.IsValidIndex(m_hForceHandle))
 		{
-			g_FontMgr->m_Fonts.FastRemove( m_hForceHandle );
-			return g_FontMgr->m_Fonts.InsertBefore( m_hForceHandle, font );
+			g_FontMgr->m_Fonts.FastRemove(m_hForceHandle);
+			return g_FontMgr->m_Fonts.InsertBefore(m_hForceHandle, font);
 		}
 	}
 

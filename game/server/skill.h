@@ -1,17 +1,17 @@
 /***
-*
-*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
-*	All Rights Reserved.
-*
-*   Use, distribution, and modification of this source code and/or resulting
-*   object code is restricted to non-commercial enhancements to products from
-*   Valve LLC.  All other use, distribution, or modification is prohibited
-*   without written permission from Valve LLC.
-*
-****/
+ *
+ *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
+ *
+ *	This product contains software technology licensed from Id
+ *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
+ *	All Rights Reserved.
+ *
+ *   Use, distribution, and modification of this source code and/or resulting
+ *   object code is restricted to non-commercial enhancements to products from
+ *   Valve LLC.  All other use, distribution, or modification is prohibited
+ *   without written permission from Valve LLC.
+ *
+ ****/
 //=========================================================
 // skill.h - skill level concerns
 //=========================================================
@@ -31,10 +31,10 @@ struct skilldata_t
 
 	float barneyHealth;
 
-	float bigmommaHealthFactor;		// Multiply each node's health by this
-	float bigmommaDmgSlash;			// melee attack damage
-	float bigmommaDmgBlast;			// mortar attack damage
-	float bigmommaRadiusBlast;		// mortar attack radius
+	float bigmommaHealthFactor; // Multiply each node's health by this
+	float bigmommaDmgSlash;	    // melee attack damage
+	float bigmommaDmgBlast;	    // mortar attack damage
+	float bigmommaRadiusBlast;  // mortar attack radius
 
 	float bullsquidHealth;
 	float bullsquidDmgBite;
@@ -109,7 +109,7 @@ struct skilldata_t
 	float plrDmgHandGrenade;
 	float plrDmgSatchel;
 	float plrDmgTripmine;
-	
+
 	// weapons shared by monsters
 	float monDmg9MM;
 	float monDmgMP5;
@@ -138,12 +138,12 @@ struct skilldata_t
 	float plrArm;
 };
 
-extern	DLL_GLOBAL	skilldata_t	gSkillData;
-float GetSkillCvar( const char *pName );
+extern DLL_GLOBAL skilldata_t gSkillData;
+float			      GetSkillCvar(const char* pName);
 
-extern DLL_GLOBAL int		g_iSkillLevel;
+extern DLL_GLOBAL int g_iSkillLevel;
 
-#define SKILL_EASY		1
-#define SKILL_MEDIUM	2
-#define SKILL_HARD		3
+#define SKILL_EASY   1
+#define SKILL_MEDIUM 2
+#define SKILL_HARD   3
 #endif // SKILL_H

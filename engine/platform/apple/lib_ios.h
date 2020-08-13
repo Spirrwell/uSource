@@ -17,7 +17,7 @@ GNU General Public License for more details.
 #ifndef IOS_LIB_H
 #define IOS_LIB_H
 
-void *IOS_LoadLibrary( const char *dllname );
+void* IOS_LoadLibrary(const char* dllname);
 
 #endif // IOS_LIB_H
 #endif // TARGET_OS_IPHONE

@@ -12,11 +12,9 @@
 class CBaseEntity2
 {
 public:
-
 	/* Basic events */
-	virtual void Spawn() {};
-	virtual void Precache() {};
-
+	virtual void Spawn(){};
+	virtual void Precache(){};
 
 	/* Entity type checking */
 	virtual bool IsNPC() const { return false; }
@@ -32,6 +30,4 @@ public:
 	virtual bool IsSneaking() const { return false; }
 	virtual bool IsInWorld() const { return false; }
 	virtual bool IsAlive() const { return false; }
-
-
 };

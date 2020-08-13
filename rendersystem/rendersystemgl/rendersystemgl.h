@@ -1,10 +1,10 @@
 #pragma once
 
-#include "rendersystem/rendersystem.h"
+#include "rendersystem/ibuffer.h"
 #include "rendersystem/imesh.h"
 #include "rendersystem/ishader.h"
 #include "rendersystem/material.h"
-#include "rendersystem/ibuffer.h"
+#include "rendersystem/rendersystem.h"
 
 extern byte* g_pGLPool;
 
@@ -15,10 +15,10 @@ public:
 	virtual void Shutdown() override;
 
 	virtual class ITriangleAPI* GetTriAPI() override;
-	virtual IShaderProgram* CreateShaderProgram(const char* name) override;
+	virtual IShaderProgram*	    CreateShaderProgram(const char* name) override;
 };
 
 namespace GL
 {
-	unsigned int GetParam(unsigned long param);
+unsigned int GetParam(unsigned long param);
 }

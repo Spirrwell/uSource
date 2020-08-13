@@ -34,15 +34,16 @@
 
 #include "cgltf.h"
 
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-cgltf_result cgltf_write_file(const cgltf_options* options, const char* path, const cgltf_data* data);
-cgltf_size cgltf_write(const cgltf_options* options, char* buffer, cgltf_size size, const cgltf_data* data);
+	cgltf_result cgltf_write_file(const cgltf_options* options, const char* path, const cgltf_data* data);
+	cgltf_size   cgltf_write(const cgltf_options* options, char* buffer, cgltf_size size, const cgltf_data* data);
 
 #ifdef __cplusplus
 }
@@ -64,78 +65,97 @@ cgltf_size cgltf_write(const cgltf_options* options, char* buffer, cgltf_size si
 
 #ifdef CGLTF_WRITE_IMPLEMENTATION
 
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define CGLTF_EXTENSION_FLAG_TEXTURE_TRANSFORM      (1 << 0)
-#define CGLTF_EXTENSION_FLAG_MATERIALS_UNLIT        (1 << 1)
+#define CGLTF_EXTENSION_FLAG_TEXTURE_TRANSFORM	    (1 << 0)
+#define CGLTF_EXTENSION_FLAG_MATERIALS_UNLIT	    (1 << 1)
 #define CGLTF_EXTENSION_FLAG_SPECULAR_GLOSSINESS    (1 << 2)
-#define CGLTF_EXTENSION_FLAG_LIGHTS_PUNCTUAL        (1 << 3)
+#define CGLTF_EXTENSION_FLAG_LIGHTS_PUNCTUAL	    (1 << 3)
 #define CGLTF_EXTENSION_FLAG_DRACO_MESH_COMPRESSION (1 << 4)
 #define CGLTF_EXTENSION_FLAG_MATERIALS_CLEARCOAT    (1 << 5)
 
-typedef struct {
-	char* buffer;
-	cgltf_size buffer_size;
-	cgltf_size remaining;
-	char* cursor;
-	cgltf_size tmp;
-	cgltf_size chars_written;
+typedef struct
+{
+	char*		  buffer;
+	cgltf_size	  buffer_size;
+	cgltf_size	  remaining;
+	char*		  cursor;
+	cgltf_size	  tmp;
+	cgltf_size	  chars_written;
 	const cgltf_data* data;
-	int depth;
-	const char* indent;
-	int needs_comma;
-	uint32_t extension_flags;
-	uint32_t required_extension_flags;
+	int		  depth;
+	const char*	  indent;
+	int		  needs_comma;
+	uint32_t	  extension_flags;
+	uint32_t	  required_extension_flags;
 } cgltf_write_context;
 
 #define CGLTF_MIN(a, b) (a < b ? a : b)
 
-#define CGLTF_SPRINTF(...) { \
-		context->tmp = snprintf ( context->cursor, context->remaining, __VA_ARGS__ ); \
-		context->chars_written += context->tmp; \
-		if (context->cursor) { \
-			context->cursor += context->tmp; \
-			context->remaining -= context->tmp; \
-		} }
+#define CGLTF_SPRINTF(...)                                                                                                                           \
+	{                                                                                                                                            \
+		context->tmp = snprintf(context->cursor, context->remaining, __VA_ARGS__);                                                           \
+		context->chars_written += context->tmp;                                                                                              \
+		if (context->cursor)                                                                                                                 \
+		{                                                                                                                                    \
+			context->cursor += context->tmp;                                                                                             \
+			context->remaining -= context->tmp;                                                                                          \
+		}                                                                                                                                    \
+	}
 
-#define CGLTF_SNPRINTF(length, ...) { \
-		context->tmp = snprintf ( context->cursor, CGLTF_MIN(length + 1, context->remaining), __VA_ARGS__ ); \
-		context->chars_written += length; \
-		if (context->cursor) { \
-			context->cursor += length; \
-			context->remaining -= length; \
-		} }
+#define CGLTF_SNPRINTF(length, ...)                                                                                                                  \
+	{                                                                                                                                            \
+		context->tmp = snprintf(context->cursor, CGLTF_MIN(length + 1, context->remaining), __VA_ARGS__);                                    \
+		context->chars_written += length;                                                                                                    \
+		if (context->cursor)                                                                                                                 \
+		{                                                                                                                                    \
+			context->cursor += length;                                                                                                   \
+			context->remaining -= length;                                                                                                \
+		}                                                                                                                                    \
+	}
 
-#define CGLTF_WRITE_IDXPROP(label, val, start) if (val) { \
-		cgltf_write_indent(context); \
-		CGLTF_SPRINTF("\"%s\": %d", label, (int) (val - start)); \
-		context->needs_comma = 1; }
+#define CGLTF_WRITE_IDXPROP(label, val, start)                                                                                                       \
+	if (val)                                                                                                                                     \
+	{                                                                                                                                            \
+		cgltf_write_indent(context);                                                                                                         \
+		CGLTF_SPRINTF("\"%s\": %d", label, (int)(val - start));                                                                              \
+		context->needs_comma = 1;                                                                                                            \
+	}
 
-#define CGLTF_WRITE_IDXARRPROP(label, dim, vals, start) if (vals) { \
-		cgltf_write_indent(context); \
-		CGLTF_SPRINTF("\"%s\": [", label); \
-		for (int i = 0; i < (int)(dim); ++i) { \
-			int idx = (int) (vals[i] - start); \
-			if (i != 0) CGLTF_SPRINTF(","); \
-			CGLTF_SPRINTF(" %d", idx); \
-		} \
-		CGLTF_SPRINTF(" ]"); \
-		context->needs_comma = 1; }
+#define CGLTF_WRITE_IDXARRPROP(label, dim, vals, start)                                                                                              \
+	if (vals)                                                                                                                                    \
+	{                                                                                                                                            \
+		cgltf_write_indent(context);                                                                                                         \
+		CGLTF_SPRINTF("\"%s\": [", label);                                                                                                   \
+		for (int i = 0; i < (int)(dim); ++i)                                                                                                 \
+		{                                                                                                                                    \
+			int idx = (int)(vals[i] - start);                                                                                            \
+			if (i != 0)                                                                                                                  \
+				CGLTF_SPRINTF(",");                                                                                                  \
+			CGLTF_SPRINTF(" %d", idx);                                                                                                   \
+		}                                                                                                                                    \
+		CGLTF_SPRINTF(" ]");                                                                                                                 \
+		context->needs_comma = 1;                                                                                                            \
+	}
 
-#define CGLTF_WRITE_TEXTURE_INFO(label, info) if (info.texture) { \
-		cgltf_write_line(context, "\"" label "\": {"); \
-		CGLTF_WRITE_IDXPROP("index", info.texture, context->data->textures); \
-		cgltf_write_intprop(context, "texCoord", info.texcoord, 0); \
-		cgltf_write_floatprop(context, "scale", info.scale, 1.0f); \
-		if (info.has_transform) { \
-			context->extension_flags |= CGLTF_EXTENSION_FLAG_TEXTURE_TRANSFORM; \
-			cgltf_write_texture_transform(context, &info.transform); \
-		} \
-		cgltf_write_extras(context, &info.extras); \
-		cgltf_write_line(context, "}"); }
+#define CGLTF_WRITE_TEXTURE_INFO(label, info)                                                                                                        \
+	if (info.texture)                                                                                                                            \
+	{                                                                                                                                            \
+		cgltf_write_line(context, "\"" label "\": {");                                                                                       \
+		CGLTF_WRITE_IDXPROP("index", info.texture, context->data->textures);                                                                 \
+		cgltf_write_intprop(context, "texCoord", info.texcoord, 0);                                                                          \
+		cgltf_write_floatprop(context, "scale", info.scale, 1.0f);                                                                           \
+		if (info.has_transform)                                                                                                              \
+		{                                                                                                                                    \
+			context->extension_flags |= CGLTF_EXTENSION_FLAG_TEXTURE_TRANSFORM;                                                          \
+			cgltf_write_texture_transform(context, &info.transform);                                                                     \
+		}                                                                                                                                    \
+		cgltf_write_extras(context, &info.extras);                                                                                           \
+		cgltf_write_line(context, "}");                                                                                                      \
+	}
 
 static void cgltf_write_indent(cgltf_write_context* context)
 {
@@ -190,7 +210,7 @@ static void cgltf_write_extras(cgltf_write_context* context, const cgltf_extras*
 	cgltf_size length = extras->end_offset - extras->start_offset;
 	if (length > 0 && context->data->file_data)
 	{
-		char* json_string = ((char*) context->data->file_data) + extras->start_offset;
+		char* json_string = ((char*)context->data->file_data) + extras->start_offset;
 		cgltf_write_indent(context);
 		CGLTF_SPRINTF("%s", "\"extras\": ");
 		CGLTF_SNPRINTF(length, "%s", json_string);
@@ -226,7 +246,7 @@ static void cgltf_write_floatprop(cgltf_write_context* context, const char* labe
 
 		if (context->cursor)
 		{
-			char *decimal_comma = strchr(context->cursor - context->tmp, ',');
+			char* decimal_comma = strchr(context->cursor - context->tmp, ',');
 			if (decimal_comma)
 			{
 				*decimal_comma = '.';
@@ -264,7 +284,8 @@ static void cgltf_write_floatarrayprop(cgltf_write_context* context, const char*
 	context->needs_comma = 1;
 }
 
-static bool cgltf_check_floatarray(const float* vals, int dim, float val) {
+static bool cgltf_check_floatarray(const float* vals, int dim, float val)
+{
 	while (dim--)
 	{
 		if (vals[dim] != val)
@@ -279,13 +300,20 @@ static int cgltf_int_from_component_type(cgltf_component_type ctype)
 {
 	switch (ctype)
 	{
-		case cgltf_component_type_r_8: return 5120;
-		case cgltf_component_type_r_8u: return 5121;
-		case cgltf_component_type_r_16: return 5122;
-		case cgltf_component_type_r_16u: return 5123;
-		case cgltf_component_type_r_32u: return 5125;
-		case cgltf_component_type_r_32f: return 5126;
-		default: return 0;
+	case cgltf_component_type_r_8:
+		return 5120;
+	case cgltf_component_type_r_8u:
+		return 5121;
+	case cgltf_component_type_r_16:
+		return 5122;
+	case cgltf_component_type_r_16u:
+		return 5123;
+	case cgltf_component_type_r_32u:
+		return 5125;
+	case cgltf_component_type_r_32f:
+		return 5126;
+	default:
+		return 0;
 	}
 }
 
@@ -293,9 +321,12 @@ static const char* cgltf_str_from_alpha_mode(cgltf_alpha_mode alpha_mode)
 {
 	switch (alpha_mode)
 	{
-		case cgltf_alpha_mode_mask: return "MASK";
-		case cgltf_alpha_mode_blend: return "BLEND";
-		default: return NULL;
+	case cgltf_alpha_mode_mask:
+		return "MASK";
+	case cgltf_alpha_mode_blend:
+		return "BLEND";
+	default:
+		return NULL;
 	}
 }
 
@@ -303,14 +334,22 @@ static const char* cgltf_str_from_type(cgltf_type type)
 {
 	switch (type)
 	{
-		case cgltf_type_scalar: return "SCALAR";
-		case cgltf_type_vec2: return "VEC2";
-		case cgltf_type_vec3: return "VEC3";
-		case cgltf_type_vec4: return "VEC4";
-		case cgltf_type_mat2: return "MAT2";
-		case cgltf_type_mat3: return "MAT3";
-		case cgltf_type_mat4: return "MAT4";
-		default: return NULL;
+	case cgltf_type_scalar:
+		return "SCALAR";
+	case cgltf_type_vec2:
+		return "VEC2";
+	case cgltf_type_vec3:
+		return "VEC3";
+	case cgltf_type_vec4:
+		return "VEC4";
+	case cgltf_type_mat2:
+		return "MAT2";
+	case cgltf_type_mat3:
+		return "MAT3";
+	case cgltf_type_mat4:
+		return "MAT4";
+	default:
+		return NULL;
 	}
 }
 
@@ -318,14 +357,22 @@ static cgltf_size cgltf_dim_from_type(cgltf_type type)
 {
 	switch (type)
 	{
-		case cgltf_type_scalar: return 1;
-		case cgltf_type_vec2: return 2;
-		case cgltf_type_vec3: return 3;
-		case cgltf_type_vec4: return 4;
-		case cgltf_type_mat2: return 4;
-		case cgltf_type_mat3: return 9;
-		case cgltf_type_mat4: return 16;
-		default: return 0;
+	case cgltf_type_scalar:
+		return 1;
+	case cgltf_type_vec2:
+		return 2;
+	case cgltf_type_vec3:
+		return 3;
+	case cgltf_type_vec4:
+		return 4;
+	case cgltf_type_mat2:
+		return 4;
+	case cgltf_type_mat3:
+		return 9;
+	case cgltf_type_mat4:
+		return 16;
+	default:
+		return 0;
 	}
 }
 
@@ -333,9 +380,12 @@ static const char* cgltf_str_from_camera_type(cgltf_camera_type camera_type)
 {
 	switch (camera_type)
 	{
-		case cgltf_camera_type_perspective: return "perspective";
-		case cgltf_camera_type_orthographic: return "orthographic";
-		default: return NULL;
+	case cgltf_camera_type_perspective:
+		return "perspective";
+	case cgltf_camera_type_orthographic:
+		return "orthographic";
+	default:
+		return NULL;
 	}
 }
 
@@ -343,10 +393,14 @@ static const char* cgltf_str_from_light_type(cgltf_light_type light_type)
 {
 	switch (light_type)
 	{
-		case cgltf_light_type_directional: return "directional";
-		case cgltf_light_type_point: return "point";
-		case cgltf_light_type_spot: return "spot";
-		default: return NULL;
+	case cgltf_light_type_directional:
+		return "directional";
+	case cgltf_light_type_point:
+		return "point";
+	case cgltf_light_type_spot:
+		return "spot";
+	default:
+		return NULL;
 	}
 }
 
@@ -381,7 +435,7 @@ static void cgltf_write_asset(cgltf_write_context* context, const cgltf_asset* a
 
 static void cgltf_write_primitive(cgltf_write_context* context, const cgltf_primitive* prim)
 {
-	cgltf_write_intprop(context, "mode", (int) prim->type, 4);
+	cgltf_write_intprop(context, "mode", (int)prim->type, 4);
 	CGLTF_WRITE_IDXPROP("indices", prim->indices, context->data->accessors);
 	CGLTF_WRITE_IDXPROP("material", prim->material, context->data->materials);
 	cgltf_write_line(context, "\"attributes\": {");
@@ -410,13 +464,16 @@ static void cgltf_write_primitive(cgltf_write_context* context, const cgltf_prim
 	cgltf_write_extras(context, &prim->extras);
 
 	cgltf_bool has_extensions = prim->has_draco_mesh_compression;
-	if (has_extensions) {
+	if (has_extensions)
+	{
 		cgltf_write_line(context, "\"extensions\": {");
 
-		if (prim->has_draco_mesh_compression) {
+		if (prim->has_draco_mesh_compression)
+		{
 			context->extension_flags |= CGLTF_EXTENSION_FLAG_DRACO_MESH_COMPRESSION;
-			if (prim->attributes_count == 0 || prim->indices == 0) {
-				context->required_extension_flags |= CGLTF_EXTENSION_FLAG_DRACO_MESH_COMPRESSION;				 
+			if (prim->attributes_count == 0 || prim->indices == 0)
+			{
+				context->required_extension_flags |= CGLTF_EXTENSION_FLAG_DRACO_MESH_COMPRESSION;
 			}
 
 			cgltf_write_line(context, "\"KHR_draco_mesh_compression\": {");
@@ -468,7 +525,6 @@ static void cgltf_write_buffer_view(cgltf_write_context* context, const cgltf_bu
 	cgltf_write_extras(context, &view->extras);
 	cgltf_write_line(context, "}");
 }
-
 
 static void cgltf_write_buffer(cgltf_write_context* context, const cgltf_buffer* buffer)
 {
@@ -632,12 +688,12 @@ static const char* cgltf_write_str_interpolation_type(cgltf_interpolation_type i
 	return "invalid";
 }
 
-static void cgltf_write_path_type(cgltf_write_context* context, const char *label, cgltf_animation_path_type path_type)
+static void cgltf_write_path_type(cgltf_write_context* context, const char* label, cgltf_animation_path_type path_type)
 {
 	cgltf_write_strprop(context, label, cgltf_write_str_path_type(path_type));
 }
 
-static void cgltf_write_interpolation_type(cgltf_write_context* context, const char *label, cgltf_interpolation_type interpolation_type)
+static void cgltf_write_interpolation_type(cgltf_write_context* context, const char* label, cgltf_interpolation_type interpolation_type)
 {
 	cgltf_write_strprop(context, label, cgltf_write_str_interpolation_type(interpolation_type));
 }
@@ -652,7 +708,8 @@ static void cgltf_write_animation_sampler(cgltf_write_context* context, const cg
 	cgltf_write_line(context, "}");
 }
 
-static void cgltf_write_animation_channel(cgltf_write_context* context, const cgltf_animation* animation, const cgltf_animation_channel* animation_channel)
+static void cgltf_write_animation_channel(cgltf_write_context* context, const cgltf_animation* animation,
+					  const cgltf_animation_channel* animation_channel)
 {
 	cgltf_write_line(context, "{");
 	CGLTF_WRITE_IDXPROP("sampler", animation_channel->sampler, animation->samplers);
@@ -854,7 +911,7 @@ static void cgltf_write_light(cgltf_write_context* context, const cgltf_light* l
 	{
 		cgltf_write_line(context, "\"spot\": {");
 		cgltf_write_floatprop(context, "innerConeAngle", light->spot_inner_cone_angle, 0.0f);
-		cgltf_write_floatprop(context, "outerConeAngle", light->spot_outer_cone_angle, 3.14159265358979323846f/4.0f);
+		cgltf_write_floatprop(context, "outerConeAngle", light->spot_outer_cone_angle, 3.14159265358979323846f / 4.0f);
 		cgltf_write_line(context, "}");
 	}
 	cgltf_write_line(context, "}");
@@ -863,9 +920,10 @@ static void cgltf_write_light(cgltf_write_context* context, const cgltf_light* l
 cgltf_result cgltf_write_file(const cgltf_options* options, const char* path, const cgltf_data* data)
 {
 	cgltf_size expected = cgltf_write(options, NULL, 0, data);
-	char* buffer = (char*) malloc(expected);
-	cgltf_size actual = cgltf_write(options, buffer, expected, data);
-	if (expected != actual) {
+	char*	   buffer   = (char*)malloc(expected);
+	cgltf_size actual   = cgltf_write(options, buffer, expected, data);
+	if (expected != actual)
+	{
 		fprintf(stderr, "Error: expected %zu bytes but wrote %zu bytes.\n", expected, actual);
 	}
 	FILE* file = fopen(path, "wt");
@@ -882,22 +940,28 @@ cgltf_result cgltf_write_file(const cgltf_options* options, const char* path, co
 
 static void cgltf_write_extensions(cgltf_write_context* context, uint32_t extension_flags)
 {
-	if (extension_flags & CGLTF_EXTENSION_FLAG_TEXTURE_TRANSFORM) {
+	if (extension_flags & CGLTF_EXTENSION_FLAG_TEXTURE_TRANSFORM)
+	{
 		cgltf_write_stritem(context, "KHR_texture_transform");
 	}
-	if (extension_flags & CGLTF_EXTENSION_FLAG_MATERIALS_UNLIT) {
+	if (extension_flags & CGLTF_EXTENSION_FLAG_MATERIALS_UNLIT)
+	{
 		cgltf_write_stritem(context, "KHR_materials_unlit");
 	}
-	if (extension_flags & CGLTF_EXTENSION_FLAG_SPECULAR_GLOSSINESS) {
+	if (extension_flags & CGLTF_EXTENSION_FLAG_SPECULAR_GLOSSINESS)
+	{
 		cgltf_write_stritem(context, "KHR_materials_pbrSpecularGlossiness");
 	}
-	if (extension_flags & CGLTF_EXTENSION_FLAG_LIGHTS_PUNCTUAL) {
+	if (extension_flags & CGLTF_EXTENSION_FLAG_LIGHTS_PUNCTUAL)
+	{
 		cgltf_write_stritem(context, "KHR_lights_punctual");
 	}
-	if (extension_flags & CGLTF_EXTENSION_FLAG_DRACO_MESH_COMPRESSION) {
+	if (extension_flags & CGLTF_EXTENSION_FLAG_DRACO_MESH_COMPRESSION)
+	{
 		cgltf_write_stritem(context, "KHR_draco_mesh_compression");
 	}
-	if (extension_flags & CGLTF_EXTENSION_FLAG_MATERIALS_CLEARCOAT) {
+	if (extension_flags & CGLTF_EXTENSION_FLAG_MATERIALS_CLEARCOAT)
+	{
 		cgltf_write_stritem(context, "KHR_materials_clearcoat");
 	}
 }
@@ -906,16 +970,16 @@ cgltf_size cgltf_write(const cgltf_options* options, char* buffer, cgltf_size si
 {
 	(void)options;
 	cgltf_write_context ctx;
-	ctx.buffer = buffer;
-	ctx.buffer_size = size;
-	ctx.remaining = size;
-	ctx.cursor = buffer;
-	ctx.chars_written = 0;
-	ctx.data = data;
-	ctx.depth = 1;
-	ctx.indent = "  ";
-	ctx.needs_comma = 0;
-	ctx.extension_flags = 0;
+	ctx.buffer		     = buffer;
+	ctx.buffer_size		     = size;
+	ctx.remaining		     = size;
+	ctx.cursor		     = buffer;
+	ctx.chars_written	     = 0;
+	ctx.data		     = data;
+	ctx.depth		     = 1;
+	ctx.indent		     = "  ";
+	ctx.needs_comma		     = 0;
+	ctx.extension_flags	     = 0;
 	ctx.required_extension_flags = 0;
 
 	cgltf_write_context* context = &ctx;
@@ -1072,13 +1136,15 @@ cgltf_size cgltf_write(const cgltf_options* options, char* buffer, cgltf_size si
 		cgltf_write_line(context, "}");
 	}
 
-	if (context->extension_flags != 0) {
+	if (context->extension_flags != 0)
+	{
 		cgltf_write_line(context, "\"extensionsUsed\": [");
 		cgltf_write_extensions(context, context->extension_flags);
 		cgltf_write_line(context, "]");
 	}
 
-	if (context->required_extension_flags != 0) {
+	if (context->required_extension_flags != 0)
+	{
 		cgltf_write_line(context, "\"extensionsRequired\": [");
 		cgltf_write_extensions(context, context->required_extension_flags);
 		cgltf_write_line(context, "]");

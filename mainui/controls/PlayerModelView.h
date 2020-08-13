@@ -16,13 +16,13 @@ GNU General Public License for more details.
 #define CMENUPLAYERMODELVIEW_H
 
 // HLSDK includes
-#include "mathlib.h"
-#include "const.h"
-#include "keydefs.h"
-#include "ref_params.h"
 #include "cl_entity.h"
 #include "com_model.h"
+#include "const.h"
 #include "entity_types.h"
+#include "keydefs.h"
+#include "mathlib.h"
+#include "ref_params.h"
 // HLSDK includes end
 #include "BaseItem.h"
 
@@ -32,14 +32,14 @@ public:
 	CMenuPlayerModelView();
 	void VidInit() override;
 	void Draw() override;
-	bool KeyDown( int key ) override;
-	bool KeyUp( int key ) override;
+	bool KeyDown(int key) override;
+	bool KeyUp(int key) override;
 	void CalcFov();
 
 	HIMAGE hPlayerImage;
 
 	ref_viewpass_t refdef;
-	cl_entity_t *ent;
+	cl_entity_t*   ent;
 
 	bool bDrawAsPlayer;
 
@@ -50,9 +50,9 @@ public:
 		PMV_SHOWIMAGE
 	} eOverrideMode;
 
-
 	CColor backgroundColor;
 	CColor outlineFocusColor;
+
 private:
 	cl_entity_t ent2;
 

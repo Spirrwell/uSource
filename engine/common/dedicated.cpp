@@ -11,7 +11,7 @@ This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-*/ 
+*/
 #ifdef XASH_DEDICATED
 #include "common.h"
 #include "mathlib.h"
@@ -19,8 +19,7 @@ GNU General Public License for more details.
 
 ref_globals_t refState;
 
-const char *svc_strings[256] =
-{
+const char* svc_strings[256] = {
 	"svc_bad",
 	"svc_nop",
 	"svc_disconnect",
@@ -87,249 +86,104 @@ const char *svc_strings[256] =
 	"svc_unused63",
 };
 
-void CL_ProcessFile( qboolean successfully_received, const char *filename )
-{
+void CL_ProcessFile(qboolean successfully_received, const char* filename) {}
 
+int CL_Active(void) { return false; }
+
+qboolean CL_Initialized(void) { return false; }
+
+qboolean CL_IsInGame(void)
+{
+	return true; // always active for dedicated servers
 }
 
-int CL_Active( void )
-{
-	return false;
-}
+qboolean CL_IsInMenu(void) { return false; }
 
-qboolean CL_Initialized( void )
-{
-	return false;
-}
+qboolean CL_IsInConsole(void) { return false; }
 
-qboolean CL_IsInGame( void )
-{
-	return true;	// always active for dedicated servers
-}
+qboolean CL_IsIntermission(void) { return false; }
 
-qboolean CL_IsInMenu( void )
-{
-	return false;
-}
+qboolean CL_IsPlaybackDemo(void) { return false; }
 
-qboolean CL_IsInConsole( void )
-{
-	return false;
-}
+qboolean CL_IsRecordDemo(void) { return false; }
 
-qboolean CL_IsIntermission( void )
-{
-	return false;
-}
+qboolean CL_DisableVisibility(void) { return false; }
 
-qboolean CL_IsPlaybackDemo( void )
-{
-	return false;
-}
+qboolean CL_IsBackgroundDemo(void) { return false; }
 
-qboolean CL_IsRecordDemo( void )
-{
-	return false;
-}
+qboolean CL_IsBackgroundMap(void) { return false; }
 
+void CL_Init() {}
 
-qboolean CL_DisableVisibility( void )
-{
-	return false;
-}
+void Key_Init() {}
 
-qboolean CL_IsBackgroundDemo( void )
-{
-	return false;
-}
+void IN_Init() {}
 
-qboolean CL_IsBackgroundMap( void )
-{
-	return false;
-}
+void CL_Drop() {}
 
-void CL_Init()
-{
+void CL_ClearEdicts() {}
 
-}
+void Key_SetKeyDest(int key_dest) {}
 
-void Key_Init()
-{
+void UI_SetActiveMenu(qboolean fActive) {}
 
-}
+void CL_WriteMessageHistory() {}
 
-void IN_Init()
-{
+void Host_ClientBegin() {}
 
-}
+void Host_ClientFrame() {}
 
-void CL_Drop()
-{
+void Host_InputFrame() { Cbuf_Execute(); }
 
-}
+void VID_InitDefaultResolution() {}
 
-void CL_ClearEdicts()
-{
+void Con_Init() {}
 
-}
+void R_ClearAllDecals() {}
+int  R_CreateDecalList(struct decallist_s* pList) { return 0; }
 
-void Key_SetKeyDest(int key_dest)
-{
+void S_StopSound(int entnum, int channel, const char* soundname) {}
 
-}
+int S_GetCurrentStaticSounds(soundlist_t* pout, int size) { return 0; }
 
-void UI_SetActiveMenu( qboolean fActive )
-{
+int CL_GetMaxClients() { return 0; }
 
-}
+void IN_TouchInitConfig() {}
 
-void CL_WriteMessageHistory()
-{
+void CL_Disconnect() {}
 
-}
+void CL_Shutdown() {}
 
-void Host_ClientBegin()
-{
+void R_ClearStaticEntities() {}
 
-}
+void Host_Credits() {}
 
-void Host_ClientFrame()
-{
+qboolean UI_CreditsActive() { return false; }
 
-}
+void GL_FreeImage(const char* name) {}
 
-void Host_InputFrame()
-{
-	Cbuf_Execute();
-}
+void S_StopBackgroundTrack() {}
 
-void VID_InitDefaultResolution()
-{
-	
-}
+void SCR_BeginLoadingPlaque(qboolean is_background) {}
 
-void Con_Init()
-{
-	
-}
+int S_GetCurrentDynamicSounds(soundlist_t* pout, int size) { return 0; }
 
-void R_ClearAllDecals()
-{
+void S_StopAllSounds(qboolean ambient) {}
 
-}
-int R_CreateDecalList( struct decallist_s *pList )
-{
-	return 0;
-}
+void Con_NPrintf(int idx, const char* fmt, ...) {}
 
-void S_StopSound(int entnum, int channel, const char *soundname)
-{
+void Con_NXPrintf(struct con_nprint_s* info, const char* fmt, ...) {}
 
-}
+const byte* GL_TextureData(unsigned int texnum) { return NULL; }
 
-int S_GetCurrentStaticSounds( soundlist_t *pout, int size )
-{
-	return 0;
-}
+void SCR_CheckStartupVids() {}
 
-int CL_GetMaxClients()
-{
-	return 0;
-}
+void Sys_SetClipboardData(const char* text, size_t size) {}
 
-void IN_TouchInitConfig()
-{
+void CL_StopPlayback(void) {}
 
-}
+void CL_ClearStaticEntities(void) {}
 
-void CL_Disconnect()
-{
-
-}
-
-void CL_Shutdown()
-{
-
-}
-
-void R_ClearStaticEntities()
-{
-
-}
-
-void Host_Credits()
-{
-
-}
-
-qboolean UI_CreditsActive()
-{
-	return false;
-}
-
-void GL_FreeImage( const char *name )
-{
-
-}
-
-void S_StopBackgroundTrack()
-{
-
-}
-
-void SCR_BeginLoadingPlaque( qboolean is_background )
-{
-
-}
-
-int S_GetCurrentDynamicSounds( soundlist_t *pout, int size )
-{
-	return 0;
-}
-
-void S_StopAllSounds( qboolean ambient )
-{
-
-}
-
-void Con_NPrintf( int idx, const char *fmt, ... )
-{
-
-}
-
-void Con_NXPrintf( struct  con_nprint_s *info, const char *fmt, ... )
-{
-
-}
-
-const byte *GL_TextureData( unsigned int texnum )
-{
-	return NULL;
-}
-
-void SCR_CheckStartupVids()
-{
-
-}
-
-void Sys_SetClipboardData( const char *text, size_t size )
-{
-
-}
-
-void CL_StopPlayback( void )
-{
-
-}
-
-void CL_ClearStaticEntities( void )
-{
-
-}
-
-void UI_ShowConnectionWarning( void )
-{
-
-}
+void UI_ShowConnectionWarning(void) {}
 
 #endif // XASH_DEDICATED

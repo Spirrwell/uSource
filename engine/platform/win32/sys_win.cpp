@@ -13,49 +13,43 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#include "platform/platform.h"
 #include "menu_int.h"
+#include "platform/platform.h"
 #include <shellapi.h>
 
 #if XASH_TIMER == TIMER_WIN32
-double Platform_DoubleTime( void )
+double Platform_DoubleTime(void)
 {
-	static LARGE_INTEGER	g_PerformanceFrequency;
-	static LARGE_INTEGER	g_ClockStart;
-	LARGE_INTEGER		CurrentTime;
+	static LARGE_INTEGER g_PerformanceFrequency;
+	static LARGE_INTEGER g_ClockStart;
+	LARGE_INTEGER	     CurrentTime;
 
-	if( !g_PerformanceFrequency.QuadPart )
+	if (!g_PerformanceFrequency.QuadPart)
 	{
-		QueryPerformanceFrequency( &g_PerformanceFrequency );
-		QueryPerformanceCounter( &g_ClockStart );
+		QueryPerformanceFrequency(&g_PerformanceFrequency);
+		QueryPerformanceCounter(&g_ClockStart);
 	}
-	QueryPerformanceCounter( &CurrentTime );
+	QueryPerformanceCounter(&CurrentTime);
 
-	return (double)( CurrentTime.QuadPart - g_ClockStart.QuadPart ) / (double)( g_PerformanceFrequency.QuadPart );
+	return (double)(CurrentTime.QuadPart - g_ClockStart.QuadPart) / (double)(g_PerformanceFrequency.QuadPart);
 }
 
-void Platform_Sleep( int msec )
-{
-	Sleep( msec );
-}
+void Platform_Sleep(int msec) { Sleep(msec); }
 #endif // XASH_TIMER == TIMER_WIN32
 
-qboolean Sys_DebuggerPresent( void )
-{
-	return IsDebuggerPresent();
-}
+qboolean Sys_DebuggerPresent(void) { return IsDebuggerPresent(); }
 
-void Platform_ShellExecute( const char *path, const char *parms )
+void Platform_ShellExecute(const char* path, const char* parms)
 {
-	if( !Q_strcmp( path, GENERIC_UPDATE_PAGE ) || !Q_strcmp( path, PLATFORM_UPDATE_PAGE ))
+	if (!Q_strcmp(path, GENERIC_UPDATE_PAGE) || !Q_strcmp(path, PLATFORM_UPDATE_PAGE))
 		path = DEFAULT_UPDATE_PAGE;
 
-	ShellExecute( NULL, "open", path, parms, NULL, SW_SHOW );
+	ShellExecute(NULL, "open", path, parms, NULL, SW_SHOW);
 }
 
 #ifdef XASH_DEDICATED
-void Platform_MessageBox( const char *title, const char *message, qboolean parentMainWindow )
+void Platform_MessageBox(const char* title, const char* message, qboolean parentMainWindow)
 {
-	MessageBox( parentMainWindow ? host.hWnd : NULL, message, title, MB_OK|MB_SETFOREGROUND|MB_ICONSTOP );
+	MessageBox(parentMainWindow ? host.hWnd : NULL, message, title, MB_OK | MB_SETFOREGROUND | MB_ICONSTOP);
 }
 #endif

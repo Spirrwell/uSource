@@ -13,11 +13,11 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#include "common.h"
-#include "protocol.h"
 #include "net_buffer.h"
+#include "common.h"
 #include "mathlib.h"
 #include "net_int.h"
+#include "protocol.h"
 
 //#define DEBUG_NET_MESSAGES_SEND
 //#define DEBUG_NET_MESSAGES_READ
@@ -25,60 +25,58 @@ GNU General Public License for more details.
 // precalculated bit masks for WriteUBitLong.
 // Using these tables instead of doing the calculations
 // gives a 33% speedup in WriteUBitLong.
-static dword	BitWriteMasks[32][33];
-static dword	ExtraMasks[32];
+static dword BitWriteMasks[32][33];
+static dword ExtraMasks[32];
 
-short MSG_BigShort( short swap )
+short MSG_BigShort(short swap) { return (swap >> 8) | (swap << 8); }
+
+void MSG_InitMasks(void)
 {
-	return (swap >> 8)|(swap << 8);
-}
+	uint startbit, endbit;
+	uint maskBit, nBitsLeft;
 
-void MSG_InitMasks( void )
-{
-	uint	startbit, endbit;
-	uint	maskBit, nBitsLeft;
-
-	for( startbit = 0; startbit < 32; startbit++ )
+	for (startbit = 0; startbit < 32; startbit++)
 	{
-		for( nBitsLeft = 0; nBitsLeft < 33; nBitsLeft++ )
+		for (nBitsLeft = 0; nBitsLeft < 33; nBitsLeft++)
 		{
 			endbit = startbit + nBitsLeft;
 
-			BitWriteMasks[startbit][nBitsLeft] = (uint)BIT( startbit ) - 1;
-			if( endbit < 32 ) BitWriteMasks[startbit][nBitsLeft] |= ~((uint)BIT( endbit ) - 1 );
+			BitWriteMasks[startbit][nBitsLeft] = (uint)BIT(startbit) - 1;
+			if (endbit < 32)
+				BitWriteMasks[startbit][nBitsLeft] |= ~((uint)BIT(endbit) - 1);
 		}
 	}
 
-	for( maskBit = 0; maskBit < 32; maskBit++ )
-		ExtraMasks[maskBit] = (uint)BIT( maskBit ) - 1;
+	for (maskBit = 0; maskBit < 32; maskBit++)
+		ExtraMasks[maskBit] = (uint)BIT(maskBit) - 1;
 }
- 
-void MSG_InitExt( sizebuf_t *sb, const char *pDebugName, void *pData, int nBytes, int nMaxBits )
+
+void MSG_InitExt(sizebuf_t* sb, const char* pDebugName, void* pData, int nBytes, int nMaxBits)
 {
-	MSG_StartWriting( sb, pData, nBytes, 0, nMaxBits );
+	MSG_StartWriting(sb, pData, nBytes, 0, nMaxBits);
 
 	sb->pDebugName = pDebugName;
 }
 
-void MSG_StartWriting( sizebuf_t *sb, void *pData, int nBytes, int iStartBit, int nBits )
+void MSG_StartWriting(sizebuf_t* sb, void* pData, int nBytes, int iStartBit, int nBits)
 {
 	// make sure it's dword aligned and padded.
-	Assert((*(dword*)&pData & 3 ) == 0 );
+	Assert((*(dword*)&pData & 3) == 0);
 
 	sb->pDebugName = "Unnamed";
-	sb->pData = (byte *)pData;
+	sb->pData      = (byte*)pData;
 
-	if( nBits == -1 )
+	if (nBits == -1)
 	{
 		sb->nDataBits = nBytes << 3;
 	}
 	else
 	{
-		Assert( nBits <= nBytes * 8 );
+		Assert(nBits <= nBytes * 8);
 		sb->nDataBits = nBits;
 	}
 
-	sb->iCurBit = iStartBit;
+	sb->iCurBit   = iStartBit;
 	sb->bOverflow = false;
 }
 
@@ -89,28 +87,25 @@ MSG_Clear
 for clearing overflowed buffer
 =======================
 */
-void MSG_Clear( sizebuf_t *sb )
+void MSG_Clear(sizebuf_t* sb)
 {
-	sb->iCurBit = 0;
+	sb->iCurBit   = 0;
 	sb->bOverflow = false;
 }
 
-static qboolean MSG_Overflow( sizebuf_t *sb, int nBits )
+static qboolean MSG_Overflow(sizebuf_t* sb, int nBits)
 {
-	if( sb->iCurBit + nBits > sb->nDataBits )
+	if (sb->iCurBit + nBits > sb->nDataBits)
 		sb->bOverflow = true;
 	return sb->bOverflow;
 }
 
-qboolean MSG_CheckOverflow( sizebuf_t *sb )
-{
-	return MSG_Overflow( sb, 0 );
-}
+qboolean MSG_CheckOverflow(sizebuf_t* sb) { return MSG_Overflow(sb, 0); }
 
-int MSG_SeekToBit( sizebuf_t *sb, int bitPos, int whence )
+int MSG_SeekToBit(sizebuf_t* sb, int bitPos, int whence)
 {
 	// compute the file offset
-	switch( whence )
+	switch (whence)
 	{
 	case SEEK_CUR:
 		bitPos += sb->iCurBit;
@@ -120,11 +115,11 @@ int MSG_SeekToBit( sizebuf_t *sb, int bitPos, int whence )
 	case SEEK_END:
 		bitPos += sb->nDataBits;
 		break;
-	default: 
+	default:
 		return -1;
 	}
 
-	if( bitPos < 0 || bitPos > sb->nDataBits )
+	if (bitPos < 0 || bitPos > sb->nDataBits)
 		return -1;
 
 	sb->iCurBit = bitPos;
@@ -132,58 +127,57 @@ int MSG_SeekToBit( sizebuf_t *sb, int bitPos, int whence )
 	return 0;
 }
 
-void MSG_SeekToByte( sizebuf_t *sb, int bytePos )
-{
-	sb->iCurBit = bytePos << 3;
-}
+void MSG_SeekToByte(sizebuf_t* sb, int bytePos) { sb->iCurBit = bytePos << 3; }
 
-void MSG_WriteOneBit( sizebuf_t *sb, int nValue )
+void MSG_WriteOneBit(sizebuf_t* sb, int nValue)
 {
-	if( !MSG_Overflow( sb, 1 ))
+	if (!MSG_Overflow(sb, 1))
 	{
-		if( nValue ) sb->pData[sb->iCurBit>>3] |= BIT( sb->iCurBit & 7 );
-		else sb->pData[sb->iCurBit>>3] &= ~BIT( sb->iCurBit & 7 );
+		if (nValue)
+			sb->pData[sb->iCurBit >> 3] |= BIT(sb->iCurBit & 7);
+		else
+			sb->pData[sb->iCurBit >> 3] &= ~BIT(sb->iCurBit & 7);
 
 		sb->iCurBit++;
 	}
 }
 
-void MSG_WriteUBitLong( sizebuf_t *sb, uint curData, int numbits )
+void MSG_WriteUBitLong(sizebuf_t* sb, uint curData, int numbits)
 {
-	Assert( numbits >= 0 && numbits <= 32 );
+	Assert(numbits >= 0 && numbits <= 32);
 
 	// bounds checking..
-	if(( sb->iCurBit + numbits ) > sb->nDataBits )
+	if ((sb->iCurBit + numbits) > sb->nDataBits)
 	{
 		sb->bOverflow = true;
-		sb->iCurBit = sb->nDataBits;
+		sb->iCurBit   = sb->nDataBits;
 	}
 	else
 	{
-		int	nBitsLeft = numbits;
-		int	iCurBit = sb->iCurBit;
-		uint	iDWord = iCurBit >> 5;	// Mask in a dword.
-		dword	iCurBitMasked;
-		int	nBitsWritten;
+		int   nBitsLeft = numbits;
+		int   iCurBit	= sb->iCurBit;
+		uint  iDWord	= iCurBit >> 5; // Mask in a dword.
+		dword iCurBitMasked;
+		int   nBitsWritten;
 
-		Assert(( iDWord * 4 + sizeof( int )) <= (uint)MSG_GetMaxBytes( sb ));
+		Assert((iDWord * 4 + sizeof(int)) <= (uint)MSG_GetMaxBytes(sb));
 
 		iCurBitMasked = iCurBit & 31;
-		((dword *)sb->pData)[iDWord] &= BitWriteMasks[iCurBitMasked][nBitsLeft];
-		((dword *)sb->pData)[iDWord] |= curData << iCurBitMasked;
+		((dword*)sb->pData)[iDWord] &= BitWriteMasks[iCurBitMasked][nBitsLeft];
+		((dword*)sb->pData)[iDWord] |= curData << iCurBitMasked;
 
 		// did it span a dword?
 		nBitsWritten = 32 - iCurBitMasked;
 
-		if( nBitsWritten < nBitsLeft )
+		if (nBitsWritten < nBitsLeft)
 		{
 			nBitsLeft -= nBitsWritten;
 			iCurBit += nBitsWritten;
 			curData >>= nBitsWritten;
 
 			iCurBitMasked = iCurBit & 31;
-			((dword *)sb->pData)[iDWord+1] &= BitWriteMasks[iCurBitMasked][nBitsLeft];
-			((dword *)sb->pData)[iDWord+1] |= curData << iCurBitMasked;
+			((dword*)sb->pData)[iDWord + 1] &= BitWriteMasks[iCurBitMasked][nBitsLeft];
+			((dword*)sb->pData)[iDWord + 1] |= curData << iCurBitMasked;
 		}
 		sb->iCurBit += numbits;
 	}
@@ -196,494 +190,458 @@ MSG_WriteSBitLong
 sign bit comes first
 =======================
 */
-void MSG_WriteSBitLong( sizebuf_t *sb, int data, int numbits )
+void MSG_WriteSBitLong(sizebuf_t* sb, int data, int numbits)
 {
 	// do we have a valid # of bits to encode with?
-	Assert( numbits >= 1 && numbits <= 32 );
+	Assert(numbits >= 1 && numbits <= 32);
 
 	// NOTE: it does this wierdness here so it's bit-compatible with regular integer data in the buffer.
 	// (Some old code writes direct integers right into the buffer).
-	if( data < 0 )
+	if (data < 0)
 	{
-		MSG_WriteUBitLong( sb, (uint)( 0x80000000 + data ), numbits - 1 );
-		MSG_WriteOneBit( sb, 1 );
+		MSG_WriteUBitLong(sb, (uint)(0x80000000 + data), numbits - 1);
+		MSG_WriteOneBit(sb, 1);
 	}
 	else
 	{
-		MSG_WriteUBitLong( sb, (uint)data, numbits - 1 );
-		MSG_WriteOneBit( sb, 0 );
+		MSG_WriteUBitLong(sb, (uint)data, numbits - 1);
+		MSG_WriteOneBit(sb, 0);
 	}
 }
 
-void MSG_WriteBitLong( sizebuf_t *sb, int data, int numbits, qboolean bSigned )
+void MSG_WriteBitLong(sizebuf_t* sb, int data, int numbits, qboolean bSigned)
 {
-	if( bSigned )
-		MSG_WriteSBitLong( sb, data, numbits );
-	else MSG_WriteUBitLong( sb, (uint)data, numbits );
+	if (bSigned)
+		MSG_WriteSBitLong(sb, data, numbits);
+	else
+		MSG_WriteUBitLong(sb, (uint)data, numbits);
 }
 
-qboolean MSG_WriteBits( sizebuf_t *sb, const void *pData, int nBits )
+qboolean MSG_WriteBits(sizebuf_t* sb, const void* pData, int nBits)
 {
-	byte	*pOut = (byte *)pData;
-	int	nBitsLeft = nBits;
+	byte* pOut	= (byte*)pData;
+	int   nBitsLeft = nBits;
 
 	// get output dword-aligned.
-	while(((*( dword* )&pOut) & 3 ) != 0 && nBitsLeft >= 8 )
+	while (((*(dword*)&pOut) & 3) != 0 && nBitsLeft >= 8)
 	{
-		MSG_WriteUBitLong( sb, *pOut, 8 );
+		MSG_WriteUBitLong(sb, *pOut, 8);
 
 		nBitsLeft -= 8;
 		++pOut;
 	}
 
 	// read dwords.
-	while( nBitsLeft >= 32 )
+	while (nBitsLeft >= 32)
 	{
-		MSG_WriteUBitLong( sb, *(( dword *)pOut ), 32 );
+		MSG_WriteUBitLong(sb, *((dword*)pOut), 32);
 
-		pOut += sizeof( dword );
+		pOut += sizeof(dword);
 		nBitsLeft -= 32;
 	}
 
 	// read the remaining bytes.
-	while( nBitsLeft >= 8 )
+	while (nBitsLeft >= 8)
 	{
-		MSG_WriteUBitLong( sb, *pOut, 8 );
+		MSG_WriteUBitLong(sb, *pOut, 8);
 
 		nBitsLeft -= 8;
 		++pOut;
 	}
-	
+
 	// Read the remaining bits.
-	if( nBitsLeft )
+	if (nBitsLeft)
 	{
-		MSG_WriteUBitLong( sb, *pOut, nBitsLeft );
+		MSG_WriteUBitLong(sb, *pOut, nBitsLeft);
 	}
 
 	return !sb->bOverflow;
 }
 
-void MSG_WriteBitAngle( sizebuf_t *sb, float fAngle, int numbits )
+void MSG_WriteBitAngle(sizebuf_t* sb, float fAngle, int numbits)
 {
-	uint	mask, shift;
-	int	d;
+	uint mask, shift;
+	int  d;
 
 	// clamp the angle before receiving
-	fAngle = fmod( fAngle, 360.0f );
-	if( fAngle < 0 ) fAngle += 360.0f;
+	fAngle = fmod(fAngle, 360.0f);
+	if (fAngle < 0)
+		fAngle += 360.0f;
 
-	shift = ( 1 << numbits );
-	mask = shift - 1;
+	shift = (1 << numbits);
+	mask  = shift - 1;
 
-	d = (int)(( fAngle * shift ) / 360.0f );
+	d = (int)((fAngle * shift) / 360.0f);
 	d &= mask;
 
-	MSG_WriteUBitLong( sb, (uint)d, numbits );
+	MSG_WriteUBitLong(sb, (uint)d, numbits);
 }
 
-void MSG_WriteCoord( sizebuf_t *sb, float val )
+void MSG_WriteCoord(sizebuf_t* sb, float val)
 {
 	// g-cont. we loose precision here but keep old size of coord variable!
-	if( FBitSet( host.features, ENGINE_WRITE_LARGE_COORD ))
-		MSG_WriteShort( sb, Q_rint( val ));
-	else MSG_WriteShort( sb, (int)( val * 8.0f ));
+	if (FBitSet(host.features, ENGINE_WRITE_LARGE_COORD))
+		MSG_WriteShort(sb, Q_rint(val));
+	else
+		MSG_WriteShort(sb, (int)(val * 8.0f));
 }
 
-void MSG_WriteVec3Coord( sizebuf_t *sb, const float *fa )
+void MSG_WriteVec3Coord(sizebuf_t* sb, const float* fa)
 {
-	MSG_WriteCoord( sb, fa[0] );
-	MSG_WriteCoord( sb, fa[1] );
-	MSG_WriteCoord( sb, fa[2] );
+	MSG_WriteCoord(sb, fa[0]);
+	MSG_WriteCoord(sb, fa[1]);
+	MSG_WriteCoord(sb, fa[2]);
 }
 
-void MSG_WriteVec3Angles( sizebuf_t *sb, const float *fa )
+void MSG_WriteVec3Angles(sizebuf_t* sb, const float* fa)
 {
-	MSG_WriteBitAngle( sb, fa[0], 16 );
-	MSG_WriteBitAngle( sb, fa[1], 16 );
-	MSG_WriteBitAngle( sb, fa[2], 16 );
+	MSG_WriteBitAngle(sb, fa[0], 16);
+	MSG_WriteBitAngle(sb, fa[1], 16);
+	MSG_WriteBitAngle(sb, fa[2], 16);
 }
 
-void MSG_WriteBitFloat( sizebuf_t *sb, float val )
+void MSG_WriteBitFloat(sizebuf_t* sb, float val)
 {
-	int	intVal;
+	int intVal;
 
-	Assert( sizeof( int ) == sizeof( float ));
-	Assert( sizeof( float ) == 4 );
+	Assert(sizeof(int) == sizeof(float));
+	Assert(sizeof(float) == 4);
 
-	intVal = *((int *)&val );
-	MSG_WriteUBitLong( sb, intVal, 32 );
+	intVal = *((int*)&val);
+	MSG_WriteUBitLong(sb, intVal, 32);
 }
 
-void MSG_WriteCmdExt( sizebuf_t *sb, int cmd, netsrc_t type, const char *name )
+void MSG_WriteCmdExt(sizebuf_t* sb, int cmd, netsrc_t type, const char* name)
 {
 #ifdef DEBUG_NET_MESSAGES_SEND
-	if( name != NULL )
+	if (name != NULL)
 	{
 		// get custom name
-		Con_Printf( "^1sv^7 write: %s\n", name );
+		Con_Printf("^1sv^7 write: %s\n", name);
 	}
-	else if( type == NS_SERVER )
+	else if (type == NS_SERVER)
 	{
-		if( cmd >= 0 && cmd <= svc_lastmsg )
+		if (cmd >= 0 && cmd <= svc_lastmsg)
 		{
 			// get engine message name
-			Con_Printf( "^1sv^7 write: %s\n", svc_strings[cmd] );
+			Con_Printf("^1sv^7 write: %s\n", svc_strings[cmd]);
 		}
 	}
-	else if( type == NS_CLIENT )
+	else if (type == NS_CLIENT)
 	{
-		if( cmd >= 0 && cmd <= clc_lastmsg )
+		if (cmd >= 0 && cmd <= clc_lastmsg)
 		{
-			Con_Printf( "^1cl^7 write: %s\n", clc_strings[cmd] );
+			Con_Printf("^1cl^7 write: %s\n", clc_strings[cmd]);
 		}
 	}
 #endif
-	MSG_WriteUBitLong( sb, cmd, sizeof( byte ) << 3 );
+	MSG_WriteUBitLong(sb, cmd, sizeof(byte) << 3);
 }
 
-void MSG_WriteChar( sizebuf_t *sb, int val )
-{
-	MSG_WriteSBitLong( sb, val, sizeof( char ) << 3 );
-}
+void MSG_WriteChar(sizebuf_t* sb, int val) { MSG_WriteSBitLong(sb, val, sizeof(char) << 3); }
 
-void MSG_WriteByte( sizebuf_t *sb, int val )
-{
-	MSG_WriteUBitLong( sb, val, sizeof( byte ) << 3 );
-}
+void MSG_WriteByte(sizebuf_t* sb, int val) { MSG_WriteUBitLong(sb, val, sizeof(byte) << 3); }
 
-void MSG_WriteShort( sizebuf_t *sb, int val )
-{
-	MSG_WriteSBitLong( sb, val, sizeof(short ) << 3 );
-}
+void MSG_WriteShort(sizebuf_t* sb, int val) { MSG_WriteSBitLong(sb, val, sizeof(short) << 3); }
 
-void MSG_WriteWord( sizebuf_t *sb, int val )
-{
-	MSG_WriteUBitLong( sb, val, sizeof( word ) << 3 );
-}
+void MSG_WriteWord(sizebuf_t* sb, int val) { MSG_WriteUBitLong(sb, val, sizeof(word) << 3); }
 
-void MSG_WriteLong( sizebuf_t *sb, int val )
-{
-	MSG_WriteSBitLong( sb, val, sizeof( int ) << 3 );
-}
+void MSG_WriteLong(sizebuf_t* sb, int val) { MSG_WriteSBitLong(sb, val, sizeof(int) << 3); }
 
-void MSG_WriteDword( sizebuf_t *sb, dword val )
-{
-	MSG_WriteUBitLong( sb, val, sizeof( dword ) << 3 );
-}
+void MSG_WriteDword(sizebuf_t* sb, dword val) { MSG_WriteUBitLong(sb, val, sizeof(dword) << 3); }
 
-void MSG_WriteFloat( sizebuf_t *sb, float val )
-{
-	MSG_WriteBits( sb, &val, sizeof( val ) << 3 );
-}
+void MSG_WriteFloat(sizebuf_t* sb, float val) { MSG_WriteBits(sb, &val, sizeof(val) << 3); }
 
-qboolean MSG_WriteBytes( sizebuf_t *sb, const void *pBuf, int nBytes )
-{
-	return MSG_WriteBits( sb, pBuf, nBytes << 3 );
-}
+qboolean MSG_WriteBytes(sizebuf_t* sb, const void* pBuf, int nBytes) { return MSG_WriteBits(sb, pBuf, nBytes << 3); }
 
-qboolean MSG_WriteString( sizebuf_t *sb, const char *pStr )
+qboolean MSG_WriteString(sizebuf_t* sb, const char* pStr)
 {
-	if( pStr )
+	if (pStr)
 	{
 		do
 		{
-			MSG_WriteChar( sb, *pStr );
+			MSG_WriteChar(sb, *pStr);
 			pStr++;
-		} while( *( pStr - 1 ));
+		} while (*(pStr - 1));
 	}
-	else MSG_WriteChar( sb, 0 );
-	
+	else
+		MSG_WriteChar(sb, 0);
+
 	return !sb->bOverflow;
 }
 
-int MSG_ReadOneBit( sizebuf_t *sb )
+int MSG_ReadOneBit(sizebuf_t* sb)
 {
-	if( !MSG_Overflow( sb, 1 ))
+	if (!MSG_Overflow(sb, 1))
 	{
-		int value = sb->pData[sb->iCurBit >> 3] & (1 << ( sb->iCurBit & 7 ));
+		int value = sb->pData[sb->iCurBit >> 3] & (1 << (sb->iCurBit & 7));
 		sb->iCurBit++;
 		return !!value;
 	}
 	return 0;
 }
 
-uint MSG_ReadUBitLong( sizebuf_t *sb, int numbits )
+uint MSG_ReadUBitLong(sizebuf_t* sb, int numbits)
 {
-	int	idword1;
-	uint	dword1, ret;
+	int  idword1;
+	uint dword1, ret;
 
-	if( numbits == 8 )
+	if (numbits == 8)
 	{
-		int leftBits = MSG_GetNumBitsLeft( sb );
+		int leftBits = MSG_GetNumBitsLeft(sb);
 
-		if( leftBits >= 0 && leftBits < 8 )
-			return 0;	// end of message
+		if (leftBits >= 0 && leftBits < 8)
+			return 0; // end of message
 	}
 
-	if(( sb->iCurBit + numbits ) > sb->nDataBits )
+	if ((sb->iCurBit + numbits) > sb->nDataBits)
 	{
 		sb->bOverflow = true;
-		sb->iCurBit = sb->nDataBits;
+		sb->iCurBit   = sb->nDataBits;
 		return 0;
 	}
 
-	Assert( numbits > 0 && numbits <= 32 );
+	Assert(numbits > 0 && numbits <= 32);
 
 	// Read the current dword.
 	idword1 = sb->iCurBit >> 5;
-	dword1 = ((uint *)sb->pData)[idword1];
-	dword1 >>= ( sb->iCurBit & 31 );	// get the bits we're interested in.
+	dword1	= ((uint*)sb->pData)[idword1];
+	dword1 >>= (sb->iCurBit & 31); // get the bits we're interested in.
 
 	sb->iCurBit += numbits;
 	ret = dword1;
 
 	// Does it span this dword?
-	if(( sb->iCurBit - 1 ) >> 5 == idword1 )
+	if ((sb->iCurBit - 1) >> 5 == idword1)
 	{
-		if( numbits != 32 )
+		if (numbits != 32)
 			ret &= ExtraMasks[numbits];
 	}
 	else
 	{
-		int	nExtraBits = sb->iCurBit & 31;
-		uint	dword2 = ((uint *)sb->pData)[idword1+1] & ExtraMasks[nExtraBits];
-		
+		int  nExtraBits = sb->iCurBit & 31;
+		uint dword2	= ((uint*)sb->pData)[idword1 + 1] & ExtraMasks[nExtraBits];
+
 		// no need to mask since we hit the end of the dword.
 		// shift the second dword's part into the high bits.
-		ret |= (dword2 << ( numbits - nExtraBits ));
+		ret |= (dword2 << (numbits - nExtraBits));
 	}
 	return ret;
 }
 
-float MSG_ReadBitFloat( sizebuf_t *sb )
+float MSG_ReadBitFloat(sizebuf_t* sb)
 {
-	int	val;
-	int	bit, byte;
+	int val;
+	int bit, byte;
 
-	Assert( sizeof( float ) == sizeof( int ));
-	Assert( sizeof( float ) == 4 );
+	Assert(sizeof(float) == sizeof(int));
+	Assert(sizeof(float) == 4);
 
-	if( MSG_Overflow( sb, 32 ))
+	if (MSG_Overflow(sb, 32))
 		return 0.0f;
 
-	bit = sb->iCurBit & 0x7;
+	bit  = sb->iCurBit & 0x7;
 	byte = sb->iCurBit >> 3;
 
 	val = sb->pData[byte] >> bit;
-	val |= ((int)sb->pData[byte + 1]) << ( 8 - bit );
-	val |= ((int)sb->pData[byte + 2]) << ( 16 - bit );
-	val |= ((int)sb->pData[byte + 3]) << ( 24 - bit );
+	val |= ((int)sb->pData[byte + 1]) << (8 - bit);
+	val |= ((int)sb->pData[byte + 2]) << (16 - bit);
+	val |= ((int)sb->pData[byte + 3]) << (24 - bit);
 
-	if( bit != 0 )
-		val |= ((int)sb->pData[byte + 4]) << ( 32 - bit );
+	if (bit != 0)
+		val |= ((int)sb->pData[byte + 4]) << (32 - bit);
 	sb->iCurBit += 32;
 
-	return *((float *)&val);
+	return *((float*)&val);
 }
 
-qboolean MSG_ReadBits( sizebuf_t *sb, void *pOutData, int nBits )
+qboolean MSG_ReadBits(sizebuf_t* sb, void* pOutData, int nBits)
 {
-	byte	*pOut = (byte *)pOutData;
-	int	nBitsLeft = nBits;
-	
+	byte* pOut	= (byte*)pOutData;
+	int   nBitsLeft = nBits;
+
 	// get output dword-aligned.
-	while(((*( dword* )&pOut) & 3) != 0 && nBitsLeft >= 8 )
+	while (((*(dword*)&pOut) & 3) != 0 && nBitsLeft >= 8)
 	{
-		*pOut = (byte)MSG_ReadUBitLong( sb, 8 );
+		*pOut = (byte)MSG_ReadUBitLong(sb, 8);
 		++pOut;
 		nBitsLeft -= 8;
 	}
 
 	// read dwords.
-	while( nBitsLeft >= 32 )
+	while (nBitsLeft >= 32)
 	{
-		*((dword *)pOut) = MSG_ReadUBitLong( sb, 32 );
-		pOut += sizeof( dword );
+		*((dword*)pOut) = MSG_ReadUBitLong(sb, 32);
+		pOut += sizeof(dword);
 		nBitsLeft -= 32;
 	}
 
 	// read the remaining bytes.
-	while( nBitsLeft >= 8 )
+	while (nBitsLeft >= 8)
 	{
-		*pOut = MSG_ReadUBitLong( sb, 8 );
+		*pOut = MSG_ReadUBitLong(sb, 8);
 		++pOut;
 		nBitsLeft -= 8;
 	}
-	
+
 	// read the remaining bits.
-	if( nBitsLeft )
+	if (nBitsLeft)
 	{
-		*pOut = MSG_ReadUBitLong( sb, nBitsLeft );
+		*pOut = MSG_ReadUBitLong(sb, nBitsLeft);
 	}
 
 	return !sb->bOverflow;
 }
 
-float MSG_ReadBitAngle( sizebuf_t *sb, int numbits )
+float MSG_ReadBitAngle(sizebuf_t* sb, int numbits)
 {
-	float	fReturn, shift;
-	int	i;
+	float fReturn, shift;
+	int   i;
 
-	shift = (float)( 1 << numbits );
+	shift = (float)(1 << numbits);
 
-	i = MSG_ReadUBitLong( sb, numbits );
-	fReturn = (float)i * ( 360.0f / shift );
+	i	= MSG_ReadUBitLong(sb, numbits);
+	fReturn = (float)i * (360.0f / shift);
 
 	// clamp the finale angle
-	if( fReturn < -180.0f ) fReturn += 360.0f; 
-	else if( fReturn > 180.0f ) fReturn -= 360.0f;
+	if (fReturn < -180.0f)
+		fReturn += 360.0f;
+	else if (fReturn > 180.0f)
+		fReturn -= 360.0f;
 
 	return fReturn;
 }
 
 // Append numbits least significant bits from data to the current bit stream
-int MSG_ReadSBitLong( sizebuf_t *sb, int numbits )
+int MSG_ReadSBitLong(sizebuf_t* sb, int numbits)
 {
-	int	r, sign;
+	int r, sign;
 
-	r = MSG_ReadUBitLong( sb, numbits - 1 );
+	r = MSG_ReadUBitLong(sb, numbits - 1);
 
 	// NOTE: it does this wierdness here so it's bit-compatible with regular integer data in the buffer.
 	// (Some old code writes direct integers right into the buffer).
-	sign = MSG_ReadOneBit( sb );
-	if( sign ) r = -( BIT( numbits - 1 ) - r );
+	sign = MSG_ReadOneBit(sb);
+	if (sign)
+		r = -(BIT(numbits - 1) - r);
 
 	return r;
 }
 
-uint MSG_ReadBitLong( sizebuf_t *sb, int numbits, qboolean bSigned )
+uint MSG_ReadBitLong(sizebuf_t* sb, int numbits, qboolean bSigned)
 {
-	if( bSigned )
-		return (uint)MSG_ReadSBitLong( sb, numbits );
-	return MSG_ReadUBitLong( sb, numbits );
+	if (bSigned)
+		return (uint)MSG_ReadSBitLong(sb, numbits);
+	return MSG_ReadUBitLong(sb, numbits);
 }
 
-int MSG_ReadCmd( sizebuf_t *sb, netsrc_t type )
+int MSG_ReadCmd(sizebuf_t* sb, netsrc_t type)
 {
-	int	cmd = MSG_ReadUBitLong( sb, sizeof( byte ) << 3 );
+	int cmd = MSG_ReadUBitLong(sb, sizeof(byte) << 3);
 
 #ifdef DEBUG_NET_MESSAGES_READ
-	if( type == NS_SERVER )
+	if (type == NS_SERVER)
 	{
-		Con_Printf( "^1cl^7 read: %s\n", CL_MsgInfo( cmd ));
+		Con_Printf("^1cl^7 read: %s\n", CL_MsgInfo(cmd));
 	}
-	else if( cmd >= 0 && cmd <= clc_lastmsg )
+	else if (cmd >= 0 && cmd <= clc_lastmsg)
 	{
-		Con_Printf( "^1sv^7 read: %s\n", clc_strings[cmd] );
+		Con_Printf("^1sv^7 read: %s\n", clc_strings[cmd]);
 	}
 #endif
 	return cmd;
 }
 
-int MSG_ReadChar( sizebuf_t *sb )
-{
-	return MSG_ReadSBitLong( sb, sizeof( char ) << 3 );
-}
+int MSG_ReadChar(sizebuf_t* sb) { return MSG_ReadSBitLong(sb, sizeof(char) << 3); }
 
-int MSG_ReadByte( sizebuf_t *sb )
-{
-	return MSG_ReadUBitLong( sb, sizeof( byte ) << 3 );
-}
+int MSG_ReadByte(sizebuf_t* sb) { return MSG_ReadUBitLong(sb, sizeof(byte) << 3); }
 
-int MSG_ReadShort( sizebuf_t *sb )
-{
-	return MSG_ReadSBitLong( sb, sizeof( short ) << 3 );
-}
+int MSG_ReadShort(sizebuf_t* sb) { return MSG_ReadSBitLong(sb, sizeof(short) << 3); }
 
-int MSG_ReadWord( sizebuf_t *sb )
-{
-	return MSG_ReadUBitLong( sb, sizeof( word ) << 3 );
-}
+int MSG_ReadWord(sizebuf_t* sb) { return MSG_ReadUBitLong(sb, sizeof(word) << 3); }
 
-float MSG_ReadCoord( sizebuf_t *sb )
+float MSG_ReadCoord(sizebuf_t* sb)
 {
 	// g-cont. we loose precision here but keep old size of coord variable!
-	if( FBitSet( host.features, ENGINE_WRITE_LARGE_COORD ))
-		return (float)(MSG_ReadShort( sb ));
-	return (float)(MSG_ReadShort( sb ) * ( 1.0f / 8.0f ));
+	if (FBitSet(host.features, ENGINE_WRITE_LARGE_COORD))
+		return (float)(MSG_ReadShort(sb));
+	return (float)(MSG_ReadShort(sb) * (1.0f / 8.0f));
 }
 
-void MSG_ReadVec3Coord( sizebuf_t *sb, vec3_t fa )
+void MSG_ReadVec3Coord(sizebuf_t* sb, vec3_t fa)
 {
-	fa[0] = MSG_ReadCoord( sb );
-	fa[1] = MSG_ReadCoord( sb );
-	fa[2] = MSG_ReadCoord( sb );
+	fa[0] = MSG_ReadCoord(sb);
+	fa[1] = MSG_ReadCoord(sb);
+	fa[2] = MSG_ReadCoord(sb);
 }
 
-void MSG_ReadVec3Angles( sizebuf_t *sb, vec3_t fa )
+void MSG_ReadVec3Angles(sizebuf_t* sb, vec3_t fa)
 {
-	fa[0] = MSG_ReadBitAngle( sb, 16 );
-	fa[1] = MSG_ReadBitAngle( sb, 16 );
-	fa[2] = MSG_ReadBitAngle( sb, 16 );
+	fa[0] = MSG_ReadBitAngle(sb, 16);
+	fa[1] = MSG_ReadBitAngle(sb, 16);
+	fa[2] = MSG_ReadBitAngle(sb, 16);
 }
 
-int MSG_ReadLong( sizebuf_t *sb )
+int MSG_ReadLong(sizebuf_t* sb) { return MSG_ReadSBitLong(sb, sizeof(int) << 3); }
+
+dword MSG_ReadDword(sizebuf_t* sb) { return MSG_ReadUBitLong(sb, sizeof(dword) << 3); }
+
+float MSG_ReadFloat(sizebuf_t* sb)
 {
-	return MSG_ReadSBitLong( sb, sizeof( int ) << 3 );
-}
+	float ret;
 
-dword MSG_ReadDword( sizebuf_t *sb )
-{
-	return MSG_ReadUBitLong( sb, sizeof( dword ) << 3 );
-}
+	Assert(sizeof(ret) == 4);
 
-float MSG_ReadFloat( sizebuf_t *sb )
-{
-	float	ret;
-
-	Assert( sizeof( ret ) == 4 );
-
-	MSG_ReadBits( sb, &ret, 32 );
+	MSG_ReadBits(sb, &ret, 32);
 
 	return ret;
 }
 
-qboolean MSG_ReadBytes( sizebuf_t *sb, void *pOut, int nBytes )
-{
-	return MSG_ReadBits( sb, pOut, nBytes << 3 );
-}
+qboolean MSG_ReadBytes(sizebuf_t* sb, void* pOut, int nBytes) { return MSG_ReadBits(sb, pOut, nBytes << 3); }
 
-char *MSG_ReadStringExt( sizebuf_t *sb, qboolean bLine )
+char* MSG_ReadStringExt(sizebuf_t* sb, qboolean bLine)
 {
-	static char	string[4096];
-	int		l = 0, c;
-	
+	static char string[4096];
+	int	    l = 0, c;
+
 	do
 	{
 		// use MSG_ReadByte so -1 is out of bounds
-		c = MSG_ReadByte( sb );
+		c = MSG_ReadByte(sb);
 
-		if( c == 0 ) break;
-		else if( bLine && c == '\n' )
+		if (c == 0)
+			break;
+		else if (bLine && c == '\n')
 			break;
 
 		// translate all fmt spec to avoid crash bugs
 		// NOTE: but game strings leave unchanged. see pfnWriteString for details
-		if( c == '%' ) c = '.';
+		if (c == '%')
+			c = '.';
 
 		string[l] = c;
 		l++;
-	} while( l < sizeof( string ) - 1 );
+	} while (l < sizeof(string) - 1);
 	string[l] = 0; // terminator
 
 	return string;
 }
 
-void MSG_ExciseBits( sizebuf_t *sb, int startbit, int bitstoremove )
+void MSG_ExciseBits(sizebuf_t* sb, int startbit, int bitstoremove)
 {
-	int	i, endbit = startbit + bitstoremove;
-	int	remaining_to_end = sb->nDataBits - endbit;
-	sizebuf_t	temp;
+	int	  i, endbit = startbit + bitstoremove;
+	int	  remaining_to_end = sb->nDataBits - endbit;
+	sizebuf_t temp;
 
-	MSG_StartWriting( &temp, sb->pData, MSG_GetMaxBytes( sb ), startbit, -1 );
-	MSG_SeekToBit( sb, endbit, SEEK_SET );
+	MSG_StartWriting(&temp, sb->pData, MSG_GetMaxBytes(sb), startbit, -1);
+	MSG_SeekToBit(sb, endbit, SEEK_SET);
 
-	for( i = 0; i < remaining_to_end; i++ )
+	for (i = 0; i < remaining_to_end; i++)
 	{
-		MSG_WriteOneBit( &temp, MSG_ReadOneBit( sb ));
+		MSG_WriteOneBit(&temp, MSG_ReadOneBit(sb));
 	}
 
-	MSG_SeekToBit( sb, startbit, SEEK_SET );
+	MSG_SeekToBit(sb, startbit, SEEK_SET);
 	sb->nDataBits -= bitstoremove;
 }
 
@@ -693,72 +651,59 @@ void MSG_ExciseBits( sizebuf_t *sb, int startbit, int bitstoremove )
  *
  */
 
-
 class CEngineNetsystem001 : public IEngineNetsystem
 {
 public:
 	virtual const char* GetName() override { return "CEngineNetsystem001"; };
 	virtual const char* GetParentInterface() override { return INETSYSTEM_INTERFACE; };
-	virtual bool Init() override { return true; }
-	virtual bool PreInit() override { return true; }
-	virtual void Shutdown() override {};
-	virtual void HookServerNetsystemMsg(void(*pfnHook)(edict_t*, void*)) override;
-	virtual void HookClientNetsystemMsg(void(*pfnHook)(void*)) override;
-	virtual void HookServerMsg(int cmd, void(*pfnHook)(edict_t*, void*)) override;
-	virtual void HookClientMsg(int cmd, void(*pfnHook)(void*)) override;
-	virtual void BeginClientNetsystemCmd() override;
-	virtual void BeginServerNetsystemCmd(edict_t* client) override;
-	virtual void WriteBytes(const void* pBuf, unsigned long long len) override;
-	virtual void WriteString(const char* str) override;
-	virtual void WriteByte(byte _byte) override;
-	virtual void WriteShort(short _short) override;
-	virtual void WriteInt(int _int) override;
-	virtual void WriteLong(long long _long) override;
-	virtual void WriteFloat(float _fl) override;
-	virtual void WriteVector(vec3_t _vec) override;
-	virtual void EndMessage() override;
-	virtual size_t ReadBytes(void* pBuffer, void* pOutbuf, unsigned long long num) override;
-	virtual void ReadString(void* pBuffer, char* pOutbuf, unsigned long long num) override;
-	virtual byte ReadByte(void* pBuffer) override;
-	virtual short ReadShort(void* pBuffer) override;
-	virtual int ReadInt(void* pBuffer) override;
-	virtual long long ReadLong(void* pBuffer) override;
-	virtual float ReadFloat(void* pBuffer) override;
-	virtual void ReadVector(void* pBuffer, vec3_t outvec) override;
-	virtual void BeginServerMessage(int cmd, edict_t* client) override;
-	virtual void BeginClientMessage(int cmd) override;
+	virtual bool	    Init() override { return true; }
+	virtual bool	    PreInit() override { return true; }
+	virtual void	    Shutdown() override{};
+	virtual void	    HookServerNetsystemMsg(void (*pfnHook)(edict_t*, void*)) override;
+	virtual void	    HookClientNetsystemMsg(void (*pfnHook)(void*)) override;
+	virtual void	    HookServerMsg(int cmd, void (*pfnHook)(edict_t*, void*)) override;
+	virtual void	    HookClientMsg(int cmd, void (*pfnHook)(void*)) override;
+	virtual void	    BeginClientNetsystemCmd() override;
+	virtual void	    BeginServerNetsystemCmd(edict_t* client) override;
+	virtual void	    WriteBytes(const void* pBuf, unsigned long long len) override;
+	virtual void	    WriteString(const char* str) override;
+	virtual void	    WriteByte(byte _byte) override;
+	virtual void	    WriteShort(short _short) override;
+	virtual void	    WriteInt(int _int) override;
+	virtual void	    WriteLong(long long _long) override;
+	virtual void	    WriteFloat(float _fl) override;
+	virtual void	    WriteVector(vec3_t _vec) override;
+	virtual void	    EndMessage() override;
+	virtual size_t	    ReadBytes(void* pBuffer, void* pOutbuf, unsigned long long num) override;
+	virtual void	    ReadString(void* pBuffer, char* pOutbuf, unsigned long long num) override;
+	virtual byte	    ReadByte(void* pBuffer) override;
+	virtual short	    ReadShort(void* pBuffer) override;
+	virtual int	    ReadInt(void* pBuffer) override;
+	virtual long long   ReadLong(void* pBuffer) override;
+	virtual float	    ReadFloat(void* pBuffer) override;
+	virtual void	    ReadVector(void* pBuffer, vec3_t outvec) override;
+	virtual void	    BeginServerMessage(int cmd, edict_t* client) override;
+	virtual void	    BeginClientMessage(int cmd) override;
 };
 
 EXPOSE_INTERFACE(CEngineNetsystem001);
 
-extern void pfnHookClientNetsystemMsg(void(*pfnHook)(void*));
-extern void pfnHookServerNetsystemMsg(void(*pfnHook)(edict_t*,void*));
-extern void pfnHookServerMsg(int cmd, void (*pfnHook)(edict_t*,void *));
-extern void pfnHookClientMsg(int cmd, void (*pfnHook)(void *));
+extern void	  pfnHookClientNetsystemMsg(void (*pfnHook)(void*));
+extern void	  pfnHookServerNetsystemMsg(void (*pfnHook)(edict_t*, void*));
+extern void	  pfnHookServerMsg(int cmd, void (*pfnHook)(edict_t*, void*));
+extern void	  pfnHookClientMsg(int cmd, void (*pfnHook)(void*));
 extern sizebuf_t* pfnBeginClientCmd(int msg);
 extern sizebuf_t* pfnBeginServerCmd(edict_t* client, int msg);
 
 static sizebuf_t* g_current_sizebuf = nullptr;
 
-void CEngineNetsystem001::HookServerNetsystemMsg(void (*pfnHook)(edict_t*, void *))
-{
-	pfnHookServerNetsystemMsg(pfnHook);
-}
+void CEngineNetsystem001::HookServerNetsystemMsg(void (*pfnHook)(edict_t*, void*)) { pfnHookServerNetsystemMsg(pfnHook); }
 
-void CEngineNetsystem001::HookClientNetsystemMsg(void (*pfnHook)(void *))
-{
-	pfnHookClientNetsystemMsg(pfnHook);
-}
+void CEngineNetsystem001::HookClientNetsystemMsg(void (*pfnHook)(void*)) { pfnHookClientNetsystemMsg(pfnHook); }
 
-void CEngineNetsystem001::HookServerMsg(int cmd, void (*pfnHook)(edict_t*, void *))
-{
-	pfnHookServerMsg(cmd, pfnHook);
-}
+void CEngineNetsystem001::HookServerMsg(int cmd, void (*pfnHook)(edict_t*, void*)) { pfnHookServerMsg(cmd, pfnHook); }
 
-void CEngineNetsystem001::HookClientMsg(int cmd, void (*pfnHook)(void *))
-{
-	pfnHookClientMsg(cmd, pfnHook);
-}
+void CEngineNetsystem001::HookClientMsg(int cmd, void (*pfnHook)(void*)) { pfnHookClientMsg(cmd, pfnHook); }
 
 void CEngineNetsystem001::BeginClientNetsystemCmd()
 {
@@ -772,80 +717,85 @@ void CEngineNetsystem001::BeginServerNetsystemCmd(edict_t* client)
 	g_current_sizebuf = pfnBeginServerCmd(client, svc_netsystem);
 }
 
-void CEngineNetsystem001::WriteBytes(const void *pBuf, unsigned long long int len)
+void CEngineNetsystem001::WriteBytes(const void* pBuf, unsigned long long int len)
 {
 	Assert(g_current_sizebuf != nullptr);
-	if(!g_current_sizebuf) return;
+	if (!g_current_sizebuf)
+		return;
 	bool overflowed = MSG_WriteBytes(g_current_sizebuf, pBuf, len);
-	if(overflowed)
+	if (overflowed)
 	{
 		Con_Printf("[CEngineNetsystem001] Internal buffer overflowed due to usermessage. Length of write=%llu\n", len);
 	}
 }
 
-void CEngineNetsystem001::WriteString(const char *str)
+void CEngineNetsystem001::WriteString(const char* str)
 {
 	Assert(g_current_sizebuf != nullptr);
-	if(!g_current_sizebuf) return;
+	if (!g_current_sizebuf)
+		return;
 	MSG_WriteString(g_current_sizebuf, str);
 }
 
 void CEngineNetsystem001::WriteByte(byte _byte)
 {
 	Assert(g_current_sizebuf != nullptr);
-	if(!g_current_sizebuf) return;
+	if (!g_current_sizebuf)
+		return;
 	MSG_WriteByte(g_current_sizebuf, _byte);
 }
 
 void CEngineNetsystem001::WriteShort(short _short)
 {
 	Assert(g_current_sizebuf != nullptr);
-	if(!g_current_sizebuf) return;
+	if (!g_current_sizebuf)
+		return;
 	MSG_WriteShort(g_current_sizebuf, _short);
 }
 
 void CEngineNetsystem001::WriteInt(int _int)
 {
 	Assert(g_current_sizebuf != nullptr);
-	if(!g_current_sizebuf) return;
+	if (!g_current_sizebuf)
+		return;
 	MSG_WriteLong(g_current_sizebuf, _int);
 }
 
 void CEngineNetsystem001::WriteLong(long long int _long)
 {
 	Assert(g_current_sizebuf != nullptr);
-	if(!g_current_sizebuf) return;
+	if (!g_current_sizebuf)
+		return;
 	MSG_WriteBytes(g_current_sizebuf, &_long, sizeof(long long int));
 }
 
 void CEngineNetsystem001::WriteFloat(float _fl)
 {
 	Assert(g_current_sizebuf != nullptr);
-	if(!g_current_sizebuf) return;
+	if (!g_current_sizebuf)
+		return;
 	MSG_WriteFloat(g_current_sizebuf, _fl);
 }
 
-void CEngineNetsystem001::WriteVector(vec_t *_vec)
+void CEngineNetsystem001::WriteVector(vec_t* _vec)
 {
 	Assert(g_current_sizebuf != nullptr);
-	if(!g_current_sizebuf) return;
+	if (!g_current_sizebuf)
+		return;
 	MSG_WriteVec3Coord(g_current_sizebuf, _vec);
 }
 
-void CEngineNetsystem001::EndMessage()
-{
-	g_current_sizebuf = nullptr;
-}
+void CEngineNetsystem001::EndMessage() { g_current_sizebuf = nullptr; }
 
-size_t CEngineNetsystem001::ReadBytes(void *pBuffer, void *pOutbuf, unsigned long long int num)
+size_t CEngineNetsystem001::ReadBytes(void* pBuffer, void* pOutbuf, unsigned long long int num)
 {
 	Assert(pBuffer != nullptr);
-	if(MSG_ReadBytes((sizebuf_t*)pBuffer, pOutbuf, num))
+	if (MSG_ReadBytes((sizebuf_t*)pBuffer, pOutbuf, num))
 		return num;
 	return 0;
 }
 
-void CEngineNetsystem001::ReadString(void *pBuffer, char *pOutbuf, unsigned long long int num)
+void CEngineNetsystem001::ReadString(void* pBuffer, char* pOutbuf, unsigned long long int num)
 {
 
 	Assert(pBuffer != nullptr);
@@ -853,37 +803,37 @@ void CEngineNetsystem001::ReadString(void *pBuffer, char *pOutbuf, unsigned long
 	strncpy(pOutbuf, out, num);
 }
 
-byte CEngineNetsystem001::ReadByte(void *pBuffer)
+byte CEngineNetsystem001::ReadByte(void* pBuffer)
 {
 	Assert(pBuffer != nullptr);
 	return MSG_ReadByte((sizebuf_t*)pBuffer);
 }
 
-short CEngineNetsystem001::ReadShort(void *pBuffer)
+short CEngineNetsystem001::ReadShort(void* pBuffer)
 {
 	Assert(pBuffer != nullptr);
 	return MSG_ReadShort((sizebuf_t*)pBuffer);
 }
 
-int CEngineNetsystem001::ReadInt(void *pBuffer)
+int CEngineNetsystem001::ReadInt(void* pBuffer)
 {
 	Assert(pBuffer != nullptr);
 	return MSG_ReadLong((sizebuf_t*)pBuffer);
 }
 
-long long CEngineNetsystem001::ReadLong(void *pBuffer)
+long long CEngineNetsystem001::ReadLong(void* pBuffer)
 {
 	Assert(pBuffer != nullptr);
 	return MSG_ReadBitLong((sizebuf_t*)pBuffer, 64, true);
 }
 
-float CEngineNetsystem001::ReadFloat(void *pBuffer)
+float CEngineNetsystem001::ReadFloat(void* pBuffer)
 {
 	Assert(pBuffer != nullptr);
 	return MSG_ReadFloat((sizebuf_t*)pBuffer);
 }
 
-void CEngineNetsystem001::ReadVector(void* pBuffer, vec_t *outvec)
+void CEngineNetsystem001::ReadVector(void* pBuffer, vec_t* outvec)
 {
 	Assert(pBuffer != nullptr);
 	MSG_ReadVec3Coord((sizebuf_t*)pBuffer, outvec);
@@ -892,13 +842,15 @@ void CEngineNetsystem001::ReadVector(void* pBuffer, vec_t *outvec)
 void CEngineNetsystem001::BeginClientMessage(int cmd)
 {
 	Assert(g_current_sizebuf == nullptr);
-	if(g_current_sizebuf) Con_Printf("BeginMessage call not terminated with EndMessage!");
+	if (g_current_sizebuf)
+		Con_Printf("BeginMessage call not terminated with EndMessage!");
 	g_current_sizebuf = pfnBeginClientCmd(cmd);
 }
 
-void CEngineNetsystem001::BeginServerMessage(int cmd, edict_t *client)
+void CEngineNetsystem001::BeginServerMessage(int cmd, edict_t* client)
 {
 	Assert(g_current_sizebuf == nullptr);
-	if(g_current_sizebuf) Con_Printf("BeginMessage call not terminated with EndMessage!");
+	if (g_current_sizebuf)
+		Con_Printf("BeginMessage call not terminated with EndMessage!");
 	g_current_sizebuf = pfnBeginServerCmd(client, cmd);
 }

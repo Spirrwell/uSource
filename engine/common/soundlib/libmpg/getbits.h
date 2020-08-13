@@ -16,44 +16,37 @@ GNU General Public License for more details.
 #ifndef GETBITS_H
 #define GETBITS_H
 
-#define backbits( fr, nob )	((void)( \
-	fr->bitindex -= nob, \
-	fr->wordpointer += (fr->bitindex>>3), \
-	fr->bitindex &= 0x7 ))
+#define backbits(fr, nob) ((void)(fr->bitindex -= nob, fr->wordpointer += (fr->bitindex >> 3), fr->bitindex &= 0x7))
 
-#define getbitoffset( fr )	((-fr->bitindex) & 0x7)
-#define getbyte( fr )	(*fr->wordpointer++)
+#define getbitoffset(fr) ((-fr->bitindex) & 0x7)
+#define getbyte(fr)	 (*fr->wordpointer++)
 
-#define skipbits( fr, nob )	fr->ultmp = ( \
-	fr->ultmp = fr->wordpointer[0], fr->ultmp <<= 8, fr->ultmp |= fr->wordpointer[1], \
-	fr->ultmp <<= 8, fr->ultmp |= fr->wordpointer[2], fr->ultmp <<= fr->bitindex, \
-	fr->ultmp &= 0xffffff, fr->bitindex += nob, \
-	fr->ultmp >>= (24-nob), fr->wordpointer += (fr->bitindex>>3), \
-	fr->bitindex &= 7 )
+#define skipbits(fr, nob)                                                                                                                            \
+	fr->ultmp = (fr->ultmp = fr->wordpointer[0], fr->ultmp <<= 8, fr->ultmp |= fr->wordpointer[1], fr->ultmp <<= 8,                              \
+		     fr->ultmp |= fr->wordpointer[2], fr->ultmp <<= fr->bitindex, fr->ultmp &= 0xffffff, fr->bitindex += nob,                        \
+		     fr->ultmp >>= (24 - nob), fr->wordpointer += (fr->bitindex >> 3), fr->bitindex &= 7)
 
-#define getbits_fast( fr, nob )( \
-	fr->ultmp = (byte) (fr->wordpointer[0] << fr->bitindex), \
-	fr->ultmp |= ((ulong)fr->wordpointer[1] << fr->bitindex) >> 8, \
-	fr->ultmp <<= nob, fr->ultmp >>= 8, \
-	fr->bitindex += nob, fr->wordpointer += (fr->bitindex >> 3), \
-	fr->bitindex &= 7, fr->ultmp )
+#define getbits_fast(fr, nob)                                                                                                                        \
+	(fr->ultmp = (byte)(fr->wordpointer[0] << fr->bitindex), fr->ultmp |= ((ulong)fr->wordpointer[1] << fr->bitindex) >> 8, fr->ultmp <<= nob,   \
+	 fr->ultmp >>= 8, fr->bitindex += nob, fr->wordpointer += (fr->bitindex >> 3), fr->bitindex &= 7, fr->ultmp)
 
-#define get1bit( fr )	( \
-	fr->uctmp = *fr->wordpointer << fr->bitindex, fr->bitindex++, \
-	fr->wordpointer += (fr->bitindex >> 3), fr->bitindex &= 7, fr->uctmp >> 7 )
+#define get1bit(fr)                                                                                                                                  \
+	(fr->uctmp = *fr->wordpointer << fr->bitindex, fr->bitindex++, fr->wordpointer += (fr->bitindex >> 3), fr->bitindex &= 7, fr->uctmp >> 7)
 
 // 24 is enough because tab13 has max. a 19 bit huffvector
-#define BITSHIFT	((sizeof(long) - 1) * 8)
+#define BITSHIFT ((sizeof(long) - 1) * 8)
 
-#define REFRESH_MASK \
-	while( num < BITSHIFT ) { \
-		mask |= ((ulong)getbyte( fr )) << (BITSHIFT - num); \
-		num += 8; \
-		part2remain -= 8; }
+#define REFRESH_MASK                                                                                                                                 \
+	while (num < BITSHIFT)                                                                                                                       \
+	{                                                                                                                                            \
+		mask |= ((ulong)getbyte(fr)) << (BITSHIFT - num);                                                                                    \
+		num += 8;                                                                                                                            \
+		part2remain -= 8;                                                                                                                    \
+	}
 
-static uint getbits( mpg123_handle_t *fr, int number_of_bits )
+static uint getbits(mpg123_handle_t* fr, int number_of_bits)
 {
-	ulong	rval;
+	ulong rval;
 
 	rval = fr->wordpointer[0];
 	rval <<= 8;
@@ -65,12 +58,12 @@ static uint getbits( mpg123_handle_t *fr, int number_of_bits )
 	rval &= 0xffffff;
 
 	fr->bitindex += number_of_bits;
-	rval >>= (24-number_of_bits);
+	rval >>= (24 - number_of_bits);
 
-	fr->wordpointer += (fr->bitindex>>3);
+	fr->wordpointer += (fr->bitindex >> 3);
 	fr->bitindex &= 7;
 
 	return rval;
 }
-  
-#endif//GETBITS_H
+
+#endif // GETBITS_H

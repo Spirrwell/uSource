@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -18,59 +18,60 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#include "Framework.h"
 #include "Bitmap.h"
+#include "Framework.h"
+#include "MenuStrings.h"
 #include "PicButton.h"
 #include "YesNoMessageBox.h"
 #include "keydefs.h"
-#include "MenuStrings.h"
 
-#define ART_BANNER		"gfx/shell/head_newgame"
+#define ART_BANNER "gfx/shell/head_newgame"
 
 class CMenuNewGame : public CMenuFramework
 {
 public:
-	CMenuNewGame() : CMenuFramework( "CMenuNewGame" ) { }
-	static void StartGameCb( float skill );
+	CMenuNewGame() : CMenuFramework("CMenuNewGame") {}
+	static void StartGameCb(float skill);
+
 private:
 	void _Init() override;
 
-	static void ShowDialogCb( CMenuBaseItem *pSelf, void *pExtra  );
+	static void ShowDialogCb(CMenuBaseItem* pSelf, void* pExtra);
 
-	CMenuYesNoMessageBox  msgBox;
+	CMenuYesNoMessageBox msgBox;
 
 	CEventCallback easyCallback;
 	CEventCallback normCallback;
 	CEventCallback hardCallback;
 };
 
-static CMenuNewGame	uiNewGame;
+static CMenuNewGame uiNewGame;
 
 /*
 =================
 CMenuNewGame::StartGame
 =================
 */
-void CMenuNewGame::StartGameCb( float skill )
+void CMenuNewGame::StartGameCb(float skill)
 {
-	if( EngFuncs::GetCvarFloat( "host_serverstate" ) && EngFuncs::GetCvarFloat( "maxplayers" ) > 1 )
-		EngFuncs::HostEndGame( "end of the game" );
+	if (EngFuncs::GetCvarFloat("host_serverstate") && EngFuncs::GetCvarFloat("maxplayers") > 1)
+		EngFuncs::HostEndGame("end of the game");
 
-	EngFuncs::CvarSetValue( "skill", skill );
-	EngFuncs::CvarSetValue( "deathmatch", 0.0f );
-	EngFuncs::CvarSetValue( "teamplay", 0.0f );
-	EngFuncs::CvarSetValue( "pausable", 1.0f ); // singleplayer is always allowing pause
-	EngFuncs::CvarSetValue( "maxplayers", 1.0f );
-	EngFuncs::CvarSetValue( "coop", 0.0f );
+	EngFuncs::CvarSetValue("skill", skill);
+	EngFuncs::CvarSetValue("deathmatch", 0.0f);
+	EngFuncs::CvarSetValue("teamplay", 0.0f);
+	EngFuncs::CvarSetValue("pausable", 1.0f); // singleplayer is always allowing pause
+	EngFuncs::CvarSetValue("maxplayers", 1.0f);
+	EngFuncs::CvarSetValue("coop", 0.0f);
 
-	EngFuncs::PlayBackgroundTrack( NULL, NULL );
+	EngFuncs::PlayBackgroundTrack(NULL, NULL);
 
-	EngFuncs::ClientCmd( FALSE, "newgame\n" );
+	EngFuncs::ClientCmd(FALSE, "newgame\n");
 }
 
-void CMenuNewGame::ShowDialogCb( CMenuBaseItem *pSelf, void *pExtra )
+void CMenuNewGame::ShowDialogCb(CMenuBaseItem* pSelf, void* pExtra)
 {
-	CMenuNewGame *ui = (CMenuNewGame*)pSelf->Parent();
+	CMenuNewGame* ui = (CMenuNewGame*)pSelf->Parent();
 
 	ui->msgBox.onPositive = *(CEventCallback*)pExtra;
 	ui->msgBox.Show();
@@ -81,34 +82,31 @@ void CMenuNewGame::ShowDialogCb( CMenuBaseItem *pSelf, void *pExtra )
 CMenuNewGame::Init
 =================
 */
-void CMenuNewGame::_Init( void )
+void CMenuNewGame::_Init(void)
 {
-	AddItem( background );
-	AddItem( banner );
+	AddItem(background);
+	AddItem(banner);
 
-	banner.SetPicture( ART_BANNER );
+	banner.SetPicture(ART_BANNER);
 
-	SET_EVENT( easyCallback, CMenuNewGame::StartGameCb( 1.0f ) );
-	SET_EVENT( normCallback, CMenuNewGame::StartGameCb( 2.0f ) );
-	SET_EVENT( hardCallback, CMenuNewGame::StartGameCb( 3.0f ) );
-	
-	CMenuPicButton *easy = AddButton( L( "GameUI_Easy" ), L( "StringsList_200" ), PC_EASY, easyCallback, QMF_NOTIFY );
-	CMenuPicButton *norm = AddButton( L( "GameUI_Medium" ), L( "StringsList_201" ), PC_MEDIUM, normCallback, QMF_NOTIFY );
-	CMenuPicButton *hard = AddButton( L( "GameUI_Hard" ), L( "StringsList_202" ), PC_DIFFICULT, hardCallback, QMF_NOTIFY );
+	SET_EVENT(easyCallback, CMenuNewGame::StartGameCb(1.0f));
+	SET_EVENT(normCallback, CMenuNewGame::StartGameCb(2.0f));
+	SET_EVENT(hardCallback, CMenuNewGame::StartGameCb(3.0f));
 
-	easy->onReleasedClActive =
-		norm->onReleasedClActive =
-		hard->onReleasedClActive = ShowDialogCb;
-	easy->onReleasedClActive.pExtra = &easyCallback;
-	norm->onReleasedClActive.pExtra = &normCallback;
-	hard->onReleasedClActive.pExtra = &hardCallback;
+	CMenuPicButton* easy = AddButton(L("GameUI_Easy"), L("StringsList_200"), PC_EASY, easyCallback, QMF_NOTIFY);
+	CMenuPicButton* norm = AddButton(L("GameUI_Medium"), L("StringsList_201"), PC_MEDIUM, normCallback, QMF_NOTIFY);
+	CMenuPicButton* hard = AddButton(L("GameUI_Hard"), L("StringsList_202"), PC_DIFFICULT, hardCallback, QMF_NOTIFY);
 
-	AddButton( L( "GameUI_Cancel" ), L( "Go back to the Main menu" ), PC_CANCEL, VoidCb( &CMenuNewGame::Hide ), QMF_NOTIFY );
+	easy->onReleasedClActive = norm->onReleasedClActive = hard->onReleasedClActive = ShowDialogCb;
+	easy->onReleasedClActive.pExtra						       = &easyCallback;
+	norm->onReleasedClActive.pExtra						       = &normCallback;
+	hard->onReleasedClActive.pExtra						       = &hardCallback;
 
-	msgBox.SetMessage( L( "StringsList_240" ) );
-	msgBox.HighlightChoice( CMenuYesNoMessageBox::HIGHLIGHT_NO );
-	msgBox.Link( this );
+	AddButton(L("GameUI_Cancel"), L("Go back to the Main menu"), PC_CANCEL, VoidCb(&CMenuNewGame::Hide), QMF_NOTIFY);
 
+	msgBox.SetMessage(L("StringsList_240"));
+	msgBox.HighlightChoice(CMenuYesNoMessageBox::HIGHLIGHT_NO);
+	msgBox.Link(this);
 }
 
 /*
@@ -116,30 +114,27 @@ void CMenuNewGame::_Init( void )
 UI_NewGame_Precache
 =================
 */
-void UI_NewGame_Precache( void )
-{
-	EngFuncs::PIC_Load( ART_BANNER );
-}
+void UI_NewGame_Precache(void) { EngFuncs::PIC_Load(ART_BANNER); }
 
 /*
 =================
 UI_NewGame_Menu
 =================
 */
-void UI_NewGame_Menu( void )
+void UI_NewGame_Menu(void)
 {
 	// completely ignore save\load menus for multiplayer_only
-	if( gMenu.m_gameinfo.gamemode == GAME_MULTIPLAYER_ONLY || !EngFuncs::CheckGameDll() )
+	if (gMenu.m_gameinfo.gamemode == GAME_MULTIPLAYER_ONLY || !EngFuncs::CheckGameDll())
 		return;
 
 #ifdef GFL_NOSKILLS
-	if( gMenu.m_gameinfo.flags & GFL_NOSKILLS )
+	if (gMenu.m_gameinfo.flags & GFL_NOSKILLS)
 	{
-		uiNewGame.StartGameCb( 1.0f );
+		uiNewGame.StartGameCb(1.0f);
 		return;
 	}
 #endif
 
 	uiNewGame.Show();
 }
-ADD_MENU( menu_newgame, UI_NewGame_Precache, UI_NewGame_Menu );
+ADD_MENU(menu_newgame, UI_NewGame_Precache, UI_NewGame_Menu);

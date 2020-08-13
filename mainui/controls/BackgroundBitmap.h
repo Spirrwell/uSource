@@ -19,35 +19,35 @@ GNU General Public License for more details.
 
 #include "Bitmap.h"
 
-#define ART_BACKGROUND		"gfx/shell/splash.bmp"
+#define ART_BACKGROUND "gfx/shell/splash.bmp"
 
 #define MAX_BACKGROUNDS 48 // SC 5.0 have 35 tiled backgrounds!
 
 // Ultimate class that support multiple types of background: fillColor, WON-style, GameUI-style
-class CMenuBackgroundBitmap: public CMenuBitmap
+class CMenuBackgroundBitmap : public CMenuBitmap
 {
 public:
 	CMenuBackgroundBitmap();
 
-	void VidInit( void ) override;
-	void Draw( void ) override;
-	void SetInactive(bool) override { }
-	void ToggleInactive() override { }
+	void VidInit(void) override;
+	void Draw(void) override;
+	void SetInactive(bool) override {}
+	void ToggleInactive() override {}
 
-	bool bForceWON; // if true, szPic will be drawn, instead of Steam-background
+	bool bForceWON;	  // if true, szPic will be drawn, instead of Steam-background
 	bool bForceColor; // dialogs should set this
 
 	static void LoadBackground();
 	static bool ShouldDrawLogoMovie() { return s_bEnableLogoMovie; }
+
 private:
-	void DrawBackgroundLayout( Point p, float xScale, float yScale );
+	void DrawBackgroundLayout(Point p, float xScale, float yScale);
 	// void DrawSplash( Point p, float xScale, float yScale );
 	void DrawColor();
 	void DrawInGameBackground();
 
-	static bool LoadBackgroundImage( const bool gamedirOnly ); // Steam background loader
-	static bool CheckBackgroundSplash( const bool gamedirOnly ); // WON background loader
-
+	static bool LoadBackgroundImage(const bool gamedirOnly);   // Steam background loader
+	static bool CheckBackgroundSplash(const bool gamedirOnly); // WON background loader
 
 	//==========
 	// WON-style
@@ -60,14 +60,13 @@ private:
 	//=============
 	typedef struct
 	{
-		HIMAGE	hImage;
-		Point coord;
-		Size size;
+		HIMAGE hImage;
+		Point  coord;
+		Size   size;
 	} bimage_t;
 
-	static int s_iBackgroundCount;
+	static int	s_iBackgroundCount;
 	static bimage_t s_Backgroudns[MAX_BACKGROUNDS];
-
 };
 
 #endif // MENU_BACKGROUNDBITMAP_H

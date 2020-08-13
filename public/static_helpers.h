@@ -12,61 +12,36 @@
  * @tparam fn
  * @tparam T
  */
-template<void(*fn)()>
-class CStaticInitWrapper
+template <void (*fn)()> class CStaticInitWrapper
 {
 public:
-	CStaticInitWrapper()
-	{
-		fn();
-	}
+	CStaticInitWrapper() { fn(); }
 
-	~CStaticInitWrapper()
-	{
-	}
+	~CStaticInitWrapper() {}
 };
 
 class CLambdaStaticInitWrapper
 {
 public:
-	CLambdaStaticInitWrapper(void(*fn)())
-	{
-		fn();
-	}
+	CLambdaStaticInitWrapper(void (*fn)()) { fn(); }
 
-	~CLambdaStaticInitWrapper()
-	{
-
-	}
+	~CLambdaStaticInitWrapper() {}
 };
 
-template<void(*fn)()>
-class CStaticDestructionWrapper
+template <void (*fn)()> class CStaticDestructionWrapper
 {
 public:
-	CStaticDestructionWrapper()
-	{
-	}
+	CStaticDestructionWrapper() {}
 
-	~CStaticDestructionWrapper()
-	{
-		fn();
-	}
+	~CStaticDestructionWrapper() { fn(); }
 };
 
-template<void(*fn)()>
-class CStaticInitDestroyWrapper
+template <void (*fn)()> class CStaticInitDestroyWrapper
 {
 public:
-	CStaticInitDestroyWrapper()
-	{
-		fn();
-	}
+	CStaticInitDestroyWrapper() { fn(); }
 
-	~CStaticInitDestroyWrapper()
-	{
-		fn();
-	}
+	~CStaticInitDestroyWrapper() { fn(); }
 };
 
-#define CallDuringStaticInit(x) static auto __static__ ## x ## __caller = CStaticInitWrapper<x>();
+#define CallDuringStaticInit(x) static auto __static__##x##__caller = CStaticInitWrapper<x>();

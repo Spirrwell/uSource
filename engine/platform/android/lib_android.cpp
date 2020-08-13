@@ -12,51 +12,52 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
-#include "common.h"
-#include "library.h"
-#include "filesystem.h"
-#include "server.h"
 #include "platform/android/lib_android.h"
+#include "common.h"
+#include "filesystem.h"
+#include "library.h"
 #include "platform/android/dlsym-weak.h" // Android < 5.0
+#include "server.h"
 
-void *ANDROID_LoadLibrary( const char *dllname )
+void* ANDROID_LoadLibrary(const char* dllname)
 {
-	char path[MAX_SYSPATH];
-	const char *libdir[2];
-	int i;
-	void *pHandle;
+	char	    path[MAX_SYSPATH];
+	const char* libdir[2];
+	int	    i;
+	void*	    pHandle;
 
 	libdir[0] = getenv("XASH3D_GAMELIBDIR");
 	libdir[1] = getenv("XASH3D_ENGLIBDIR");
 
-	for( i = 0; i < 2; i++ )
+	for (i = 0; i < 2; i++)
 	{
-		Q_snprintf( path, MAX_SYSPATH, "%s/lib%s"POSTFIX"."OS_LIB_EXT, libdir[i], dllname );
-		pHandle = dlopen( path, RTLD_LAZY );
-		if( pHandle )
+		Q_snprintf(path, MAX_SYSPATH, "%s/lib%s" POSTFIX "." OS_LIB_EXT, libdir[i], dllname);
+		pHandle = dlopen(path, RTLD_LAZY);
+		if (pHandle)
 			return pHandle;
 
-		COM_PushLibraryError( dlerror() );
+		COM_PushLibraryError(dlerror());
 	}
 
 	// HACKHACK: keep old behaviour for compability
-	pHandle = dlopen( dllname, RTLD_LAZY );
-	if( pHandle )
+	pHandle = dlopen(dllname, RTLD_LAZY);
+	if (pHandle)
 		return pHandle;
 
-	COM_PushLibraryError( dlerror() );
+	COM_PushLibraryError(dlerror());
 
 	return NULL;
 }
 
-void *ANDROID_GetProcAddress( void *hInstance, const char *name )
+void* ANDROID_GetProcAddress(void* hInstance, const char* name)
 {
-	void *p = dlsym( hInstance, name );
+	void* p = dlsym(hInstance, name);
 
 #ifndef XASH_64BIT
-	if( p ) return p;
+	if (p)
+		return p;
 
-	p = dlsym_weak( hInstance, name );
+	p = dlsym_weak(hInstance, name);
 #endif // XASH_64BIT
 
 	return p;

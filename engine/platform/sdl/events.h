@@ -16,19 +16,18 @@ GNU General Public License for more details.
 #pragma once
 #ifndef KEYWRAPPER_H
 #define KEYWRAPPER_H
-#ifdef  XASH_SDL
+#ifdef XASH_SDL
 
 #include "platform/platform.h"
 
 // window management
-void VID_RestoreScreenResolution( void );
-qboolean  VID_CreateWindow( int width, int height, qboolean fullscreen );
-void      VID_DestroyWindow( void );
-void GL_InitExtensions( void );
-qboolean GL_CreateContext( void );
-qboolean GL_UpdateContext( void );
-qboolean GL_DeleteContext( void );
-
+void	 VID_RestoreScreenResolution(void);
+qboolean VID_CreateWindow(int width, int height, qboolean fullscreen);
+void	 VID_DestroyWindow(void);
+void	 GL_InitExtensions(void);
+qboolean GL_CreateContext(void);
+qboolean GL_UpdateContext(void);
+qboolean GL_DeleteContext(void);
 
 #endif // XASH_SDL
 #endif // KEYWRAPPER_H

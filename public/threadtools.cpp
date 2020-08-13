@@ -1,12 +1,12 @@
 #include "threadtools.h"
 
 #ifdef _POSIX
+#include <fcntl.h>
 #include <pthread.h>
 #include <semaphore.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <fcntl.h>
 #include <signal.h>
+#include <sys/types.h>
+#include <unistd.h>
 #else
 #include <windows.h>
 #endif
@@ -14,16 +14,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 //===========================================
 //
 //      CThread
 //
 //===========================================
 
-CThread::CThread(void *(*threadfn)(void *)) :
-	m_threadfn(threadfn),
-	m_run(false)
+CThread::CThread(void* (*threadfn)(void*)) : m_threadfn(threadfn), m_run(false)
 {
 #ifdef _WIN32
 
@@ -37,7 +34,7 @@ void CThread::Run(void* pvt)
 #ifdef _WIN32
 
 #else
-	if(m_run)
+	if (m_run)
 	{
 		pthread_cancel(m_thread);
 	}
@@ -126,7 +123,6 @@ void CThreadMutex::Unlock()
 #endif
 }
 
-
 //===========================================
 //
 //      CThreadSpinlock
@@ -143,14 +139,14 @@ CThreadSpinlock::CThreadSpinlock()
 #endif
 }
 
-CThreadSpinlock::~CThreadSpinlock()
-{
-}
+CThreadSpinlock::~CThreadSpinlock() {}
 
 void CThreadSpinlock::Lock()
 {
 #ifdef __GNUC__
-	while(__sync_bool_compare_and_swap(&m_atomicFlag, 0, 1)) {};
+	while (__sync_bool_compare_and_swap(&m_atomicFlag, 0, 1))
+	{
+	};
 #else
 
 #endif
@@ -174,49 +170,33 @@ void CThreadSpinlock::Unlock()
 #endif
 }
 
-
 //===========================================
 //
 //      CThreadSemaphore
 //
 //===========================================
 
-CThreadSemaphore::CThreadSemaphore(const char* name, int max, bool shared) :
-	m_name(name),
-	m_shared(shared)
-{
+CThreadSemaphore::CThreadSemaphore(const char* name, int max, bool shared)
+	: m_name(name),
+	  m_shared(shared){
 #ifdef _WIN32
 
 #else
 
 #endif
-}
+	  }
 
-CThreadSemaphore::~CThreadSemaphore()
+	  CThreadSemaphore::~CThreadSemaphore()
 {
-
 }
 
-void CThreadSemaphore::Lock()
-{
+void CThreadSemaphore::Lock() {}
 
-}
+void CThreadSemaphore::Unlock() {}
 
-void CThreadSemaphore::Unlock()
-{
+bool CThreadSemaphore::TryLock() { return false; }
 
-}
-
-bool CThreadSemaphore::TryLock()
-{
-	return false;
-}
-
-int CThreadSemaphore::GetUsers() const
-{
-	return 0;
-}
-
+int CThreadSemaphore::GetUsers() const { return 0; }
 
 //===========================================
 //
@@ -224,35 +204,17 @@ int CThreadSemaphore::GetUsers() const
 //
 //===========================================
 
-CThreadSpinSemaphore::CThreadSpinSemaphore(int max)
-{
+CThreadSpinSemaphore::CThreadSpinSemaphore(int max) {}
 
-}
+CThreadSpinSemaphore::~CThreadSpinSemaphore() {}
 
-CThreadSpinSemaphore::~CThreadSpinSemaphore()
-{
+void CThreadSpinSemaphore::Lock() {}
 
-}
+void CThreadSpinSemaphore::Unlock() {}
 
-void CThreadSpinSemaphore::Lock()
-{
+bool CThreadSpinSemaphore::TryLock() { return false; }
 
-}
-
-void CThreadSpinSemaphore::Unlock()
-{
-
-}
-
-bool CThreadSpinSemaphore::TryLock()
-{
-	return false;
-}
-
-int CThreadSpinSemaphore::GetUsers() const
-{
-	return 0;
-}
+int CThreadSpinSemaphore::GetUsers() const { return 0; }
 
 //===========================================
 //

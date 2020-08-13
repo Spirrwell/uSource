@@ -8,39 +8,36 @@ class CStringArrayModel : public CMenuBaseArrayModel
 {
 public:
 	// pointer to array of pointers
-	CStringArrayModel( const char **ptr, int count )
+	CStringArrayModel(const char** ptr, int count)
 	{
 		m_u.m_pArrayOfPtrs = ptr;
-		m_iCount = count;
-		m_iOffset = 0;
+		m_iCount	   = count;
+		m_iOffset	   = 0;
 	}
 
-	CStringArrayModel( const char *str, int offset, int count )
+	CStringArrayModel(const char* str, int offset, int count)
 	{
 		m_u.m_pArrayOfChars = str;
-		m_iOffset = offset;
-		m_iCount = count;
+		m_iOffset	    = offset;
+		m_iCount	    = count;
 	}
 
 	// by default, there is no need to update
-	void Update() { }
+	void Update() {}
 
-	const char *GetText( int line )
+	const char* GetText(int line)
 	{
-		if( line < 0 || line > m_iCount )
+		if (line < 0 || line > m_iCount)
 		{
-			Con_Printf("StringArrayModel: wrong index %d of %d\n", line, m_iCount );
+			Con_Printf("StringArrayModel: wrong index %d of %d\n", line, m_iCount);
 			return "";
 		}
-		if( m_iOffset )
+		if (m_iOffset)
 			return m_u.m_pArrayOfChars + m_iOffset * line;
 		return m_u.m_pArrayOfPtrs[line];
 	}
 
-	int GetRows() const
-	{
-		return m_iCount;
-	}
+	int GetRows() const { return m_iCount; }
 
 protected:
 	int m_iCount;
@@ -48,8 +45,8 @@ protected:
 private:
 	union
 	{
-		const char **m_pArrayOfPtrs;
-		const char *m_pArrayOfChars;
+		const char** m_pArrayOfPtrs;
+		const char*  m_pArrayOfChars;
 	} m_u;
 	int m_iOffset;
 };

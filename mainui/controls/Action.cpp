@@ -14,14 +14,14 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#include "extdll_menu.h"
-#include "BaseMenu.h"
 #include "Action.h"
+#include "BaseMenu.h"
 #include "Utils.h"
+#include "extdll_menu.h"
 
 CMenuAction::CMenuAction() : BaseClass()
 {
-	m_szBackground = NULL;
+	m_szBackground	  = NULL;
 	m_bfillBackground = false;
 	forceCalcW = forceCalcY = false;
 }
@@ -31,31 +31,31 @@ CMenuAction::CMenuAction() : BaseClass()
 CMenuAction::Init
 =================
 */
-void CMenuAction::VidInit( )
+void CMenuAction::VidInit()
 {
-	m_iBackcolor.SetDefault( 0 );
+	m_iBackcolor.SetDefault(0);
 
-	if( !forceCalcW )
+	if (!forceCalcW)
 		forceCalcW = size.w < 1;
 
-	if( !forceCalcY )
+	if (!forceCalcY)
 		forceCalcY = size.h < 1;
 
-	if( forceCalcW || forceCalcY )
+	if (forceCalcW || forceCalcY)
 	{
-		if( m_szBackground )
+		if (m_szBackground)
 		{
-			HIMAGE handle = EngFuncs::PIC_Load( m_szBackground );
-			size.w = EngFuncs::PIC_Width( handle );
-			size.h = EngFuncs::PIC_Height( handle );
+			HIMAGE handle = EngFuncs::PIC_Load(m_szBackground);
+			size.w	      = EngFuncs::PIC_Width(handle);
+			size.h	      = EngFuncs::PIC_Height(handle);
 		}
 		else
 		{
-			if( forceCalcW )
-				size.w = g_FontMgr->GetTextWideScaled( font, szName, charSize ) / uiStatic.scaleX;
+			if (forceCalcW)
+				size.w = g_FontMgr->GetTextWideScaled(font, szName, charSize) / uiStatic.scaleX;
 
-			if( forceCalcY )
-				size.h = g_FontMgr->GetTextHeightExt( font, szName, charSize, size.w ) / uiStatic.scaleX;
+			if (forceCalcY)
+				size.h = g_FontMgr->GetTextHeightExt(font, szName, charSize, size.w) / uiStatic.scaleX;
 		}
 
 		m_bLimitBySize = false;
@@ -73,35 +73,35 @@ void CMenuAction::VidInit( )
 CMenuAction::Key
 =================
 */
-bool CMenuAction::KeyUp( int key )
+bool CMenuAction::KeyUp(int key)
 {
-	const char *sound = 0;
+	const char* sound = 0;
 
-	if( UI::Key::IsEnter( key ) && !(iFlags & QMF_MOUSEONLY) )
+	if (UI::Key::IsEnter(key) && !(iFlags & QMF_MOUSEONLY))
 		sound = uiSoundLaunch;
-	else if( UI::Key::IsLeftMouse( key ) && ( iFlags & QMF_HASMOUSEFOCUS ) )
+	else if (UI::Key::IsLeftMouse(key) && (iFlags & QMF_HASMOUSEFOCUS))
 		sound = uiSoundLaunch;
 
-	if( sound )
+	if (sound)
 	{
-		_Event( QM_PRESSED );
-		PlayLocalSound( sound );
+		_Event(QM_PRESSED);
+		PlayLocalSound(sound);
 	}
 
 	return sound != NULL;
 }
 
-bool CMenuAction::KeyDown( int key )
+bool CMenuAction::KeyDown(int key)
 {
 	bool handled = false;
 
-	if( UI::Key::IsEnter( key ) && !(iFlags & QMF_MOUSEONLY) )
+	if (UI::Key::IsEnter(key) && !(iFlags & QMF_MOUSEONLY))
 		handled = true;
-	else if( UI::Key::IsLeftMouse( key ) && ( iFlags & QMF_HASMOUSEFOCUS ) )
+	else if (UI::Key::IsLeftMouse(key) && (iFlags & QMF_HASMOUSEFOCUS))
 		handled = true;
 
-	if( handled )
-		_Event( QM_PRESSED );
+	if (handled)
+		_Event(QM_PRESSED);
 
 	return handled;
 }
@@ -111,82 +111,83 @@ bool CMenuAction::KeyDown( int key )
 CMenuAction::Draw
 =================
 */
-void CMenuAction::Draw( )
+void CMenuAction::Draw()
 {
-	uint textflags = ( iFlags & QMF_DROPSHADOW ? ETF_SHADOW : 0 ) | ( m_bLimitBySize ? 0 : ETF_NOSIZELIMIT ) | ( bIgnoreColorstring ? ETF_FORCECOL : 0 );
+	uint textflags =
+		(iFlags & QMF_DROPSHADOW ? ETF_SHADOW : 0) | (m_bLimitBySize ? 0 : ETF_NOSIZELIMIT) | (bIgnoreColorstring ? ETF_FORCECOL : 0);
 
-	if( bDrawStroke )
+	if (bDrawStroke)
 	{
-		UI_DrawRectangleExt( m_scPos, m_scSize, colorStroke, iStrokeWidth );
+		UI_DrawRectangleExt(m_scPos, m_scSize, colorStroke, iStrokeWidth);
 	}
 
-	if( m_szBackground )
+	if (m_szBackground)
 	{
-		UI_DrawPic( m_scPos, m_scSize, m_iBackcolor, m_szBackground );
+		UI_DrawPic(m_scPos, m_scSize, m_iBackcolor, m_szBackground);
 	}
-	else if( m_bfillBackground )
+	else if (m_bfillBackground)
 	{
-		if( this != m_pParent->ItemAtCursor() || iFlags & QMF_GRAYED )
+		if (this != m_pParent->ItemAtCursor() || iFlags & QMF_GRAYED)
 		{
-			UI_FillRect( m_scPos, m_scSize, m_iBackcolor );
+			UI_FillRect(m_scPos, m_scSize, m_iBackcolor);
 		}
 		else
 		{
-			UI_FillRect( m_scPos, m_scSize, m_iBackColorFocused );
+			UI_FillRect(m_scPos, m_scSize, m_iBackColorFocused);
 		}
 	}
 
-	if( szStatusText && iFlags & QMF_NOTIFY )
+	if (szStatusText && iFlags & QMF_NOTIFY)
 	{
 		Point coord;
 
 		coord.x = m_scPos.x + 16 * uiStatic.scaleX;
 		coord.y = m_scPos.y + m_scSize.h / 2 - EngFuncs::ConsoleCharacterHeight() / 2;
 
-		int	r, g, b;
+		int r, g, b;
 
-		UnpackRGB( r, g, b, uiColorHelp );
-		EngFuncs::DrawSetTextColor( r, g, b );
-		EngFuncs::DrawConsoleString( coord, szStatusText );
+		UnpackRGB(r, g, b, uiColorHelp);
+		EngFuncs::DrawSetTextColor(r, g, b);
+		EngFuncs::DrawConsoleString(coord, szStatusText);
 	}
 
-	if( iFlags & QMF_GRAYED )
+	if (iFlags & QMF_GRAYED)
 	{
-		UI_DrawString( font, m_scPos, m_scSize, szName, uiColorDkGrey, m_scChSize, eTextAlignment, textflags | ETF_FORCECOL );
+		UI_DrawString(font, m_scPos, m_scSize, szName, uiColorDkGrey, m_scChSize, eTextAlignment, textflags | ETF_FORCECOL);
 		return; // grayed
 	}
 
-	if( this != m_pParent->ItemAtCursor() || eFocusAnimation == QM_NOFOCUSANIMATION )
+	if (this != m_pParent->ItemAtCursor() || eFocusAnimation == QM_NOFOCUSANIMATION)
 	{
-		UI_DrawString( font, m_scPos, m_scSize, szName, colorBase, m_scChSize, eTextAlignment, textflags );
+		UI_DrawString(font, m_scPos, m_scSize, szName, colorBase, m_scChSize, eTextAlignment, textflags);
 		return; // no focus
 	}
 
-	if( eFocusAnimation == QM_HIGHLIGHTIFFOCUS )
+	if (eFocusAnimation == QM_HIGHLIGHTIFFOCUS)
 	{
-		UI_DrawString( font, m_scPos, m_scSize, szName, colorFocus, m_scChSize, eTextAlignment, textflags );
+		UI_DrawString(font, m_scPos, m_scSize, szName, colorFocus, m_scChSize, eTextAlignment, textflags);
 	}
-	else if( eFocusAnimation == QM_PULSEIFFOCUS )
+	else if (eFocusAnimation == QM_PULSEIFFOCUS)
 	{
-		int	color;
+		int color;
 
-		color = PackAlpha( colorBase, 255 * (0.5f + 0.5f * sin( (float)uiStatic.realTime / UI_PULSE_DIVISOR )));
+		color = PackAlpha(colorBase, 255 * (0.5f + 0.5f * sin((float)uiStatic.realTime / UI_PULSE_DIVISOR)));
 
-		UI_DrawString( font, m_scPos, m_scSize, szName, color, m_scChSize, eTextAlignment, textflags );
+		UI_DrawString(font, m_scPos, m_scSize, szName, color, m_scChSize, eTextAlignment, textflags);
 	}
 }
 
-void CMenuAction::SetBackground(const char *path, unsigned int color)
+void CMenuAction::SetBackground(const char* path, unsigned int color)
 {
-	m_szBackground = path;
-	m_iBackcolor = color;
+	m_szBackground	  = path;
+	m_iBackcolor	  = color;
 	m_bfillBackground = false;
 }
 
-void CMenuAction::SetBackground(unsigned int color, unsigned int focused )
+void CMenuAction::SetBackground(unsigned int color, unsigned int focused)
 {
-	m_bfillBackground = true;
-	m_szBackground = NULL;
-	m_iBackcolor = color;
+	m_bfillBackground   = true;
+	m_szBackground	    = NULL;
+	m_iBackcolor	    = color;
 	m_iBackColorFocused = focused;
 }

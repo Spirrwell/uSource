@@ -1,19 +1,20 @@
 /**
- * 
+ *
  * rendersystem.h
- * 
- * Rendersystem is an advanced rendering backend for xash3d. It's based off of xash3d's original ref_gl renderer, but with some pretty significant changes.
- * 
+ *
+ * Rendersystem is an advanced rendering backend for xash3d. It's based off of xash3d's original ref_gl renderer, but with some pretty significant
+ * changes.
+ *
  * The rendersystem abstracts graphics API calls in such a way that you can write platform agnostic rendering code
- * quite easily. The goal of this is primarily to ease shader creation and make extending the graphics system much much easier. 
- * 
+ * quite easily. The goal of this is primarily to ease shader creation and make extending the graphics system much much easier.
+ *
  */
 #pragma once
 
-#include "imesh.h"
-#include "ishader.h"
 #include "ibuffer.h"
 #include "imaterial.h"
+#include "imesh.h"
+#include "ishader.h"
 
 struct render_params_t
 {
@@ -22,7 +23,6 @@ struct render_params_t
 	int bpp;
 	int refresh_rate;
 };
-
 
 enum class EShaderDepthFunc
 {
@@ -101,14 +101,14 @@ class IRenderSystem
 {
 public:
 	virtual void Init(const render_params_t& params) = 0;
-	virtual void Shutdown() = 0;
+	virtual void Shutdown()				 = 0;
 
 	virtual void OnParamsChanged(const render_params_t& params) = 0;
 
 	virtual IVertexBuffer* CreateEmptyVertexBuffer(EVertexFormat fmt, EBufferType type) = 0;
-	virtual IIndexBuffer* CreateEmptyIndexBuffer(EIndexFormat fmt, EBufferType type) = 0;
-	virtual IBuffer* CreateEmptyBuffer(EBufferType type) = 0;
-	virtual ITexture* CreateEmptyTexture(ETextureFormat fmt) = 0;
+	virtual IIndexBuffer*  CreateEmptyIndexBuffer(EIndexFormat fmt, EBufferType type)   = 0;
+	virtual IBuffer*       CreateEmptyBuffer(EBufferType type)			    = 0;
+	virtual ITexture*      CreateEmptyTexture(ETextureFormat fmt)			    = 0;
 
 	/* Creates a new image from the rgb data that has been specified */
 	/* This won't be using the same buffers as the rgbdata, so you will want to call FreeImage on the rgbdata after this */
@@ -121,20 +121,20 @@ public:
 	virtual IShaderProgram* CreateProgram(const char* name) = 0;
 
 	/* Creates new shaders */
-	virtual IGeomShader* CreateGeometryShader() = 0;
-	virtual IVertexShader* CreateVertexShader() = 0;
-	virtual IFragShader* CreateFragShader() = 0;
+	virtual IGeomShader*	CreateGeometryShader()		      = 0;
+	virtual IVertexShader*	CreateVertexShader()		      = 0;
+	virtual IFragShader*	CreateFragShader()		      = 0;
 	virtual IShaderProgram* CreateShaderProgram(const char* name) = 0;
 
 	/* API Accessors */
 	virtual class ITriangleAPI* GetTriAPI() = 0;
 
-	virtual void SetDepthFunc(EShaderDepthFunc func) = 0;
-	virtual void SetBlendEquation(EShaderBlendEq func) = 0;
-	virtual void SetBlendFunc(EShaderBlendFunc func) = 0;
-	virtual void SetAlphaFunc(EShaderAlphaFunc func) = 0;
+	virtual void SetDepthFunc(EShaderDepthFunc func)     = 0;
+	virtual void SetBlendEquation(EShaderBlendEq func)   = 0;
+	virtual void SetBlendFunc(EShaderBlendFunc func)     = 0;
+	virtual void SetAlphaFunc(EShaderAlphaFunc func)     = 0;
 	virtual void SetStencilFunc(EShaderStencilFunc func) = 0;
-	virtual void SetStencilOp(EShaderStencilOp op) = 0;
+	virtual void SetStencilOp(EShaderStencilOp op)	     = 0;
 };
 
 /* This is the only function you must implement within your backend implementation */

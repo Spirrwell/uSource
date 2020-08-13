@@ -12,33 +12,27 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
-#include "extdll_menu.h"
-#include "BaseMenu.h"
-#include "Utils.h"
-#include "Action.h"
-#include "ItemsHolder.h"
 #include "MessageBox.h"
+#include "Action.h"
+#include "BaseMenu.h"
+#include "ItemsHolder.h"
+#include "Utils.h"
+#include "extdll_menu.h"
 
-CMenuMessageBox::CMenuMessageBox(const char *name) : BaseClass( name )
-{
-	iFlags |= QMF_INACTIVE;
-}
+CMenuMessageBox::CMenuMessageBox(const char* name) : BaseClass(name) { iFlags |= QMF_INACTIVE; }
 
 void CMenuMessageBox::_Init()
 {
 	background.bForceColor = true;
-	background.colorBase = uiPromptBgColor;
+	background.colorBase   = uiPromptBgColor;
 
 	dlgMessage.eTextAlignment = QM_CENTER; // center
-	dlgMessage.iFlags = QMF_INACTIVE|QMF_DROPSHADOW;
-	dlgMessage.SetCoord( 0, 0 );
+	dlgMessage.iFlags	  = QMF_INACTIVE | QMF_DROPSHADOW;
+	dlgMessage.SetCoord(0, 0);
 	dlgMessage.size = size;
 
-	AddItem( background );
-	AddItem( dlgMessage );
+	AddItem(background);
+	AddItem(dlgMessage);
 }
 
-void CMenuMessageBox::SetMessage( const char *sz )
-{
-	dlgMessage.szName = sz;
-}
+void CMenuMessageBox::SetMessage(const char* sz) { dlgMessage.szName = sz; }

@@ -16,7 +16,7 @@ GNU General Public License for more details.
 #ifndef ANDROID_LIB_H
 #define ANDROID_LIB_H
 
-void *ANDROID_LoadLibrary( const char *dllname );
-void *ANDROID_GetProcAddress( void *hInstance, const char *name );
+void* ANDROID_LoadLibrary(const char* dllname);
+void* ANDROID_GetProcAddress(void* hInstance, const char* name);
 
 #endif // ANDROID_LIB_H
