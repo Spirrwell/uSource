@@ -10,10 +10,35 @@
 #include "tier1/convar.h"
 #include "tier1/dbg.h"
 
+#include "containers/list.h"
+#include "containers/hashmap.h"
+
 Convar net_debug_messages("net_debug_messages", "0", FCVAR_CHEAT | FCVAR_ARCHIVE);
 
 IEngineNetsystem* g_pNetworkSystem;
 byte* NetworkSystem::g_pNetworkPool;
+
+/* Callbacks registered BY the client FOR messages sent BY the server */
+struct cl_usermsg_callback
+{
+	unsigned int msgid;
+	List<NetworkSystem::pfnRecvServerMsgCallback> callbacks;
+};
+Array<cl_usermsg_callback> g_client_msg_callbacks;
+
+/* Callbacks registered BY the server FOR message sent BY a client */
+struct sv_usermsg_callback_t
+{
+	unsigned int msgid;
+	struct internal_callback
+	{
+		bool any;
+		int client_id;
+		NetworkSystem::pfnRecvClientMsgCallback callback;
+	};
+	List<internal_callback> callbacks;
+};
+Array<sv_usermsg_callback_t> g_server_msg_callbacks;
 
 void SV_ParseNetsysMessage(edict_t* e, void* msg);
 void CL_ParseNetsysMessage(void* msg);
@@ -33,8 +58,6 @@ void NetworksystemInit()
 	AssertMsg(!bNetsysInitialized, "NetworkSystem has already been initialized!");
 	bNetsysInitialized = true;
 	g_pNetworkPool = g_pZoneAllocator->_Mem_AllocPool("NetworksystemPool", __FILE__, __LINE__);
-	g_pNetworkSystem->HookServerNetsystemMsg(SV_ParseNetsysMessage);
-	g_pNetworkSystem->HookClientNetsystemMsg(CL_ParseNetsysMessage);
 }
 
 void NetworksystemShutdown()
@@ -42,6 +65,20 @@ void NetworksystemShutdown()
 	AssertMsg(bNetsysInitialized, "NetworkSystem has not been initialized yet!");
 	g_pZoneAllocator->_Mem_FreePool(&g_pNetworkPool, __FILE__, __LINE__);
 }
+
+
+void NetworksystemInit_Client()
+{
+	g_pNetworkSystem->HookClientNetsystemMsg(CL_ParseNetsysMessage);
+	CClientUserMessageHook::Init();
+}
+
+void NetworksystemInit_Server()
+{
+	g_pNetworkSystem->HookServerNetsystemMsg(SV_ParseNetsysMessage);
+	CServerUserMessageHook::Init();
+}
+
 
 //=========================================================================================================================//
 // Memory allocation
@@ -63,31 +100,101 @@ void* NetworkSystem::Mem_Realloc(void *ptr, unsigned long long size)
 	Assert(ptr);
 	return g_pZoneAllocator->_Mem_Realloc(g_pNetworkPool, ptr, size, false, "", 0);
 }
+//=========================================================================================================================//
 
+//=========================================================================================================================//
+// Send/Recv from client/server
 void NetworkSystem::SendToServer(unsigned int msgname, const CNetworkMessage &msg)
 {
-
+	g_pNetworkSystem->BeginClientNetsystemCmd();
+		g_pNetworkSystem->WriteShort(HDR_USRMSG); // Write out the message type
+		g_pNetworkSystem->WriteInt(msgname); // Write out the message id
+		g_pNetworkSystem->WriteInt(msg.Size()); // Write out the message length
+		g_pNetworkSystem->WriteBytes(msg.Data(), msg.Size()); // Write out the message data
+	g_pNetworkSystem->EndMessage();
 }
 
 void NetworkSystem::SendToClient(unsigned int msgname, edict_t *client, const CNetworkMessage &msg)
 {
-
+	g_pNetworkSystem->BeginServerNetsystemCmd(client);
+		g_pNetworkSystem->WriteShort(HDR_USRMSG); // Write out the message type
+		g_pNetworkSystem->WriteInt(msgname); // Write out the message id
+		g_pNetworkSystem->WriteInt(msg.Size()); // Write out the message length
+		g_pNetworkSystem->WriteBytes(msg.Data(), msg.Size()); // Write out the message data
+	g_pNetworkSystem->EndMessage();
 }
 
-void NetworkSystem::RecvFromServer(unsigned int msgname, pfnRecvServerMsgCallback callback)
+
+void NetworkSystem::HookMsgFromServer(unsigned int msgname, pfnRecvServerMsgCallback callback)
 {
+	for(auto& x : g_client_msg_callbacks)
+	{
+		if(x.msgid == msgname)
+		{
+			x.callbacks.push_back(callback);
+			return;
+		}
+	}
 
+	/* Not found. add new callback entry */
+	cl_usermsg_callback _callback;
+	_callback.msgid = msgname;
+	_callback.callbacks.push_back(callback);
+	g_client_msg_callbacks.push_back(_callback);
 }
 
-void NetworkSystem::RecvFromClient(unsigned int msgname, edict_t *client, pfnRecvClientMsgCallback callback)
+void NetworkSystem::HookMsgFromClient(unsigned int msgname, int client, pfnRecvClientMsgCallback callback)
 {
+	for(auto& x : g_server_msg_callbacks)
+	{
+		if(x.msgid == msgname)
+		{
+			x.callbacks.push_back({
+				false,          /* Ignore client id? */
+				client,         /* Client ID */
+				callback,               /* Callback */
+			});
+			return;
+		}
+	}
 
+	/* Not found. Add new entry */
+	sv_usermsg_callback_t _callback_table;
+	_callback_table.msgid = msgname;
+	_callback_table.callbacks.push_back({
+		false,          /* Ignore client id? */
+		client,   /* Client ID */
+		callback,               /* Callback */
+	});
+	g_server_msg_callbacks.push_back(_callback_table);
 }
 
-void NetworkSystem::RecvFromClients(unsigned int msgname, pfnRecvClientMsgCallback callback)
+void NetworkSystem::HookMsgFromClients(unsigned int msgname, pfnRecvClientMsgCallback callback)
 {
+	for(auto& x : g_server_msg_callbacks)
+	{
+		if(x.msgid == msgname)
+		{
+			x.callbacks.push_back({
+				true,
+				0,
+				callback,
+			});
+			return;
+		}
+	}
 
+	/* Not found. Add new entry */
+	sv_usermsg_callback_t _callback_table;
+	_callback_table.msgid = msgname;
+	_callback_table.callbacks.push_back({
+		true,
+		0,
+		callback,
+	});
+	g_server_msg_callbacks.push_back(_callback_table);
 }
+
 
 /**
  * Parse a netsys message received from the server
@@ -95,19 +202,83 @@ void NetworkSystem::RecvFromClients(unsigned int msgname, pfnRecvClientMsgCallba
 void CL_ParseNetsysMessage(void* msg)
 {
 	msg_hdr_t hdr;
-	hdr.type = g_pNetworkSystem->ReadShort(msg);
+	hdr.type = g_pNetworkSystem->ReadInt(msg);
+
+	CNetworkMessage msgbuf;
+	switch(hdr.type)
+	{
+		case HDR_USRMSG:
+		{
+			usrmsg_hdr_t usermsghdr;
+			usermsghdr.id = g_pNetworkSystem->ReadInt(msg);
+			usermsghdr.length = g_pNetworkSystem->ReadInt(msg);
+			/* Initialize a new message buffer */
+			msgbuf = CNetworkMessage(usermsghdr.length);
+			msgbuf.InitStorage();
+			g_pNetworkSystem->ReadBytes(msg, msgbuf.Data(), usermsghdr.length);
+			/* Search for a usermessage entry and execute it */
+			for (const auto &callback : g_client_msg_callbacks)
+			{
+				if (callback.msgid != usermsghdr.id) continue;
+				for (const auto &entry : callback.callbacks)
+				{
+					entry(msgbuf);
+				}
+			}
+			break;
+		}
+		case HDR_VARUPD:
+			Error("Varupdate message type is not implemented yet.\n");
+		default:
+			Error("Unknown message type %u received from server\n", hdr.type);
+			break;
+	}
 
 	if(net_debug_messages.GetBool())
-		Msg("Received message: type=%u\n", (unsigned)hdr.type);
+		Msg("CLIENT: Received message: type=%u\n", (unsigned)hdr.type);
 
 }
 
 /* Parse a netsys message received from a client connected to the server */
 void SV_ParseNetsysMessage(edict_t* e, void* msg)
 {
+	msg_hdr_t hdr;
+	hdr.type = g_pNetworkSystem->ReadInt(msg);
 
+	CNetworkMessage msgbuf;
+	switch(hdr.type)
+	{
+	case HDR_USRMSG:
+	{
+		usrmsg_hdr_t usermsghdr;
+		usermsghdr.id = g_pNetworkSystem->ReadInt(msg);
+		usermsghdr.length = g_pNetworkSystem->ReadInt(msg);
+		/* Initialize a new message buffer */
+		msgbuf = CNetworkMessage(usermsghdr.length);
+		msgbuf.InitStorage();
+		g_pNetworkSystem->ReadBytes(msg, msgbuf.Data(), usermsghdr.length);
+		/* Search for a usermessage entry and execute it */
+		for (const auto &callback : g_server_msg_callbacks)
+		{
+			if (callback.msgid != usermsghdr.id) continue;
+			for (const auto &entry : callback.callbacks)
+			{
+				if (entry.any || (entry.client_id == e->serialnumber))
+					entry.callback(e, msgbuf);
+			}
+		}
+		break;
+	}
+	case HDR_VARUPD:
+		Error("Varupdate message type is not implemented yet.\n");
+	default:
+		Error("Unknown message type %u received from client %u\n", hdr.type, e->serialnumber);
+		break;
+	}
+
+	if(net_debug_messages.GetBool())
+		Msg("SERVER: Received message: type=%u client=%u\n", (unsigned)hdr.type, e->serialnumber);
 }
-
 //=========================================================================================================================//
 
 //=========================================================================================================================//
@@ -185,6 +356,7 @@ long long NetworkSystem::ntohll(long long in)
 	return in;
 #endif
 }
+
 //=========================================================================================================================//
 
 
@@ -197,6 +369,18 @@ CNetworkMessage::CNetworkMessage(unsigned long size) :
 	m_bufpos(0),
 	m_overflowed(false)
 {
+}
+
+CNetworkMessage::CNetworkMessage(void *data, size_t size) :
+	m_init(true),
+	m_data(nullptr),
+	m_size(size),
+	m_bufpos(0),
+	m_overflowed(false)
+{
+	Assert(size > 0);
+	m_data = Mem_Alloc(size);
+	memcpy(m_data, data, size);
 }
 
 CNetworkMessage::CNetworkMessage(const CNetworkMessage &msg)
@@ -238,6 +422,12 @@ void CNetworkMessage::InitStorage()
 	if(m_init) return;
 	m_init = true;
 	m_data = Mem_Alloc(m_size);
+}
+
+void CNetworkMessage::Reset() const
+{
+	m_bufpos = 0;
+	m_overflowed = false;
 }
 
 #define WRITE_TO_BUFFER(x) if(m_bufpos + sizeof(x) >= m_size) { m_overflowed = true; return; }; auto y = ToLittleEndian(x); memcpy((void*)((uintptr_t)m_data + m_bufpos), &y, sizeof(y));\
@@ -294,7 +484,7 @@ void CNetworkMessage::WriteBytes(void *pBytes, unsigned long num)
 	m_bufpos += num;
 }
 
-int CNetworkMessage::ReadInt()
+int CNetworkMessage::ReadInt() const
 {
 	if(m_bufpos + 4 >= m_size)
 	{
@@ -307,7 +497,7 @@ int CNetworkMessage::ReadInt()
 	return NetworkSystem::htoni(l);
 }
 
-unsigned int CNetworkMessage::ReadUInt()
+unsigned int CNetworkMessage::ReadUInt() const
 {
 	if(m_bufpos + 4 >= m_size)
 	{
@@ -320,7 +510,7 @@ unsigned int CNetworkMessage::ReadUInt()
 	return NetworkSystem::htoni(l);
 }
 
-short CNetworkMessage::ReadShort()
+short CNetworkMessage::ReadShort() const
 {
 	if(m_bufpos + 4 >= m_size)
 	{
@@ -333,7 +523,7 @@ short CNetworkMessage::ReadShort()
 	return NetworkSystem::htons(l);
 }
 
-unsigned short CNetworkMessage::ReadUShort()
+unsigned short CNetworkMessage::ReadUShort() const
 {
 	if(m_bufpos + 4 >= m_size)
 	{
@@ -346,7 +536,7 @@ unsigned short CNetworkMessage::ReadUShort()
 	return NetworkSystem::htons(l);
 }
 
-unsigned char CNetworkMessage::ReadByte()
+unsigned char CNetworkMessage::ReadByte() const
 {
 	if(m_bufpos + 4 >= m_size)
 	{
@@ -357,7 +547,7 @@ unsigned char CNetworkMessage::ReadByte()
 	return ((char*)m_data)[m_bufpos-1];
 }
 
-char CNetworkMessage::ReadChar()
+char CNetworkMessage::ReadChar() const
 {
 	if(m_bufpos + 4 >= m_size)
 	{
@@ -368,7 +558,7 @@ char CNetworkMessage::ReadChar()
 	return ((char*)m_data)[m_bufpos-1];
 }
 
-long long CNetworkMessage::ReadInt64()
+long long CNetworkMessage::ReadInt64() const
 {
 	if(m_bufpos + 4 >= m_size)
 	{
@@ -381,7 +571,7 @@ long long CNetworkMessage::ReadInt64()
 	return NetworkSystem::htonll(l);
 }
 
-unsigned long long CNetworkMessage::ReadUInt64()
+unsigned long long CNetworkMessage::ReadUInt64() const
 {
 	if(m_bufpos + 4 >= m_size)
 	{
@@ -394,7 +584,7 @@ unsigned long long CNetworkMessage::ReadUInt64()
 	return NetworkSystem::htonll(l);
 }
 
-void CNetworkMessage::ReadBytes(void *outbuf, unsigned long num)
+void CNetworkMessage::ReadBytes(void *outbuf, unsigned long num) const
 {
 	if(m_bufpos + num >= m_size)
 	{
@@ -452,5 +642,60 @@ CNetworkMessage &CNetworkMessage::operator=(CNetworkMessage &&other) noexcept
 	other.m_data = nullptr;
 	other.m_size = 0;
 	return *this;
+}
+//=========================================================================================================================//
+List<CServerUserMessageHook::desc_t>* g_server_message_hooks_registry = nullptr;
+bool CServerUserMessageHook::init = false;
+CServerUserMessageHook::CServerUserMessageHook(unsigned int _m, int client_index, void (*callback)(edict_t *, const CNetworkMessage &))
+{
+	if(!g_server_message_hooks_registry)
+		g_server_message_hooks_registry = new List<CServerUserMessageHook::desc_t>();
+	g_server_message_hooks_registry->push_back({_m, client_index, callback});
+}
+
+CServerUserMessageHook::~CServerUserMessageHook()
+{
+
+}
+
+void CServerUserMessageHook::Init()
+{
+	Assert(!CServerUserMessageHook::init);
+	init = true;
+	if(!g_server_message_hooks_registry) return;
+	for(auto c : *g_server_message_hooks_registry)
+	{
+		if(c.clid == -1)
+			NetworkSystem::HookMsgFromClients(c.msgid, c.callback);
+		else
+			NetworkSystem::HookMsgFromClient(c.msgid, c.clid, c.callback);
+	}
+}
+//=========================================================================================================================//
+
+//=========================================================================================================================//
+List<CClientUserMessageHook::desc_t>* g_client_message_hooks_registry = nullptr;
+bool CClientUserMessageHook::init = false;
+CClientUserMessageHook::CClientUserMessageHook(unsigned int _m, void (*callback)(const CNetworkMessage &))
+{
+	if(!g_client_message_hooks_registry)
+		g_client_message_hooks_registry = new List<CClientUserMessageHook::desc_t>();
+	g_client_message_hooks_registry->push_back({_m, callback});
+}
+
+CClientUserMessageHook::~CClientUserMessageHook()
+{
+
+}
+
+void CClientUserMessageHook::Init()
+{
+	Assert(!CClientUserMessageHook::init);
+	init = true;
+	if(!g_client_message_hooks_registry) return;
+	for(auto c : *g_client_message_hooks_registry)
+	{
+		NetworkSystem::HookMsgFromServer(c.msgid, c.callback);
+	}
 }
 //=========================================================================================================================//

@@ -17,7 +17,6 @@ namespace NetworkSystem
 	enum {
 		HDR_USRMSG, /* Usermessage */
 		HDR_VARUPD, /* Var update */
-		HDR_ACTION, /* Networked actions */
 	};
 
 	struct msg_hdr_t
@@ -42,14 +41,6 @@ namespace NetworkSystem
 
 	};
 
-	struct action_hdr_t
-	{
-		char action[32]; /* The action name */
-	};
-
 #pragma pack()
-
-	Buffer& BuildVarUpdateMessage();
-	Buffer& BuildActionMessage();
 }
 
