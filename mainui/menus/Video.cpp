@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
 
 See the GNU General Public License for more details.
 
@@ -18,40 +18,43 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#include "Bitmap.h"
 #include "Framework.h"
+#include "Bitmap.h"
 #include "PicButton.h"
 
-#define ART_BANNER "gfx/shell/head_video"
+#define ART_BANNER		"gfx/shell/head_video"
 
 /*
 =================
 UI_Video_Precache
 =================
 */
-void UI_Video_Precache(void) { EngFuncs::PIC_Load(ART_BANNER); }
+void UI_Video_Precache( void )
+{
+	EngFuncs::PIC_Load( ART_BANNER );
+}
+
 
 /*
 =================
 UI_Video_Menu
 =================
 */
-void UI_Video_Menu(void)
+void UI_Video_Menu( void )
 {
 	static CMenuFramework video("CMenuVideo");
 
-	if (!video.WasInit())
+	if( !video.WasInit() )
 	{
 		video.banner.SetPicture(ART_BANNER);
 
-		video.AddItem(video.background);
-		video.AddItem(video.banner);
-		video.AddButton(L("Video options"), L("Set video options such as screen size, gamma and image quality."), PC_VID_OPT,
-				UI_VidOptions_Menu, QMF_NOTIFY);
-		video.AddButton(L("Video modes"), L("Set video modes and configure 3D accelerators."), PC_VID_MODES, UI_VidModes_Menu, QMF_NOTIFY);
-		video.AddButton(L("Done"), L("Go back to the previous menu"), PC_DONE, VoidCb(&CMenuFramework::Hide), QMF_NOTIFY);
+		video.AddItem( video.background );
+		video.AddItem( video.banner );
+		video.AddButton( L( "Video options" ), L( "Set video options such as screen size, gamma and image quality." ), PC_VID_OPT, UI_VidOptions_Menu, QMF_NOTIFY );
+		video.AddButton( L( "Video modes" ), L( "Set video modes and configure 3D accelerators." ), PC_VID_MODES, UI_VidModes_Menu, QMF_NOTIFY );
+		video.AddButton( L( "Done" ), L( "Go back to the previous menu" ), PC_DONE, VoidCb( &CMenuFramework::Hide ), QMF_NOTIFY );
 	}
 
 	video.Show();
 }
-ADD_MENU(menu_video, UI_Video_Precache, UI_Video_Menu);
+ADD_MENU( menu_video, UI_Video_Precache, UI_Video_Menu );

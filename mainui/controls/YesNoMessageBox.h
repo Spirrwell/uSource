@@ -16,31 +16,31 @@ GNU General Public License for more details.
 #ifndef MENU_GENERICMSGBOX_H
 #define MENU_GENERICMSGBOX_H
 
-#include "Action.h"
-#include "BaseWindow.h"
-#include "ItemsHolder.h"
 #include "PicButton.h"
+#include "Action.h"
+#include "ItemsHolder.h"
+#include "BaseWindow.h"
 
 class CMenuYesNoMessageBox : public CMenuBaseWindow
 {
 public:
 	typedef CMenuBaseWindow BaseClass;
-	CMenuYesNoMessageBox(bool alert = false);
+	CMenuYesNoMessageBox( bool alert = false );
 
 	void _Init() override;
 	void _VidInit() override;
 	void Draw() override;
-	bool KeyDown(int key) override;
-	void SetMessage(const char* msg);
-	void SetPositiveButton(const char* msg, EDefaultBtns buttonPic, int extrawidth = 0);
-	void SetNegativeButton(const char* msg, EDefaultBtns buttonPic, int extrawidth = 0);
+	bool KeyDown( int key ) override;
+	void SetMessage( const char *msg );
+	void SetPositiveButton( const char *msg, EDefaultBtns buttonPic, int extrawidth = 0 );
+	void SetNegativeButton( const char *msg, EDefaultBtns buttonPic, int extrawidth = 0 );
 	enum EHighlight
 	{
 		NO_HIGHLIGHT = 0,
 		HIGHLIGHT_YES,
 		HIGHLIGHT_NO
 	};
-	void HighlightChoice(EHighlight ch);
+	void HighlightChoice( EHighlight ch );
 
 	// Pass pointer to messagebox to extra of calling object
 	CEventCallback MakeOpenEvent();
@@ -48,13 +48,13 @@ public:
 	CEventCallback onPositive;
 	CEventCallback onNegative;
 
-	bool	       bAutoHide;
-	CMenuAction    dlgMessage1;
-	CMenuPicButton yes;
-	CMenuPicButton no;
+	bool bAutoHide;
+	CMenuAction		dlgMessage1;
+	CMenuPicButton	yes;
+	CMenuPicButton	no;
 
 private:
-	static void OpenCb(CMenuBaseItem*, void* pExtra);
+	static void OpenCb( CMenuBaseItem *, void *pExtra );
 
 	bool m_bSetYes, m_bSetNo;
 	bool m_bIsAlert;

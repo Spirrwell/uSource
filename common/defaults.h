@@ -27,83 +27,83 @@ SETUP BACKENDS DEFINITIONS
 */
 #ifndef XASH_DEDICATED
 
-#ifdef XASH_SDL
+	#ifdef XASH_SDL
 
-// by default, use SDL subsystems
-#ifndef XASH_VIDEO
-#define XASH_VIDEO VIDEO_SDL
-#endif // XASH_VIDEO
+		// by default, use SDL subsystems
+		#ifndef XASH_VIDEO
+			#define XASH_VIDEO VIDEO_SDL
+		#endif // XASH_VIDEO
 
-#ifndef XASH_TIMER
-#define XASH_TIMER TIMER_SDL
-#endif
+		#ifndef XASH_TIMER
+			#define XASH_TIMER TIMER_SDL
+		#endif
 
-#ifndef XASH_INPUT
-#define XASH_INPUT INPUT_SDL
-#endif
+		#ifndef XASH_INPUT
+			#define XASH_INPUT INPUT_SDL
+		#endif
 
-#ifndef XASH_SOUND
-#define XASH_SOUND SOUND_SDL
-#endif
+		#ifndef XASH_SOUND
+			#define XASH_SOUND SOUND_SDL
+		#endif
 
-#endif // XASH_SDL
+	#endif //XASH_SDL
 
-#if defined __ANDROID__ && !defined XASH_SDL
+	#if defined __ANDROID__ && !defined XASH_SDL
 
-#ifndef XASH_VIDEO
-#define XASH_VIDEO VIDEO_ANDROID
-#endif
+		#ifndef XASH_VIDEO
+			#define XASH_VIDEO VIDEO_ANDROID
+		#endif
 
-#ifndef XASH_TIMER
-#define XASH_TIMER TIMER_LINUX
-#endif
+		#ifndef XASH_TIMER
+			#define XASH_TIMER TIMER_LINUX
+		#endif
 
-#ifndef XASH_INPUT
-#define XASH_INPUT INPUT_ANDROID
-#endif
+		#ifndef XASH_INPUT
+			#define XASH_INPUT INPUT_ANDROID
+		#endif
 
-#ifndef XASH_SOUND
-#define XASH_SOUND SOUND_OPENSLES
-#endif
-#endif // android case
+		#ifndef XASH_SOUND
+			#define XASH_SOUND SOUND_OPENSLES
+		#endif
+	#endif // android case
 
 #endif // XASH_DEDICATED
 
 // select crashhandler based on defines
 #ifndef XASH_CRASHHANDLER
-#ifdef _WIN32
-#ifdef DBGHELP
-#define XASH_CRASHHANDLER CRASHHANDLER_DBGHELP
-#endif
-#elif defined CRASHHANDLER
-#define XASH_CRASHHANDLER CRASHHANDLER_UCONTEXT
-#else
-#define XASH_CRASHHANDLER CRASHHANDLER_NULL
-#endif
+	#ifdef _WIN32
+		#ifdef DBGHELP
+			#define XASH_CRASHHANDLER CRASHHANDLER_DBGHELP
+		#endif
+	#elif defined CRASHHANDLER
+		#define XASH_CRASHHANDLER CRASHHANDLER_UCONTEXT
+	#else
+		#define XASH_CRASHHANDLER CRASHHANDLER_NULL
+	#endif
 #endif
 
 // no timer - no xash
 #ifndef XASH_TIMER
-#ifdef _WIN32
-#define XASH_TIMER TIMER_WIN32
-#else
-#define XASH_TIMER TIMER_LINUX
-#endif
+	#ifdef _WIN32
+		#define XASH_TIMER TIMER_WIN32
+	#else
+		#define XASH_TIMER TIMER_LINUX
+	#endif
 #endif
 
 //
 // fallback to NULL
 //
 #ifndef XASH_VIDEO
-#define XASH_VIDEO VIDEO_NULL
+	#define XASH_VIDEO VIDEO_NULL
 #endif
 
 #ifndef XASH_SOUND
-#define XASH_SOUND SOUND_NULL
+	#define XASH_SOUND SOUND_NULL
 #endif
 
 #ifndef XASH_INPUT
-#define XASH_INPUT INPUT_NULL
+	#define XASH_INPUT INPUT_NULL
 #endif
 
 /*
@@ -115,11 +115,11 @@ Default build-depended cvar and constant values
 */
 
 #if defined __ANDROID__ || TARGET_OS_IPHONE
-#define DEFAULT_TOUCH_ENABLE "1"
-#define DEFAULT_M_IGNORE     "1"
+	#define DEFAULT_TOUCH_ENABLE "1"
+	#define DEFAULT_M_IGNORE "1"
 #else
-#define DEFAULT_TOUCH_ENABLE "0"
-#define DEFAULT_M_IGNORE     "0"
+	#define DEFAULT_TOUCH_ENABLE "0"
+	#define DEFAULT_M_IGNORE "0"
 #endif
 
 #if defined __ANDROID__ || TARGET_OS_IPHONE || defined __EMSCRIPTEN__
@@ -131,36 +131,36 @@ Default build-depended cvar and constant values
 // Set ForceSimulating to 1 by default for dedicated, because AMXModX timers require this
 // TODO: enable simulating for any server?
 #ifdef XASH_DEDICATED
-#define DEFAULT_SV_FORCESIMULATING "1"
+	#define DEFAULT_SV_FORCESIMULATING "1"
 #else
-#define DEFAULT_SV_FORCESIMULATING "0"
+	#define DEFAULT_SV_FORCESIMULATING "0"
 #endif
 
 // allow override for developer/debug builds
 #ifndef DEFAULT_DEV
-#define DEFAULT_DEV 0
+	#define DEFAULT_DEV 0
 #endif
 
 #ifndef DEFAULT_FULLSCREEN
-#define DEFAULT_FULLSCREEN 1
+	#define DEFAULT_FULLSCREEN 1
 #endif
 
 #ifndef DEFAULT_ACCELERATED_RENDERER
-#ifdef __ANDROID__
-#define DEFAULT_ACCELERATED_RENDERER "gles1"
-#else
-#define DEFAULT_ACCELERATED_RENDERER "gl"
-#endif
+	#ifdef __ANDROID__
+		#define DEFAULT_ACCELERATED_RENDERER "gles1"
+	#else
+		#define DEFAULT_ACCELERATED_RENDERER "gl"
+	#endif
 #endif // DEFAULT_ACCELERATED_RENDERER
 
 #ifndef DEFAULT_SOFTWARE_RENDERER
-#define DEFAULT_SOFTWARE_RENDERER "soft" // mittorn's ref_soft
-#endif					 // DEFAULT_SOFTWARE_RENDERER
+	#define DEFAULT_SOFTWARE_RENDERER "soft" // mittorn's ref_soft
+#endif // DEFAULT_SOFTWARE_RENDERER
 
 #if TARGET_OS_IPHONE
-#define DEFAULT_CON_MAXFRAC "0.5"
+	#define DEFAULT_CON_MAXFRAC "0.5"
 #else
-#define DEFAULT_CON_MAXFRAC "1"
+	#define DEFAULT_CON_MAXFRAC "1"
 #endif
 
 #endif // DEFAULTS_H

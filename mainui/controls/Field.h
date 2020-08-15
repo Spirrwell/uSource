@@ -19,7 +19,7 @@ GNU General Public License for more details.
 
 #include "Editable.h"
 
-#define UI_MAX_FIELD_LINE 256
+#define UI_MAX_FIELD_LINE		256
 
 class CMenuField : public CMenuEditable
 {
@@ -27,45 +27,51 @@ public:
 	typedef CMenuEditable BaseClass;
 
 	CMenuField();
-	void Init(void) override;
-	void VidInit(void) override;
-	bool KeyDown(int key) override;
-	void Draw(void) override;
-	void Char(int key) override;
+	void Init( void ) override;
+	void VidInit( void ) override;
+	bool KeyDown( int key ) override;
+	void Draw( void ) override;
+	void Char( int key ) override;
 	void UpdateEditable() override;
 
-	bool KeyValueData(const char* key, const char* data) override;
-	void LinkCvar(const char* name) override { CMenuEditable::LinkCvar(name, CVAR_STRING); }
+	bool KeyValueData(const char *key, const char *data) override;
+	void LinkCvar(const char *name) override
+	{
+		CMenuEditable::LinkCvar( name, CVAR_STRING );
+	}
 
 	void Paste();
 	void Clear();
 
-	void SetBuffer(const char* buffer)
+	void SetBuffer( const char *buffer )
 	{
-		Q_strncpy(szBuffer, buffer, UI_MAX_FIELD_LINE);
-		iCursor = strlen(szBuffer);
-		iScroll = g_FontMgr->CutText(font, szBuffer, m_scChSize, iRealWidth, true);
+		Q_strncpy( szBuffer, buffer, UI_MAX_FIELD_LINE );
+		iCursor = strlen( szBuffer );
+		iScroll = g_FontMgr->CutText( font, szBuffer, m_scChSize, iRealWidth, true );
 	}
 
-	const char* GetBuffer() { return szBuffer; }
+	const char *GetBuffer()
+	{
+		return szBuffer;
+	}
 
-	bool	    bAllowColorstrings;
-	bool	    bHideInput;
-	bool	    bNumbersOnly;
-	const char* szBackground;
-	int	    iMaxLength; // can't be more than UI_MAX_FIELD_LINE
+	bool bAllowColorstrings;
+	bool bHideInput;
+	bool bNumbersOnly;
+	const char	*szBackground;
+	int		iMaxLength;		// can't be more than UI_MAX_FIELD_LINE
 
 protected:
-	void _Event(int ev) override;
+	void _Event( int ev ) override;
 
 private:
-	char szBuffer[UI_MAX_FIELD_LINE];
-	int  iCursor;
-	int  iScroll;
+	char	szBuffer[UI_MAX_FIELD_LINE];
+	int		iCursor;
+	int		iScroll;
 
-	int iRealWidth;
+	int		iRealWidth;
 
-	bool m_bOverrideOverstrike;
+	bool	m_bOverrideOverstrike;
 };
 
 #endif // MENU_FIELD_H

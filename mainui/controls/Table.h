@@ -49,51 +49,61 @@ public:
 
 	CMenuTable();
 
-	bool KeyUp(int key) override;
-	bool KeyDown(int key) override;
+
+	bool KeyUp( int key ) override;
+	bool KeyDown( int key ) override;
 	void Draw() override;
 	void VidInit() override;
-	bool MoveView(int delta);
-	bool MoveCursor(int delta);
-	int  GetCurrentIndex() { return iCurItem; }
-	void SetCurrentIndex(int idx);
-	int  GetSortingColumn(void) { return m_iSortingColumn; }
-	bool IsAscend(void) { return m_bAscend; }
-	void SetSortingColumn(int column, bool ascend)
+	bool MoveView( int delta );
+	bool MoveCursor( int delta );
+	int GetCurrentIndex() { return iCurItem; }
+	void SetCurrentIndex( int idx );
+	int GetSortingColumn( void ) { return m_iSortingColumn; }
+	bool IsAscend( void ) { return m_bAscend; }
+	void SetSortingColumn( int column, bool ascend )
 	{
 		m_iSortingColumn = column;
-		m_bAscend	 = ascend;
-		if (!m_pModel->Sort(column, ascend))
+		m_bAscend = ascend;
+		if( !m_pModel->Sort( column, ascend ) )
 			m_iSortingColumn = -1; // sorting is not supported
 	}
-	void SetSortingColumn(int column) { SetSortingColumn(column, true); }
-	void SwapOrder(void) { SetSortingColumn(m_iSortingColumn, !m_bAscend); }
-
-	void DisableSorting(void) { SetSortingColumn(-1); }
-
-	void SetUpArrowPicture(const char* upArrow, const char* upArrowFocus, const char* upArrowPressed)
+	void SetSortingColumn( int column )
 	{
-		szUpArrow	 = upArrow;
-		szUpArrowFocus	 = upArrowFocus;
+		SetSortingColumn( column, true );
+	}
+	void SwapOrder( void )
+	{
+		SetSortingColumn( m_iSortingColumn, !m_bAscend );
+	}
+
+	void DisableSorting( void )
+	{
+		SetSortingColumn( -1 );
+	}
+
+	void SetUpArrowPicture( const char *upArrow, const char *upArrowFocus, const char *upArrowPressed )
+	{
+		szUpArrow = upArrow;
+		szUpArrowFocus = upArrowFocus;
 		szUpArrowPressed = upArrowPressed;
 	}
 
-	void SetDownArrowPicture(const char* downArrow, const char* downArrowFocus, const char* downArrowPressed)
+	void SetDownArrowPicture( const char *downArrow, const char *downArrowFocus, const char *downArrowPressed )
 	{
-		szDownArrow	   = downArrow;
-		szDownArrowFocus   = downArrowFocus;
+		szDownArrow = downArrow;
+		szDownArrowFocus = downArrowFocus;
 		szDownArrowPressed = downArrowPressed;
 	}
 
-	void SetModel(CMenuBaseModel* model)
+	void SetModel( CMenuBaseModel *model )
 	{
 		m_pModel = model;
 		m_pModel->Update();
 	}
 
-	void SetHeaderText(int num, const char* text)
+	void SetHeaderText( int num, const char *text )
 	{
-		if (num < MAX_TABLE_COLUMNS && num >= 0)
+		if( num < MAX_TABLE_COLUMNS && num >= 0 )
 			szHeaderTexts[num] = text;
 	}
 
@@ -101,20 +111,20 @@ public:
 	// Total of all widths should be 1.0f, but not necessary.
 	// to keep everything simple, if first few columns exceeds 1.0, the other will not be shown
 	// if you have set fixed == true, then column size is set in logical units
-	void SetColumnWidth(int num, float width, bool fixed = false)
+	void SetColumnWidth( int num, float width, bool fixed = false )
 	{
-		if (num < MAX_TABLE_COLUMNS && num >= 0)
+		if( num < MAX_TABLE_COLUMNS && num >= 0 )
 		{
-			columns[num].flWidth	  = width;
+			columns[num].flWidth = width;
 			columns[num].fStaticWidth = fixed;
 		}
 	}
 
 	// shortcut for SetHeaderText && SetColumnWidth
-	inline void SetupColumn(int num, const char* text, float width, bool fixed = false)
+	inline void SetupColumn( int num, const char *text, float width, bool fixed = false )
 	{
-		SetHeaderText(num, text);
-		SetColumnWidth(num, width, fixed);
+		SetHeaderText( num, text );
+		SetColumnWidth( num, width, fixed );
 	}
 
 	bool bFramedHintText;
@@ -127,40 +137,40 @@ public:
 	CColor iHeaderColor;
 
 private:
-	void DrawLine(Point p, const char** psz, size_t size, uint textColor, bool forceCol, uint fillColor = 0);
+	void DrawLine(Point p, const char **psz, size_t size, uint textColor, bool forceCol, uint fillColor = 0);
 	void DrawLine(Point p, int line, uint textColor, bool forceCol, uint fillColor = 0);
 
-	const char* szHeaderTexts[MAX_TABLE_COLUMNS];
+	const char	*szHeaderTexts[MAX_TABLE_COLUMNS];
 	struct
 	{
 		float flWidth;
-		bool  fStaticWidth;
+		bool fStaticWidth;
 	} columns[MAX_TABLE_COLUMNS];
 
 	float flFixedSumm, flDynamicSumm;
 
-	const char* szBackground;
-	const char* szUpArrow;
-	const char* szUpArrowFocus;
-	const char* szUpArrowPressed;
-	const char* szDownArrow;
-	const char* szDownArrowFocus;
-	const char* szDownArrowPressed;
+	const char	*szBackground;
+	const char	*szUpArrow;
+	const char	*szUpArrowFocus;
+	const char  *szUpArrowPressed;
+	const char	*szDownArrow;
+	const char	*szDownArrowFocus;
+	const char  *szDownArrowPressed;
 
-	int iTopItem;
-	int iNumRows;
-	// scrollbar stuff // ADAMIX
-	Point sbarPos;
-	Size  sbarSize;
-	bool  iScrollBarSliding;
-	// highlight // mittorn
-	int iHighlight;
-	int iCurItem;
+	int		iTopItem;
+	int     iNumRows;
+// scrollbar stuff // ADAMIX
+	Point	sbarPos;
+	Size	sbarSize;
+	bool	iScrollBarSliding;
+// highlight // mittorn
+	int		iHighlight;
+	int		iCurItem;
 
-	int m_iLastItemMouseChange;
+	int		m_iLastItemMouseChange;
 
 	// sorting
-	int  m_iSortingColumn;
+	int m_iSortingColumn;
 	bool m_bAscend;
 
 	// header
@@ -169,13 +179,14 @@ private:
 	// arrows
 	Point upArrow;
 	Point downArrow;
-	Size  arrow;
+	Size arrow;
 
 	// actual table
 	Point boxPos;
-	Size  boxSize;
+	Size boxSize;
 
-	CMenuBaseModel* m_pModel;
+	CMenuBaseModel *m_pModel;
 };
+
 
 #endif // MENU_TABLE_H

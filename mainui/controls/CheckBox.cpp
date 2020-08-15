@@ -14,24 +14,28 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#include "CheckBox.h"
-#include "BaseMenu.h"
-#include "Utils.h"
 #include "extdll_menu.h"
+#include "BaseMenu.h"
+#include "CheckBox.h"
+#include "Utils.h"
 
 CMenuCheckBox::CMenuCheckBox() : BaseClass()
 {
-	SetCharSize(QM_DEFAULTFONT);
-	SetSize(32, 32);
-	SetPicture(UI_CHECKBOX_EMPTY, UI_CHECKBOX_FOCUS, UI_CHECKBOX_PRESSED, UI_CHECKBOX_ENABLED, UI_CHECKBOX_GRAYED);
-	bChecked	= false;
+	SetCharSize( QM_DEFAULTFONT );
+	SetSize( 32, 32 );
+	SetPicture( UI_CHECKBOX_EMPTY,
+		UI_CHECKBOX_FOCUS,
+		UI_CHECKBOX_PRESSED,
+		UI_CHECKBOX_ENABLED,
+		UI_CHECKBOX_GRAYED );
+	bChecked = false;
 	eFocusAnimation = QM_HIGHLIGHTIFFOCUS;
 	iFlags |= QMF_DROPSHADOW;
 	bChangeOnPressed = false;
-	colorBase	 = uiColorWhite;
-	colorFocus	 = uiColorWhite;
-	iMask		 = 0;
-	bInvertMask	 = false;
+	colorBase = uiColorWhite;
+	colorFocus = uiColorWhite;
+	iMask = 0;
+	bInvertMask = false;
 }
 
 /*
@@ -39,158 +43,162 @@ CMenuCheckBox::CMenuCheckBox() : BaseClass()
 CMenuCheckBox::Init
 =================
 */
-void CMenuCheckBox::VidInit(void)
+void CMenuCheckBox::VidInit( void )
 {
-	colorText.SetDefault(uiColorHelp);
+	colorText.SetDefault( uiColorHelp );
 	BaseClass::VidInit();
-	m_scTextPos.x = m_scPos.x + (m_scSize.w * 1.5f);
+	m_scTextPos.x = m_scPos.x + (m_scSize.w * 1.5f );
 	m_scTextPos.y = m_scPos.y;
 
-	m_scTextSize.w = g_FontMgr->GetTextWideScaled(font, szName, m_scChSize);
+	m_scTextSize.w = g_FontMgr->GetTextWideScaled( font, szName, m_scChSize );
 	m_scTextSize.h = m_scChSize;
 }
 
-bool CMenuCheckBox::KeyUp(int key)
+bool CMenuCheckBox::KeyUp( int key )
 {
-	const char* sound = 0;
+	const char	*sound = 0;
 
-	switch (key)
+	switch( key )
 	{
 	case K_MOUSE1:
-		if (!(iFlags & QMF_HASMOUSEFOCUS))
+		if(!( iFlags & QMF_HASMOUSEFOCUS ))
 			break;
 		sound = uiSoundGlow;
 		break;
 	case K_ENTER:
 	case K_KP_ENTER:
 	case K_AUX1:
-		// if( !down ) return sound;
-		if (iFlags & QMF_MOUSEONLY)
+		//if( !down ) return sound;
+		if( iFlags & QMF_MOUSEONLY )
 			break;
 		sound = uiSoundGlow;
 		break;
 	}
 
-	if (sound)
+	if( sound )
 	{
-		_Event(QM_RELEASED);
-		if (!bChangeOnPressed)
+		_Event( QM_RELEASED );
+		if( !bChangeOnPressed )
 		{
-			bChecked = !bChecked; // apply on release
-			SetCvarValue(bChecked);
-			_Event(QM_CHANGED);
-			PlayLocalSound(sound); // emit sound only when changed
+			bChecked = !bChecked;	// apply on release
+			SetCvarValue( bChecked );
+			_Event( QM_CHANGED );
+			PlayLocalSound( sound ); // emit sound only when changed
 		}
 	}
 
 	return sound != NULL;
 }
 
-bool CMenuCheckBox::KeyDown(int key)
+bool CMenuCheckBox::KeyDown( int key )
 {
-	const char* sound = 0;
+	const char	*sound = 0;
 
-	switch (key)
+	switch( key )
 	{
 	case K_MOUSE1:
-		if (!(iFlags & QMF_HASMOUSEFOCUS))
+		if(!( iFlags & QMF_HASMOUSEFOCUS ))
 			break;
 		sound = uiSoundGlow;
 		break;
 	case K_ENTER:
 	case K_KP_ENTER:
 	case K_AUX1:
-		// if( !down ) return sound;
-		if (iFlags & QMF_MOUSEONLY)
+		//if( !down ) return sound;
+		if( iFlags & QMF_MOUSEONLY )
 			break;
 		sound = uiSoundGlow;
 		break;
 	}
 
-	if (sound)
+	if( sound )
 	{
-		_Event(QM_PRESSED);
-		if (bChangeOnPressed)
+		_Event( QM_PRESSED );
+		if( bChangeOnPressed )
 		{
-			bChecked = !bChecked; // apply on release
-			SetCvarValue(bChecked);
-			_Event(QM_CHANGED);
-			PlayLocalSound(sound); // emit sound only when changed
+			bChecked = !bChecked;	// apply on release
+			SetCvarValue( bChecked );
+			_Event( QM_CHANGED );
+			PlayLocalSound( sound ); // emit sound only when changed
 		}
 	}
 
 	return sound != NULL;
 }
+
 
 /*
 =================
 CMenuCheckBox::Draw
 =================
 */
-void CMenuCheckBox::Draw(void)
+void CMenuCheckBox::Draw( void )
 {
-	uint textflags = (iFlags & QMF_DROPSHADOW ? ETF_SHADOW : 0) | ETF_NOSIZELIMIT | ETF_FORCECOL;
+	uint textflags = ( iFlags & QMF_DROPSHADOW ? ETF_SHADOW : 0 ) | ETF_NOSIZELIMIT | ETF_FORCECOL;
 
-	UI_DrawString(font, m_scTextPos, m_scTextSize, szName, colorText, m_scChSize, eTextAlignment, textflags);
+	UI_DrawString( font, m_scTextPos, m_scTextSize, szName, colorText, m_scChSize, eTextAlignment, textflags );
 
-	if (szStatusText && iFlags & QMF_NOTIFY)
+	if( szStatusText && iFlags & QMF_NOTIFY )
 	{
 		Point coord;
 
-		if (szName[0])
+		if( szName[0] )
 			coord.x = 290 * uiStatic.scaleX;
 		else
 			coord.x = m_scSize.w + 16 * uiStatic.scaleX;
 		coord.x += m_scPos.x;
 		coord.y = m_scPos.y + m_scSize.h / 2 - EngFuncs::ConsoleCharacterHeight() / 2;
 
-		int r, g, b;
+		int	r, g, b;
 
-		UnpackRGB(r, g, b, uiColorHelp);
-		EngFuncs::DrawSetTextColor(r, g, b);
-		EngFuncs::DrawConsoleString(coord, szStatusText);
+		UnpackRGB( r, g, b, uiColorHelp );
+		EngFuncs::DrawSetTextColor( r, g, b );
+		EngFuncs::DrawConsoleString( coord, szStatusText );
 	}
 
-	if (iFlags & QMF_GRAYED)
+	if( iFlags & QMF_GRAYED )
 	{
-		UI_DrawPic(m_scPos, m_scSize, uiColorWhite, szGrayedPic);
+		UI_DrawPic( m_scPos, m_scSize, uiColorWhite, szGrayedPic );
 		return; // grayed
 	}
 
-	if (((iFlags & QMF_MOUSEONLY) && !(iFlags & QMF_HASMOUSEFOCUS)) || (this != m_pParent->ItemAtCursor()))
+	if((( iFlags & QMF_MOUSEONLY ) && !( iFlags & QMF_HASMOUSEFOCUS ))
+	   || ( this != m_pParent->ItemAtCursor() ) )
 	{
-		if (!bChecked)
-			UI_DrawPic(m_scPos, m_scSize, colorBase, szEmptyPic);
-		else
-			UI_DrawPic(m_scPos, m_scSize, colorBase, szCheckPic);
+		if( !bChecked )
+			UI_DrawPic( m_scPos, m_scSize, colorBase, szEmptyPic );
+		else UI_DrawPic( m_scPos, m_scSize, colorBase, szCheckPic );
 		return; // no focus
 	}
 
-	if (m_bPressed)
+	if( m_bPressed )
 	{
-		UI_DrawPic(m_scPos, m_scSize, colorBase, szPressPic);
+		UI_DrawPic( m_scPos, m_scSize, colorBase, szPressPic );
 	}
-	else if (eFocusAnimation == QM_HIGHLIGHTIFFOCUS)
+	else if( eFocusAnimation == QM_HIGHLIGHTIFFOCUS )
 	{
-		if (bChecked)
+		if( bChecked )
 		{
 			// use two textures for it. Second is just focus texture, slightly orange. Looks pretty.
-			UI_DrawPic(m_scPos, m_scSize, colorBase, szPressPic);
-			UI_DrawPic(m_scPos, m_scSize, uiInputTextColor, szFocusPic, QM_DRAWADDITIVE);
+			UI_DrawPic( m_scPos, m_scSize, colorBase, szPressPic );
+			UI_DrawPic( m_scPos, m_scSize, uiInputTextColor, szFocusPic, QM_DRAWADDITIVE );
 		}
 		else
 		{
-			UI_DrawPic(m_scPos, m_scSize, colorFocus, szFocusPic);
+			UI_DrawPic( m_scPos, m_scSize, colorFocus, szFocusPic );
 		}
 	}
-	else if (bChecked)
+	else if( bChecked )
 	{
-		UI_DrawPic(m_scPos, m_scSize, colorBase, szCheckPic);
+		UI_DrawPic( m_scPos, m_scSize, colorBase, szCheckPic );
 	}
 	else
 	{
-		UI_DrawPic(m_scPos, m_scSize, colorBase, szEmptyPic);
+		UI_DrawPic( m_scPos, m_scSize, colorBase, szEmptyPic );
 	}
 }
 
-void CMenuCheckBox::UpdateEditable() { bChecked = !!EngFuncs::GetCvarFloat(m_szCvarName); }
+void CMenuCheckBox::UpdateEditable()
+{
+	bChecked = !!EngFuncs::GetCvarFloat( m_szCvarName );
+}

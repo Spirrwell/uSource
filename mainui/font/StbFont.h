@@ -16,16 +16,19 @@ GNU General Public License for more details.
 
 #if defined(MAINUI_USE_CUSTOM_FONT_RENDER) && defined(MAINUI_USE_STB)
 #include "BaseFontBackend.h"
-#include "stb_truetype.h"
 #include "utlmemory.h"
 #include "utlrbtree.h"
+#include "stb_truetype.h"
 
 struct abc_t
 {
 	int ch;
 	int a, b, c;
 
-	bool operator<(const abc_t& a) const { return ch < a.ch; }
+	bool operator< (const abc_t &a) const
+	{
+		return ch < a.ch;
+	}
 };
 
 class CStbFont : public CBaseFont
@@ -34,22 +37,27 @@ public:
 	CStbFont();
 	~CStbFont();
 
-	bool Create(const char* name, int tall, int weight, int blur, float brighten, int outlineSize, int scanlineOffset, float scanlineScale,
-		    int flags) override;
-	void GetCharRGBA(int ch, Point pt, Size sz, unsigned char* rgba, Size& drawSize) override;
-	void GetCharABCWidths(int ch, int& a, int& b, int& c) override;
-	bool HasChar(int ch) const override;
+	bool Create(const char *name,
+		int tall, int weight,
+		int blur, float brighten,
+		int outlineSize,
+		int scanlineOffset, float scanlineScale,
+		int flags) override;
+	void GetCharRGBA(int ch, Point pt, Size sz, unsigned char *rgba, Size &drawSize) override;
+	void GetCharABCWidths( int ch, int &a, int &b, int &c ) override;
+	bool HasChar( int ch ) const override;
 
 private:
 	CUtlRBTree<abc_t, int> m_ABCCache;
 
 	char m_szRealFontFile[4096];
-	bool FindFontDataFile(const char* name, int tall, int weight, int flags, char* dataFile, int dataFileChars);
+	bool FindFontDataFile(const char *name, int tall, int weight, int flags, char *dataFile, int dataFileChars);
 
-	byte*	       m_pFontData;
+	byte *m_pFontData;
 	stbtt_fontinfo m_fontInfo;
 
 	float scale;
+
 
 	friend class CFontManager;
 };

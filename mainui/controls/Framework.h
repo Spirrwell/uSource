@@ -28,7 +28,7 @@ class CMenuFramework : public CMenuBaseWindow
 public:
 	typedef CMenuBaseWindow BaseClass;
 
-	CMenuFramework(const char* name = "Unnamed Framework");
+	CMenuFramework( const char *name = "Unnamed Framework" );
 	virtual ~CMenuFramework() override;
 
 	void Show() override;
@@ -38,19 +38,19 @@ public:
 	void Hide() override;
 	bool IsRoot() override { return true; }
 
-	CMenuPicButton* AddButton(const char* szName, const char* szStatus, EDefaultBtns iButton, CEventCallback onReleased = CEventCallback(),
-				  int iFlags = 0);
+	CMenuPicButton *AddButton( const char *szName, const char *szStatus,
+		EDefaultBtns iButton, CEventCallback onReleased = CEventCallback(), int iFlags = 0 );
 
-	CMenuPicButton* AddButton(const char* szName, const char* szStatus, const char* szButtonPath, CEventCallback onReleased = CEventCallback(),
-				  int iFlags = 0);
+	CMenuPicButton *AddButton( const char *szName, const char *szStatus,
+		const char *szButtonPath, CEventCallback onReleased = CEventCallback(), int iFlags = 0 );
 
 	bool DrawAnimation() override;
 
 	CMenuBannerBitmap banner;
 
 protected:
-	CMenuPicButton* m_apBtns[MAX_FRAMEWORK_PICBUTTONS];
-	int		m_iBtnsNum;
+	CMenuPicButton *m_apBtns[MAX_FRAMEWORK_PICBUTTONS];
+	int m_iBtnsNum;
 };
 
 #endif // FRAMEWORK_H

@@ -1,17 +1,17 @@
 /***
- *
- *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
- *
- *	This product contains software technology licensed from Id
- *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
- *	All Rights Reserved.
- *
- *   Use, distribution, and modification of this source code and/or resulting
- *   object code is restricted to non-commercial enhancements to products from
- *   Valve LLC.  All other use, distribution, or modification is prohibited
- *   without written permission from Valve LLC.
- *
- ****/
+*
+*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
+*	
+*	This product contains software technology licensed from Id 
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*	All Rights Reserved.
+*
+*   Use, distribution, and modification of this source code and/or resulting
+*   object code is restricted to non-commercial enhancements to products from
+*   Valve LLC.  All other use, distribution, or modification is prohibited
+*   without written permission from Valve LLC.
+*
+****/
 #pragma once
 #ifndef EXTDLL_H
 #define EXTDLL_H
@@ -42,22 +42,21 @@
 #ifndef TRUE
 #define TRUE (!FALSE)
 #endif
-typedef unsigned int  ULONG;
+typedef unsigned int ULONG;
 typedef unsigned char BYTE;
-typedef int	      BOOL;
+typedef int BOOL;
 #define MAX_PATH PATH_MAX
 #include <limits.h>
 #include <stdarg.h>
 #endif //_WIN32
 
 // Misc C-runtime library headers
-#include "math.h"
 #include "stdio.h"
 #include "stdlib.h"
+#include "math.h"
 
-#if defined(__LP64__) || defined(__LLP64__) || defined(_WIN64) || (defined(__x86_64__) && !defined(__ILP32__)) || defined(_M_X64) ||                 \
-	defined(__ia64) || defined(_M_IA64) || defined(__aarch64__) || defined(__powerpc64__)
-#define XASH_64BIT
+#if defined(__LP64__) || defined(__LLP64__) || defined(_WIN64) || (defined(__x86_64__) && !defined(__ILP32__) ) || defined(_M_X64) || defined(__ia64) || defined (_M_IA64) || defined(__aarch64__) || defined(__powerpc64__)
+  #define XASH_64BIT
 #endif
 
 // Vector class
@@ -68,8 +67,8 @@ typedef int	      BOOL;
 
 // Shared engine/DLL constants
 #include "common/const.h"
-#include "edict.h"
 #include "progdefs.h"
+#include "edict.h"
 
 // Shared header describing protocol between engine and DLLs
 #include "eiface.h"
@@ -77,4 +76,4 @@ typedef int	      BOOL;
 // Shared header between the client DLL and the game DLLs
 #include "cdll_dll.h"
 
-#endif // EXTDLL_H
+#endif //EXTDLL_H

@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
 
 See the GNU General Public License for more details.
 
@@ -18,43 +18,46 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#include "Bitmap.h"
 #include "Framework.h"
+#include "Bitmap.h"
 #include "PicButton.h"
 
-#define ART_BANNER "gfx/shell/head_touch"
+#define ART_BANNER		"gfx/shell/head_touch"
 
 /*
 =================
 UI_Touch_Precache
 =================
 */
-void UI_Touch_Precache(void) { EngFuncs::PIC_Load(ART_BANNER); }
+void UI_Touch_Precache( void )
+{
+	EngFuncs::PIC_Load( ART_BANNER );
+}
 
 /*
 =================
 UI_Touch_Menu
 =================
 */
-void UI_Touch_Menu(void)
+void UI_Touch_Menu( void )
 {
 	static CMenuFramework touch("CMenuTouch");
 
-	if (!touch.WasInit())
+	if( !touch.WasInit() )
 	{
-		touch.banner.SetPicture(ART_BANNER);
-		touch.AddItem(touch.background);
-		touch.AddItem(touch.banner);
+		touch.banner.SetPicture( ART_BANNER );
+		touch.AddItem( touch.background );
+		touch.AddItem( touch.banner );
 
-		touch.AddButton(L("Touch options"), L("Touch sensitivity and profile options"), "gfx/shell/btn_touch_options", UI_TouchOptions_Menu,
-				QMF_NOTIFY);
+		touch.AddButton( L( "Touch options" ), L( "Touch sensitivity and profile options" ), "gfx/shell/btn_touch_options",
+			UI_TouchOptions_Menu, QMF_NOTIFY );
 
-		touch.AddButton(L("Touch buttons"), L("Add, remove, edit touch buttons"), "gfx/shell/btn_touch_buttons", UI_TouchButtons_Menu,
-				QMF_NOTIFY);
+		touch.AddButton( L( "Touch buttons" ), L( "Add, remove, edit touch buttons" ), "gfx/shell/btn_touch_buttons",
+			UI_TouchButtons_Menu, QMF_NOTIFY );
 
-		touch.AddButton(L("Done"), L("Go back to the previous menu"), PC_DONE, VoidCb(&CMenuFramework::Hide), QMF_NOTIFY);
+		touch.AddButton( L( "Done" ),  L( "Go back to the previous menu" ), PC_DONE, VoidCb( &CMenuFramework::Hide ), QMF_NOTIFY );
 	}
 
 	touch.Show();
 }
-ADD_MENU(menu_touch, UI_Touch_Precache, UI_Touch_Menu);
+ADD_MENU( menu_touch, UI_Touch_Precache, UI_Touch_Menu );

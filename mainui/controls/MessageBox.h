@@ -15,18 +15,17 @@ GNU General Public License for more details.
 #ifndef MESSAGEBOX_H
 #define MESSAGEBOX_H
 
-#include "Action.h"
 #include "BaseWindow.h"
+#include "Action.h"
 
 class CMenuMessageBox : public CMenuBaseWindow
 {
 public:
 	typedef CMenuBaseWindow BaseClass;
 
-	CMenuMessageBox(const char* name = "Unnamed MessageBox");
+	CMenuMessageBox( const char *name = "Unnamed MessageBox" );
 
-	void SetMessage(const char* sz);
-
+	void SetMessage( const char *sz );
 private:
 	void _Init() override;
 

@@ -1,24 +1,25 @@
 /**
- *
+ * 
  * weapon_script.h
- *
- * Weapon scripts are keyvalues scripts that let you dynamically define properties of a weapon.
- * CWeaponScript is a thing wrapper around the KeyValues class provided by libpublic
- *
- */
+ * 
+ * Weapon scripts are keyvalues scripts that let you dynamically define properties of a weapon. 
+ * CWeaponScript is a thing wrapper around the KeyValues class provided by libpublic 
+ * 
+ */ 
+
 
 #pragma once
 
-#include "public/containers/array.h"
 #include "public/keyvalues.h"
+#include "public/containers/array.h"
 
-#define WEAPON_SCRIPT_NAME	   "name"
-#define WEAPON_SCRIPT_WORLD_MODEL  "world_model"
-#define WEAPON_SCRIPT_VIEW_MODEL   "view_model"
+#define WEAPON_SCRIPT_NAME "name"
+#define WEAPON_SCRIPT_WORLD_MODEL "world_model"
+#define WEAPON_SCRIPT_VIEW_MODEL "view_model"
 #define WEAPON_SCRIPT_EVENT_SCRIPT "event_script"
-#define WEAPON_SCRIPT_WPN_MODEL	   "weapon_model"
-#define WEAPON_SCRIPT_SOUNDS	   "sounds"
-#define WEAPON_SCRIPT_PROPS	   "properties"
+#define WEAPON_SCRIPT_WPN_MODEL "weapon_model"
+#define WEAPON_SCRIPT_SOUNDS "sounds"
+#define WEAPON_SCRIPT_PROPS "properties"
 
 struct weapon_script_sound_t
 {

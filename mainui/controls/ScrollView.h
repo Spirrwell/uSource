@@ -6,19 +6,18 @@
 class CMenuScrollView : public CMenuItemsHolder
 {
 	typedef CMenuItemsHolder BaseClass;
-
 public:
 	CMenuScrollView();
 
 	void VidInit() override;
 	void Draw() override;
-	bool KeyDown(int key) override;
-	bool MouseMove(int x, int y) override;
+	bool KeyDown( int key ) override;
+	bool MouseMove( int x, int y ) override;
 
 	Point GetPositionOffset() const override;
 
 private:
-	bool IsRectVisible(Point pt, Size sz);
+	bool IsRectVisible( Point pt, Size sz );
 
 	Point m_scScrollBarPos;
 	Size  m_scScrollBarSize;

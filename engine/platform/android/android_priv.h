@@ -9,9 +9,9 @@
 
 extern struct jnimethods_s
 {
-	jclass	  actcls;
-	JavaVM*	  vm;
-	JNIEnv*	  env;
+	jclass actcls;
+	JavaVM *vm;
+	JNIEnv *env;
 	jmethodID enableTextInput;
 	jmethodID vibrate;
 	jmethodID messageBox;
@@ -23,20 +23,20 @@ extern struct jnimethods_s
 	jmethodID loadID;
 	jmethodID showMouse;
 	jmethodID shellExecute;
-	int	  width, height;
+	int width, height;
 } jni;
 
 extern struct nativeegl_s
 {
-	qboolean   valid;
-	void*	   window;
+	qboolean valid;
+	void *window;
 	EGLDisplay dpy;
 	EGLSurface surface;
 	EGLContext context;
-	EGLConfig  cfg;
-	EGLint	   numCfg;
+	EGLConfig cfg;
+	EGLint numCfg;
 
-	const char* extensions;
+	const char *extensions;
 } negl;
 
 extern struct jnimouse_s
@@ -47,6 +47,6 @@ extern struct jnimouse_s
 //
 // vid_android.c
 //
-void Android_UpdateSurface(void);
+void Android_UpdateSurface( void );
 
 #endif // ANDROID_PRIV_H

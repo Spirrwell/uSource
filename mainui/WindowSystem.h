@@ -24,33 +24,36 @@ class CMenuBaseWindow;
 class CWindowStack
 {
 public:
-	CWindowStack() : active(stack.InvalidIndex()) {}
+	CWindowStack() :
+		active( stack.InvalidIndex() )
+	{
 
-	CMenuBaseWindow*       Current() { return stack.IsValidIndex(active) ? stack[active] : NULL; }
-	const CMenuBaseWindow* Current() const { return stack.IsValidIndex(active) ? stack[active] : NULL; }
+	}
 
-	bool IsActive(void) { return !stack.IsEmpty(); }
-	int  Count(void) { return stack.Count(); }
-	void Clean(void)
+	CMenuBaseWindow *Current() { return stack.IsValidIndex( active ) ? stack[active] : NULL; }
+	const CMenuBaseWindow *Current() const { return stack.IsValidIndex( active ) ? stack[active] : NULL; }
+
+	bool IsActive( void ) { return !stack.IsEmpty(); }
+	int  Count( void ) { return stack.Count(); }
+	void Clean( void )
 	{
 		stack.RemoveAll();
 		active = stack.InvalidIndex();
 	}
-	void Add(CMenuBaseWindow* menu);
-	void Remove(CMenuBaseWindow* menu);
+	void Add( CMenuBaseWindow *menu );
+	void Remove( CMenuBaseWindow *menu );
 
-	bool IsVisible(const CMenuBaseWindow* menu) const;
+	bool IsVisible( const CMenuBaseWindow *menu ) const;
 
-	void VidInit(bool firstTime);
-	void Update(void);
-	void KeyUpEvent(int key);
-	void KeyDownEvent(int key);
-	void CharEvent(int ch);
-	void MouseEvent(int x, int y);
-	void InputMethodResized(void);
-
+	void VidInit( bool firstTime );
+	void Update( void );
+	void KeyUpEvent( int key );
+	void KeyDownEvent( int key );
+	void CharEvent( int ch );
+	void MouseEvent( int x, int y );
+	void InputMethodResized( void );
 private:
-	CUtlLinkedList<CMenuBaseWindow*> stack;
+	CUtlLinkedList<CMenuBaseWindow *> stack;
 
 	int active; // current active window
 };

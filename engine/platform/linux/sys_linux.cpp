@@ -13,58 +13,61 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#include "platform/platform.h"
-#include <fcntl.h>
-#include <stdlib.h>
 #include <time.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include "platform/platform.h"
 
 #if XASH_TIMER == TIMER_LINUX
-double Platform_DoubleTime(void)
+double Platform_DoubleTime( void )
 {
 	static longtime_t g_PerformanceFrequency;
 	static longtime_t g_ClockStart;
-	longtime_t	  CurrentTime;
-	struct timespec	  ts;
+	longtime_t CurrentTime;
+	struct timespec ts;
 
-	if (!g_PerformanceFrequency)
+	if( !g_PerformanceFrequency )
 	{
 		struct timespec res;
-		if (!clock_getres(CLOCK_MONOTONIC, &res))
-			g_PerformanceFrequency = 1000000000LL / res.tv_nsec;
+		if( !clock_getres(CLOCK_MONOTONIC, &res) )
+			g_PerformanceFrequency = 1000000000LL/res.tv_nsec;
 	}
 	clock_gettime(CLOCK_MONOTONIC, &ts);
-	return (double)ts.tv_sec + (double)ts.tv_nsec / 1000000000.0;
+	return (double) ts.tv_sec + (double) ts.tv_nsec/1000000000.0;
 }
 
-void Platform_Sleep(int msec) { usleep(msec * 1000); }
+void Platform_Sleep( int msec )
+{
+	usleep( msec * 1000 );
+}
 #endif // XASH_TIMER == TIMER_LINUX
 
-qboolean Sys_DebuggerPresent(void)
+qboolean Sys_DebuggerPresent( void )
 {
 	char buf[1024];
 
-	int status_fd = open("/proc/self/status", O_RDONLY);
-	if (status_fd == -1)
+	int status_fd = open( "/proc/self/status", O_RDONLY );
+	if ( status_fd == -1 )
 		return 0;
 
-	ssize_t num_read = read(status_fd, buf, sizeof(buf));
-	close(status_fd);
+	ssize_t num_read = read( status_fd, buf, sizeof( buf ) );
+	close( status_fd );
 
-	if (num_read > 0)
+	if ( num_read > 0 )
 	{
 		static const char TracerPid[] = "TracerPid:";
-		const byte*	  tracer_pid;
+		const byte *tracer_pid;
 
 		buf[num_read] = 0;
-		tracer_pid    = (const byte*)Q_strstr(buf, TracerPid);
-		if (!tracer_pid)
+		tracer_pid    = (const byte*)Q_strstr( buf, TracerPid );
+		if( !tracer_pid )
 			return false;
-		// printf( "%s\n", tracer_pid );
-		while (*tracer_pid < '0' || *tracer_pid > '9')
-			if (*tracer_pid++ == '\n')
+		//printf( "%s\n", tracer_pid );
+		while( *tracer_pid < '0' || *tracer_pid > '9'  )
+			if( *tracer_pid++ == '\n' )
 				return false;
-		// printf( "%s\n", tracer_pid );
-		return !!Q_atoi((const char*)tracer_pid);
+		//printf( "%s\n", tracer_pid );
+		return !!Q_atoi( (const char*)tracer_pid );
 	}
 
 	return false;

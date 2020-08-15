@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
 
 See the GNU General Public License for more details.
 
@@ -18,104 +18,105 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#include "Bitmap.h"
-#include "CheckBox.h"
 #include "Framework.h"
-#include "MenuStrings.h"
-#include "PicButton.h"
-#include "Slider.h"
 #include "kbutton.h"
+#include "MenuStrings.h"
+#include "Bitmap.h"
+#include "PicButton.h"
+#include "CheckBox.h"
+#include "Slider.h"
 
-#define ART_BANNER "gfx/shell/head_advanced"
+#define ART_BANNER			"gfx/shell/head_advanced"
 
 class CAdvancedControls : public CMenuFramework
 {
 public:
 	typedef CMenuFramework BaseClass;
-	CAdvancedControls() : CMenuFramework("CAdvancedControls") {}
+	CAdvancedControls() : CMenuFramework("CAdvancedControls") { }
 
-	void ToggleLookCheckboxes(bool write);
+	void ToggleLookCheckboxes( bool write );
 
 private:
-	void _Init(void) override;
-	void _VidInit(void) override;
+	void _Init( void ) override;
+	void _VidInit( void ) override;
 	void SaveAndPopMenu() override;
 
-	void GetConfig(void);
-	void PitchInvert(void);
+	void GetConfig( void );
+	void PitchInvert( void );
 
 	CMenuPicButton done, inputDev;
 
-	CMenuCheckBox crosshair;
-	CMenuCheckBox invertMouse;
-	CMenuCheckBox mouseLook;
-	CMenuCheckBox lookSpring;
-	CMenuCheckBox lookStrafe;
-	CMenuCheckBox lookFilter;
-	CMenuCheckBox autoaim;
-	CMenuSlider   sensitivity;
+	CMenuCheckBox	crosshair;
+	CMenuCheckBox	invertMouse;
+	CMenuCheckBox	mouseLook;
+	CMenuCheckBox	lookSpring;
+	CMenuCheckBox	lookStrafe;
+	CMenuCheckBox	lookFilter;
+	CMenuCheckBox	autoaim;
+	CMenuSlider	sensitivity;
 };
 
-static CAdvancedControls uiAdvControls;
+static CAdvancedControls	uiAdvControls;
 
 /*
 =================
 UI_AdvControls_GetConfig
 =================
 */
-void CAdvancedControls::GetConfig()
+void CAdvancedControls::GetConfig( )
 {
-	kbutton_t* mlook;
+	kbutton_t	*mlook;
 
-	if (EngFuncs::GetCvarFloat("m_pitch") < 0)
+	if( EngFuncs::GetCvarFloat( "m_pitch" ) < 0 )
 		invertMouse.bChecked = true;
 
-	mlook = (kbutton_s*)EngFuncs::KEY_GetState("in_mlook");
-	if (mlook)
+	mlook = (kbutton_s *)EngFuncs::KEY_GetState( "in_mlook" );
+	if( mlook )
 	{
-		if (mlook && mlook->state & 1)
+		if( mlook && mlook->state & 1 )
 			mouseLook.bChecked = true;
 		else
 			mouseLook.bChecked = false;
 	}
 	else
 	{
-		mouseLook.SetGrayed(true);
+		mouseLook.SetGrayed( true );
 		mouseLook.bChecked = true;
 	}
 
-	crosshair.LinkCvar("crosshair");
-	lookSpring.LinkCvar("lookspring");
-	lookStrafe.LinkCvar("lookstrafe");
-	lookFilter.LinkCvar("look_filter");
+	crosshair.LinkCvar( "crosshair" );
+	lookSpring.LinkCvar( "lookspring" );
+	lookStrafe.LinkCvar( "lookstrafe" );
+	lookFilter.LinkCvar( "look_filter" );
 
-	autoaim.LinkCvar("sv_aim");
-	sensitivity.LinkCvar("sensitivity");
+	autoaim.LinkCvar( "sv_aim" );
+	sensitivity.LinkCvar( "sensitivity" );
 
-	ToggleLookCheckboxes(false);
+	ToggleLookCheckboxes( false );
 }
 
 void CAdvancedControls::PitchInvert()
 {
-	bool  invert  = invertMouse.bChecked;
-	float m_pitch = EngFuncs::GetCvarFloat("m_pitch");
-	if ((invert && (m_pitch > 0)) || (!invert && (m_pitch < 0)))
+	bool invert = invertMouse.bChecked;
+	float m_pitch = EngFuncs::GetCvarFloat( "m_pitch" );
+	if( ( invert && (m_pitch > 0) ) ||
+		( !invert && (m_pitch < 0) ) )
 	{
-		EngFuncs::CvarSetValue("m_pitch", -m_pitch);
+		EngFuncs::CvarSetValue( "m_pitch", -m_pitch );
 	}
 }
 
-void CAdvancedControls::ToggleLookCheckboxes(bool write)
+void CAdvancedControls::ToggleLookCheckboxes( bool write )
 {
-	lookSpring.SetGrayed(mouseLook.bChecked);
-	lookStrafe.SetGrayed(mouseLook.bChecked);
+	lookSpring.SetGrayed( mouseLook.bChecked );
+	lookStrafe.SetGrayed( mouseLook.bChecked );
 
-	if (write)
+	if( write )
 	{
-		if (mouseLook.bChecked)
-			EngFuncs::ClientCmd(FALSE, "+mlook\nbind _force_write\n");
+		if( mouseLook.bChecked )
+			EngFuncs::ClientCmd( FALSE, "+mlook\nbind _force_write\n" );
 		else
-			EngFuncs::ClientCmd(FALSE, "-mlook\nbind _force_write\n");
+			EngFuncs::ClientCmd( FALSE, "-mlook\nbind _force_write\n" );
 	}
 }
 
@@ -125,12 +126,12 @@ void CAdvancedControls::SaveAndPopMenu()
 	lookSpring.WriteCvar();
 	lookStrafe.WriteCvar();
 	lookFilter.WriteCvar();
-	if (EngFuncs::GetCvarString("m_filter")[0])
-		EngFuncs::CvarSetValue("m_filter", lookFilter.bChecked);
+	if( EngFuncs::GetCvarString("m_filter")[0] )
+		EngFuncs::CvarSetValue( "m_filter", lookFilter.bChecked );
 	autoaim.WriteCvar();
 	sensitivity.WriteCvar();
 
-	ToggleLookCheckboxes(true);
+	ToggleLookCheckboxes( true );
 
 	CMenuFramework::SaveAndPopMenu();
 }
@@ -140,85 +141,95 @@ void CAdvancedControls::SaveAndPopMenu()
 UI_AdvControls_Init
 =================
 */
-void CAdvancedControls::_Init(void)
+void CAdvancedControls::_Init( void )
 {
-	banner.SetPicture(ART_BANNER);
+	banner.SetPicture( ART_BANNER );
 
-	done.SetNameAndStatus(L("Done"), L("save changed and go back to the Customize Menu"));
-	done.SetPicture(PC_DONE);
-	done.onReleased = VoidCb(&CAdvancedControls::SaveAndPopMenu);
-	done.SetCoord(72, 680);
+	done.SetNameAndStatus( L( "Done" ), L( "save changed and go back to the Customize Menu" ) );
+	done.SetPicture( PC_DONE );
+	done.onReleased = VoidCb( &CAdvancedControls::SaveAndPopMenu );
+	done.SetCoord( 72, 680 );
 
-	crosshair.SetNameAndStatus(L("Crosshair"), L("Enable the weapon aiming crosshair"));
+	crosshair.SetNameAndStatus( L( "Crosshair" ), L( "Enable the weapon aiming crosshair" ) );
 	crosshair.iFlags |= QMF_NOTIFY;
-	crosshair.SetCoord(72, 280);
+	crosshair.SetCoord( 72, 280 );
 
-	invertMouse.SetNameAndStatus(L("GameUI_ReverseMouse"), L("GameUI_ReverseMouseLabel"));
+	invertMouse.SetNameAndStatus( L( "GameUI_ReverseMouse" ), L( "GameUI_ReverseMouseLabel" ) );
 	invertMouse.iFlags |= QMF_NOTIFY;
-	invertMouse.onChanged = VoidCb(&CAdvancedControls::PitchInvert);
-	invertMouse.SetCoord(72, 330);
+	invertMouse.onChanged = VoidCb( &CAdvancedControls::PitchInvert );
+	invertMouse.SetCoord( 72, 330 );
 
-	mouseLook.SetNameAndStatus(L("GameUI_MouseLook"), L("GameUI_MouseLookLabel"));
+	mouseLook.SetNameAndStatus( L( "GameUI_MouseLook" ), L( "GameUI_MouseLookLabel" ) );
 	mouseLook.iFlags |= QMF_NOTIFY;
-	SET_EVENT(mouseLook.onChanged, ((CAdvancedControls*)pSelf->Parent())->ToggleLookCheckboxes(true));
-	mouseLook.SetCoord(72, 380);
+	SET_EVENT( mouseLook.onChanged,
+		((CAdvancedControls*)pSelf->Parent())->ToggleLookCheckboxes( true ) );
+	mouseLook.SetCoord( 72, 380 );
 
-	lookSpring.SetNameAndStatus(L("Look spring"), L("Causes the screen to 'spring' back to looking straight ahead when you move forward"));
+	lookSpring.SetNameAndStatus( L( "Look spring" ), L( "Causes the screen to 'spring' back to looking straight ahead when you move forward" ) );
 	lookSpring.iFlags |= QMF_NOTIFY;
-	lookSpring.SetCoord(72, 430);
+	lookSpring.SetCoord( 72, 430 );
 
-	lookStrafe.SetNameAndStatus(L("Look strafe"),
-				    L("In combination with your mouse look modifier, causes left-right movements to strafe instead of turn"));
+	lookStrafe.SetNameAndStatus( L( "Look strafe" ), L( "In combination with your mouse look modifier, causes left-right movements to strafe instead of turn" ) );
 	lookStrafe.iFlags |= QMF_NOTIFY;
-	lookStrafe.SetCoord(72, 480);
+	lookStrafe.SetCoord( 72, 480 );
 
-	lookFilter.SetNameAndStatus(L("GameUI_MouseFilter"), L("GameUI_MouseFilterLabel"));
+	lookFilter.SetNameAndStatus( L( "GameUI_MouseFilter" ), L( "GameUI_MouseFilterLabel" ) );
 	lookFilter.iFlags |= QMF_NOTIFY;
-	lookFilter.SetCoord(72, 530);
+	lookFilter.SetCoord( 72, 530 );
 
-	autoaim.SetNameAndStatus(L("GameUI_AutoAim"), L("GameUI_AutoaimLabel"));
+	autoaim.SetNameAndStatus( L( "GameUI_AutoAim" ), L( "GameUI_AutoaimLabel" ) );
 	autoaim.iFlags |= QMF_NOTIFY;
-	autoaim.SetCoord(72, 580);
+	autoaim.SetCoord( 72, 580 );
 
-	sensitivity.SetNameAndStatus(L("GameUI_MouseSensitivity"), L("Set in-game mouse sensitivity"));
-	sensitivity.Setup(0.0, 20.0f, 0.1);
-	sensitivity.SetCoord(72, 660);
+	sensitivity.SetNameAndStatus( L( "GameUI_MouseSensitivity" ), L( "Set in-game mouse sensitivity" ) );
+	sensitivity.Setup( 0.0, 20.0f, 0.1 );
+	sensitivity.SetCoord( 72, 660 );
 
-	inputDev.SetNameAndStatus(L("Input devices"), L("Toggle mouse, touch controls"));
+	inputDev.SetNameAndStatus( L( "Input devices" ), L( "Toggle mouse, touch controls" ) );
 	inputDev.onReleased = UI_InputDevices_Menu;
 	inputDev.iFlags |= QMF_NOTIFY;
-	if (CL_IsActive() && !EngFuncs::GetCvarFloat("host_serverstate"))
-		inputDev.SetGrayed(true);
-	// inputDev.SetRect( 72, 230, UI_BUTTONS_WIDTH, UI_BUTTONS_HEIGHT );
-	inputDev.SetCoord(72, 230);
+	if( CL_IsActive() && !EngFuncs::GetCvarFloat( "host_serverstate" ))
+		inputDev.SetGrayed( true );
+	//inputDev.SetRect( 72, 230, UI_BUTTONS_WIDTH, UI_BUTTONS_HEIGHT );
+	inputDev.SetCoord( 72, 230 );
 
-	AddItem(background);
-	AddItem(banner);
-	AddItem(done);
-	AddItem(inputDev);
-	AddItem(crosshair);
-	AddItem(invertMouse);
-	AddItem(mouseLook);
-	AddItem(lookSpring);
-	AddItem(lookStrafe);
-	AddItem(lookFilter);
-	AddItem(autoaim);
-	AddItem(sensitivity);
+	AddItem( background );
+	AddItem( banner );
+	AddItem( done );
+	AddItem( inputDev );
+	AddItem( crosshair );
+	AddItem( invertMouse );
+	AddItem( mouseLook );
+	AddItem( lookSpring );
+	AddItem( lookStrafe );
+	AddItem( lookFilter );
+	AddItem( autoaim );
+	AddItem( sensitivity );
 }
 
-void CAdvancedControls::_VidInit() { GetConfig(); }
+
+void CAdvancedControls::_VidInit()
+{
+	GetConfig();
+}
 
 /*
 =================
 UI_AdvControls_Precache
 =================
 */
-void UI_AdvControls_Precache(void) { EngFuncs::PIC_Load(ART_BANNER); }
+void UI_AdvControls_Precache( void )
+{
+	EngFuncs::PIC_Load( ART_BANNER );
+}
 
 /*
 =================
 UI_AdvControls_Menu
 =================
 */
-void UI_AdvControls_Menu(void) { uiAdvControls.Show(); }
-ADD_MENU(menu_advcontrols, UI_AdvControls_Precache, UI_AdvControls_Menu);
+void UI_AdvControls_Menu( void )
+{
+	uiAdvControls.Show();
+}
+ADD_MENU( menu_advcontrols, UI_AdvControls_Precache, UI_AdvControls_Menu );

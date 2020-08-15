@@ -32,18 +32,18 @@ typedef enum
 
 typedef struct scrvarlistentry_s
 {
-	char*			  szName;
-	float			  flValue;
-	struct scrvarlistentry_s* next;
+	char *szName;
+	float flValue;
+	struct scrvarlistentry_s *next;
 } scrvarlistentry_t;
 
 typedef struct scrvarlist_s
 {
-	int		   iCount;
-	scrvarlistentry_t* pEntries;
-	scrvarlistentry_t* pLast;
-	const char**	   pArray;
-	CStringArrayModel* pModel; // ready model for use in UI
+	int iCount;
+	scrvarlistentry_t *pEntries;
+	scrvarlistentry_t *pLast;
+	const char **pArray;
+	CStringArrayModel *pModel; // ready model for use in UI
 } scrvarlist_t;
 
 typedef struct
@@ -54,22 +54,24 @@ typedef struct
 
 struct scrvardef_t
 {
-	scrvardef_t() : flags(0), name(), value(), desc(), type(T_NONE), next(0) {}
+	scrvardef_t() :
+		flags(0), name(), value(), desc(),
+		type(T_NONE), next(0) {}
 
-	int  flags;
+	int flags;
 	char name[MAX_STRING];
 	char value[MAX_STRING];
 	char desc[MAX_STRING];
 	union
 	{
 		scrvarnumber_t number;
-		scrvarlist_t   list;
+		scrvarlist_t list;
 	};
-	cvartype_t	    type;
-	struct scrvardef_t* next;
+	cvartype_t type;
+	struct scrvardef_t *next;
 };
 
-scrvardef_t* CSCR_LoadDefaultCVars(const char* scriptfilename, int* count);
-void	     CSCR_FreeList(scrvardef_t* list);
+scrvardef_t *CSCR_LoadDefaultCVars( const char *scriptfilename, int *count );
+void CSCR_FreeList( scrvardef_t *list );
 
 #endif // CFGSCRIPT_H

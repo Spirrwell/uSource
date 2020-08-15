@@ -6,8 +6,8 @@
  *
  */
 #include "common.h"
-#include "imagelib/imagelib.h"
 #include "mod_local.h"
+#include "imagelib/imagelib.h"
 
 /* cgltf includes */
 #define CGLTF_IMPLEMENTATION
@@ -23,28 +23,37 @@ class CGlTfLoader : public IModelLoader
 {
 public:
 	CGlTfLoader();
-	virtual ~CGlTfLoader(){};
+	virtual ~CGlTfLoader() {};
 
 	virtual bool LoadModel(model_t* mod, const void* buffer, size_t length);
 
 	virtual bool CheckBuffer(const void* buf, size_t len) { return true; }
+
+
 };
 /* Singleton */
 static CGlTfLoader g_glTfLoader;
 
-CGlTfLoader::CGlTfLoader() : IModelLoader(g_gltf_extensions, ARRAYSIZE(g_gltf_extensions)) {}
+CGlTfLoader::CGlTfLoader() :
+	IModelLoader(g_gltf_extensions, ARRAYSIZE(g_gltf_extensions))
+{
 
-bool CGlTfLoader::LoadModel(model_t* mod, const void* buffer, size_t length)
+}
+
+bool CGlTfLoader::LoadModel(model_t *mod, const void *buffer, size_t length)
 {
 	cgltf_options options = {};
-	cgltf_data*   data    = NULL;
-	cgltf_result  result  = cgltf_parse(&options, buffer, 0, &data);
+	cgltf_data* data = NULL;
+	cgltf_result result = cgltf_parse(&options, buffer, 0, &data);
 
-	if (result != cgltf_result_success)
+	if(result != cgltf_result_success)
 		return false;
 
 	/* Just loads the internal buffers */
 	cgltf_load_buffers(&options, data, mod->name);
+
+
+
 
 	cgltf_free(data);
 

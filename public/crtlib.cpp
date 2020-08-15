@@ -12,15 +12,15 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
-#include "crtlib.h"
-#include "const.h"
 #include "port.h"
-#include "stdio.h"
 #include "xash3d_types.h"
-#include <ctype.h>
+#include "const.h"
 #include <math.h>
 #include <stdarg.h>
+#include <ctype.h>
 #include <time.h>
+#include "stdio.h"
+#include "crtlib.h"
 
 #define BIT0 (1)
 #define BIT1 (2)
@@ -31,60 +31,53 @@ GNU General Public License for more details.
 #define BIT6 (64)
 #define BIT7 (128)
 
-void Q_strnupr(const char* in, char* out, size_t size_out)
+void Q_strnupr(const char *in, char *out, size_t size_out)
 {
-	if (size_out == 0)
-		return;
+	if (size_out == 0) return;
 
 	while (*in && size_out > 1)
 	{
 		if (*in >= 'a' && *in <= 'z')
 			*out++ = *in++ + 'A' - 'a';
-		else
-			*out++ = *in++;
+		else *out++ = *in++;
 		size_out--;
 	}
 	*out = '\0';
 }
 
-void Q_strnlwr(const char* in, char* out, size_t size_out)
+void Q_strnlwr(const char *in, char *out, size_t size_out)
 {
-	if (size_out == 0)
-		return;
+	if (size_out == 0) return;
 
 	while (*in && size_out > 1)
 	{
 		if (*in >= 'A' && *in <= 'Z')
 			*out++ = *in++ + 'a' - 'A';
-		else
-			*out++ = *in++;
+		else *out++ = *in++;
 		size_out--;
 	}
 	*out = '\0';
 }
 
-qboolean Q_isdigit(const char* str)
+qboolean Q_isdigit(const char *str)
 {
 	if (str && *str)
 	{
-		while (isdigit(*str))
-			str++;
-		if (!*str)
-			return true;
+		while (isdigit(*str)) str++;
+		if (!*str) return true;
 	}
 	return false;
 }
 
-int Q_strlen(const char* string)
+int Q_strlen(const char *string)
 {
-	int	    len;
-	const char* p;
+	int len;
+	const char *p;
 
-	if (!string)
-		return 0;
+	if (!string) return 0;
 
 	len = 0;
-	p   = string;
+	p = string;
 	while (*p)
 	{
 		p++;
@@ -93,16 +86,15 @@ int Q_strlen(const char* string)
 	return len;
 }
 
-int Q_colorstr(const char* string)
+int Q_colorstr(const char *string)
 {
-	int	    len;
-	const char* p;
+	int len;
+	const char *p;
 
-	if (!string)
-		return 0;
+	if (!string) return 0;
 
 	len = 0;
-	p   = string;
+	p = string;
 	while (*p)
 	{
 		if (IsColorString(p))
@@ -123,8 +115,7 @@ char Q_toupper(const char in)
 
 	if (in >= 'a' && in <= 'z')
 		out = in + 'A' - 'a';
-	else
-		out = in;
+	else out = in;
 
 	return out;
 }
@@ -135,30 +126,27 @@ char Q_tolower(const char in)
 
 	if (in >= 'A' && in <= 'Z')
 		out = in + 'a' - 'A';
-	else
-		out = in;
+	else out = in;
 
 	return out;
 }
 
-size_t Q_strncat(char* dst, const char* src, size_t size)
+size_t Q_strncat(char *dst, const char *src, size_t size)
 {
-	char*	    d = dst;
-	const char* s = src;
-	size_t	    n = size;
-	size_t	    dlen;
+	char *d = dst;
+	const char *s = src;
+	size_t n = size;
+	size_t dlen;
 
 	if (!dst || !src || !size)
 		return 0;
 
 	// find the end of dst and adjust bytes left but don't go past end
-	while (n-- != 0 && *d != '\0')
-		d++;
+	while (n-- != 0 && *d != '\0') d++;
 	dlen = d - dst;
-	n    = size - dlen;
+	n = size - dlen;
 
-	if (n == 0)
-		return (dlen + Q_strlen(s));
+	if (n == 0) return (dlen + Q_strlen(s));
 
 	while (*s != '\0')
 	{
@@ -174,11 +162,11 @@ size_t Q_strncat(char* dst, const char* src, size_t size)
 	return (dlen + (s - src)); // count does not include NULL
 }
 
-size_t Q_strncpy(char* dst, const char* src, size_t size)
+size_t Q_strncpy(char *dst, const char *src, size_t size)
 {
-	char*	    d = dst;
-	const char* s = src;
-	size_t	    n = size;
+	char *d = dst;
+	const char *s = src;
+	size_t n = size;
 
 	if (!dst || !src || !size)
 		return 0;
@@ -198,34 +186,29 @@ size_t Q_strncpy(char* dst, const char* src, size_t size)
 	{
 		if (size != 0)
 			*d = '\0'; // NULL-terminate dst
-		while (*s++)
-			;
+		while (*s++);
 	}
 	return (s - src - 1); // count does not include NULL
 }
 
-int Q_atoi(const char* str)
+int Q_atoi(const char *str)
 {
 	int val = 0;
 	int c, sign;
 
-	if (!str)
-		return 0;
+	if (!str) return 0;
 
 	// check for empty charachters in string
 	while (str && *str == ' ')
 		str++;
 
-	if (!str)
-		return 0;
+	if (!str) return 0;
 
 	if (*str == '-')
 	{
 		sign = -1;
 		str++;
-	}
-	else
-		sign = 1;
+	} else sign = 1;
 
 	// check for hex
 	if (str[0] == '0' && (str[1] == 'x' || str[1] == 'X'))
@@ -234,14 +217,10 @@ int Q_atoi(const char* str)
 		while (1)
 		{
 			c = *str++;
-			if (c >= '0' && c <= '9')
-				val = (val << 4) + c - '0';
-			else if (c >= 'a' && c <= 'f')
-				val = (val << 4) + c - 'a' + 10;
-			else if (c >= 'A' && c <= 'F')
-				val = (val << 4) + c - 'A' + 10;
-			else
-				return val * sign;
+			if (c >= '0' && c <= '9') val = (val << 4) + c - '0';
+			else if (c >= 'a' && c <= 'f') val = (val << 4) + c - 'a' + 10;
+			else if (c >= 'A' && c <= 'F') val = (val << 4) + c - 'A' + 10;
+			else return val * sign;
 		}
 	}
 
@@ -260,28 +239,24 @@ int Q_atoi(const char* str)
 	return 0;
 }
 
-float Q_atof(const char* str)
+float Q_atof(const char *str)
 {
 	double val = 0;
-	int    c, sign, decimal, total;
+	int c, sign, decimal, total;
 
-	if (!str)
-		return 0.0f;
+	if (!str) return 0.0f;
 
 	// check for empty charachters in string
 	while (str && *str == ' ')
 		str++;
 
-	if (!str)
-		return 0.0f;
+	if (!str) return 0.0f;
 
 	if (*str == '-')
 	{
 		sign = -1;
 		str++;
-	}
-	else
-		sign = 1;
+	} else sign = 1;
 
 	// check for hex
 	if (str[0] == '0' && (str[1] == 'x' || str[1] == 'X'))
@@ -290,24 +265,19 @@ float Q_atof(const char* str)
 		while (1)
 		{
 			c = *str++;
-			if (c >= '0' && c <= '9')
-				val = (val * 16) + c - '0';
-			else if (c >= 'a' && c <= 'f')
-				val = (val * 16) + c - 'a' + 10;
-			else if (c >= 'A' && c <= 'F')
-				val = (val * 16) + c - 'A' + 10;
-			else
-				return val * sign;
+			if (c >= '0' && c <= '9') val = (val * 16) + c - '0';
+			else if (c >= 'a' && c <= 'f') val = (val * 16) + c - 'a' + 10;
+			else if (c >= 'A' && c <= 'F') val = (val * 16) + c - 'A' + 10;
+			else return val * sign;
 		}
 	}
 
 	// check for character
-	if (str[0] == '\'')
-		return sign * str[1];
+	if (str[0] == '\'') return sign * str[1];
 
 	// assume decimal
 	decimal = -1;
-	total	= 0;
+	total = 0;
 
 	while (1)
 	{
@@ -336,11 +306,11 @@ float Q_atof(const char* str)
 	return val * sign;
 }
 
-void Q_atov(float* vec, const char* str, size_t siz)
+void Q_atov(float *vec, const char *str, size_t siz)
 {
 	string buffer;
-	char * pstr, *pfront;
-	int    j;
+	char *pstr, *pfront;
+	int j;
 
 	Q_strncpy(buffer, str, sizeof(buffer));
 	memset(vec, 0, sizeof(vec_t) * siz);
@@ -354,26 +324,25 @@ void Q_atov(float* vec, const char* str, size_t siz)
 		while (*pstr && *pstr != ' ')
 			pstr++;
 
-		if (!*pstr)
-			break;
+		if (!*pstr) break;
 		pstr++;
 		pfront = pstr;
 	}
 }
 
-char* Q_strchr(const char* s, char c)
+char *Q_strchr(const char *s, char c)
 {
 	int len = Q_strlen(s);
 
 	while (len--)
 	{
 		if (*++s == c)
-			return (char*)s;
+			return (char *) s;
 	}
 	return 0;
 }
 
-char* Q_strrchr(const char* s, char c)
+char *Q_strrchr(const char *s, char c)
 {
 	int len = Q_strlen(s);
 
@@ -382,12 +351,12 @@ char* Q_strrchr(const char* s, char c)
 	while (len--)
 	{
 		if (*--s == c)
-			return (char*)s;
+			return (char *) s;
 	}
 	return 0;
 }
 
-int Q_strnicmp(const char* s1, const char* s2, int n)
+int Q_strnicmp(const char *s1, const char *s2, int n)
 {
 	int c1, c2;
 
@@ -395,10 +364,8 @@ int Q_strnicmp(const char* s1, const char* s2, int n)
 	{
 		if (s2 == NULL)
 			return 0;
-		else
-			return -1;
-	}
-	else if (s2 == NULL)
+		else return -1;
+	} else if (s2 == NULL)
 	{
 		return 1;
 	}
@@ -408,17 +375,13 @@ int Q_strnicmp(const char* s1, const char* s2, int n)
 		c1 = *s1++;
 		c2 = *s2++;
 
-		if (!n--)
-			return 0; // strings are equal until end point
+		if (!n--) return 0; // strings are equal until end point
 
 		if (c1 != c2)
 		{
-			if (c1 >= 'a' && c1 <= 'z')
-				c1 -= ('a' - 'A');
-			if (c2 >= 'a' && c2 <= 'z')
-				c2 -= ('a' - 'A');
-			if (c1 != c2)
-				return c1 < c2 ? -1 : 1;
+			if (c1 >= 'a' && c1 <= 'z') c1 -= ('a' - 'A');
+			if (c2 >= 'a' && c2 <= 'z') c2 -= ('a' - 'A');
+			if (c1 != c2) return c1 < c2 ? -1 : 1;
 		}
 	} while (c1);
 
@@ -426,7 +389,7 @@ int Q_strnicmp(const char* s1, const char* s2, int n)
 	return 0;
 }
 
-int Q_strncmp(const char* s1, const char* s2, int n)
+int Q_strncmp(const char *s1, const char *s2, int n)
 {
 	int c1, c2;
 
@@ -434,10 +397,8 @@ int Q_strncmp(const char* s1, const char* s2, int n)
 	{
 		if (s2 == NULL)
 			return 0;
-		else
-			return -1;
-	}
-	else if (s2 == NULL)
+		else return -1;
+	} else if (s2 == NULL)
 	{
 		return 1;
 	}
@@ -448,10 +409,8 @@ int Q_strncmp(const char* s1, const char* s2, int n)
 		c2 = *s2++;
 
 		// strings are equal until end point
-		if (!n--)
-			return 0;
-		if (c1 != c2)
-			return c1 < c2 ? -1 : 1;
+		if (!n--) return 0;
+		if (c1 != c2) return c1 < c2 ? -1 : 1;
 
 	} while (c1);
 
@@ -467,10 +426,8 @@ int Q_strcasecmp(const char* s1, const char* s2)
 	{
 		if (s2 == NULL)
 			return 0;
-		else
-			return -1;
-	}
-	else if (s2 == NULL)
+		else return -1;
+	} else if (s2 == NULL)
 	{
 		return 1;
 	}
@@ -481,9 +438,8 @@ int Q_strcasecmp(const char* s1, const char* s2)
 		c2 = *s2++;
 
 		/* Quick and dirty lil trick. Clearing bit 5 will ensure we have lowercase */
-		// if ((c1 ^ BIT5) != (c2 ^ BIT5)) return c1 < c2 ? -1 : 1;
-		if (Q_tolower(c1) != Q_tolower(c2))
-			return c1 < c2 ? -1 : 1;
+		//if ((c1 ^ BIT5) != (c2 ^ BIT5)) return c1 < c2 ? -1 : 1;
+		if(Q_tolower(c1) != Q_tolower(c2)) return c1 < c2 ? -1 : 1;
 
 	} while (c1);
 
@@ -491,9 +447,10 @@ int Q_strcasecmp(const char* s1, const char* s2)
 	return 0;
 }
 
-static qboolean Q_starcmp(const char* pattern, const char* text)
+
+static qboolean Q_starcmp(const char *pattern, const char *text)
 {
-	char	    c, c1;
+	char c, c1;
 	const char *p = pattern, *t = text;
 
 	while ((c = *p++) == '?' || c == '*')
@@ -502,19 +459,17 @@ static qboolean Q_starcmp(const char* pattern, const char* text)
 			return false;
 	}
 
-	if (c == '\0')
-		return true;
+	if (c == '\0') return true;
 
 	for (c1 = ((c == '\\') ? *p : c);;)
 	{
 		if (Q_tolower(*t) == c1 && Q_stricmpext(p - 1, t))
 			return true;
-		if (*t++ == '\0')
-			return false;
+		if (*t++ == '\0') return false;
 	}
 }
 
-qboolean Q_stricmpext(const char* pattern, const char* text)
+qboolean Q_stricmpext(const char *pattern, const char *text)
 {
 	char c;
 
@@ -522,62 +477,62 @@ qboolean Q_stricmpext(const char* pattern, const char* text)
 	{
 		switch (c)
 		{
-		case '?':
-			if (*text++ == '\0')
-				return false;
-			break;
-		case '\\':
-			if (Q_tolower(*pattern++) != Q_tolower(*text++))
-				return false;
-			break;
-		case '*':
-			return Q_starcmp(pattern, text);
-		default:
-			if (Q_tolower(c) != Q_tolower(*text++))
-				return false;
+			case '?':
+				if (*text++ == '\0')
+					return false;
+				break;
+			case '\\':
+				if (Q_tolower(*pattern++) != Q_tolower(*text++))
+					return false;
+				break;
+			case '*':
+				return Q_starcmp(pattern, text);
+			default:
+				if (Q_tolower(c) != Q_tolower(*text++))
+					return false;
 		}
 	}
 	return (*text == '\0');
 }
 
-const char* Q_timestamp(int format)
+const char *Q_timestamp(int format)
 {
-	static string	 timestamp;
-	time_t		 crt_time;
-	const struct tm* crt_tm;
-	string		 timestring;
+	static string timestamp;
+	time_t crt_time;
+	const struct tm *crt_tm;
+	string timestring;
 
 	time(&crt_time);
 	crt_tm = localtime(&crt_time);
 
 	switch (format)
 	{
-	case TIME_FULL:
-		// Build the full timestamp (ex: "Apr03 2007 [23:31.55]");
-		strftime(timestring, sizeof(timestring), "%b%d %Y [%H:%M.%S]", crt_tm);
-		break;
-	case TIME_DATE_ONLY:
-		// Build the date stamp only (ex: "Apr03 2007");
-		strftime(timestring, sizeof(timestring), "%b%d %Y", crt_tm);
-		break;
-	case TIME_TIME_ONLY:
-		// Build the time stamp only (ex: "23:31.55");
-		strftime(timestring, sizeof(timestring), "%H:%M.%S", crt_tm);
-		break;
-	case TIME_NO_SECONDS:
-		// Build the time stamp exclude seconds (ex: "13:46");
-		strftime(timestring, sizeof(timestring), "%H:%M", crt_tm);
-		break;
-	case TIME_YEAR_ONLY:
-		// Build the date stamp year only (ex: "2006");
-		strftime(timestring, sizeof(timestring), "%Y", crt_tm);
-		break;
-	case TIME_FILENAME:
-		// Build a timestamp that can use for filename (ex: "Nov2006-26 (19.14.28)");
-		strftime(timestring, sizeof(timestring), "%b%Y-%d_%H.%M.%S", crt_tm);
-		break;
-	default:
-		return NULL;
+		case TIME_FULL:
+			// Build the full timestamp (ex: "Apr03 2007 [23:31.55]");
+			strftime(timestring, sizeof(timestring), "%b%d %Y [%H:%M.%S]", crt_tm);
+			break;
+		case TIME_DATE_ONLY:
+			// Build the date stamp only (ex: "Apr03 2007");
+			strftime(timestring, sizeof(timestring), "%b%d %Y", crt_tm);
+			break;
+		case TIME_TIME_ONLY:
+			// Build the time stamp only (ex: "23:31.55");
+			strftime(timestring, sizeof(timestring), "%H:%M.%S", crt_tm);
+			break;
+		case TIME_NO_SECONDS:
+			// Build the time stamp exclude seconds (ex: "13:46");
+			strftime(timestring, sizeof(timestring), "%H:%M", crt_tm);
+			break;
+		case TIME_YEAR_ONLY:
+			// Build the date stamp year only (ex: "2006");
+			strftime(timestring, sizeof(timestring), "%Y", crt_tm);
+			break;
+		case TIME_FILENAME:
+			// Build a timestamp that can use for filename (ex: "Nov2006-26 (19.14.28)");
+			strftime(timestring, sizeof(timestring), "%b%Y-%d_%H.%M.%S", crt_tm);
+			break;
+		default:
+			return NULL;
 	}
 
 	Q_strncpy(timestamp, timestring, sizeof(timestamp));
@@ -585,61 +540,53 @@ const char* Q_timestamp(int format)
 	return timestamp;
 }
 
-char* Q_strstr(const char* string, const char* string2)
+char *Q_strstr(const char *string, const char *string2)
 {
 	int c, len;
 
-	if (!string || !string2)
-		return NULL;
+	if (!string || !string2) return NULL;
 
-	c   = *string2;
+	c = *string2;
 	len = Q_strlen(string2);
 
 	while (string)
 	{
-		for (; *string && *string != c; string++)
-			;
+		for (; *string && *string != c; string++);
 
 		if (*string)
 		{
 			if (!Q_strncmp(string, string2, len))
 				break;
 			string++;
-		}
-		else
-			return NULL;
+		} else return NULL;
 	}
-	return (char*)string;
+	return (char *) string;
 }
 
-char* Q_stristr(const char* string, const char* string2)
+char *Q_stristr(const char *string, const char *string2)
 {
 	int c, len;
 
-	if (!string || !string2)
-		return NULL;
+	if (!string || !string2) return NULL;
 
-	c   = Q_tolower(*string2);
+	c = Q_tolower(*string2);
 	len = Q_strlen(string2);
 
 	while (string)
 	{
-		for (; *string && Q_tolower(*string) != c; string++)
-			;
+		for (; *string && Q_tolower(*string) != c; string++);
 
 		if (*string)
 		{
 			if (!Q_strnicmp(string, string2, len))
 				break;
 			string++;
-		}
-		else
-			return NULL;
+		} else return NULL;
 	}
-	return (char*)string;
+	return (char *) string;
 }
 
-int Q_vsnprintf(char* buffer, size_t buffersize, const char* format, va_list args)
+int Q_vsnprintf(char *buffer, size_t buffersize, const char *format, va_list args)
 {
 	size_t result;
 
@@ -648,13 +595,13 @@ int Q_vsnprintf(char* buffer, size_t buffersize, const char* format, va_list arg
 #else
 	__try
 	{
-		result = _vsnprintf(buffer, buffersize, format, args);
+		result = _vsnprintf( buffer, buffersize, format, args );
 	}
 
 	// to prevent crash while output
-	__except (EXCEPTION_EXECUTE_HANDLER)
+	__except( EXCEPTION_EXECUTE_HANDLER )
 	{
-		Q_strncpy(buffer, "^1sprintf throw exception^7\n", buffersize);
+		Q_strncpy( buffer, "^1sprintf throw exception^7\n", buffersize );
 		result = buffersize;
 	}
 #endif
@@ -668,10 +615,10 @@ int Q_vsnprintf(char* buffer, size_t buffersize, const char* format, va_list arg
 	return result;
 }
 
-int Q_snprintf(char* buffer, size_t buffersize, const char* format, ...)
+int Q_snprintf(char *buffer, size_t buffersize, const char *format, ...)
 {
 	va_list args;
-	int	result;
+	int result;
 
 	va_start(args, format);
 	result = Q_vsnprintf(buffer, buffersize, format, args);
@@ -680,10 +627,10 @@ int Q_snprintf(char* buffer, size_t buffersize, const char* format, ...)
 	return result;
 }
 
-int Q_sprintf(char* buffer, const char* format, ...)
+int Q_sprintf(char *buffer, const char *format, ...)
 {
 	va_list args;
-	int	result;
+	int result;
 
 	va_start(args, format);
 	result = Q_vsnprintf(buffer, 99999, format, args);
@@ -692,7 +639,7 @@ int Q_sprintf(char* buffer, const char* format, ...)
 	return result;
 }
 
-uint Q_hashkey(const char* string, uint hashSize, qboolean caseinsensitive)
+uint Q_hashkey(const char *string, uint hashSize, qboolean caseinsensitive)
 {
 	uint i, hashKey = 0;
 
@@ -700,11 +647,10 @@ uint Q_hashkey(const char* string, uint hashSize, qboolean caseinsensitive)
 	{
 		for (i = 0; string[i]; i++)
 			hashKey += (i * 119) * Q_tolower(string[i]);
-	}
-	else
+	} else
 	{
 		for (i = 0; string[i]; i++)
-			hashKey += (i + 119) * (int)string[i];
+			hashKey += (i + 119) * (int) string[i];
 	}
 
 	hashKey = ((hashKey ^ (hashKey >> 10)) ^ (hashKey >> 20)) & (hashSize - 1);
@@ -712,16 +658,16 @@ uint Q_hashkey(const char* string, uint hashSize, qboolean caseinsensitive)
 	return hashKey;
 }
 
-char* Q_pretifymem(float value, int digitsafterdecimal)
+char *Q_pretifymem(float value, int digitsafterdecimal)
 {
 	static char output[8][32];
-	static int  current;
-	float	    onekb = 1024.0f;
-	float	    onemb = onekb * onekb;
-	char	    suffix[8];
-	char*	    out = output[current];
-	char	    val[32], *i, *o, *dot;
-	int	    pos;
+	static int current;
+	float onekb = 1024.0f;
+	float onemb = onekb * onekb;
+	char suffix[8];
+	char *out = output[current];
+	char val[32], *i, *o, *dot;
+	int pos;
 
 	current = (current + 1) & (8 - 1);
 
@@ -730,24 +676,20 @@ char* Q_pretifymem(float value, int digitsafterdecimal)
 	{
 		value /= onemb;
 		Q_sprintf(suffix, " Mb");
-	}
-	else if (value > onekb)
+	} else if (value > onekb)
 	{
 		value /= onekb;
 		Q_sprintf(suffix, " Kb");
-	}
-	else
-		Q_sprintf(suffix, " bytes");
+	} else Q_sprintf(suffix, " bytes");
 
 	// clamp to >= 0
 	digitsafterdecimal = Q_max(digitsafterdecimal, 0);
 
 	// if it's basically integral, don't do any decimals
-	if (fabs(value - (int)value) < 0.00001)
+	if (fabs(value - (int) value) < 0.00001)
 	{
-		Q_sprintf(val, "%i%s", (int)value, suffix);
-	}
-	else
+		Q_sprintf(val, "%i%s", (int) value, suffix);
+	} else
 	{
 		char fmt[32];
 
@@ -762,11 +704,10 @@ char* Q_pretifymem(float value, int digitsafterdecimal)
 
 	// search for decimal or if it was integral, find the space after the raw number
 	dot = Q_strstr(i, ".");
-	if (!dot)
-		dot = Q_strstr(i, " ");
+	if (!dot) dot = Q_strstr(i, " ");
 
-	pos = dot - i; // compute position of dot
-	pos -= 3;      // don't put a comma if it's <= 3 long
+	pos = dot - i;        // compute position of dot
+	pos -= 3;                // don't put a comma if it's <= 3 long
 
 	while (*i)
 	{
@@ -775,12 +716,11 @@ char* Q_pretifymem(float value, int digitsafterdecimal)
 		if (pos >= 0 && !(pos % 3))
 		{
 			// never in first spot
-			if (o != out)
-				*o++ = ',';
+			if (o != out) *o++ = ',';
 		}
 
-		pos--;	     // count down comma position
-		*o++ = *i++; // copy rest of data as normal
+		pos--;                // count down comma position
+		*o++ = *i++;        // copy rest of data as normal
 	}
 	*o = 0; // terminate
 
@@ -796,13 +736,13 @@ so I don't need to have varargs versions
 of all text functions.
 ============
 */
-char* va(const char* format, ...)
+char *va(const char *format, ...)
 {
-	va_list	    argptr;
+	va_list argptr;
 	static char string[256][1024], *s;
-	static int  stringindex = 0;
+	static int stringindex = 0;
 
-	s	    = string[stringindex];
+	s = string[stringindex];
 	stringindex = (stringindex + 1) & 255;
 	va_start(argptr, format);
 	Q_vsnprintf(s, sizeof(string[0]), format, argptr);
@@ -818,13 +758,12 @@ COM_FileBase
 Extracts the base name of a file (no path, no extension, assumes '/' as path separator)
 ============
 */
-void COM_FileBase(const char* in, char* out)
+void COM_FileBase(const char *in, char *out)
 {
 	int len, start, end;
 
 	len = Q_strlen(in);
-	if (!len)
-		return;
+	if (!len) return;
 
 	// scan backward for '.'
 	end = len - 1;
@@ -834,8 +773,7 @@ void COM_FileBase(const char* in, char* out)
 
 	if (in[end] != '.')
 		end = len - 1; // no '.', copy to end
-	else
-		end--; // found ',', copy to left of '.'
+	else end--; // found ',', copy to left of '.'
 
 	// scan backward for '/'
 	start = len - 1;
@@ -845,8 +783,7 @@ void COM_FileBase(const char* in, char* out)
 
 	if (start < 0 || (in[start] != '/' && in[start] != '\\'))
 		start = 0;
-	else
-		start++;
+	else start++;
 
 	// length of new sting
 	len = end - start + 1;
@@ -861,7 +798,7 @@ void COM_FileBase(const char* in, char* out)
 COM_FileExtension
 ============
 */
-const char* COM_FileExtension(const char* in)
+const char *COM_FileExtension(const char *in)
 {
 	const char *separator, *backslash, *colon, *dot;
 
@@ -889,7 +826,7 @@ const char* COM_FileExtension(const char* in)
 COM_FileWithoutPath
 ============
 */
-const char* COM_FileWithoutPath(const char* in)
+const char *COM_FileWithoutPath(const char *in)
 {
 	const char *separator, *backslash, *colon;
 
@@ -912,9 +849,9 @@ const char* COM_FileWithoutPath(const char* in)
 COM_ExtractFilePath
 ============
 */
-void COM_ExtractFilePath(const char* path, char* dest)
+void COM_ExtractFilePath(const char *path, char *dest)
 {
-	const char* src = path + Q_strlen(path) - 1;
+	const char *src = path + Q_strlen(path) - 1;
 
 	// back up until a \ or the start
 	while (src != path && !(*(src - 1) == '\\' || *(src - 1) == '/'))
@@ -924,8 +861,7 @@ void COM_ExtractFilePath(const char* path, char* dest)
 	{
 		memcpy(dest, path, src - path);
 		dest[src - path - 1] = 0; // cutoff backslash
-	}
-	else
+	} else
 		Q_strcpy(dest, ""); // file without path
 }
 
@@ -934,7 +870,7 @@ void COM_ExtractFilePath(const char* path, char* dest)
 COM_StripExtension
 ============
 */
-void COM_StripExtension(char* path)
+void COM_StripExtension(char *path)
 {
 	size_t length;
 
@@ -946,8 +882,7 @@ void COM_StripExtension(char* path)
 			return; // no extension
 	}
 
-	if (length)
-		path[length] = 0;
+	if (length) path[length] = 0;
 }
 
 /*
@@ -955,9 +890,9 @@ void COM_StripExtension(char* path)
 COM_DefaultExtension
 ==================
 */
-void COM_DefaultExtension(char* path, const char* extension)
+void COM_DefaultExtension(char *path, const char *extension)
 {
-	const char* src;
+	const char *src;
 
 	// if path doesn't have a .EXT, append extension
 	// (extension should include the .)
@@ -966,8 +901,7 @@ void COM_DefaultExtension(char* path, const char* extension)
 	while (*src != '/' && src != path)
 	{
 		// it has an extension
-		if (*src == '.')
-			return;
+		if (*src == '.') return;
 		src--;
 	}
 
@@ -979,20 +913,21 @@ void COM_DefaultExtension(char* path, const char* extension)
 COM_ReplaceExtension
 ==================
 */
-void COM_ReplaceExtension(char* path, const char* extension)
+void COM_ReplaceExtension(char *path, const char *extension)
 {
 	COM_StripExtension(path);
 	COM_DefaultExtension(path, extension);
 }
 
-int matchpattern(const char* in, const char* pattern, qboolean caseinsensitive)
+int matchpattern(const char *in, const char *pattern, qboolean caseinsensitive)
 {
 	return matchpattern_with_separator(in, pattern, caseinsensitive, "/\\:", false);
 }
 
 // wildcard_least_one: if true * matches 1 or more characters
 //                     if false * matches 0 or more characters
-int matchpattern_with_separator(const char* in, const char* pattern, qboolean caseinsensitive, const char* separators, qboolean wildcard_least_one)
+int matchpattern_with_separator(const char *in, const char *pattern, qboolean caseinsensitive, const char *separators,
+                                qboolean wildcard_least_one)
 {
 	int c1, c2;
 
@@ -1000,53 +935,54 @@ int matchpattern_with_separator(const char* in, const char* pattern, qboolean ca
 	{
 		switch (*pattern)
 		{
-		case 0:
-			return 1; // end of pattern
-		case '?':	  // match any single character
-			if (*in == 0 || Q_strchr(separators, *in))
-				return 0; // no match
-			in++;
-			pattern++;
-			break;
-		case '*': // match anything until following string
-			if (wildcard_least_one)
-			{
+			case 0:
+				return 1; // end of pattern
+			case '?': // match any single character
 				if (*in == 0 || Q_strchr(separators, *in))
 					return 0; // no match
 				in++;
-			}
-			pattern++;
-			while (*in)
-			{
-				if (Q_strchr(separators, *in))
-					break;
-				// see if pattern matches at this offset
-				if (matchpattern_with_separator(in, pattern, caseinsensitive, separators, wildcard_least_one))
-					return 1;
-				// nope, advance to next offset
+				pattern++;
+				break;
+			case '*': // match anything until following string
+				if (wildcard_least_one)
+				{
+					if (*in == 0 || Q_strchr(separators, *in))
+						return 0; // no match
+					in++;
+				}
+				pattern++;
+				while (*in)
+				{
+					if (Q_strchr(separators, *in))
+						break;
+					// see if pattern matches at this offset
+					if (matchpattern_with_separator(in, pattern, caseinsensitive, separators,
+					                                wildcard_least_one))
+						return 1;
+					// nope, advance to next offset
+					in++;
+				}
+				break;
+			default:
+				if (*in != *pattern)
+				{
+					if (!caseinsensitive)
+						return 0; // no match
+					c1 = *in;
+					if (c1 >= 'A' && c1 <= 'Z')
+						c1 += 'a' - 'A';
+					c2 = *pattern;
+					if (c2 >= 'A' && c2 <= 'Z')
+						c2 += 'a' - 'A';
+					if (c1 != c2)
+						return 0; // no match
+				}
 				in++;
-			}
-			break;
-		default:
-			if (*in != *pattern)
-			{
-				if (!caseinsensitive)
-					return 0; // no match
-				c1 = *in;
-				if (c1 >= 'A' && c1 <= 'Z')
-					c1 += 'a' - 'A';
-				c2 = *pattern;
-				if (c2 >= 'A' && c2 <= 'Z')
-					c2 += 'a' - 'A';
-				if (c1 != c2)
-					return 0; // no match
-			}
-			in++;
-			pattern++;
-			break;
+				pattern++;
+				break;
 		}
 	}
 	if (*in)
 		return 0; // reached end of pattern but not end of input
-	return 1;	  // success
+	return 1; // success
 }

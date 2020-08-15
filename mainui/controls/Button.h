@@ -4,9 +4,10 @@
 
 namespace UI
 {
-class Button : public CMenuBaseItem
-{
-private:
-public:
-};
-} // namespace UI
+	class Button : public CMenuBaseItem
+	{
+	private:
+
+	public:
+	};
+}

@@ -5,28 +5,36 @@
  */
 #pragma once
 
-#include "allocator.h"
+#include <sstream>
 #include <cstdarg>
+#include <ios>
 #include <cstdio>
 #include <cstdlib>
-#include <ios>
-#include <memory.h>
 #include <memory>
-#include <sstream>
+#include <memory.h>
+#include "allocator.h"
 
 class BufferSizePolicyLinear
 {
 public:
-	unsigned long long GetNewSize(unsigned long long old) { return old * 2; }
+	unsigned long long GetNewSize(unsigned long long old)
+	{
+		return old * 2;
+	}
 };
 
 class BufferSizePolicyFixed
 {
 public:
-	unsigned long long GetNewSize(unsigned long long old) { return old; }
+	unsigned long long GetNewSize(unsigned long long old)
+	{
+		return old;
+	}
 };
 
-template <class CharT = char, class AllocatorT = DefaultAllocator<CharT>, class SizePolicyT = BufferSizePolicyLinear> class BufferT
+
+template<class CharT = char, class AllocatorT = DefaultAllocator<CharT>, class SizePolicyT = BufferSizePolicyLinear>
+class BufferT
 {
 public:
 	typedef long long BufferPos;
@@ -36,71 +44,79 @@ public:
 	{
 		this->m_data = m_allocator.allocate(m_size * sizeof(CharT));
 		memcpy(this->m_data, other.m_data, sizeof(CharT) * m_size);
-		this->m_bufPos	 = other.m_bufPos;
-		this->m_size	 = other.m_size;
+		this->m_bufPos = other.m_bufPos;
+		this->m_size = other.m_size;
 		this->m_maxWrite = other.m_maxWrite;
 		return *this;
 	}
 
 	BufferT& operator=(BufferT&& other) noexcept
 	{
-		this->m_data	 = other.m_data;
-		this->m_bufPos	 = other.m_bufPos;
-		this->m_size	 = other.m_size;
+		this->m_data = other.m_data;
+		this->m_bufPos = other.m_bufPos;
+		this->m_size = other.m_size;
 		this->m_maxWrite = other.m_maxWrite;
-		other.m_data	 = nullptr;
+		other.m_data = nullptr;
 		other.m_maxWrite = 0;
-		other.m_size	 = 0;
-		other.m_bufPos	 = 0;
+		other.m_size = 0;
+		other.m_bufPos = 0;
 		return *this;
 	}
 
 	CharT operator[](unsigned int i)
 	{
-		if (i >= m_size)
-			return CharT();
+		if(i >= m_size) return CharT();
 		return m_data[i];
 	}
 
 private:
-	CharT*	    m_data;
-	BufferPos   m_bufPos;
-	BufferPos   m_size;
-	BufferPos   m_maxWrite;
-	AllocatorT  m_allocator;
+	CharT* m_data;
+	BufferPos m_bufPos;
+	BufferPos m_size;
+	BufferPos m_maxWrite;
+	AllocatorT m_allocator;
 	SizePolicyT m_sizePolicy;
 
-	inline void compute_max_write() { m_maxWrite = m_bufPos > m_maxWrite ? m_bufPos : m_maxWrite; }
+	inline void compute_max_write()
+	{
+		m_maxWrite = m_bufPos > m_maxWrite ? m_bufPos : m_maxWrite;
+	}
 
 public:
-	BufferT(BufferSize sz) : m_size(sz), m_bufPos(0), m_maxWrite(-1) { m_data = m_allocator.allocate(sizeof(CharT) * m_size); }
+	BufferT(BufferSize sz) :
+		m_size(sz),
+		m_bufPos(0),
+		m_maxWrite(-1)
+	{
+		m_data = m_allocator.allocate(sizeof(CharT) * m_size);
+	}
 
 	BufferT(const BufferT& other)
 	{
 		this->m_data = m_allocator.allocate(m_size * sizeof(CharT));
 		memcpy(this->m_data, other.m_data, sizeof(CharT) * m_size);
-		this->m_bufPos	 = other.m_bufPos;
-		this->m_size	 = other.m_size;
+		this->m_bufPos = other.m_bufPos;
+		this->m_size = other.m_size;
 		this->m_maxWrite = other.m_maxWrite;
 	}
 
 	BufferT(BufferT&& other) noexcept
 	{
-		this->m_data	 = other.m_data;
-		this->m_bufPos	 = other.m_bufPos;
-		this->m_size	 = other.m_size;
+		this->m_data = other.m_data;
+		this->m_bufPos = other.m_bufPos;
+		this->m_size = other.m_size;
 		this->m_maxWrite = other.m_maxWrite;
-		other.m_data	 = nullptr;
+		other.m_data = nullptr;
 		other.m_maxWrite = 0;
-		other.m_size	 = 0;
-		other.m_bufPos	 = 0;
+		other.m_size = 0;
+		other.m_bufPos = 0;
 	}
 
 	virtual ~BufferT()
 	{
-		if (m_data)
+		if(m_data)
 			m_allocator.deallocate(m_data);
-		m_size	 = 0;
+		m_size = 0;
 		m_bufPos = 0;
 	}
 
@@ -111,8 +127,7 @@ public:
 	inline BufferSize resize()
 	{
 		BufferSize newsize = m_sizePolicy.GetNewSize(m_size);
-		if (newsize == m_size)
-			return m_size;
+		if(newsize == m_size) return m_size;
 		m_data = m_allocator.reallocate(m_data, newsize);
 		m_size = newsize;
 		return m_size;
@@ -125,8 +140,7 @@ public:
 	 */
 	inline BufferSize resize(BufferSize newsize)
 	{
-		if (newsize == m_size)
-			return m_size;
+		if(newsize == m_size) return m_size;
 		m_data = m_allocator.reallocate(m_data, newsize);
 		m_size = newsize;
 		/* Fix up the buffer pointers */
@@ -145,7 +159,7 @@ public:
 	inline BufferSize puts(const CharT* data, BufferSize count)
 	{
 		BufferSize i;
-		for (i = 0; i < count && (i + m_bufPos) < m_size; i++)
+		for(i = 0; i < count && (i + m_bufPos) < m_size; i++)
 			m_data[m_bufPos + i] = data[i];
 		m_bufPos += i;
 		compute_max_write();
@@ -159,8 +173,7 @@ public:
 	 */
 	inline BufferSize putc(CharT c)
 	{
-		if (m_bufPos + 1 >= m_size)
-			return 0;
+		if(m_bufPos + 1 >= m_size) return 0;
 		m_data[m_bufPos] = c;
 		m_bufPos++;
 		compute_max_write();
@@ -176,8 +189,8 @@ public:
 	inline BufferSize gets(CharT* data, BufferSize maxsize)
 	{
 		BufferSize i;
-		for (i = 0; i < maxsize && (m_bufPos + i) < m_size; i++)
-			data[i] = m_data[i + m_bufPos];
+		for(i = 0; i < maxsize && (m_bufPos+i) < m_size; i++)
+			data[i] = m_data[i+m_bufPos];
 		m_bufPos += i;
 		compute_max_write();
 		return i;
@@ -192,8 +205,8 @@ public:
 	inline BufferSize peeks(CharT* data, BufferSize sz)
 	{
 		BufferSize i;
-		for (i = 0; i < sz && (i + m_bufPos) < m_size; i++)
-			data[i] = m_data[i + m_bufPos];
+		for(i = 0; i < sz && (i+m_bufPos) < m_size; i++)
+			data[i] = m_data[i+m_bufPos];
 		return i;
 	}
 
@@ -213,13 +226,19 @@ public:
 	 * @brief Returns next char from buffer without incrementing it
 	 * @return next char
 	 */
-	inline int peek() const { return m_data[m_bufPos]; }
+	inline int peek() const
+	{
+		return m_data[m_bufPos];
+	}
 
 	/**
 	 * @brief Get the current pos of the read/write head
 	 * @return
 	 */
-	inline BufferPos current_pos() const { return m_bufPos; }
+	inline BufferPos current_pos() const
+	{
+		return m_bufPos;
+	}
 
 	/**
 	 * @brief Seeks to the very start of the buffer
@@ -228,7 +247,7 @@ public:
 	inline BufferPos seek_start()
 	{
 		BufferPos old = m_bufPos;
-		m_bufPos      = 0;
+		m_bufPos = 0;
 		return old;
 	}
 
@@ -239,7 +258,7 @@ public:
 	inline BufferPos seek_end()
 	{
 		BufferPos old = m_bufPos;
-		m_bufPos      = m_size - 1;
+		m_bufPos = m_size - 1;
 		return old;
 	}
 
@@ -250,8 +269,7 @@ public:
 	 */
 	inline BufferPos seek_cur(int offset)
 	{
-		if (offset + m_bufPos >= m_size)
-			return m_bufPos;
+		if(offset + m_bufPos >= m_size) return m_bufPos;
 		m_bufPos += offset;
 	}
 
@@ -262,32 +280,43 @@ public:
 	 */
 	inline BufferPos seek_absolute(BufferPos offset)
 	{
-		if (offset > m_size)
-			return m_bufPos;
+		if(offset > m_size) return m_bufPos;
 		BufferPos old = m_bufPos;
-		m_bufPos      = offset;
+		m_bufPos = offset;
 		return m_bufPos;
 	}
 
 	/**
 	 * @return Max allocated size of the buffer
 	 */
-	inline BufferSize max_size() const { return m_size; }
+	inline BufferSize max_size() const
+	{
+		return m_size;
+	}
 
 	/**
 	 * @return Number of chars written to the buffer
 	 */
-	inline BufferSize size() const { return m_maxWrite; }
+	inline BufferSize size() const
+	{
+		return m_maxWrite;
+	}
 
 	/**
 	 * @return Pointer to the data of the buffer
 	 */
-	inline void* data() const { return m_data; }
+	inline void* data() const
+	{
+		return m_data;
+	}
 
 	/**
 	 * @brief Zeroes out the internal buffer
 	 */
-	inline void clear() { memset(m_data, 0, sizeof(CharT) * m_size); }
+	inline void clear()
+	{
+		memset(m_data, 0, sizeof(CharT) * m_size);
+	}
 
 	/**
 	 * @brief Resizes the internal buffer so that it's  the same size as the data written to it
@@ -295,8 +324,7 @@ public:
 	inline void compact()
 	{
 		/* Cannot compact if we're already at max compaction */
-		if (m_maxWrite == m_size - 1)
-			return;
+		if(m_maxWrite == m_size-1) return;
 		this->resize(m_maxWrite);
 	}
 
@@ -304,12 +332,18 @@ public:
 	 * @brief Returns true if the buffer is empty
 	 * @return
 	 */
-	inline bool empty() const { return (m_maxWrite == -1 || m_size == 0); }
+	inline bool empty() const
+	{
+		return (m_maxWrite == -1 || m_size == 0);
+	}
 
 	/**
 	 * @return returns if the buffer will overflow if you write the specified number of bytes to it
 	 */
-	inline bool will_overflow(BufferSize num_bytes) const { return (m_bufPos + num_bytes >= m_size); }
+	inline bool will_overflow(BufferSize num_bytes) const
+	{
+		return (m_bufPos + num_bytes >= m_size);
+	}
 
 	/**
 	 * @brief Writes the current buffer to a stream
@@ -318,9 +352,8 @@ public:
 	 */
 	inline BufferSize write_to_stream(FILE* stream) const
 	{
-		if (m_maxWrite == m_bufPos)
-			return 0;
-		return (BufferSize)std::fwrite(&m_data[m_bufPos], sizeof(CharT), m_maxWrite - m_bufPos, stream);
+		if(m_maxWrite == m_bufPos) return 0;
+		return (BufferSize)std::fwrite(&m_data[m_bufPos], sizeof(CharT), m_maxWrite-m_bufPos, stream);
 	}
 
 	/**
@@ -331,24 +364,29 @@ public:
 	 */
 	inline BufferSize read_from_stream(FILE* stream, BufferSize num_bytes)
 	{
-		if ((num_bytes / sizeof(CharT)) > m_size)
-			resize(num_bytes / sizeof(CharT));
+		if((num_bytes / sizeof(CharT))> m_size) resize(num_bytes / sizeof(CharT));
 		std::size_t num_read = fread(&m_data[m_bufPos], 1, num_bytes, stream);
-		m_bufPos += (num_read / sizeof(CharT));
+		m_bufPos += (num_read/sizeof(CharT));
 		compute_max_write();
 		return (BufferSize)num_read;
 	}
 };
 
-template <unsigned long long N, class CharT = unsigned char>
+template<unsigned long long N, class CharT = unsigned char>
 class FixedBufferT : public BufferT<CharT, StaticAllocator<CharT, N>, BufferSizePolicyFixed>
 {
 public:
 	typedef BufferT<CharT, StaticAllocator<CharT, N>, BufferSizePolicyFixed> BaseClass;
 
-	FixedBufferT() : BaseClass(N) {}
+	FixedBufferT() :
+		BaseClass(N)
+	{
 
-	virtual ~FixedBufferT() {}
+	}
+
+	virtual ~FixedBufferT()
+	{
+	}
 };
 
 typedef BufferT<unsigned char> Buffer;

@@ -17,24 +17,23 @@ GNU General Public License for more details.
 #define VGUI_DRAW_H
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 #include "port.h"
 
-	//
-	// vgui_draw.c
-	//
-	void	 VGui_Startup(const char* clientlib, int width, int height);
-	void	 VGui_Shutdown(void);
-	void	 VGui_Paint();
-	void	 VGui_RunFrame();
-	void	 VGui_KeyEvent(int key, int down);
-	void	 VGui_MouseMove(int x, int y);
-	qboolean VGui_IsActive(void);
-	void*	 VGui_GetPanel();
+//
+// vgui_draw.c
+//
+void VGui_Startup( const char *clientlib, int width, int height );
+void VGui_Shutdown( void );
+void VGui_Paint();
+void VGui_RunFrame();
+void VGui_KeyEvent( int key, int down );
+void VGui_MouseMove( int x, int y );
+qboolean VGui_IsActive( void );
+void *VGui_GetPanel();
 #ifdef __cplusplus
 }
 #endif
-#endif // VGUI_DRAW_H
+#endif//VGUI_DRAW_H

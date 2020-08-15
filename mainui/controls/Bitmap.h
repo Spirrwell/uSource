@@ -26,39 +26,39 @@ public:
 
 	CMenuBitmap();
 
-	void VidInit(void) override;
-	bool KeyUp(int key) override;
-	bool KeyDown(int key) override;
-	void Draw(void) override;
-	void SetPicture(const char* pic, const char* focusPic = NULL, const char* pressPic = NULL)
+	void VidInit( void ) override;
+	bool KeyUp( int key ) override;
+	bool KeyDown( int key ) override;
+	void Draw( void ) override;
+	void SetPicture( const char *pic, const char *focusPic = NULL, const char *pressPic = NULL)
 	{
-		szPic	   = pic;
+		szPic = pic;
 		szFocusPic = focusPic;
 		szPressPic = pressPic;
 	}
 
-	void SetRenderMode(ERenderMode renderMode, ERenderMode focusRenderMode = QM_DRAWNORMAL, ERenderMode pressRenderMode = QM_DRAWNORMAL)
+	void SetRenderMode( ERenderMode renderMode, ERenderMode focusRenderMode = QM_DRAWNORMAL, ERenderMode pressRenderMode = QM_DRAWNORMAL )
 	{
-		eRenderMode	 = renderMode;
+		eRenderMode = renderMode;
 		eFocusRenderMode = focusRenderMode;
 		ePressRenderMode = pressRenderMode;
 	}
 
-	const char* szPic;
+	const char *szPic;
 	ERenderMode eRenderMode;
 
-	const char* szFocusPic;
+	const char *szFocusPic;
 	ERenderMode eFocusRenderMode;
 
-	const char* szPressPic;
+	const char *szPressPic;
 	ERenderMode ePressRenderMode;
 };
 
 // menu banners used fiexed rectangle (virtual screenspace at 640x480)
-#define UI_BANNER_POSX	 72
-#define UI_BANNER_POSY	 72
-#define UI_BANNER_WIDTH	 736
-#define UI_BANNER_HEIGHT 128
+#define UI_BANNER_POSX		72
+#define UI_BANNER_POSY		72
+#define UI_BANNER_WIDTH		736
+#define UI_BANNER_HEIGHT		128
 
 class CMenuBannerBitmap : public CMenuBitmap
 {
@@ -68,14 +68,15 @@ public:
 	CMenuBannerBitmap() : BaseClass()
 	{
 		iFlags = QMF_INACTIVE;
-		SetCharSize(QM_BIGFONT);
-		SetRect(UI_BANNER_POSX, UI_BANNER_POSY, UI_BANNER_WIDTH, UI_BANNER_HEIGHT);
-		SetRenderMode(QM_DRAWADDITIVE);
+		SetCharSize( QM_BIGFONT );
+		SetRect( UI_BANNER_POSX, UI_BANNER_POSY, UI_BANNER_WIDTH, UI_BANNER_HEIGHT );
+		SetRenderMode( QM_DRAWADDITIVE );
 	}
-	void Draw(void) override;
-	void VidInit(void) override;
-	void SetInactive(bool) override {}
-	void ToggleInactive() override {}
+	void Draw( void ) override;
+	void VidInit( void ) override;
+	void SetInactive(bool) override { }
+	void ToggleInactive() override { }
 };
+
 
 #endif // MENU_BITMAP_H

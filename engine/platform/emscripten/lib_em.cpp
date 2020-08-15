@@ -13,31 +13,31 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 #ifdef __EMSCRIPTEN__
-#include "common.h"
-#include "filesystem.h"
-#include "library.h"
-#include "server.h"
 #include <emscripten.h>
+#include "common.h"
+#include "library.h"
+#include "filesystem.h"
+#include "server.h"
 
-void* EMSCRIPTEN_LoadLibrary(const char* dllname)
+void *EMSCRIPTEN_LoadLibrary( const char *dllname )
 {
-	void* pHandle = NULL;
-
+	void *pHandle = NULL;
+	
 #ifdef EMSCRIPTEN_LIB_FS
-	char   path[MAX_SYSPATH];
+	char path[MAX_SYSPATH];
 	string prefix;
-	Q_strcpy(prefix, getenv("LIBRARY_PREFIX"));
-	Q_snprintf(path, MAX_SYSPATH, "%s%s%s", prefix, dllname, getenv("LIBRARY_SUFFIX"));
-	pHandle = dlopen(path, RTLD_LAZY);
-	if (!pHandle)
+	Q_strcpy(prefix, getenv( "LIBRARY_PREFIX" ) );
+	Q_snprintf( path, MAX_SYSPATH, "%s%s%s",  prefix, dllname, getenv( "LIBRARY_SUFFIX" ) );
+	pHandle = dlopen( path, RTLD_LAZY );
+	if( !pHandle )
 	{
-		COM_PushLibraryError(va("Loading %s:\n", path));
-		COM_PushLibraryError(dlerror());
+		COM_PushLibraryError( va("Loading %s:\n", path ) );
+		COM_PushLibraryError( dlerror() );
 	}
 	return pHandle;
 #else
 	// get handle of preloaded library outside fs
-	return EM_ASM_INT(return DLFCN.loadedLibNames[Pointer_stringify($0)], (int)dllname);
+	return EM_ASM_INT( return DLFCN.loadedLibNames[Pointer_stringify($0)], (int)dllname );
 #endif
 }
 

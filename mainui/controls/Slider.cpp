@@ -14,12 +14,13 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-#include "Slider.h"
-#include "BaseMenu.h"
-#include "Utils.h"
 #include "extdll_menu.h"
+#include "BaseMenu.h"
+#include "Slider.h"
+#include "Utils.h"
 
-CMenuSlider::CMenuSlider() : BaseClass(), m_flMinValue(), m_flMaxValue(), m_flCurValue(), m_flDrawStep(), m_iNumSteps(), m_flRange(), m_iKeepSlider()
+CMenuSlider::CMenuSlider() : BaseClass(), m_flMinValue(), m_flMaxValue(), m_flCurValue(),
+	m_flDrawStep(), m_iNumSteps(), m_flRange(), m_iKeepSlider()
 {
 	m_iSliderOutlineWidth = 6;
 
@@ -30,7 +31,7 @@ CMenuSlider::CMenuSlider() : BaseClass(), m_flMinValue(), m_flMaxValue(), m_flCu
 
 	eFocusAnimation = QM_HIGHLIGHTIFFOCUS;
 
-	SetCharSize(QM_DEFAULTFONT);
+	SetCharSize( QM_DEFAULTFONT );
 
 	iFlags |= QMF_DROPSHADOW;
 }
@@ -40,13 +41,13 @@ CMenuSlider::CMenuSlider() : BaseClass(), m_flMinValue(), m_flMaxValue(), m_flCu
 CMenuSlider::Init
 =================
 */
-void CMenuSlider::VidInit()
+void CMenuSlider::VidInit(  )
 {
-	if (m_flRange < 0.05f)
+	if( m_flRange < 0.05f )
 		m_flRange = 0.05f;
 
-	colorBase.SetDefault(uiColorWhite);
-	colorFocus.SetDefault(uiColorWhite);
+	colorBase.SetDefault( uiColorWhite );
+	colorFocus.SetDefault( uiColorWhite );
 
 	BaseClass::VidInit();
 
@@ -54,20 +55,21 @@ void CMenuSlider::VidInit()
 	m_scCenterBox.w = m_scSize.w / 5.0f;
 	m_scCenterBox.h = m_scSize.h - m_iSliderOutlineWidth * 2;
 
-	m_iNumSteps  = (m_flMaxValue - m_flMinValue) / m_flRange + 1;
+	m_iNumSteps = (m_flMaxValue - m_flMinValue) / m_flRange + 1;
 	m_flDrawStep = (float)(m_scSize.w - m_iSliderOutlineWidth - m_scCenterBox.w) / (float)m_iNumSteps;
 }
 
-bool CMenuSlider::KeyUp(int key)
+bool CMenuSlider::KeyUp( int key )
 {
-	if (m_iKeepSlider)
+	if( m_iKeepSlider )
 	{
 		// tell menu about changes
-		SetCvarValue(m_flCurValue);
-		_Event(QM_CHANGED);
+		SetCvarValue( m_flCurValue );
+		_Event( QM_CHANGED );
 		m_iKeepSlider = false; // button released
 	}
 	return true;
+
 }
 
 /*
@@ -75,12 +77,12 @@ bool CMenuSlider::KeyUp(int key)
 CMenuSlider::Key
 =================
 */
-bool CMenuSlider::KeyDown(int key)
+bool CMenuSlider::KeyDown( int key )
 {
-	switch (key)
+	switch( key )
 	{
 	case K_MOUSE1:
-		if (!UI_CursorInRect(m_scPos, m_scSize))
+		if( !UI_CursorInRect( m_scPos, m_scSize ) )
 		{
 			m_iKeepSlider = false;
 			return true;
@@ -89,47 +91,47 @@ bool CMenuSlider::KeyDown(int key)
 		m_iKeepSlider = true;
 
 		// immediately move slider into specified place
-		int dist, numSteps;
+		int	dist, numSteps;
 
-		dist	     = uiStatic.cursorX - (m_scPos.x + m_iSliderOutlineWidth + m_scCenterBox.w);
-		numSteps     = floor(dist / m_flDrawStep);
-		m_flCurValue = bound(m_flMinValue, numSteps * m_flRange + m_flMinValue, m_flMaxValue);
+		dist = uiStatic.cursorX - (m_scPos.x + m_iSliderOutlineWidth + m_scCenterBox.w);
+		numSteps = floor(dist / m_flDrawStep);
+		m_flCurValue = bound( m_flMinValue, numSteps * m_flRange + m_flMinValue, m_flMaxValue );
 
 		// tell menu about changes
-		SetCvarValue(m_flCurValue);
-		_Event(QM_CHANGED);
+		SetCvarValue( m_flCurValue );
+		_Event( QM_CHANGED );
 
 		return true;
 	case K_LEFTARROW:
 		m_flCurValue -= m_flRange;
 
-		if (m_flCurValue < m_flMinValue)
+		if( m_flCurValue < m_flMinValue )
 		{
 			m_flCurValue = m_flMinValue;
-			PlayLocalSound(uiSoundBuzz);
+			PlayLocalSound( uiSoundBuzz );
 			return true;
 		}
 
 		// tell menu about changes
-		SetCvarValue(m_flCurValue);
-		_Event(QM_CHANGED);
+		SetCvarValue( m_flCurValue );
+		_Event( QM_CHANGED );
 
-		PlayLocalSound(uiSoundKey);
+		PlayLocalSound( uiSoundKey );
 		return true;
 	case K_RIGHTARROW:
 		m_flCurValue += m_flRange;
 
-		if (m_flCurValue > m_flMaxValue)
+		if( m_flCurValue > m_flMaxValue )
 		{
 			m_flCurValue = m_flMaxValue;
-			PlayLocalSound(uiSoundBuzz);
+			PlayLocalSound( uiSoundBuzz );
 			return true;
 		}
 
 		// tell menu about changes
-		SetCvarValue(m_flCurValue);
-		_Event(QM_CHANGED);
-		PlayLocalSound(uiSoundKey);
+		SetCvarValue( m_flCurValue );
+		_Event( QM_CHANGED );
+		PlayLocalSound( uiSoundKey );
 		return true;
 	}
 
@@ -141,66 +143,68 @@ bool CMenuSlider::KeyDown(int key)
 CMenuSlider::Draw
 =================
 */
-void CMenuSlider::Draw(void)
+void CMenuSlider::Draw( void )
 {
-	int  textHeight, sliderX;
-	uint textflags = (iFlags & QMF_DROPSHADOW) ? ETF_SHADOW : 0;
+	int	textHeight, sliderX;
+	uint textflags = ( iFlags & QMF_DROPSHADOW ) ? ETF_SHADOW : 0;
 
-	if (szStatusText && iFlags & QMF_NOTIFY)
+	if( szStatusText && iFlags & QMF_NOTIFY )
 	{
 		Point coord;
 
 		coord.x = m_scPos.x + 16 * uiStatic.scaleX;
 		coord.y = m_scPos.y + m_scSize.h / 2 - EngFuncs::ConsoleCharacterHeight() / 2;
 
-		int r, g, b;
 
-		UnpackRGB(r, g, b, uiColorHelp);
-		EngFuncs::DrawSetTextColor(r, g, b);
-		EngFuncs::DrawConsoleString(coord, szStatusText);
+		int	r, g, b;
+
+		UnpackRGB( r, g, b, uiColorHelp );
+		EngFuncs::DrawSetTextColor( r, g, b );
+		EngFuncs::DrawConsoleString( coord, szStatusText );
 	}
 
-	if (m_iKeepSlider)
+	if( m_iKeepSlider )
 	{
-		if (!UI_CursorInRect(m_scPos.x, m_scPos.y - 40, m_scSize.w, m_scSize.h + 80))
+		if( !UI_CursorInRect( m_scPos.x, m_scPos.y - 40, m_scSize.w, m_scSize.h + 80 ) )
 			m_iKeepSlider = false;
 		else
 		{
-			int dist, numSteps;
+			int	dist, numSteps;
 
 			// move slider follow the holded mouse button
-			dist	     = uiStatic.cursorX - m_scPos.x - m_iSliderOutlineWidth - (m_scCenterBox.w / 2);
-			numSteps     = floor(dist / m_flDrawStep);
-			m_flCurValue = bound(m_flMinValue, numSteps * m_flRange + m_flMinValue, m_flMaxValue);
+			dist = uiStatic.cursorX - m_scPos.x - m_iSliderOutlineWidth - (m_scCenterBox.w/2);
+			numSteps = floor(dist / m_flDrawStep);
+			m_flCurValue = bound( m_flMinValue, numSteps * m_flRange + m_flMinValue, m_flMaxValue );
 
 			// tell menu about changes
-			SetCvarValue(m_flCurValue);
-			_Event(QM_CHANGED);
+			SetCvarValue( m_flCurValue );
+			_Event( QM_CHANGED );
 		}
 	}
 
 	// keep value in range
-	m_flCurValue = bound(m_flMinValue, m_flCurValue, m_flMaxValue);
+	m_flCurValue = bound( m_flMinValue, m_flCurValue, m_flMaxValue );
 
 	// calc slider position
-	sliderX = m_scPos.x + (m_iSliderOutlineWidth / 2)			    // start
-		  + ((m_flCurValue - m_flMinValue) / (m_flMaxValue - m_flMinValue)) // calc fractional part
-			    * (m_scSize.w - m_iSliderOutlineWidth - (m_scCenterBox.w));
+	sliderX = m_scPos.x + (m_iSliderOutlineWidth/2) // start
+		+ ( ( m_flCurValue - m_flMinValue ) / ( m_flMaxValue - m_flMinValue ) )  // calc fractional part
+		* ( m_scSize.w - m_iSliderOutlineWidth - (m_scCenterBox.w) );
 
-	UI_DrawRectangleExt(m_scPos.x + m_iSliderOutlineWidth / 2, m_scPos.y + m_iSliderOutlineWidth, m_scSize.w - m_iSliderOutlineWidth,
-			    m_scCenterBox.h, uiInputBgColor, m_iSliderOutlineWidth);
-	if (eFocusAnimation == QM_HIGHLIGHTIFFOCUS && this == m_pParent->ItemAtCursor())
-		UI_DrawPic(sliderX, m_scPos.y, m_scCenterBox.w, m_scSize.h, uiColorHelp, UI_SLIDER_MAIN);
+
+	UI_DrawRectangleExt( m_scPos.x + m_iSliderOutlineWidth / 2, m_scPos.y + m_iSliderOutlineWidth, m_scSize.w - m_iSliderOutlineWidth, m_scCenterBox.h, uiInputBgColor, m_iSliderOutlineWidth );
+	if( eFocusAnimation == QM_HIGHLIGHTIFFOCUS && this == m_pParent->ItemAtCursor())
+		UI_DrawPic( sliderX, m_scPos.y, m_scCenterBox.w, m_scSize.h, uiColorHelp, UI_SLIDER_MAIN );
 	else
-		UI_DrawPic(sliderX, m_scPos.y, m_scCenterBox.w, m_scSize.h, uiColorWhite, UI_SLIDER_MAIN);
+		UI_DrawPic( sliderX, m_scPos.y, m_scCenterBox.w, m_scSize.h, uiColorWhite, UI_SLIDER_MAIN );
+
 
 	textHeight = m_scPos.y - (m_scChSize * 1.5f);
-	UI_DrawString(font, m_scPos.x, textHeight, m_scSize.w, m_scChSize, szName, uiColorHelp, m_scChSize, eTextAlignment, textflags | ETF_FORCECOL);
+	UI_DrawString( font, m_scPos.x, textHeight, m_scSize.w, m_scChSize, szName, uiColorHelp, m_scChSize, eTextAlignment, textflags | ETF_FORCECOL );
 }
 
 void CMenuSlider::UpdateEditable()
 {
-	float flValue = EngFuncs::GetCvarFloat(m_szCvarName);
+	float flValue = EngFuncs::GetCvarFloat( m_szCvarName );
 
 	m_flCurValue = flValue;
 }
