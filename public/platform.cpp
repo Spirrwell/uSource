@@ -63,3 +63,33 @@ void platform::FatalError(const char *fmt, ...)
 	fprintf(stderr, "%s", tmp);
 	abort();
 }
+
+bool platform::time_t::operator<(const platform::time_t &other) const
+{
+	return (this->sec < other.sec) || (this->sec == other.sec && this->ns < other.ns);
+}
+
+bool platform::time_t::operator<=(const platform::time_t &other) const
+{
+	return (this->sec <= other.sec) || (this->sec == other.sec && this->ns <= other.ns);
+}
+
+bool platform::time_t::operator>(const platform::time_t &other) const
+{
+	return (this->sec > other.sec) || (this->sec == other.sec && this->ns > other.ns);
+}
+
+bool platform::time_t::operator>=(const platform::time_t &other) const
+{
+	return (this->sec >= other.sec) || (this->sec == other.sec && this->ns >= other.ns);
+}
+
+bool platform::time_t::operator==(const platform::time_t &other) const
+{
+	return (this->sec == other.sec) && (this->ns == other.ns);
+}
+
+bool platform::time_t::operator!=(const platform::time_t &other) const
+{
+	return (this->sec != other.sec) || (this->ns != other.ns);
+}

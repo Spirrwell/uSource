@@ -81,6 +81,7 @@ private:
 	unsigned long long m_nodeStackThreads[MAX_NODESTACKS];
 	bool m_enabled;
 	mutable CThreadMutex m_mutex;
+	platform::time_t m_lastFrameTime;
 public:
 	CXProf();
 	~CXProf();
@@ -92,6 +93,18 @@ public:
 	class CXProfNode* CreateNode(const char* category, const char* func, const char* file, unsigned long long budget);
 	void PushNode(class CXProfNode* node);
 	void PopNode();
+
+	/* Returns a pointer to the current node.
+	 * NOT thread-safe. Lock before calling this! */
+	class CXProfNode* CurrentNode();
+
+	platform::time_t LastFrameTime() const { return m_lastFrameTime; };
+
+	/* Use to report memory allocations/frees */
+	/* Thread-safe without locks */
+	void ReportAlloc(size_t sz);
+	void ReportRealloc(size_t oldsize, size_t newsize);
+	void ReportFree();
 
 	class CXProfNode* FindCategory(const char* name);
 
@@ -133,14 +146,43 @@ private:
 	bool m_added;
 	unsigned long long m_timeBudget;
 	unsigned long long m_totalTime; /* Total time for THIS NODE */
+	unsigned long long m_absTotal; /* Total time absolute. Not per-frame */
 	bool m_logTests;
 	unsigned int m_testQueueSize;
 	Array<class CXProfTest> m_testQueue;
 	const char* m_file;
 	const char* m_category;
 	mutable CThreadSpinlock m_mutex;
+	platform::time_t m_lastSampleTime; /* Used to record the last sample time of the node, which is used to determine if this was sampled in the last frame or not */
+
+	unsigned long long m_numFrames; // Total number of frames
+
+	/* Stuff for malloc tracking */
+	unsigned long long m_allocBudget; /* Per-frame malloc budget */
+	unsigned long long m_freeBudget; /* Per-frame free budget */
+
+	unsigned long long m_frameAllocs; /* Number of allocations per frame */
+	unsigned long long m_frameAllocBytes; /* Number of bytes allocated in this frame */
+	unsigned long long m_frameFrees; /* Number of calls to free */
+
+	unsigned long long m_totalAllocs;
+	unsigned long long m_totalAllocBytes;
+	unsigned long long m_totalFrees;
+
+	/* Averages for allocs and such */
+	unsigned int m_avgAllocs;
+	unsigned int m_avgAllocBytes;
+	unsigned int m_avgFrees;
 
 	friend class CXProf;
+
+	/**
+	 * Counter reports for the memory allocators and such
+	 * These will be called by CXProf
+	 */
+	void ReportAlloc(size_t size);
+	void ReportFree();
+	void ReportRealloc(size_t old, size_t newsize);
 
 public:
 	CXProfNode(const char* category, const char* function, const char* file, unsigned long long budget);
@@ -168,6 +210,11 @@ public:
 	unsigned long long GetRemainingBudget() const;
 	void ResetBudget();
 
+	/**
+	 * @brief Resets anything that might need to be reset
+	 */
+	void DoFrame();
+
 	/* Accessors */
 	/* THREAD SAFE */
 	const char* Name() const { return m_function; };
@@ -180,6 +227,7 @@ public:
 };
 
 extern CXProf* g_pXProf;
+CXProf& GlobalXProf();
 
 /* defined in header to avoid cross DLL calls */
 class CXProfTest

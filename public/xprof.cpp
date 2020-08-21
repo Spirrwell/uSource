@@ -59,9 +59,15 @@ public:
 };
 static CXProfInit g_xprof_init_wrapper;
 
+CXProf& GlobalXProf()
+{
+	return *g_pXProf;
+}
+
 /* Constructor is NOT thread-safe, obviously! */
 CXProf::CXProf() :
-	m_enabled(true)
+	m_enabled(true),
+	m_lastFrameTime()
 {
 	for(int i = 0; i < MAX_NODESTACKS; i++)
 	{
@@ -203,7 +209,7 @@ void CXProf::DumpNodeTreeInternal(CXProfNode* node, int indent, int(*printFn)(co
 	for(int i = indent; i > 0; i--) printf("\t");
 	printFn("%s\n", node->Name());
 	for(int i = indent; i >= 0; i--) printf("\t");
-	printFn("Total time: %llu us\n", node->GetRemainingBudget() / 1000);
+	printFn("Total time: %llu us\n", node->m_lastSampleTime > m_lastFrameTime ? node->GetRemainingBudget() / 1000 : 0.0f);
 	for(auto x : node->Children())
 		DumpNodeTreeInternal(x, indent+1);
 }
@@ -211,11 +217,8 @@ void CXProf::DumpNodeTreeInternal(CXProfNode* node, int indent, int(*printFn)(co
 void CXProf::Frame(float dt)
 {
 	auto lock = m_mutex.RAIILock();
-	/* Reset all budgets */
-	for(auto x : m_nodes)
-	{
-		x->ResetBudget();
-	}
+	/* Simply record the last frame time */
+	m_lastFrameTime = platform::GetCurrentTime();
 }
 
 void CXProf::ClearNodes()
@@ -249,6 +252,49 @@ bool CXProf::Enabled() const
 	return  m_enabled;
 }
 
+void CXProf::ReportAlloc(size_t sz)
+{
+	auto lock = m_mutex.RAIILock();
+	CXProfNode* node = CurrentNode();
+	if(!node) return;
+	node->ReportAlloc(sz);
+}
+
+void CXProf::ReportRealloc(size_t oldsize, size_t newsize)
+{
+	auto lock = m_mutex.RAIILock();
+	CXProfNode* node = CurrentNode();
+	if(!node) return;
+	node->ReportRealloc(oldsize, newsize);
+}
+
+void CXProf::ReportFree()
+{
+	auto lock = m_mutex.RAIILock();
+	CXProfNode* node = CurrentNode();
+	if(!node) return;
+	node->ReportFree();
+}
+
+class CXProfNode *CXProf::CurrentNode()
+{
+	auto threadid = platform::GetCurrentThreadId();
+	int index = -1;
+	for(int i = 0; i < MAX_NODESTACKS; i++)
+	{
+		if(m_nodeStackThreads[i] == threadid)
+		{
+			index = i;
+			break;
+		}
+	}
+
+	if(index == -1) return nullptr;
+	if(m_nodeStack[index].empty()) return nullptr;
+
+	return m_nodeStack[index].top();
+}
+
 /*=======================================================
  *
  *      CXProfNode
@@ -265,7 +311,21 @@ CXProfNode::CXProfNode(const char* category, const char* function, const char* f
 	m_testQueueSize(0),
 	m_category(category),
 	m_totalTime(0),
-	m_added(false)
+	m_added(false),
+	m_lastSampleTime(),
+	m_absTotal(0),
+	m_totalAllocBytes(0),
+	m_allocBudget(0),
+	m_frameAllocBytes(0),
+	m_frameAllocs(0),
+	m_frameFrees(0),
+	m_totalAllocs(0),
+	m_totalFrees(0),
+	m_freeBudget(0),
+	m_avgFrees(0),
+	m_avgAllocBytes(0),
+	m_avgAllocs(0),
+	m_numFrames(0)
 {
 
 }
@@ -297,7 +357,11 @@ void CXProfNode::ResetBudget()
 void CXProfNode::SubmitTest(CXProfTest* test)
 {
 	auto lock = m_mutex.RAIILock();
-	this->m_totalTime += (test->stop.to_ns() - test->start.to_ns());
+	this->m_lastSampleTime = platform::GetCurrentTime();
+
+	unsigned long long elapsed = (test->stop.to_ns() - test->start.to_ns());
+	this->m_totalTime += elapsed;
+	this->m_absTotal += elapsed;
 }
 
 void CXProfNode::SetBudget(unsigned long long int time)
@@ -328,4 +392,51 @@ Array<CXProfTest> CXProfNode::TestQueue() const
 {
 	auto lock = this->m_mutex.RAIILock();
 	return m_testQueue;
+}
+
+void CXProfNode::DoFrame()
+{
+	auto lock = this->m_mutex.RAIILock();
+	m_numFrames++;
+
+	/* Check if the last frame reset time has taken place after our last sample. If so, reset the per-frame budget time and stuff */
+	if(GlobalXProf().LastFrameTime() > this->m_lastSampleTime)
+	{
+		/* Update the average allocations and stuff */
+		this->m_avgFrees = ((m_numFrames-1) * m_avgFrees + m_frameFrees) / m_numFrames;
+		this->m_avgAllocs = ((m_numFrames-1) * m_avgAllocs + m_frameAllocs) / m_numFrames;
+		this->m_avgAllocBytes = ((m_numFrames-1) * m_avgAllocBytes + m_frameAllocBytes) / m_numFrames;
+
+		this->m_totalTime = 0;
+		this->m_frameAllocs = 0;
+		this->m_frameAllocBytes = 0;
+		this->m_frameFrees = 0;
+	}
+}
+
+void CXProfNode::ReportAlloc(size_t size)
+{
+	auto lock = this->m_mutex.RAIILock();
+	m_totalAllocs++;
+	m_frameAllocs++;
+	m_frameAllocBytes += size;
+	m_totalAllocBytes += size;
+}
+
+void CXProfNode::ReportFree()
+{
+	auto lock = this->m_mutex.RAIILock();
+	m_totalFrees++;
+	m_frameFrees++;
+}
+
+void CXProfNode::ReportRealloc(size_t old, size_t newsize)
+{
+	auto lock = this->m_mutex.RAIILock();
+	int ds = newsize - old;
+	m_totalAllocs++;
+	m_frameAllocs++;
+	m_totalFrees++; // Gonna count this as a free too. Need a better way to detect this
+	m_totalAllocBytes += ds;
+	m_frameAllocBytes += ds;
 }

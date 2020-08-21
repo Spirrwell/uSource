@@ -27,6 +27,7 @@ GNU General Public License for more details.
 #include "mem.h"
 #include "crtlib.h"
 #include "platformspec.h"
+#include "xprof.h"
 
 #include <stdlib.h>
 #include <memory.h>
@@ -100,6 +101,8 @@ void* CZoneAllocator::_Mem_Alloc( byte *poolptr, size_t size, bool clear, const 
 	if( mem->next ) mem->next->prev = mem;
 	if( clear ) memset((void *)((byte *)mem + sizeof( memheader_t )), 0, mem->size );
 
+	GlobalXProf().ReportAlloc(size);
+
 	return (void *)((byte *)mem + sizeof( memheader_t ));
 }
 
@@ -159,6 +162,7 @@ void CZoneAllocator::_Mem_Free( void *data, const char *filename, int fileline )
 {
 	if( data == NULL ) platform::FatalError( "Mem_Free: data == NULL (called at %s:%i)\n", filename, fileline );
 	Mem_FreeBlock((memheader_t *)((byte *)data - sizeof( memheader_t )), filename, fileline );
+	GlobalXProf().ReportFree();
 }
 
 void* CZoneAllocator::_Mem_Realloc( byte *poolptr, void *memptr, size_t size, bool clear, const char *filename, int fileline )
@@ -182,6 +186,8 @@ void* CZoneAllocator::_Mem_Realloc( byte *poolptr, void *memptr, size_t size, bo
 		memcpy( nb, memptr, newsize );
 		_Mem_Free( memptr, filename, fileline ); // free unused old block
 	}
+
+	GlobalXProf().ReportRealloc(memhdr->size, size);
 
 	return (void *)nb;
 }

@@ -42,6 +42,7 @@ GNU General Public License for more details.
 #include "appframework.h"
 #include "public/containers/list.h"
 #include "tier1/tier1.h"
+#include "xprof.h"
 
 /* Interface includes */
 #include "log_int.h"
@@ -596,6 +597,8 @@ void Host_Frame( float time )
 	if( !Host_FilterTime( time ))
 		return;
 
+	GlobalXProf().Frame();
+
 	Host_InputFrame ();  // input frame
 	Host_ClientBegin (); // begin client
 	Host_GetCommands (); // dedicated in
@@ -992,6 +995,8 @@ extern "C" int EXPORT Host_Main( int argc, char **argv, const char *progname, in
 	static double	oldtime, newtime;
 
 	pChangeGame = func;	// may be NULL
+
+	GlobalXProf().Enable();
 
 	Host_InitInterfaces();
 	Host_InitCommon( argc, argv, progname, bChangeGame );
