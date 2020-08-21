@@ -66,6 +66,11 @@ typedef struct mempool_s
 
 mempool_t *poolchain = NULL; // critical stuff
 
+CZoneAllocator& GlobalAllocator()
+{
+	return *g_pZoneAllocator;
+}
+
 void* CZoneAllocator::_Mem_Alloc( byte *poolptr, size_t size, bool clear, const char *filename, int fileline )
 {
 	memheader_t	*mem;

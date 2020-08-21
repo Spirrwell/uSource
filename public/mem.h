@@ -41,6 +41,8 @@ public:
 
 extern CZoneAllocator* g_pZoneAllocator;
 
+CZoneAllocator& GlobalAllocator();
+
 class IBaseMemoryAllocator
 {
 public:
