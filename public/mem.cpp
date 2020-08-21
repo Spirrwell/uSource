@@ -187,7 +187,12 @@ void* CZoneAllocator::_Mem_Realloc( byte *poolptr, void *memptr, size_t size, bo
 		_Mem_Free( memptr, filename, fileline ); // free unused old block
 	}
 
-	GlobalXProf().ReportRealloc(memhdr->size, size);
+	/* Only report realloc if the memptr is not null */
+	/* otherwise, it's just an allocation */
+	if(memptr)
+		GlobalXProf().ReportRealloc(memhdr->size, size);
+	else
+		GlobalXProf().ReportAlloc(size);
 
 	return (void *)nb;
 }

@@ -41,6 +41,8 @@ static xprof_node_desc_t g_categories[] =
 	{XPROF_CATEGORY_SERVER_THINK, 0},
 	{XPROF_CATEGORY_UNZIP, 0},
 	{XPROF_CATEGORY_LZSS, 0},
+	{XPROF_CATEGORY_COMMON, 0},
+	{XPROF_CATEGORY_FRAME, 0}
 };
 
 
@@ -83,6 +85,7 @@ CXProf::CXProf() :
 CXProf::~CXProf()
 {
 	this->DumpCategoryTree(XPROF_CATEGORY_KVPARSE);
+	this->DumpCategoryTree(XPROF_CATEGORY_FRAME);
 }
 
 void CXProf::AddCategoryNode(const char* name, unsigned long long budget)

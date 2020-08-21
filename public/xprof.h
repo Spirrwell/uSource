@@ -39,6 +39,8 @@ xprof.h - Realtime profiling
 #define XPROF_CATEGORY_SERVER_THINK "ServerThink"
 #define XPROF_CATEGORY_UNZIP "Unzip"
 #define XPROF_CATEGORY_LZSS "LZSS"
+#define XPROF_CATEGORY_COMMON "Common"
+#define XPROF_CATEGORY_FRAME "Frame"
 
 namespace xprof
 {
