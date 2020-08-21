@@ -69,7 +69,8 @@ CXProf& GlobalXProf()
 /* Constructor is NOT thread-safe, obviously! */
 CXProf::CXProf() :
 	m_enabled(true),
-	m_lastFrameTime()
+	m_lastFrameTime(),
+	m_flags(0)
 {
 	for(int i = 0; i < MAX_NODESTACKS; i++)
 	{
@@ -84,8 +85,11 @@ CXProf::CXProf() :
 
 CXProf::~CXProf()
 {
-	this->DumpCategoryTree(XPROF_CATEGORY_KVPARSE);
-	this->DumpCategoryTree(XPROF_CATEGORY_FRAME);
+	if(m_flags & XPROF_DUMP_ON_EXIT)
+	{
+		for(int i = 0; i < (sizeof(g_categories) / sizeof(g_categories[0])); i++)
+			this->DumpCategoryTree(g_categories[i].name);
+	}
 }
 
 void CXProf::AddCategoryNode(const char* name, unsigned long long budget)
@@ -207,12 +211,26 @@ void CXProf::DumpCategoryTree(const char* cat, int(*printFn)(const char*,...))
 	}
 }
 
+#define FILL_TABS for(int i = 0; i < indent; i++) printFn("\t")
+
 void CXProf::DumpNodeTreeInternal(CXProfNode* node, int indent, int(*printFn)(const char*,...))
 {
-	for(int i = indent; i > 0; i--) printf("\t");
+	/* Print node name */
+	FILL_TABS;
 	printFn("%s\n", node->Name());
-	for(int i = indent; i >= 0; i--) printf("\t");
-	printFn("Total time: %llu us\n", node->m_lastSampleTime > m_lastFrameTime ? node->GetRemainingBudget() / 1000 : 0.0f);
+
+	/* Print total time */
+	FILL_TABS;
+	printFn("Total time: %llu us\n", node->m_absTotal / 1000);
+
+	/* Print average time */
+	FILL_TABS;
+	printFn("Average per-frame time: %llu us\n", node->m_avgTime / 1000);
+
+	/* Print total allocs */
+	FILL_TABS;
+	printFn("Total allocs: %llu for %llu bytes total\n", node->m_totalAllocs, node->m_totalAllocBytes);
+
 	for(auto x : node->Children())
 		DumpNodeTreeInternal(x, indent+1);
 }
@@ -328,7 +346,8 @@ CXProfNode::CXProfNode(const char* category, const char* function, const char* f
 	m_avgFrees(0),
 	m_avgAllocBytes(0),
 	m_avgAllocs(0),
-	m_numFrames(0)
+	m_numFrames(0),
+	m_avgTime(0)
 {
 
 }
@@ -365,6 +384,7 @@ void CXProfNode::SubmitTest(CXProfTest* test)
 	unsigned long long elapsed = (test->stop.to_ns() - test->start.to_ns());
 	this->m_totalTime += elapsed;
 	this->m_absTotal += elapsed;
+	DoFrame();
 }
 
 void CXProfNode::SetBudget(unsigned long long int time)
@@ -399,16 +419,18 @@ Array<CXProfTest> CXProfNode::TestQueue() const
 
 void CXProfNode::DoFrame()
 {
-	auto lock = this->m_mutex.RAIILock();
-	m_numFrames++;
-
 	/* Check if the last frame reset time has taken place after our last sample. If so, reset the per-frame budget time and stuff */
 	if(GlobalXProf().LastFrameTime() > this->m_lastSampleTime)
 	{
+		m_numFrames++;
+
 		/* Update the average allocations and stuff */
 		this->m_avgFrees = ((m_numFrames-1) * m_avgFrees + m_frameFrees) / m_numFrames;
 		this->m_avgAllocs = ((m_numFrames-1) * m_avgAllocs + m_frameAllocs) / m_numFrames;
 		this->m_avgAllocBytes = ((m_numFrames-1) * m_avgAllocBytes + m_frameAllocBytes) / m_numFrames;
+
+		/* Update frame time average */
+		this->m_avgTime = ((m_numFrames-1) * m_avgTime + m_totalTime) / m_numFrames;
 
 		this->m_totalTime = 0;
 		this->m_frameAllocs = 0;
@@ -424,6 +446,7 @@ void CXProfNode::ReportAlloc(size_t size)
 	m_frameAllocs++;
 	m_frameAllocBytes += size;
 	m_totalAllocBytes += size;
+	DoFrame();
 }
 
 void CXProfNode::ReportFree()
@@ -431,6 +454,7 @@ void CXProfNode::ReportFree()
 	auto lock = this->m_mutex.RAIILock();
 	m_totalFrees++;
 	m_frameFrees++;
+	DoFrame();
 }
 
 void CXProfNode::ReportRealloc(size_t old, size_t newsize)
@@ -442,4 +466,5 @@ void CXProfNode::ReportRealloc(size_t old, size_t newsize)
 	m_totalFrees++; // Gonna count this as a free too. Need a better way to detect this
 	m_totalAllocBytes += ds;
 	m_frameAllocBytes += ds;
+	DoFrame();
 }

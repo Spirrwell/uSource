@@ -42,6 +42,9 @@ xprof.h - Realtime profiling
 #define XPROF_CATEGORY_COMMON "Common"
 #define XPROF_CATEGORY_FRAME "Frame"
 
+/* XProf Flags */
+#define XPROF_DUMP_ON_EXIT (1<<0)
+
 namespace xprof
 {
 	constexpr inline unsigned long long SecondsToNs(unsigned long long sec)
@@ -84,6 +87,8 @@ private:
 	bool m_enabled;
 	mutable CThreadMutex m_mutex;
 	platform::time_t m_lastFrameTime;
+	unsigned int m_flags;
+
 public:
 	CXProf();
 	~CXProf();
@@ -109,6 +114,9 @@ public:
 	void ReportFree();
 
 	class CXProfNode* FindCategory(const char* name);
+
+	void SetFlag(unsigned int flag) { m_flags |= flag; };
+	void ClearFlag(unsigned int flag) { m_flags &= ~flag; };
 
 	/* Returns a list of category nodes */
 	/* THREAD SAFE */
@@ -149,6 +157,7 @@ private:
 	unsigned long long m_timeBudget;
 	unsigned long long m_totalTime; /* Total time for THIS NODE */
 	unsigned long long m_absTotal; /* Total time absolute. Not per-frame */
+	unsigned long long m_avgTime; /* Average per-frame time */
 	bool m_logTests;
 	unsigned int m_testQueueSize;
 	Array<class CXProfTest> m_testQueue;
