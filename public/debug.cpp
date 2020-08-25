@@ -29,31 +29,44 @@ static void DbgInit()
 	binit = true;
 }
 
+/* Strips off the ../ that all files have appeneded to them */
+static const char* _CleanName(const char* file)
+{
+	size_t sz = Q_strlen(file);
+	if(sz > 3 && Q_startswith(file, ".." PATH_SEPARATOR))
+	{
+		return &file[3];
+	}
+	return file;
+}
+
 /* Internal functions (No locking done) */
 static CAssert& _FindOrCreateAssert(const char* file, int line, const char* exp)
 {
+	const char* cleanName = _CleanName(file);
 	for(auto& x : *g_passertions)
 	{
-		if(Q_strcmp(file, x.File()) == 0 && line == x.m_line)
+		if(Q_strcmp(cleanName, x.File()) == 0 && line == x.m_line)
 			return x;
 	}
-	CAssert assert(line, file, "");
+	CAssert assert(line, _CleanName(file), "");
 	g_passertions->push_back(assert);
 	return (*g_passertions)[g_passertions->size()-1];
 }
 
 static CAssert& _CreateAssert(const char* file, int line, const char* exp)
 {
-	CAssert assert(line, file, exp);
+	CAssert assert(line, _CleanName(file), exp);
 	g_passertions->push_back(assert);
 	return (*g_passertions)[g_passertions->size()-1];
 }
 
 static CAssert* _FindAssert(const char* file, int line)
 {
+	const char* cleanName = _CleanName(file);
 	for(auto& x : *g_passertions)
 	{
-		if(Q_strcmp(file, x.m_file) == 0 && x.m_line == line)
+		if(Q_strcmp(cleanName, x.m_file) == 0 && x.m_line == line)
 			return &x;
 	}
 	return nullptr;

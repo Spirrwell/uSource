@@ -25,6 +25,14 @@ GNU General Public License for more details.
 #define _format(x)
 #endif
 
+#undef PATH_SEPARATOR
+
+#ifdef _WIN32
+#define PATH_SEPARATOR "\\"
+#else
+#define PATH_SEPARATOR "/"
+#endif
+
 // timestamp modes
 enum
 {
@@ -86,5 +94,7 @@ void COM_StripExtension(char *path);
 int matchpattern(const char *in, const char *pattern, qboolean caseinsensitive);
 int matchpattern_with_separator(const char *in, const char *pattern, qboolean caseinsensitive, const char *separators,
                                 qboolean wildcard_least_one);
+
+bool Q_startswith(const char* string, const char* startingString);
 
 #endif//STDLIB_H

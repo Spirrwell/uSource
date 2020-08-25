@@ -31,6 +31,11 @@ GNU General Public License for more details.
 #define BIT6 (64)
 #define BIT7 (128)
 
+bool Q_startswith(const char* str, const char* sub)
+{
+	return Q_strncmp(str, sub, strlen(sub)) == 0;
+}
+
 void Q_strnupr(const char *in, char *out, size_t size_out)
 {
 	if (size_out == 0) return;
