@@ -14,6 +14,10 @@ Array<CAssert>* g_passertions = nullptr;
 
 CThreadMutex* g_passert_mutex = nullptr;
 
+bool g_asserts_once = false;
+bool g_asserts_break = false;
+bool g_asserts_disable = false;
+
 static void DbgInit()
 {
 	static bool binit = false;
@@ -30,7 +34,7 @@ static CAssert& _FindOrCreateAssert(const char* file, int line, const char* exp)
 {
 	for(auto& x : *g_passertions)
 	{
-		if(Q_strcmp(file, x.File()) == 0)
+		if(Q_strcmp(file, x.File()) == 0 && line == x.m_line)
 			return x;
 	}
 	CAssert assert(line, file, "");
@@ -117,7 +121,14 @@ bool dbg::FireAssertion(const char *file, int line, const char* exp)
 	ass.m_timesHit++; // The assertion's hit counter will be marked each and every time, even if the assert is ignored
 	ass.m_exp = exp; // Just going to update the expression here as it might not be set before the assert is actually hit
 
-	if(ass.m_break)
+	// Are asserts globally disabled?
+	if(g_asserts_disable) return false;
+
+	if((ass.m_assertOnce || g_asserts_once) && ass.m_timesHit > 1)
+		return false;
+
+	// Is the assert broken or are all asserts broken?
+	if(ass.m_break || g_asserts_break)
 		raise(SIGINT);
 
 	return !ass.m_ignored;
@@ -151,13 +162,51 @@ bool dbg::WasAssertHit(const char *file, int line)
 	return ass->m_timesHit != 0;
 }
 
+Array<CAssert> dbg::GetAssertList()
+{
+	DbgInit();
+	auto lock = g_passert_mutex->RAIILock();
+	return *g_passertions;
+}
+
+void dbg::EnableAssertBreak()
+{
+	g_asserts_break = true;
+}
+
+void dbg::DisableAssertBreak()
+{
+	g_asserts_break = false;
+}
+
+void dbg::EnableAssertOnce()
+{
+	g_asserts_once = true;
+}
+
+void dbg::DisableAssertOnce()
+{
+	g_asserts_once = false;
+}
+
+void dbg::EnableAsserts()
+{
+	g_asserts_disable = false;
+}
+
+void dbg::DisableAsserts()
+{
+	g_asserts_disable = true;
+}
+
 CAssert::CAssert(int line, const char* file, const char* exp) :
-	m_file(""),
-	m_line(0),
+	m_file(file),
+	m_line(line),
 	m_ignored(false),
 	m_exp(exp),
 	m_timesHit(0),
-	m_break(false)
+	m_break(false),
+	m_assertOnce(false)
 {
 }
 

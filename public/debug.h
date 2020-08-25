@@ -6,6 +6,7 @@
 #pragma once
 
 #include "build.h"
+#include "containers/array.h"
 
 #define BEGIN_DBG_NAMESPACE namespace dbg {
 #define END_DBG_NAMESPACE }
@@ -20,6 +21,7 @@ public:
 	const char* m_exp;
 	bool m_ignored : 1;
 	bool m_break : 1;
+	bool m_assertOnce : 1;
 	int m_timesHit;
 
 public:
@@ -56,5 +58,17 @@ void UnBreakAssert(const char* file, int line);
 
 /* Returns true if the assertion was hit */
 bool WasAssertHit(const char* file, int line);
+
+/* Returns a list of assertions */
+Array<CAssert> GetAssertList();
+
+/* Enable/Disable features globally */
+/* These act on ALL asserts */
+void EnableAssertOnce();
+void DisableAssertOnce();
+void EnableAssertBreak();
+void DisableAssertBreak();
+void EnableAsserts();
+void DisableAsserts();
 
 END_DBG_NAMESPACE
