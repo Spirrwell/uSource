@@ -14,7 +14,7 @@
 #define COLOR_BOLD "^7"
 #define COLOR_STRIKE "^8"
 
-namespace log
+namespace logger
 {
 	void Printf(const char* fmt, ...);
 	void Errorf(const char* fmt, ...);

@@ -1,16 +1,16 @@
 #include "logger.h"
 
-void log::Printf(const char *fmt, ...)
+void logger::Printf(const char *fmt, ...)
 {
 
 }
 
-void log::Errorf(const char *fmt, ...)
+void logger::Errorf(const char *fmt, ...)
 {
 
 }
 
-void log::Warnf(const char *fmt, ...)
+void logger::Warnf(const char *fmt, ...)
 {
 
 }
