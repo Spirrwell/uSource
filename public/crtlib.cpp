@@ -25,6 +25,14 @@ GNU General Public License for more details.
 #include "crtlib.h"
 #include "mem.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#undef min
+#undef max
+#else
+#include <sys/stat.h>
+#endif
+
 #define BIT0 (1)
 #define BIT1 (2)
 #define BIT2 (4)
@@ -107,19 +115,7 @@ qboolean Q_isdigit(const char *str)
 
 int Q_strlen(const char *string)
 {
-	int len;
-	const char *p;
-
-	if (!string) return 0;
-
-	len = 0;
-	p = string;
-	while (*p)
-	{
-		p++;
-		len++;
-	}
-	return len;
+	return strlen(string);
 }
 
 int Q_colorstr(const char *string)
@@ -1197,6 +1193,60 @@ char *Q_MakeAbsolute(const char *s, char *out, size_t len)
 	_fullpath(out, s, len);
 	return out;
 #else
-	realpath(s, out);
+	return realpath(s, out);
+#endif
+}
+
+char *Q_getcwd(char *buf, size_t sz)
+{
+#ifdef _WIN32
+	return _getcwd(buf, sz);
+#else
+	return getcwd(buf, sz);
+#endif
+}
+
+int Q_getpid()
+{
+#ifdef _WIN32
+	return _getpid();
+#else
+	return getpid();
+#endif
+}
+
+int Q_mkstemp(char *tmpl)
+{
+#ifdef _WIN32
+	return _mktemp(tmpl);
+#else
+	return mkstemp(tmpl);
+#endif
+}
+
+int Q_unlink(const char* path)
+{
+#ifdef _WIN32
+	return _unlink(path);
+#else
+	return unlink(path);
+#endif
+}
+
+int Q_mkdir(const char* path)
+{
+#ifdef _WIN32
+	return _mkdir(path);
+#else
+	return mkdir(path, S_IRWXU | S_IRWXG);
+#endif
+}
+
+int Q_fileno(FILE* f)
+{
+#ifdef _WIN32
+	return _fileno(f);
+#else
+	return fileno(f);
 #endif
 }
