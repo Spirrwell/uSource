@@ -19,8 +19,11 @@ GNU General Public License for more details.
 #include <stdarg.h>
 #include <ctype.h>
 #include <time.h>
+#include <stdlib.h>
+#include <errno.h>
 #include "stdio.h"
 #include "crtlib.h"
+#include "mem.h"
 
 #define BIT0 (1)
 #define BIT1 (2)
@@ -31,9 +34,37 @@ GNU General Public License for more details.
 #define BIT6 (64)
 #define BIT7 (128)
 
+byte* g_pCrtPool;
+
+#ifndef _WIN32
+#define MAX_PATH PATH_MAX
+#endif
+
+#ifdef _WIN32
+#define PATH_SEPARATORC '\\'
+#else
+#define PATH_SEPARATORC '/'
+#endif
+
+static void InitCrtLib()
+{
+	static bool binit = false;
+	if(binit) return;
+	g_pCrtPool = GlobalAllocator()._Mem_AllocPool("CrtlibPool", __FILE__, __LINE__);
+}
+
 bool Q_startswith(const char* str, const char* sub)
 {
 	return Q_strncmp(str, sub, strlen(sub)) == 0;
+}
+
+bool Q_endswith(const char* str, const char* subst)
+{
+	if(!str || !subst) return false;
+	size_t sz = strlen(subst);
+	size_t sztr = strlen(str);
+	if(sz > sztr) return false;
+	return Q_strncmp(&str[sztr-sz], subst, sz) == 0;
 }
 
 void Q_strnupr(const char *in, char *out, size_t size_out)
@@ -990,4 +1021,182 @@ int matchpattern_with_separator(const char *in, const char *pattern, qboolean ca
 	if (*in)
 		return 0; // reached end of pattern but not end of input
 	return 1; // success
+}
+
+char* Q_strdup(const char* s)
+{
+	if(!s) return nullptr;
+	InitCrtLib();
+	size_t size = Q_strlen(s);
+	char* ret = (char*)GlobalAllocator()._Mem_Alloc(g_pCrtPool, size, false, __FILE__, __LINE__);
+	if(!ret) return ret;
+	memcpy(ret, s, size);
+	return ret;
+}
+
+bool Q_strint(const char *str, int &out, int base)
+{
+	if(!str) return false;
+	long o = strtol(str, NULL, base);
+	if(o == 0 && errno != 0) return false;
+	out = o;
+	return true;
+}
+
+bool Q_strfloat(const char *str, float &out)
+{
+	if(!str) return false;
+	float o = strtof(str, NULL);
+	if(o == 0.0f && errno != 0) return false;
+	out = o;
+	return true;
+}
+
+bool Q_strlong(const char *str, long long int &out, int base)
+{
+	if(!str) return false;
+	long long o = strtol(str, NULL, base);
+	if(o == 0 && errno != 0) return false;
+	out = o;
+	return true;
+}
+
+bool Q_strdouble(const char* str, double& out)
+{
+	if(!str) return false;
+	float o = strtod(str, NULL);
+	if(o == 0.0 && errno != 0) return false;
+	out = o;
+	return true;
+}
+
+bool Q_strbool(const char *str, bool &out)
+{
+	if(!str) return false;
+	out = !(Q_strcasecmp(str, "FALSE") == 0 || Q_strcasecmp(str, "0") == 0);
+	return true;
+}
+
+char *Q_FileExtension(const char *s, char *out, size_t len)
+{
+	if(!s || !out || len == 0) return nullptr;
+	const char* ext = COM_FileExtension(s);
+	size_t _len = Q_strlen(ext);
+	_len = _len > len ? len : _len;
+	memcpy(out, ext, _len);
+	if(_len != len)
+		out[_len] = 0;
+	else
+		out[_len-1] = 0;
+	return out;
+}
+
+char *Q_FileName(const char *s, char *out, size_t len)
+{
+	if(!s || !out || len == 0) return nullptr;
+	const char* file = COM_FileWithoutPath(s);
+	size_t _len = Q_strlen(file);
+	_len = _len > len ? len : _len;
+	memcpy(out, file, _len);
+	if(_len != len)
+		out[_len] = 0;
+	else
+		out[_len-1] = 0;
+	return out;
+}
+
+char *Q_BaseDirectory(const char *s, char *out, size_t len)
+{
+	if(!s || !out || len == 0) return nullptr;
+	size_t _len = Q_strlen(s);
+	size_t i;
+	for(i = len-1; i >= 0; i--)
+	{
+		if(s[i] == '/' || s[i] == '\\')
+			break;
+	}
+	if(i >= len) return nullptr;
+	memcpy(out, s, i+1);
+	if(_len == len)
+		out[i] = 0;
+	else
+		out[i+1] = 0;
+	return out;
+}
+
+char *Q_StripExtension(const char *s, char *out, size_t len)
+{
+	if(!s || !out || len == 0) return nullptr;
+	size_t _len = Q_strlen(s);
+	_len = _len > len ? len : _len;
+	memcpy(out, s, _len);
+	COM_StripExtension(out);
+	return out;
+}
+
+char *Q_StripDirectory(const char *s, char *out, size_t len)
+{
+	if(!s || !out || len == 0) return nullptr;
+	const char* file = COM_FileWithoutPath(s);
+	size_t _len = Q_strlen(s);
+	_len = _len > len ? len : _len;
+	memcpy(out, file, _len);
+	if(_len != len)
+		out[_len] = 0;
+	else
+		out[_len-1] - 0;
+	return out;
+}
+
+char *Q_FixSlashes(const char *s, char *out, size_t len)
+{
+	if(!s || !out || len == 0) return nullptr;
+	size_t _len = Q_strlen(s);
+	_len = _len > len ? len : _len;
+	memcpy(out, s, _len);
+	if(_len != len)
+		out[_len] = 0;
+	else
+		out[_len-1] = 0;
+	for(int i = 0; i < _len; i++)
+	{
+		if(out[i] == '\\' || out[i] == '/')
+			out[i] = PATH_SEPARATORC;
+	}
+	return out;
+}
+
+char *Q_FixSlashesInPlace(char *s)
+{
+	if(!s) return nullptr;
+	size_t len = Q_strlen(s);
+	for(int i = 0; i < len; i++)
+	{
+		if(s[i] == '\\' || s[i] == '/')
+			s[i] = PATH_SEPARATORC;
+	}
+	return s;
+}
+
+String &Q_FixSlashesInPlace(String &s)
+{
+	char* _s = (char*)s;
+	size_t len = Q_strlen(_s);
+	for(int i = 0; i < len; i++)
+	{
+		if(_s[i] == '\\' || _s[i] == '/')
+			_s[i] = PATH_SEPARATORC;
+	}
+	return s;
+}
+
+char *Q_MakeAbsolute(const char *s, char *out, size_t len)
+{
+	if(!s || !out || len == 0) return nullptr;
+#ifdef _WIN32
+	_fullpath(out, s, len);
+	return out;
+#else
+	realpath(s, out);
+#endif
 }

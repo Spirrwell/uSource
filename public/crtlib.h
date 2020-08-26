@@ -18,6 +18,7 @@ GNU General Public License for more details.
 
 #include <stdarg.h>
 #include "build.h"
+#include "containers/string.h"
 
 #ifdef __GNUC__
 #define _format(x) __attribute__((format(printf, x, x+1)))
@@ -95,6 +96,27 @@ int matchpattern(const char *in, const char *pattern, qboolean caseinsensitive);
 int matchpattern_with_separator(const char *in, const char *pattern, qboolean caseinsensitive, const char *separators,
                                 qboolean wildcard_least_one);
 
+char* Q_strdup(const char* s);
+
+/* Safe string conversions */
+bool Q_strint(const char* str, int& out, int base = 10);
+bool Q_strfloat(const char* str, float& out);
+bool Q_strdouble(const char* str, double& out);
+bool Q_strlong(const char* str, long long& out, int base = 10);
+bool Q_strbool(const char* str, bool& out);
+
+/* Path operations */
+char* Q_FileExtension(const char* s, char* out, size_t len);
+char* Q_FileName(const char* s, char* out, size_t len);
+char* Q_BaseDirectory(const char* s, char* out, size_t len);
+char* Q_StripExtension(const char* s, char* out, size_t len);
+char* Q_StripDirectory(const char* s, char* out, size_t len);
+char* Q_FixSlashes(const char* s, char* out, size_t len);
+char* Q_FixSlashesInPlace(char* s);
+String& Q_FixSlashesInPlace(String& s);
+char* Q_MakeAbsolute(const char* s, char* out, size_t len);
+
 bool Q_startswith(const char* string, const char* startingString);
+bool Q_endswith(const char* str, const char* subst);
 
 #endif//STDLIB_H
