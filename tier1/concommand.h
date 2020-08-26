@@ -26,9 +26,10 @@ namespace __func_command_ ## _name ## _namespace { \
 int argc = 0; const char** argv = nullptr; \
 void __func_command_ ## _name ();\
 } \
-ConCommand _name(#_name, _desc, _flags, []() {\
+ConCommand __concommand__ ## _name(#_name, _desc, _flags, []() {\
 	__func_command_ ## _name ## _namespace::argc = g_pEngineCvar->CmdArgc();\
 	__func_command_ ## _name ## _namespace::argv = g_pEngineCvar->CmdArgv();\
 	__func_command_ ## _name ## _namespace::__func_command_ ## _name (); \
 }); \
 void __func_command_ ## _name ## _namespace::__func_command_ ## _name ()
+
