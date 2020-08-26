@@ -115,6 +115,7 @@ qboolean Q_isdigit(const char *str)
 
 int Q_strlen(const char *string)
 {
+	if(!string) return 0;
 	return strlen(string);
 }
 
