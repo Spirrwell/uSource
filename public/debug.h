@@ -13,6 +13,8 @@
 
 BEGIN_DBG_NAMESPACE
 
+void Init();
+
 class CAssert
 {
 public:

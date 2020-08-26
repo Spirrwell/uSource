@@ -15,6 +15,7 @@ GNU General Public License for more details.
 
 #include "port.h"
 #include "cmdline.h"
+#include "debug.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -143,7 +144,10 @@ int main( int argc, char **argv )
 {
 	szArgc = argc;
 	szArgv = argv;
+
+	/* Initialization for libpublic */
 	GlobalCommandLine().Set(argc, argv);
+	dbg::Init();
 
 	return Sys_Start();
 }

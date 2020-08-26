@@ -1,10 +1,14 @@
+#include "build.h"
 #include "debug.h"
 #include "threadtools.h"
 #include "common.h"
 #include "crtlib.h"
 #include "containers/array.h"
+#include "cmdline.h"
 
 #include <signal.h>
+#include <stdlib.h>
+#include <memory.h>
 
 
 using namespace dbg;
@@ -18,15 +22,35 @@ bool g_asserts_once = false;
 bool g_asserts_break = false;
 bool g_asserts_disable = false;
 
+#ifdef XASH_LINUX
+static void HandleAbort(int sig, siginfo_t* siginfo, void* pdat);
+#endif
+
 static void DbgInit()
 {
 	static bool binit = false;
 	if(binit) return;
+
+#ifdef XASH_LINUX
+	if(GlobalCommandLine().Find("-debug-test"))
+	{
+		struct sigaction sabrt;
+		memset(&sabrt, 0, sizeof(sabrt));
+		sabrt.sa_sigaction = HandleAbort;
+		sigaction(SIGABRT, &sabrt, &sabrt);
+	}
+#endif
+
 	if(!g_passert_mutex)
 		g_passert_mutex = new CThreadMutex();
 	if(!g_passertions)
 		g_passertions = new Array<CAssert>();
 	binit = true;
+}
+
+void dbg::Init()
+{
+	DbgInit();
 }
 
 /* Strips off the ../ that all files have appeneded to them */
@@ -225,4 +249,9 @@ CAssert::CAssert(int line, const char* file, const char* exp) :
 
 CAssert::~CAssert()
 {
+}
+
+static void HandleAbort(int sig, siginfo_t* siginfo, void* pdat)
+{
+	exit(1);
 }

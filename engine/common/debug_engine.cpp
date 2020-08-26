@@ -9,6 +9,7 @@
 #include "tier1/concommand.h"
 #include "tier1/convar.h"
 #include "debug.h"
+#include <signal.h>
 
 CONCOMMAND(assert_break_all, "Breaks all assertions", 0)
 {
@@ -105,4 +106,34 @@ CONCOMMAND(assert_test, "Fires a test assertion", 0)
 CONCOMMAND(assert_test2, "Fires a test assertion", 0)
 {
 	Assert(0);
+}
+
+CONCOMMAND(raise, "Raises a signal", 0)
+{
+	if(argc < 2)
+	{
+		Msg("Usage: raise <sig>\n");
+		return;
+	}
+	const char* sig = argv[1];
+	if(!Q_strcmp(sig, "SIGABRT"))
+		raise(SIGABRT);
+	else if(!Q_strcmp(sig, "SIGSEGV"))
+		raise(SIGSEGV);
+	else if(!Q_strcmp(sig, "SIGINT"))
+		raise(SIGINT);
+	else if(!Q_strcmp(sig, "SIGILL"))
+		raise(SIGILL);
+	else if(!Q_strcmp(sig, "SIGFPE"))
+		raise(SIGFPE);
+	else if(!Q_strcmp(sig, "SIGKILL"))
+		raise(SIGKILL);
+	else if(!Q_strcmp(sig, "SIGTRAP"))
+		raise(SIGTRAP);
+	else if(!Q_strcmp(sig, "SIGTERM"))
+		raise(SIGTERM);
+	else if(!Q_strcmp(sig, "SIGHUP"))
+		raise(SIGHUP);
+	else
+		Msg("Unknown signal name\n");
 }
