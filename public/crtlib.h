@@ -119,4 +119,12 @@ char* Q_MakeAbsolute(const char* s, char* out, size_t len);
 bool Q_startswith(const char* string, const char* startingString);
 bool Q_endswith(const char* str, const char* subst);
 
+/* Other C std functions which might not be portable */
+char* Q_getcwd(char* buf, size_t sz);
+int Q_getpid();
+int Q_mkstemp(char* tmpl);
+int Q_unlink(const char* path);
+int Q_mkdir(const char* path);
+int Q_fileno(FILE* f);
+
 #endif//STDLIB_H
