@@ -27,6 +27,9 @@ GNU General Public License for more details.
 
 #ifdef _WIN32
 #include <windows.h>
+#include <direct.h>
+#include <process.h>
+#include <io.h>
 #undef min
 #undef max
 #else
@@ -1219,7 +1222,7 @@ int Q_getpid()
 int Q_mkstemp(char *tmpl)
 {
 #ifdef _WIN32
-	return _mktemp(tmpl);
+	return _mktemp(tmpl) ? 0 : -1;
 #else
 	return mkstemp(tmpl);
 #endif
