@@ -7,7 +7,7 @@ from waflib import Logs
 import sys
 import os, pathlib
 import waftools
-from waftools import cmake, msdev, eclipse, codeblocks
+from waftools import cmake, msdev, eclipse, codeblocks, export
 
 VERSION = '0.10'
 APPNAME = 'uSource'
@@ -26,7 +26,7 @@ class Subproject:
 
 SUBDIRS = [
 	Subproject('public',      dedicated=False),
-	Subproject('game_launch', singlebin=True),
+	Subproject('launcher', singlebin=True),
 	Subproject('ref_gl'),
 	#Subproject('ref_soft'),
 	Subproject('mainui'),
@@ -89,7 +89,7 @@ def options(opt):
 	opt.add_subproject(subdirs())
 
 	opt.load('xcompile compiler_cxx compiler_c sdl2 clang_compilation_database strip_on_install')
-	opt.load('cmake msdev eclipse codeblocks doxygen', tooldir=waftools.location)
+	opt.load('cmake msdev eclipse codeblocks doxygen export', tooldir=waftools.location)
 	if sys.platform == 'win32':
 		opt.load('msvc msdev msvs')
 	opt.load('reconfigure')
@@ -135,7 +135,7 @@ def configure(conf):
 
 	conf.options.NO_VGUI = True
 
-	conf.load('fwgslib reconfigure cmake msdev eclipse codeblocks doxygen')
+	conf.load('fwgslib reconfigure cmake msdev eclipse codeblocks doxygen export')
 	conf.start_msg('Build type')
 	if conf.options.BUILD_TYPE == None:
 		conf.end_msg('not set', color='RED')
