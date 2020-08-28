@@ -1034,6 +1034,18 @@ char* Q_strdup(const char* s)
 	return ret;
 }
 
+void* Q_malloc(size_t sz)
+{
+	if(sz == 0) return nullptr;
+	return GlobalAllocator()._Mem_Alloc(g_pCrtPool, sz, false, __FILE__, __LINE__);
+}
+
+void Q_free(void* ptr)
+{
+	if(!ptr) return;
+	GlobalAllocator()._Mem_Free(ptr, __FILE__, __LINE__);
+}
+
 bool Q_strint(const char *str, int &out, int base)
 {
 	if(!str) return false;

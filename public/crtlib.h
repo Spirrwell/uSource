@@ -97,6 +97,8 @@ int matchpattern_with_separator(const char *in, const char *pattern, qboolean ca
                                 qboolean wildcard_least_one);
 
 char* Q_strdup(const char* s);
+void* Q_malloc(size_t sz);
+void Q_free(void* blk);
 
 /* Safe string conversions */
 bool Q_strint(const char* str, int& out, int base = 10);
