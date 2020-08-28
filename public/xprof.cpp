@@ -4,6 +4,7 @@
 #include "crtlib.h"
 #undef min
 #undef max
+#undef GetCurrentTime
 #include <stack>
 #include <stdio.h>
 
