@@ -342,3 +342,9 @@ compile_commands.json
 # Stuff from intellij
 .idea
 *.code-workspace
+
+
+# Waftools generated scripts
+CMakeLists.txt 
+!utils/**/CMakeLists.txt
+!thirdparty/**/CMakeLists.txt
