@@ -1,3 +1,30 @@
+### Repository Structure
+
+#### `docs/`
+
+Engine documentation
+
+#### `scripts/`
+
+Utility and common scripts needed by the engine
+
+#### `thirdparty/`
+
+All thirdparty components of the engine
+
+#### `contrib/`
+
+Individual contributions that should be tracked by source control. People working on the project may add their personal convinence and utility scripts here to 
+aid with development.
+
+For example I, jjl77, have a configure script and some others so I dont need to constantly type in a ton of flags.
+
+Feel free to add your own personal scripts to the repo if you're contributing code back to the upstream regularly or if you have write access to the repository.
+
+#### `common/`
+
+Common code and headers will go here.
+
 ### Engine Components
 
 #### `public/`
