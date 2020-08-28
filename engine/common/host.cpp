@@ -42,7 +42,9 @@ GNU General Public License for more details.
 #include "appframework.h"
 #include "public/containers/list.h"
 #include "tier1/tier1.h"
+#include "tier1/dbg.h"
 #include "xprof.h"
+#include "tier1/concommand.h"
 
 /* Interface includes */
 #include "log_int.h"
@@ -599,6 +601,8 @@ void Host_Frame( float time )
 
 	GlobalXProf().Frame();
 
+	XPROF_NODE(XPROF_CATEGORY_FRAME);
+
 	Host_InputFrame ();  // input frame
 	Host_ClientBegin (); // begin client
 	Host_GetCommands (); // dedicated in
@@ -857,6 +861,10 @@ void Host_InitCommon( int argc, char **argv, const char *progname, qboolean bCha
 	}
 
 	host.con_showalways = true;
+
+	/* XProf dump on exit */
+	if(Sys_CheckParm("-xprof-dump-on-exit"))
+		GlobalXProf().SetFlag(XPROF_DUMP_ON_EXIT);
 
 #ifdef XASH_DEDICATED
 	host.type = HOST_DEDICATED; // predict state

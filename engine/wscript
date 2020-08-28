@@ -135,7 +135,7 @@ def build(bld):
 		features = 'c cxx cxxshlib cshlib'
 
 	bld(source   = source,
-		target   = 'xash',
+		target   = 'engine',
 		features = features,
 		includes = includes,
 		use      = libs,

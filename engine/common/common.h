@@ -51,10 +51,10 @@ XASH SPECIFIC			- sort of hack that works only in Xash3D not in GoldSrc
 #endif
 
 #if defined(__APPLE__) || defined(__unix__)
-	#define ENGINELIB    "libxash." OS_LIB_EXT
+	#define ENGINELIB    "libengine." OS_LIB_EXT
 	#define PUBLICLIB    "libpublic." OS_LIB_EXT
 #elif _WIN32
-	#define ENGINELIB    "xash.dll"
+	#define ENGINELIB    "engine.dll"
 	#define PUBLICLIB    "public.dll"
 #endif
 
