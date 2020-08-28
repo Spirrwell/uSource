@@ -1019,9 +1019,9 @@ extern "C" int EXPORT Host_Main( int argc, char **argv, const char *progname, in
 	}
 
 	host_serverstate = Cvar_Get( "host_serverstate", "0", FCVAR_READ_ONLY, "displays current server state" );
-	host_maxfps = Cvar_Get( "fps_max", "144", FCVAR_ARCHIVE, "host fps upper limit" );
+	host_maxfps = Cvar_Get( "fps_max", "500", FCVAR_ARCHIVE, "host fps upper limit" );
 	host_framerate = Cvar_Get( "host_framerate", "0", 0, "locks frame timing to this value in seconds" );  
-	host_sleeptime = Cvar_Get( "sleeptime", "1", FCVAR_ARCHIVE, "milliseconds to sleep for each frame. higher values reduce fps accuracy" );
+	host_sleeptime = Cvar_Get( "sleeptime", "0", FCVAR_ARCHIVE, "milliseconds to sleep for each frame. higher values reduce fps accuracy" );
 	host_gameloaded = Cvar_Get( "host_gameloaded", "0", FCVAR_READ_ONLY, "inidcates a loaded game.dll" );
 	host_clientloaded = Cvar_Get( "host_clientloaded", "0", FCVAR_READ_ONLY, "inidcates a loaded client.dll" );
 	host_limitlocal = Cvar_Get( "host_limitlocal", "0", 0, "apply cl_cmdrate and rate to loopback connection" );
