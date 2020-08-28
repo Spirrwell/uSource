@@ -1028,9 +1028,10 @@ char* Q_strdup(const char* s)
 	if(!s) return nullptr;
 	InitCrtLib();
 	size_t size = Q_strlen(s);
-	char* ret = (char*)GlobalAllocator()._Mem_Alloc(g_pCrtPool, size, false, __FILE__, __LINE__);
+	char* ret = (char*)GlobalAllocator()._Mem_Alloc(g_pCrtPool, size + 1, false, __FILE__, __LINE__);
 	if(!ret) return ret;
 	memcpy(ret, s, size);
+	ret[size] = 0;
 	return ret;
 }
 
