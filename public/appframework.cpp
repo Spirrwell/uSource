@@ -42,8 +42,20 @@ std::list<appsys_t> g_appsystems;
 std::list<mod_t*> g_loadedmods;
 char g_last_error[1024] = {(char)0};
 
-std::function<void*(const char*)> g_load_library = [](const char* lib) -> void* { return dlopen(lib, RTLD_LAZY); };
-std::function<void(void*)> g_free_library = [](void* lib) -> void { dlclose(lib); };
+std::function<void*(const char*)> g_load_library = [](const char* lib) -> void* {
+#ifdef _WIN32
+	return LoadLibraryA(lib);
+#else 
+	return dlopen(lib, RTLD_LAZY);
+#endif 
+};
+std::function<void(void*)> g_free_library = [](void* lib) -> void {
+#ifdef _WIN32
+	FreeLibrary((HMODULE)lib);
+#else 
+	dlclose(lib);
+#endif 
+};
 
 const char* AppFramework::GetLastError()
 {
@@ -106,8 +118,8 @@ bool AppFramework::AddInterface(const char *module, const char *iface)
 		}
 
 		_module->filename = module;
-		_module->pCreateInterface = (pfnCreateInterface)GetProcAddress(_module->handle, "CreateInterface");
-		_module->pGetInterfaces = (pfnGetInterfaces)GetProcAddress(_module->handle, "GetInterfaces");
+		_module->pCreateInterface = (pfnCreateInterface)GetProcAddress((HMODULE)_module->handle, "CreateInterface");
+		_module->pGetInterfaces = (pfnGetInterfaces)GetProcAddress((HMODULE)_module->handle, "GetInterfaces");
 
 		/* Functions not exported?? */
 		if(!_module->pGetInterfaces || !_module->pCreateInterface)
