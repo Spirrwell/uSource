@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include "xprof.h"
+#include "common.h"
 #include "crtlib.h"
 
 inline bool _internal_isspace(char c)

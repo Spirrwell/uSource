@@ -90,6 +90,10 @@ void _FreeLibrary(void* lib)
 	g_free_library(lib);
 }
 
+#ifndef _WIN32 
+#define HMODULE void*
+#endif
+
 
 bool AppFramework::AddInterface(const char *module, const char *iface)
 {
