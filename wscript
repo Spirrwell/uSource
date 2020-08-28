@@ -9,8 +9,8 @@ import os, pathlib
 import waftools
 from waftools import cmake, msdev, eclipse, codeblocks
 
-VERSION = '0.99'
-APPNAME = 'xash3d-fwgs'
+VERSION = '0.10'
+APPNAME = 'uSource'
 top = '.'
 
 class Subproject:
