@@ -6,6 +6,8 @@ from __future__ import print_function
 from waflib import Logs
 import sys
 import os, pathlib
+import waftools
+from waftools import cmake, msdev, eclipse, codeblocks
 
 VERSION = '0.99'
 APPNAME = 'xash3d-fwgs'
@@ -87,6 +89,7 @@ def options(opt):
 	opt.add_subproject(subdirs())
 
 	opt.load('xcompile compiler_cxx compiler_c sdl2 clang_compilation_database strip_on_install')
+	opt.load('cmake msdev eclipse codeblocks doxygen', tooldir=waftools.location)
 	if sys.platform == 'win32':
 		opt.load('msvc msdev msvs')
 	opt.load('reconfigure')
@@ -132,7 +135,7 @@ def configure(conf):
 
 	conf.options.NO_VGUI = True
 
-	conf.load('fwgslib reconfigure')
+	conf.load('fwgslib reconfigure cmake msdev eclipse codeblocks doxygen')
 	conf.start_msg('Build type')
 	if conf.options.BUILD_TYPE == None:
 		conf.end_msg('not set', color='RED')

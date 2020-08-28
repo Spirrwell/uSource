@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include "xprof.h"
+#include "crtlib.h"
 
 inline bool _internal_isspace(char c)
 {
@@ -424,13 +425,13 @@ bool KeyValues::key_t::ReadBool(bool& ok)
 	}
 
 	/* For bool, check if we've got TRUE or FALSE */
-	if(strcasecmp(this->value, "true") == 0 || strcmp(this->value, "1") == 0)
+	if(Q_strcasecmp(this->value, "true") == 0 || strcmp(this->value, "1") == 0)
 	{
 		this->cachedv.bval = true;
 		this->cached = ELastCached::BOOL;
 		return true;
 	}
-	else if(strcasecmp(this->value, "false") == 0 || strcmp(this->value, "0") == 0)
+	else if(Q_strcasecmp(this->value, "false") == 0 || strcmp(this->value, "0") == 0)
 	{
 		this->cachedv.bval = false;
 		this->cached =  ELastCached::BOOL;
