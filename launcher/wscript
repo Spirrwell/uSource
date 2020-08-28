@@ -28,7 +28,7 @@ def build(bld):
 
 	bld(
 		source   = source,
-		target   = 'xash3d', # hl.exe
+		target   = 'hl', # hl.exe
 		features = 'c cxx cxxprogram',
 		includes = includes,
 		use      = libs,
