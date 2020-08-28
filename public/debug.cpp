@@ -251,7 +251,9 @@ CAssert::~CAssert()
 {
 }
 
+#ifdef XASH_LINUX
 static void HandleAbort(int sig, siginfo_t* siginfo, void* pdat)
 {
 	exit(1);
 }
+#endif
