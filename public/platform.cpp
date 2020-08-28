@@ -16,10 +16,13 @@
 #include <pthread.h>
 #else
 #include <windows.h>
+#include <stdlib.h>
+#include <time.h>
 #endif 
 
 using namespace platform;
 
+#undef GetCurrentTime
 platform::time_t platform::GetCurrentTime()
 {
 #ifndef _WIN32
@@ -30,7 +33,17 @@ platform::time_t platform::GetCurrentTime()
 	_time.sec = time.tv_sec;
 	return _time;
 #else
-	#error Implement me
+	LARGE_INTEGER time;
+	if(QueryPerformanceCounter(&time))
+	{
+		LARGE_INTEGER	 freq;
+		QueryPerformanceFrequency(&freq);
+		platform::time_t outtime;
+		outtime.sec = time.QuadPart / freq.QuadPart;
+		outtime.ns  = time.QuadPart - ((time.QuadPart / freq.QuadPart) * freq.QuadPart);
+		return outtime;
+	}
+	return platform::time_t();
 #endif 
 }
 
@@ -39,7 +52,7 @@ unsigned long long platform::GetCurrentThreadId()
 #ifndef _WIN32
 	return (unsigned long long)pthread_self();
 #else
-	#error Implement me
+	return ::GetCurrentThreadId();
 #endif 
 }
 
