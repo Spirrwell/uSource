@@ -12,9 +12,7 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
-
-#ifndef STDLIB_H
-#define STDLIB_H
+#pragma once
 
 #include <stdarg.h>
 #include "build.h"
@@ -99,6 +97,19 @@ int matchpattern_with_separator(const char *in, const char *pattern, qboolean ca
 char* Q_strdup(const char* s);
 void* Q_malloc(size_t sz);
 void Q_free(void* blk);
+void* Q_alloca(size_t sz);
+
+/* Format a color string using terminal escape codes */
+/* color_table is a table containing 10 entries of char[3] that specifies a color in RGB. if set to nullptr, a default is used */
+/* modifier_talbe is a table containing 10 entries of char that specifies a format modifier for that color index, a default is used if set to nullptr */
+/* This function is a bit unsafe, so be careful with it */
+#define FMT_NONE 0
+#define FMT_BOLD 1
+#define FMT_UNDERLINE 2
+#define FMT_BLINK 3
+char* Q_fmtcolorstr(const char* s, char* out, size_t n);
+char* Q_fmtcolorstr(const char* s, char* out, size_t n, const unsigned char color_table[10][3]);
+char* Q_fmtcolorstr(const char* s, char* out, size_t n, const unsigned char color_table[10][3], const unsigned char modifier_table[10]);
 
 /* Safe string conversions */
 bool Q_strint(const char* str, int& out, int base = 10);
@@ -128,5 +139,3 @@ int Q_mkstemp(char* tmpl);
 int Q_unlink(const char* path);
 int Q_mkdir(const char* path);
 int Q_fileno(FILE* f);
-
-#endif//STDLIB_H

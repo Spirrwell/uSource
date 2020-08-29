@@ -145,6 +145,132 @@ int Q_colorstr(const char *string)
 	return len;
 }
 
+static unsigned char g_default_color_table[][3] = {
+	{255, 255, 255},  // 0 (white)
+	{255, 0, 0},      // 1 (red)
+	{0, 255, 0},      // 2 (green)
+	{255, 255, 0},    // 3 (yellow)
+	{0, 255, 255},    // 4 (cyan)
+	{255, 0, 255},    // 5 (purple)
+	{255, 155, 0},    // 6 (orange)
+	{255, 255, 255},  // 7 (white)
+	{255, 100, 100},  // 8 (light red)
+	{100, 255, 100},  // 9 (light green)
+};
+
+static unsigned char g_default_format_modifiers[] = {
+	FMT_NONE, // 0
+	FMT_BOLD, // 1
+	FMT_NONE, // 2
+	FMT_BOLD, // 3
+	FMT_NONE, // 4
+	FMT_NONE, // 5
+	FMT_NONE, // 6
+	FMT_BOLD, // 7
+	FMT_NONE, // 8
+	FMT_NONE, // 9
+};
+
+
+char* Q_fmtcolorstr(const char* s, char* out, size_t n)
+{
+	return Q_fmtcolorstr(s, out, n, g_default_color_table, g_default_format_modifiers);
+}
+
+char* Q_fmtcolorstr(const char* s, char* out, size_t n, const unsigned char color_table[10][3])
+{
+	return Q_fmtcolorstr(s, out, n, color_table, g_default_format_modifiers);
+}
+
+char* Q_fmtcolorstr(const char* s, char* out, size_t sz,  const unsigned char color_table[10][3], const unsigned char format_modifiers[10])
+{
+	if(!s || !out) return nullptr;
+
+	struct color_str_ptr {
+		const char* ptr;
+		size_t len;
+		char color_index;
+	};
+
+	/* Allocate and clear string list */
+	int color_strs = Q_colorstr(s) / 2; // NOTE: colorstr returns counts in muliples of 2, for the char count of the actual "color string"
+	color_str_ptr* ptrs = (color_str_ptr*)Q_alloca(sizeof(color_str_ptr) * color_strs);
+	memset(ptrs, 0, sizeof(color_str_ptr) * color_strs);
+
+	int cur_str = 0;
+	size_t nlen = Q_strlen(s);
+	size_t prevlen = 0;
+
+	for(size_t i = 0; i < nlen; i++)
+	{
+		if(s[i] == '^')
+		{
+			/* If the current pointer is set, that means we've already come through this routine once. */
+			/* So compute the length and increment the current string */
+			if(ptrs[cur_str].ptr)
+			{
+				ptrs[cur_str].len = i - prevlen;
+				cur_str++;
+			}
+
+			i++;
+			if(i >= nlen+1) break;
+			if(s[i] > '9' || s[i] < '0') continue;
+			ptrs[cur_str].color_index = s[i] - 0x30; // Convert to char for the actual index
+			ptrs[cur_str].ptr = &s[i+1]; // set the pointer to the start of the substring
+			prevlen = i+1; // set the previous index
+			continue;
+		}
+	}
+	/* Set the last length to nlen - prevlen */
+	ptrs[cur_str].len = nlen - prevlen;
+	out[0] = 0;
+
+	/* Index is the format specifier (FMT_XXX) */
+	static int format_conversion_table[] = {
+		0, // FMT_NONE
+		1, // FMT_BOLD
+		4, // FMT_UNDERLINE
+		5, // FMT_BLINK
+	};
+
+	/* Loop through our list of strings and concatenate them, including coloring info */
+	int total_printed = 0;
+	for(int i = 0; i < color_strs; i++)
+	{
+		if(!ptrs[i].ptr) continue;
+#ifndef _WIN32
+		/* Print in the color string */
+		const unsigned char* color = color_table[(int)ptrs[i].color_index];
+		unsigned char mod = format_conversion_table[format_modifiers[(int)ptrs[i].color_index]];
+		char fmtstr[32];
+		if(mod != 0)
+			total_printed += snprintf(fmtstr, sizeof(fmtstr), "\e[38;2;%u;%u;%um\e[%um", (unsigned char)color[0], (unsigned char)color[1], (unsigned char)color[2], mod);
+		else
+			total_printed += snprintf(fmtstr, sizeof(fmtstr), "\e[38;2;%u;%u;%um", (unsigned char)color[0], (unsigned char)color[1], (unsigned char)color[2]);
+		strncat(out, fmtstr, sz);
+#else
+
+#endif
+		/* Concat the rest of it */
+		/* NOTE: Using memcpy here because the string is not null terminated */
+		if(ptrs[i].len + total_printed > sz)
+		{
+			/* Dont overflow the buffer and break out of the loop as we can't print any more */
+			memcpy(&out[total_printed], ptrs[i].ptr, sz - ptrs[i].len);
+			out[sz] = 0;
+			break;
+		}
+		else
+		{
+			memcpy(&out[total_printed], ptrs[i].ptr, ptrs[i].len);
+			out[total_printed+ptrs[i].len] = 0;
+		}
+		total_printed += ptrs[i].len;
+	}
+	return out;
+}
+
 char Q_toupper(const char in)
 {
 	char out;
@@ -1265,5 +1391,14 @@ int Q_fileno(FILE* f)
 	return _fileno(f);
 #else
 	return fileno(f);
+#endif
+}
+
+void* Q_alloca(size_t sz)
+{
+#ifdef _WIN32
+	return _alloca(sz);
+#else
+	return alloca(sz);
 #endif
 }
