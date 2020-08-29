@@ -3,7 +3,7 @@
 #include "engine/log_int.h"
 #include "engine/common/common.h"
 
-#define CLOGGINGSYSTEM_NAME "CLoggingSystem001"
+#define CLOGGINGSYSTEM_NAME "CLoggingSystem"
 
 struct log_channel_t
 {
@@ -139,7 +139,10 @@ LoggingChannel_t CLoggingSystem::GetLoggingChannelForName(const char *name)
 
 void SetColor(FILE* fs, unsigned char r, unsigned char g, unsigned char b)
 {
+#ifndef _WIN32
 	fprintf(fs, "\e[38;2;%u;%u;%um", (unsigned char)r, (unsigned char)g, (unsigned char)b);
+#else
+#endif
 }
 
 log_channel_t GetChan(LoggingChannel_t chan)
@@ -151,35 +154,47 @@ log_channel_t GetChan(LoggingChannel_t chan)
 	return {};
 }
 
+/* Actual log function */
 void CLoggingSystem::Log(LoggingChannel_t channel, int v, const char *fmt)
 {
 	static thread_local char buf[8192];
+
+	if(Q_colorstr(fmt) > 0)
+		Q_fmtcolorstr(fmt, buf, sizeof(buf));
+	else
+		Q_strcpy(buf, fmt);
 
 	/* Only for stdout */
 	if(this->_stdout)
 	{
 		auto chan = GetChan(channel); 
 		this->SetColor((const char*)chan.color);
-		fprintf(this->_stdout, fmt);
+		fprintf(this->_stdout, buf);
 		this->ClearColor();
 	}
 
 	for(auto stream : this->m_stdout)
-		fprintf(stream, fmt);
+		fprintf(stream, buf);
 
-	/* TODO: Colors this shit */
 	if(!Host_IsDedicated())
 		Con_Print(fmt);
 }
 
 void CLoggingSystem::SetColor(const char colo[3])
 {
-	::SetColor(this->_stdout, colo[0], colo[1], colo[2]);
+	if(this->_stdout)
+		::SetColor(this->_stdout, colo[0], colo[1], colo[2]);
 }
 
 void CLoggingSystem::ClearColor()
 {
-	::SetColor(this->_stdout, default_color[0], default_color[1], default_color[2]);
+#ifndef _WIN32
+	// Assumes basic color code support, and only for stdout
+	if(this->_stdout)
+		fprintf(this->_stdout, "\e[0m");
+#else
+
+#endif
 }
 
 
