@@ -377,6 +377,7 @@ model_t *Mod_LoadModel( model_t *mod, qboolean crash, EModelType type )
 					if (Q_strcmp(COM_FileExtension(mod->name), ldr.extensions[j]) == 0 &&
 						ldr.loader->CheckBuffer(buf, length))
 					{
+						mod->type = mod_custom; // Use the custom model renderer
 						/* Use this loader */
 						loaded = ldr.loader->LoadModel(mod, buf, length);
 						loader_used = true;
@@ -395,6 +396,7 @@ model_t *Mod_LoadModel( model_t *mod, qboolean crash, EModelType type )
 					if(Q_strcmp(COM_FileExtension(mod->name), ldr.extensions[j]) == 0 &&
 						ldr.loader->CheckBuffer(buf, length))
 					{
+						mod->type = mod_brush; 
 						/* Use this loader */
 						loaded = ldr.loader->LoadMap(mod, buf, length);
 						loader_used = true;

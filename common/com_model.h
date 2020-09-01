@@ -48,7 +48,8 @@ typedef enum
 	mod_brush, 
 	mod_sprite, 
 	mod_alias, 
-	mod_studio
+	mod_studio,
+	mod_custom, // Models that are loaded using custom model loaders
 } modtype_t;
 
 #if 0

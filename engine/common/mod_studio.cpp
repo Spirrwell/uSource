@@ -254,7 +254,7 @@ hull_t *Mod_HullForStudio( model_t *model, float frame, int sequence, vec3_t ang
 		}
 	}
 
-	mod_studiohdr = Mod_StudioExtradata( model );
+	mod_studiohdr = static_cast<studiohdr_t *>(Mod_StudioExtradata(model));
 	if( !mod_studiohdr ) return NULL; // probably not a studiomodel
 
 	VectorCopy( angles, angles2 );
@@ -677,7 +677,7 @@ static void SV_StudioSetupBones( model_t *pModel,	float frame, int sequence, con
 
 	pseqdesc = (mstudioseqdesc_t *)((byte *)mod_studiohdr + mod_studiohdr->seqindex) + sequence;
 	pbones = (mstudiobone_t *)((byte *)mod_studiohdr + mod_studiohdr->boneindex);
-	panim = R_StudioGetAnim( mod_studiohdr, pModel, pseqdesc );
+	panim = static_cast<mstudioanim_t *>(R_StudioGetAnim(mod_studiohdr, pModel, pseqdesc));
 
 	if( iBone < -1 || iBone >= mod_studiohdr->numbones )
 		iBone = 0;
