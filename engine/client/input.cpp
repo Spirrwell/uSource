@@ -317,7 +317,7 @@ void IN_DeactivateMouse( void )
 
 	in_mouseactive = false;
 #ifdef XASH_SDL
-	SDL_SetWindowGrab( host.hWnd, SDL_FALSE );
+	SDL_SetWindowGrab( (SDL_Window*)host.hWnd, SDL_FALSE );
 #endif
 }
 

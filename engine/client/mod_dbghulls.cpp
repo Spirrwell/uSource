@@ -67,7 +67,7 @@ _inline void list_del( hullnode_t *entry )
 
 static winding_t * winding_alloc( uint numpoints )
 {
-	return (winding_t *)malloc( (int)((winding_t *)0)->p[numpoints] );
+	return (winding_t *)malloc( (int)(size_t)((winding_t *)0)->p[numpoints] );
 }
 
 static void free_winding( winding_t *w )
@@ -84,7 +84,7 @@ static winding_t *winding_copy( winding_t *w )
 	winding_t	*neww;
 
 	neww = winding_alloc( w->numpoints );
-	memcpy( neww, w, (int)((winding_t *)0)->p[w->numpoints] );
+	memcpy( neww, w, (int)(size_t)((winding_t *)0)->p[w->numpoints] );
 
 	return neww;
 }
@@ -111,7 +111,7 @@ static void winding_reverse( winding_t *w )
 static winding_t *winding_shrink( winding_t *w )
 {
 	winding_t	*neww = winding_alloc( w->numpoints );
-	memcpy( neww, w, (int)((winding_t *)0)->p[w->numpoints] );
+	memcpy( neww, w, (int)(size_t)((winding_t *)0)->p[w->numpoints] );
 	free_winding( w );
 
 	return neww;

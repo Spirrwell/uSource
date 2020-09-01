@@ -89,7 +89,7 @@ void CL_InitParticles( void )
 {
 	int	i;
 
-	cl_particles = Mem_Calloc( cls.mempool, sizeof( particle_t ) * GI->max_particles );
+	cl_particles = static_cast<particle_t *>(Mem_Calloc(cls.mempool, sizeof(particle_t) * GI->max_particles));
 	CL_ClearParticles ();
 
 	// this is used for EF_BRIGHTFIELD
@@ -362,7 +362,7 @@ CL_InitViewBeams
 */
 void CL_InitViewBeams( void )
 {
-	cl_viewbeams = Mem_Calloc( cls.mempool, sizeof( BEAM ) * GI->max_beams );
+	cl_viewbeams = static_cast<BEAM *>(Mem_Calloc(cls.mempool, sizeof(BEAM) * GI->max_beams));
 	CL_ClearViewBeams();
 }
 

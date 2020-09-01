@@ -186,7 +186,7 @@ void CL_UpdateStudioTexture( mstudiotexture_t *ptexture, int topcolor, int botto
 		return;
 	}
 
-	index = GL_UpdateTextureInternal( origtexname, pic, 0 );
+	index = GL_UpdateTextureInternal( origtexname, pic, (texFlags_t)0 );
 	FS_FreeImage( pic );
 
 	// restore original palette
@@ -291,7 +291,7 @@ void CL_AllocRemapInfo( int topcolor, int bottomcolor )
 			// e.g. playermodel 'barney' with playermodel 'gordon'
 			if( clgame.remap_info[i] ) CL_FreeRemapInfo( clgame.remap_info[i] ); // free old info
 			size = sizeof( remap_info_t ) + ( sizeof( mstudiotexture_t ) * phdr->numtextures );
-			info = clgame.remap_info[i] = Mem_Calloc( clgame.mempool, size );	
+			info = clgame.remap_info[i] = static_cast<remap_info_t *>(Mem_Calloc(clgame.mempool, size));
 			info->ptexture = (mstudiotexture_t *)(info + 1); // textures are immediately comes after remap_info
 		}
 		else
@@ -328,7 +328,8 @@ void CL_AllocRemapInfo( int topcolor, int bottomcolor )
 			// this code catches studiomodel change with another studiomodel with remap textures
 			// e.g. playermodel 'barney' with playermodel 'gordon'
 			if( clgame.remap_info[i] ) CL_FreeRemapInfo( clgame.remap_info[i] ); // free old info
-			info = clgame.remap_info[i] = Mem_Calloc( clgame.mempool, sizeof( remap_info_t ));	
+			info = clgame.remap_info[i] = static_cast<remap_info_t *>(Mem_Calloc(clgame.mempool,
+			                                                                     sizeof(remap_info_t)));
 		}
 		else
 		{
