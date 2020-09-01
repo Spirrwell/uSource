@@ -60,6 +60,12 @@ else { \
 	if(g_pEngineDebug) g_pEngineDebug->HostError(_vpaste(__VA_ARGS__)); \
 	else abort();}
 
+/* Colors for MsgC */
+static const char red[] = {(char)255, 0, 0};
+static const char green[] = {0, (char)255, 0};
+static const char blue[] = {0, 0, (char)255 };
+static const char white[] = {(char)255, (char)255, (char)255};
+
 void Msg(const char* fmt, ...);
 void Warn(const char* fmt, ...);
 void Error(const char* fmt, ...);
