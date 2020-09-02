@@ -523,7 +523,8 @@ glpoly_t *R_DecalCreatePoly( decalinfo_t *decalinfo, decal_t *pdecal, msurface_t
 
 	// allocate glpoly
 	// REFTODO: com_studiocache pool!
-	poly = Mem_Calloc( r_temppool, sizeof( glpoly_t ) + ( lnumverts - 4 ) * VERTEXSIZE * sizeof( float ));
+	poly = static_cast<glpoly_t *>(Mem_Calloc(r_temppool,
+	                                          sizeof(glpoly_t) + (lnumverts - 4) * VERTEXSIZE * sizeof(float)));
 	poly->next = pdecal->polys;
 	poly->flags = surf->flags;
 	pdecal->polys = poly;
@@ -618,7 +619,7 @@ void R_DecalSurface( msurface_t *surf, decalinfo_t *decalinfo )
 	decal_t		*decal = surf->pdecals;
 	vec4_t		textureU, textureV;
 	float		s, t, w, h;
-	connstate_t state = ENGINE_GET_PARM( PARM_CONNSTATE );
+	connstate_t state = (connstate_t)ENGINE_GET_PARM( PARM_CONNSTATE );
 
 	// we in restore mode
 	if( state == ca_connected || state == ca_validate )

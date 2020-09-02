@@ -908,7 +908,7 @@ qboolean R_Init( void )
 		return false;
 	}
 
-	r_temppool = Mem_AllocPool( "Render Zone" );
+	r_temppool = static_cast<byte *>(Mem_AllocPool("Render Zone"));
 
 	GL_SetDefaults();
 	R_CheckVBO();

@@ -470,7 +470,7 @@ pfnGetModelCounters
 static void pfnGetModelCounters( int **s, int **a )
 {
 	*s = &g_studio.framecount;
-	*a = &r_stats.c_studio_models_drawn;
+	*a = (int*)&r_stats.c_studio_models_drawn;
 }
 
 /*
@@ -890,7 +890,7 @@ void R_StudioMergeBones( cl_entity_t *e, model_t *m_pSubModel )
 
 	f = R_StudioEstimateFrame( e, pseqdesc );
 
-	panim = gEngfuncs.R_StudioGetAnim( m_pStudioHeader, m_pSubModel, pseqdesc );
+	panim = static_cast<mstudioanim_t *>(gEngfuncs.R_StudioGetAnim(m_pStudioHeader, m_pSubModel, pseqdesc));
 	R_StudioCalcRotations( e, pos, q, pseqdesc, panim, f );
 	pbones = (mstudiobone_t *)((byte *)m_pStudioHeader + m_pStudioHeader->boneindex);
 
@@ -956,7 +956,7 @@ void R_StudioSetupBones( cl_entity_t *e )
 
 	f = R_StudioEstimateFrame( e, pseqdesc );
 
-	panim = gEngfuncs.R_StudioGetAnim( m_pStudioHeader, RI.currentmodel, pseqdesc );
+	panim = static_cast<mstudioanim_t *>(gEngfuncs.R_StudioGetAnim(m_pStudioHeader, RI.currentmodel, pseqdesc));
 	R_StudioCalcRotations( e, pos, q, pseqdesc, panim, f );
 
 	if( pseqdesc->numblends > 1 )
@@ -996,7 +996,8 @@ void R_StudioSetupBones( cl_entity_t *e )
 		float		s;
 
 		pseqdesc = (mstudioseqdesc_t *)((byte *)m_pStudioHeader + m_pStudioHeader->seqindex) + e->latched.prevsequence;
-		panim = gEngfuncs.R_StudioGetAnim( m_pStudioHeader, RI.currentmodel, pseqdesc );
+		panim = static_cast<mstudioanim_t *>(gEngfuncs.R_StudioGetAnim(m_pStudioHeader, RI.currentmodel,
+		                                                               pseqdesc));
 
 		// clip prevframe
 		R_StudioCalcRotations( e, pos1b, q1b, pseqdesc, panim, e->latched.prevframe );
@@ -1046,7 +1047,8 @@ void R_StudioSetupBones( cl_entity_t *e )
 
 		pseqdesc = (mstudioseqdesc_t *)((byte *)m_pStudioHeader + m_pStudioHeader->seqindex) + m_pPlayerInfo->gaitsequence;
 
-		panim = gEngfuncs.R_StudioGetAnim( m_pStudioHeader, RI.currentmodel, pseqdesc );
+		panim = static_cast<mstudioanim_t *>(gEngfuncs.R_StudioGetAnim(m_pStudioHeader, RI.currentmodel,
+		                                                               pseqdesc));
 		R_StudioCalcRotations( e, pos2, q2, pseqdesc, panim, m_pPlayerInfo->gaitframe );
 
 		for( i = 0; i < m_pStudioHeader->numbones; i++ )
@@ -1863,7 +1865,7 @@ mstudiotexture_t *R_StudioGetTexture( cl_entity_t *e )
 	mstudiotexture_t	*ptexture;
 	studiohdr_t	*phdr, *thdr;
 
-	if(( phdr = gEngfuncs.Mod_Extradata( mod_studio, e->model )) == NULL )
+	if(( phdr = static_cast<studiohdr_t *>(gEngfuncs.Mod_Extradata(mod_studio, e->model))) == NULL )
 		return NULL;
 
 	thdr = m_pStudioHeader;
@@ -2749,7 +2751,7 @@ int R_GetEntityRenderMode( cl_entity_t *ent )
 
 	RI.currententity = oldent;
 
-	if(( phdr = gEngfuncs.Mod_Extradata( mod_studio, model )) == NULL )
+	if(( phdr = static_cast<studiohdr_t *>(gEngfuncs.Mod_Extradata(mod_studio, model))) == NULL )
 	{
 		if( R_ModelOpaque( ent->curstate.rendermode ))
 		{
@@ -3772,7 +3774,7 @@ static void R_StudioLoadTexture( model_t *mod, studiohdr_t *phdr, mstudiotexture
 		i = mod->numtextures;
 		mod->textures = (texture_t **)Mem_Realloc( mod->mempool, mod->textures, ( i + 1 ) * sizeof( texture_t* ));
 		size = ptexture->width * ptexture->height + 768;
-		tx = Mem_Calloc( mod->mempool, sizeof( *tx ) + size );
+		tx = static_cast<texture_t *>(Mem_Calloc(mod->mempool, sizeof(*tx) + size));
 		mod->textures[i] = tx;
 
 		// store ranges into anim_min, anim_max etc
@@ -3947,13 +3949,13 @@ static engine_studio_api_t gStudioAPI =
 	R_StudioDrawHulls,
 	R_StudioDrawAbsBBox,
 	R_StudioDrawBones,
-	(void*)R_StudioSetupSkin,
+	reinterpret_cast<void (*)(void *, int)>((void *) R_StudioSetupSkin),
 	R_StudioSetRemapColors,
 	R_StudioSetupPlayerModel,
 	R_StudioClientEvents,
 	R_StudioGetForceFaceFlags,
 	R_StudioSetForceFaceFlags,
-	(void*)R_StudioSetHeader,
+	reinterpret_cast<void (*)(void *)>((void *) R_StudioSetHeader),
 	R_StudioSetRenderModel,
 	R_StudioSetupRenderer,
 	R_StudioRestoreRenderer,

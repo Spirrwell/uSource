@@ -64,19 +64,25 @@ Disable warnings
 template<class T, class U>
 static void SetBits(T& iBitVector, U bits)
 {
-	iBitVector = iBitVector | bits;
+	uint64_t _iBitVector = (uint64_t)iBitVector;
+	uint64_t _bits = (uint64_t)bits;
+	iBitVector = (T)(_iBitVector | _bits);
 }
 
 template<class T, class U>
 static void ClearBits(T& iBitVector, U bits)
 {
-	iBitVector = (iBitVector) & ~bits;
+	uint64_t _iBitVector = (uint64_t)iBitVector;
+	uint64_t _bits = (uint64_t)bits;
+	iBitVector = (T)((_iBitVector) & ~_bits);
 }
 
 template<class T, class U>
 static bool FBitSet(T iBitVec, U bit)
 {
-	return iBitVec & bit;
+	uint64_t _iBitVector = (uint64_t)iBitVec;
+	uint64_t _bits = (uint64_t)bit;
+	return _iBitVector & _bits;
 }
 
 #ifndef __cplusplus
