@@ -53,7 +53,7 @@ static void HPAK_AddToQueue( const char *name, resource_t *pResource, void *data
 {
 	hash_pack_queue_t	*p;
 
-	p = Z_Malloc( sizeof( hash_pack_queue_t ));
+	p = static_cast<hash_pack_queue_t *>(Z_Malloc(sizeof(hash_pack_queue_t)));
 	p->name = copystring( name );
 	p->resource = *pResource;
 	p->size = pResource->nDownloadSize;
@@ -74,7 +74,7 @@ void HPAK_FlushHostQueue( void )
 	for( p = gp_hpak_queue; p != NULL; p = gp_hpak_queue )
 	{
 		gp_hpak_queue = p->next;
-		HPAK_AddLump( false, p->name, &p->resource, p->data, NULL );
+		HPAK_AddLump( false, p->name, &p->resource, (byte*)p->data, NULL );
 		freestring( p->name );
 		Mem_Free( p->data );
 		Mem_Free( p );
@@ -118,7 +118,7 @@ void HPAK_CreatePak( const char *filename, resource_t *pResource, byte *pData, f
 
 		// there are better ways
 		filelocation = FS_Tell( fin );
-		temp = Z_Malloc( pResource->nDownloadSize );
+		temp = static_cast<byte *>(Z_Malloc(pResource->nDownloadSize));
 		FS_Read( fin, temp, pResource->nDownloadSize );
 		FS_Seek( fin, filelocation, SEEK_SET );
 		MD5Update( &ctx, temp, pResource->nDownloadSize );
@@ -144,7 +144,7 @@ void HPAK_CreatePak( const char *filename, resource_t *pResource, byte *pData, f
 	FS_Write( fout, &hash_pack_header, sizeof( hash_pack_header ));
 
 	hash_pack_info.count = 1;
-	hash_pack_info.entries = Z_Malloc( sizeof( hpak_lump_t ));
+	hash_pack_info.entries = static_cast<hpak_lump_t *>(Z_Malloc(sizeof(hpak_lump_t)));
 	hash_pack_info.entries[0].resource = *pResource;
 	hash_pack_info.entries[0].filepos = FS_Tell( fout );
 	hash_pack_info.entries[0].disksize = pResource->nDownloadSize;
@@ -219,7 +219,7 @@ void HPAK_AddLump( qboolean bUseQueue, const char *name, resource_t *pResource, 
 
 		// there are better ways
 		position = FS_Tell( pFile );
-		temp = Z_Malloc( pResource->nDownloadSize );
+		temp = static_cast<byte *>(Z_Malloc(pResource->nDownloadSize));
 		FS_Read( pFile, temp, pResource->nDownloadSize );
 		FS_Seek( pFile, position, SEEK_SET );
 		MD5Update( &ctx, temp, pResource->nDownloadSize );
@@ -296,7 +296,7 @@ void HPAK_AddLump( qboolean bUseQueue, const char *name, resource_t *pResource, 
 	}
 
 	// load the data
-	srcpak.entries = Z_Malloc( sizeof( hpak_lump_t ) * srcpak.count );
+	srcpak.entries = static_cast<hpak_lump_t *>(Z_Malloc(sizeof(hpak_lump_t) * srcpak.count));
 	FS_Read( file_src, srcpak.entries, sizeof( hpak_lump_t ) * srcpak.count );
 
 	// check if already exists
@@ -311,7 +311,7 @@ void HPAK_AddLump( qboolean bUseQueue, const char *name, resource_t *pResource, 
 
 	// make a new container
 	dstpak.count = srcpak.count + 1;
-	dstpak.entries = Z_Malloc( sizeof( hpak_lump_t ) * dstpak.count );
+	dstpak.entries = static_cast<hpak_lump_t *>(Z_Malloc(sizeof(hpak_lump_t) * dstpak.count));
 	memcpy( dstpak.entries, srcpak.entries, srcpak.count );
 
 	for( i = 0; i < srcpak.count; i++ )
@@ -411,7 +411,7 @@ static qboolean HPAK_Validate( const char *filename, qboolean quiet )
 
 	if( !quiet ) Con_Printf( "# of Entries:  %i\n", num_lumps );
 
-	dataDir = Z_Malloc( sizeof( hpak_lump_t ) * num_lumps );
+	dataDir = static_cast<hpak_lump_t *>(Z_Malloc(sizeof(hpak_lump_t) * num_lumps));
 	FS_Read( f, dataDir, sizeof( hpak_lump_t ) * num_lumps );
 
 	if( !quiet ) Con_Printf( "# Type Size FileName : MD5 Hash\n" );
@@ -427,7 +427,7 @@ static qboolean HPAK_Validate( const char *filename, qboolean quiet )
 			return false;
 		}
 
-		dataPak = Z_Malloc( dataDir[i].disksize );
+		dataPak = static_cast<byte *>(Z_Malloc(dataDir[i].disksize));
 		FS_Seek( f, dataDir[i].filepos, SEEK_SET );
 		FS_Read( f, dataPak, dataDir[i].disksize );
 
@@ -558,7 +558,7 @@ qboolean HPAK_ResourceForHash( const char *filename, byte *hash, resource_t *pRe
 		return false;
 	}
 
-	directory.entries = Z_Malloc( sizeof( hpak_lump_t ) * directory.count );
+	directory.entries = static_cast<hpak_lump_t *>(Z_Malloc(sizeof(hpak_lump_t) * directory.count));
 	FS_Read( f, directory.entries, sizeof( hpak_lump_t ) * directory.count );
 	bFound = HPAK_FindResource( &directory, hash, pResource );
 	Mem_Free( directory.entries );
@@ -619,7 +619,7 @@ static qboolean HPAK_ResourceForIndex( const char *filename, int index, resource
 		return false;
 	}
 
-	directory.entries = Z_Malloc( sizeof( hpak_lump_t ) * directory.count );
+	directory.entries = static_cast<hpak_lump_t *>(Z_Malloc(sizeof(hpak_lump_t) * directory.count));
 	FS_Read( f, directory.entries, sizeof( hpak_lump_t ) * directory.count );
 	*pResource = directory.entries[index-1].resource;
 	Z_Free( directory.entries );
@@ -651,7 +651,7 @@ qboolean HPAK_GetDataPointer( const char *filename, resource_t *pResource, byte 
 		{
 			if( buffer )
 			{
-				tmpbuf = Z_Malloc( p->size );
+				tmpbuf = static_cast<byte *>(Z_Malloc(p->size));
 				memcpy( tmpbuf, p->data, p->size );
 				*buffer = tmpbuf;
 			}
@@ -695,7 +695,7 @@ qboolean HPAK_GetDataPointer( const char *filename, resource_t *pResource, byte 
 		return false;
 	}
 
-	directory.entries = Z_Malloc( sizeof( hpak_lump_t ) * directory.count );
+	directory.entries = static_cast<hpak_lump_t *>(Z_Malloc(sizeof(hpak_lump_t) * directory.count));
 	FS_Read( f, directory.entries, sizeof( hpak_lump_t ) * directory.count );
 
 	for( i = 0; i < directory.count; i++ )
@@ -708,7 +708,7 @@ qboolean HPAK_GetDataPointer( const char *filename, resource_t *pResource, byte 
 
 			if( buffer && entry->disksize > 0 )
 			{
-				tmpbuf = Z_Malloc( entry->disksize );
+				tmpbuf = static_cast<byte *>(Z_Malloc(entry->disksize));
 				FS_Read( f, tmpbuf, entry->disksize );
 				*buffer = tmpbuf;
 			}
@@ -804,8 +804,8 @@ void HPAK_RemoveLump( const char *name, resource_t *pResource )
 	}
 
 	hpak_save.count = hpak_read.count - 1;
-	hpak_read.entries = Z_Malloc( sizeof( hpak_lump_t ) * hpak_read.count );
-	hpak_save.entries = Z_Malloc( sizeof( hpak_lump_t ) * hpak_save.count );
+	hpak_read.entries = static_cast<hpak_lump_t *>(Z_Malloc(sizeof(hpak_lump_t) * hpak_read.count));
+	hpak_save.entries = static_cast<hpak_lump_t *>(Z_Malloc(sizeof(hpak_lump_t) * hpak_save.count));
 
 	FS_Read( file_src, hpak_read.entries, sizeof( hpak_lump_t ) * hpak_read.count );
 
@@ -913,7 +913,7 @@ void HPAK_List_f( void )
 	Con_Printf( "# of Entries:  %i\n", directory.count );
 	Con_Printf( "# Type Size FileName : MD5 Hash\n" );
 
-	directory.entries = Z_Malloc( directory.count * sizeof( hpak_lump_t ));
+	directory.entries = static_cast<hpak_lump_t *>(Z_Malloc(directory.count * sizeof(hpak_lump_t)));
 	FS_Read( f, directory.entries, directory.count * sizeof( hpak_lump_t ));
 
 	for( nCurrent = 0; nCurrent < directory.count; nCurrent++ )
@@ -1004,7 +1004,7 @@ void HPAK_Extract_f( void )
 	if( nIndex == -1 ) Con_Printf( "Extracting all lumps from %s.\n", pakname );
 	else Con_Printf( "Extracting lump %i from %s\n", nIndex, pakname );
 
-	directory.entries = Z_Malloc( directory.count * sizeof( hpak_lump_t ));
+	directory.entries = static_cast<hpak_lump_t *>(Z_Malloc(directory.count * sizeof(hpak_lump_t)));
 	FS_Read( f, directory.entries, directory.count * sizeof( hpak_lump_t ));
 
 	for( nCurrent = 0; nCurrent < directory.count; nCurrent++ )
@@ -1027,7 +1027,7 @@ void HPAK_Extract_f( void )
 		}
 
 		nDataSize = entry->disksize;
-		pData = Z_Malloc( nDataSize + 1 );
+		pData = static_cast<byte *>(Z_Malloc(nDataSize + 1));
 		FS_Seek( f, entry->filepos, SEEK_SET );
 		FS_Read( f, pData, nDataSize );
 

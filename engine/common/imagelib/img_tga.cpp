@@ -122,7 +122,7 @@ qboolean Image_LoadTGA( const char *name, const byte *buffer, fs_offset_t filesi
 	rows = targa_header.height;
 
 	image.size = image.width * image.height * 4;
-	targa_rgba = image.rgba = Mem_Malloc( host.imagepool, image.size );
+	targa_rgba = image.rgba = static_cast<byte *>(Mem_Malloc(host.imagepool, image.size));
 
 	// if bit 5 of attributes isn't set, the image has been stored from bottom to top
 	if( !Image_CheckFlag( IL_DONTFLIP_TGA ) && targa_header.attributes & 0x20 )
@@ -256,7 +256,7 @@ qboolean Image_SaveTGA( const char *name, rgbdata_t *pix )
 	buffer[15] = (pix->height >> 8) & 0xFF;
 	buffer[16] = ( pix->flags & IMAGE_HAS_ALPHA ) ? 32 : 24;
 	buffer[17] = ( pix->flags & IMAGE_HAS_ALPHA ) ? 8 : 0; // 8 bits of alpha
-	Q_strncpy( buffer + 18, comment, Q_strlen( comment )); 
+	Q_strncpy(reinterpret_cast<char *>(buffer + 18), comment, Q_strlen(comment ));
 	out = buffer + 18 + Q_strlen( comment );
 
 	// get image description

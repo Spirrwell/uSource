@@ -30,13 +30,13 @@ static mpg_off_t get_fileinfo( mpg123_handle_t *fr );
 // methods for the buffer chain, mainly used for feed reader, but not just that.
 static buffy_t* buffy_new( size_t size, size_t minsize )
 {
-	buffy_t	*newbuf = malloc( sizeof( buffy_t ));
+	buffy_t	*newbuf = static_cast<buffy_t *>(malloc(sizeof(buffy_t)));
 
 	if( newbuf == NULL )
 		return NULL;
 
 	newbuf->realsize = size > minsize ? size : minsize;
-	newbuf->data = malloc( newbuf->realsize );
+	newbuf->data = static_cast<byte *>(malloc(newbuf->realsize));
 
 	if( newbuf->data == NULL )
 	{

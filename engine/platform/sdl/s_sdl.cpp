@@ -113,7 +113,7 @@ qboolean SNDDMA_Init( void )
 	if( !samplecount )
 		samplecount = 0x8000;
 	dma.samples         = samplecount * obtained.channels;
-	dma.buffer          = Z_Malloc( dma.samples * 2 );
+	dma.buffer          = static_cast<byte *>(Z_Malloc(dma.samples * 2));
 	dma.samplepos       = 0;
 
 	Con_Printf( "Using SDL audio driver: %s @ %d Hz\n", SDL_GetCurrentAudioDriver( ), obtained.freq );

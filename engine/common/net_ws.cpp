@@ -1273,7 +1273,7 @@ void NET_SendPacketEx( netsrc_t sock, size_t length, const void *data, netadr_t 
 
 	NET_NetadrToSockadr( &to, &addr );
 
-	ret = NET_SendLong( sock, net_socket, data, length, 0, &addr, sizeof( addr ), splitsize );
+	ret = NET_SendLong( sock, net_socket, (const char*)data, length, 0, &addr, sizeof( addr ), splitsize );
 
 	if( NET_IsSocketError( ret ))
 	{
@@ -1444,7 +1444,7 @@ static int NET_Isocket( const char *net_interface, int port, qboolean multicast 
 
 	addr.sin_family = AF_INET;
 
-	if( NET_IsSocketError( bind( net_socket, (void *)&addr, sizeof( addr )) ) )
+	if( NET_IsSocketError( bind( net_socket, (sockaddr *)&addr, sizeof( addr )) ) )
 	{
 		Con_DPrintf( S_WARN "NET_UDsocket: port: %d bind: %s\n", port, NET_ErrorString( ));
 		closesocket( net_socket );
@@ -2366,7 +2366,7 @@ static httpserver_t *HTTP_ParseURL( const char *url )
 		return NULL;
 
 	url += 7;
-	server = Z_Calloc( sizeof( httpserver_t ) );
+	server = static_cast<httpserver_t *>(Z_Calloc(sizeof(httpserver_t)));
 	i = 0;
 
 	while( *url && ( *url != ':' ) && ( *url != '/' ) && ( *url != '\r' ) && ( *url != '\n' ) )

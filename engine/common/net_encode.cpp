@@ -383,7 +383,7 @@ void Delta_CustomEncode( delta_info_t *dt, const void *from, const void *to )
 
 	if( dt->userCallback )
 	{
-		dt->userCallback( dt->pFields, from, to );
+		dt->userCallback(dt->pFields, static_cast<const byte *>(from), static_cast<const byte *>(to));
 	}
 }
 
@@ -455,7 +455,7 @@ qboolean Delta_AddField( const char *pStructName, const char *pName, int flags, 
 	}
 
 	// allocate a new one
-	dt->pFields = Z_Realloc( dt->pFields, (dt->numFields + 1) * sizeof( delta_t ));	
+	dt->pFields = static_cast<delta_t *>(Z_Realloc(dt->pFields, (dt->numFields + 1) * sizeof(delta_t)));
 	for( i = 0, pField = dt->pFields; i < dt->numFields; i++, pField++ );
 
 	// copy info to new field
@@ -743,7 +743,7 @@ void Delta_ParseTable( char **delta_script, delta_info_t *dt, const char *encode
 	// adjust to fit memory size
 	if( dt->numFields < dt->maxFields )
 	{
-		dt->pFields = Z_Realloc( dt->pFields, dt->numFields * sizeof( delta_t ));
+		dt->pFields = static_cast<delta_t *>(Z_Realloc(dt->pFields, dt->numFields * sizeof(delta_t)));
 	}
 
 	dt->bInitialized = true; // table is ok

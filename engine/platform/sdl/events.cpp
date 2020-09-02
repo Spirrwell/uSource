@@ -140,7 +140,8 @@ static void SDLash_KeyEvent( SDL_KeyboardEvent key )
 			return;
 		}
 		default:
-			if( down ) Con_Reportf( "SDLash_KeyEvent: Unknown key: %s = %i\n", SDL_GetScancodeName( keynum ), keynum );
+			if( down ) Con_Reportf("SDLash_KeyEvent: Unknown key: %s = %i\n", SDL_GetScancodeName(
+					static_cast<SDL_Scancode>(keynum)), keynum );
 			return;
 		}
 	}
@@ -366,7 +367,7 @@ static void SDLash_EventFilter( SDL_Event *event )
 		break;
 
 	case SDL_WINDOWEVENT:
-		if( event->window.windowID != SDL_GetWindowID( host.hWnd ) )
+		if( event->window.windowID != SDL_GetWindowID( (SDL_Window*)host.hWnd ) )
 			return;
 
 		if( host.status == HOST_SHUTDOWN || Host_IsDedicated() )
@@ -429,7 +430,7 @@ static void SDLash_EventFilter( SDL_Event *event )
 			if( vid_fullscreen->value )
 				break;
 
-			SDL_GL_GetDrawableSize( host.hWnd, &w, &h );
+			SDL_GL_GetDrawableSize( (SDL_Window*)host.hWnd, &w, &h );
 			R_SaveVideoMode( w, h );
 			SCR_VidInit(); // tell the client.dll what vid_mode has changed
 			break;

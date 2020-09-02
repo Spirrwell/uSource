@@ -60,7 +60,7 @@ void Mod_LoadSpriteModel( model_t *mod, const void *buffer, qboolean *loaded, ui
 	{
 		pinq1 = (dsprite_q1_t *)buffer;
 		size = sizeof( msprite_t ) + ( pinq1->numframes - 1 ) * sizeof( psprite->frames );
-		psprite = Mem_Calloc( mod->mempool, size );
+		psprite = static_cast<msprite_t *>(Mem_Calloc(mod->mempool, size));
 		mod->cache.data = psprite;	// make link to extradata
 
 		psprite->type = pinq1->type;
@@ -84,7 +84,7 @@ void Mod_LoadSpriteModel( model_t *mod, const void *buffer, qboolean *loaded, ui
 	{
 		pinhl = (dsprite_hl_t *)buffer;
 		size = sizeof( msprite_t ) + ( pinhl->numframes - 1 ) * sizeof( psprite->frames );
-		psprite = Mem_Calloc( mod->mempool, size );
+		psprite = static_cast<msprite_t *>(Mem_Calloc(mod->mempool, size));
 		mod->cache.data = psprite;	// make link to extradata
 
 		psprite->type = pinhl->type;

@@ -19,7 +19,7 @@ GNU General Public License for more details.
 
 qboolean CustomDecal_Validate( void *raw, int nFileSize )
 {
-	rgbdata_t	*test = FS_LoadImage( "#logo.bmp", raw, nFileSize );
+	rgbdata_t	*test = FS_LoadImage( "#logo.bmp", (byte*)raw, nFileSize );
 
 	if( test )
 	{
@@ -53,7 +53,7 @@ void COM_ClearCustomizationList( customization_t *pHead, qboolean bCleanDecals )
 			}
 #endif
 
-			FS_FreeImage( pCurrent->pInfo );
+			FS_FreeImage( (rgbdata_t*)pCurrent->pInfo );
 		}
 		Mem_Free( pCurrent );
 	}
@@ -69,7 +69,7 @@ qboolean COM_CreateCustomization( customization_t *pListHead, resource_t *pResou
 
 	if( pOut ) *pOut = NULL;
 
-	pCust = Z_Calloc( sizeof( customization_t ));
+	pCust = static_cast<customization_t *>(Z_Calloc(sizeof(customization_t)));
 	pCust->resource = *pResource;
 
 	if( pResource->nDownloadSize <= 0 )
@@ -108,7 +108,7 @@ qboolean COM_CreateCustomization( customization_t *pListHead, resource_t *pResou
 					pCust->nUserData2 = 1;
 
 					if( !FBitSet( flags, FCUST_WIPEDATA ))
-						pCust->pInfo = FS_LoadImage( "#logo.bmp", pCust->pBuffer, pCust->resource.nDownloadSize );
+						pCust->pInfo = FS_LoadImage( "#logo.bmp", (byte*)pCust->pBuffer, pCust->resource.nDownloadSize );
 					else pCust->pInfo = NULL;
 					if( nLumps ) *nLumps = 1;
 				}

@@ -854,7 +854,7 @@ qboolean Cmd_CheckMapsList_R( qboolean fRefresh, qboolean onlyingamedir )
 		return false;
 	}
 
-	buffer = Mem_Calloc( host.mempool, t->numfilenames * 2 * sizeof( result ));
+	buffer = static_cast<char *>(Mem_Calloc(host.mempool, t->numfilenames * 2 * sizeof(result)));
 	use_filter = Q_strlen( GI->mp_filter ) ? true : false;
 
 	for( i = 0; i < t->numfilenames; i++ )
@@ -900,7 +900,7 @@ qboolean Cmd_CheckMapsList_R( qboolean fRefresh, qboolean onlyingamedir )
 			if( !ents && lumplen >= 10 )
 			{
 				FS_Seek( f, lumpofs, SEEK_SET );
-				ents = Z_Calloc( lumplen + 1 );
+				ents = static_cast<char *>(Z_Calloc(lumplen + 1));
 				FS_Read( f, ents, lumplen );
 			}
 
@@ -1289,7 +1289,7 @@ static void Cmd_WriteOpenGLCvar( const char *name, const char *string, const cha
 {
 	if( !COM_CheckString( desc ))
 		return; // ignore cvars without description (fantom variables)
-	FS_Printf( f, "%s \"%s\"\n", name, string );
+	FS_Printf( (file_t*)f, "%s \"%s\"\n", name, string );
 }
 
 static void Cmd_WriteHelp(const char *name, const char *unused, const char *desc, void *f )
@@ -1303,10 +1303,10 @@ static void Cmd_WriteHelp(const char *name, const char *unused, const char *desc
 
 	length = 3 - (Q_strlen( name ) / 10); // Asm_Ed default tab stop is 10
 
-	if( length == 3 ) FS_Printf( f, "%s\t\t\t\"%s\"\n", name, desc );
-	if( length == 2 ) FS_Printf( f, "%s\t\t\"%s\"\n", name, desc );
-	if( length == 1 ) FS_Printf( f, "%s\t\"%s\"\n", name, desc );
-	if( length == 0 ) FS_Printf( f, "%s \"%s\"\n", name, desc );
+	if( length == 3 ) FS_Printf( (file_t*)f, "%s\t\t\t\"%s\"\n", name, desc );
+	if( length == 2 ) FS_Printf( (file_t*)f, "%s\t\t\"%s\"\n", name, desc );
+	if( length == 1 ) FS_Printf( (file_t*)f, "%s\t\"%s\"\n", name, desc );
+	if( length == 0 ) FS_Printf( (file_t*)f, "%s \"%s\"\n", name, desc );
 }
 
 void Cmd_WriteOpenGLVariables( file_t *f )

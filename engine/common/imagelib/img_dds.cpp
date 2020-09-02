@@ -335,7 +335,7 @@ qboolean Image_LoadDDS( const char *name, const byte *buffer, fs_offset_t filesi
 	}
 
 	// dds files will be uncompressed on a render. requires minimal of info for set this
-	image.rgba = Mem_Malloc( host.imagepool, image.size ); 
+	image.rgba = static_cast<byte *>(Mem_Malloc(host.imagepool, image.size));
 	memcpy( image.rgba, fin, image.size );
 	SetBits( image.flags, IMAGE_DDS_FORMAT );
 

@@ -510,7 +510,7 @@ Cmd_Argl
 */
 const char** Cmd_Argl()
 {
-	return cmd_argv;
+	return const_cast<const char **>(cmd_argv);
 }
 
 /*

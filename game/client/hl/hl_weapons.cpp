@@ -344,13 +344,13 @@ void HUD_InitClientWeapons( void )
 	g_engfuncs.pfnPrecacheModel = stub_PrecacheModel;
 	g_engfuncs.pfnPrecacheSound = stub_PrecacheSound;
 	g_engfuncs.pfnPrecacheEvent = stub_PrecacheEvent;
-	g_engfuncs.pfnNameForFunction = stub_NameForFunction;
+	g_engfuncs.pfnNameForFunction = reinterpret_cast<const char *(*)(unsigned long)>(stub_NameForFunction);
 	g_engfuncs.pfnSetModel = stub_SetModel;
 	g_engfuncs.pfnSetClientMaxspeed = HUD_SetMaxSpeed;
 
 	// Handled locally
 	g_engfuncs.pfnPlaybackEvent = HUD_PlaybackEvent;
-	g_engfuncs.pfnAlertMessage = AlertMessage;
+	g_engfuncs.pfnAlertMessage = reinterpret_cast<void (*)(ALERT_TYPE, char *, ...)>(AlertMessage);
 
 	// Pass through to engine
 	g_engfuncs.pfnPrecacheEvent = gEngfuncs.pfnPrecacheEvent;

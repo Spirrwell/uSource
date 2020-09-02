@@ -440,13 +440,13 @@ rgbdata_t *Image_Quantize( rgbdata_t *pic )
 	image.ptr = 0;
 
 	// allocate 8-bit buffer
-	image.tempbuffer = Mem_Realloc( host.imagepool, image.tempbuffer, image.size );
+	image.tempbuffer = static_cast<byte *>(Mem_Realloc(host.imagepool, image.tempbuffer, image.size));
 
 	initnet( pic->buffer, pic->size, 10 );
 	learn();
 	unbiasnet();
 
-	pic->palette = Mem_Malloc( host.imagepool, netsize * 3 );
+	pic->palette = static_cast<byte *>(Mem_Malloc(host.imagepool, netsize * 3));
 
 	for( i = 0; i < netsize; i++ )
 	{
@@ -462,7 +462,7 @@ rgbdata_t *Image_Quantize( rgbdata_t *pic )
 		image.tempbuffer[i] = inxsearch( pic->buffer[i*image.bpp+0], pic->buffer[i*image.bpp+1], pic->buffer[i*image.bpp+2] );
 	}
 
-	pic->buffer = Mem_Realloc( host.imagepool, pic->buffer, image.size );
+	pic->buffer = static_cast<byte *>(Mem_Realloc(host.imagepool, pic->buffer, image.size));
 	memcpy( pic->buffer, image.tempbuffer, image.size );
 	pic->type = PF_INDEXED_24;
 	pic->size = image.size;

@@ -229,7 +229,7 @@ qboolean Image_LoadPNG( const char *name, const byte *buffer, fs_offset_t filesi
 	rowsize = pixel_size * image.width;
 
 	uncompressed_size = image.height * ( rowsize + 1 ); // +1 for filter
-	uncompressed_buffer = Mem_Malloc( host.imagepool, uncompressed_size );
+	uncompressed_buffer = static_cast<byte *>(Mem_Malloc(host.imagepool, uncompressed_size));
 
 	stream.next_in = idat_buf;
 	stream.total_in = stream.avail_in = newsize;
@@ -257,7 +257,7 @@ qboolean Image_LoadPNG( const char *name, const byte *buffer, fs_offset_t filesi
 		return false;
 	}
 
-	prior = pixbuf = image.rgba = Mem_Malloc( host.imagepool, image.size );
+	prior = pixbuf = image.rgba = static_cast<byte *>(Mem_Malloc(host.imagepool, image.size));
 
 	i = 0;
 
@@ -427,7 +427,7 @@ qboolean Image_SavePNG( const char *name, rgbdata_t *pix )
 	// get filtered image size
 	filtered_size = ( rowsize + 1 ) * pix->height;
 
-	out = filtered_buffer = Mem_Malloc( host.imagepool, filtered_size );
+	out = filtered_buffer = static_cast<byte *>(Mem_Malloc(host.imagepool, filtered_size));
 	in = pix->buffer;
 
 	// apply adaptive filter to image

@@ -116,7 +116,7 @@ void BaseCmd_Insert( base_command_type_e type, base_command_t *basecmd, const ch
 	uint hash = COM_HashKey( name, HASH_SIZE );
 	base_command_hashmap_t *elem;
 
-	elem = Z_Malloc( sizeof( base_command_hashmap_t ) );
+	elem = static_cast<base_command_hashmap_t *>(Z_Malloc(sizeof(base_command_hashmap_t)));
 	elem->basecmd = basecmd;
 	elem->type = type;
 	elem->name = name;
@@ -232,7 +232,7 @@ void BaseCmd_Stats_f( void )
 static void BaseCmd_CheckCvars( const char *key, const char *value, void *buffer, void *ptr )
 {
 	base_command_t *v = BaseCmd_Find( HM_CVAR, key );
-	qboolean *invalid = ptr;
+	qboolean *invalid = static_cast<qboolean *>(ptr);
 
 	if( !v )
 	{
@@ -267,13 +267,13 @@ void BaseCmd_Test_f( void )
 	}
 
 	for( cmd = Cmd_GetFirstFunctionHandle(); cmd;
-		 cmd = Cmd_GetNextFunctionHandle( cmd ) )
+		 cmd = Cmd_GetNextFunctionHandle( (cmd_s*)cmd ) )
 	{
-		base_command_t *v = BaseCmd_Find( HM_CMD, Cmd_GetName( cmd ) );
+		base_command_t *v = BaseCmd_Find( HM_CMD, Cmd_GetName( (cmd_s*)cmd ) );
 
 		if( !v )
 		{
-			Con_Printf( "Command %s is missing in basecmd\n", Cmd_GetName( cmd ) );
+			Con_Printf( "Command %s is missing in basecmd\n", Cmd_GetName( (cmd_s*)cmd ) );
 			invalid = true;
 		}
 	}

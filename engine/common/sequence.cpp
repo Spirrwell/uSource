@@ -879,7 +879,7 @@ char Sequence_ParseMacro( sequenceEntry_s *entry )
 	char symbol;
 	sequenceCommandLine_s *newCommandLine;
 
-	newCommandLine = Z_Malloc( sizeof( sequenceCommandLine_s ) );
+	newCommandLine = static_cast<sequenceCommandLine_s *>(Z_Malloc(sizeof(sequenceCommandLine_s)));
 	memset( newCommandLine, 0, sizeof( sequenceCommandLine_s ) );
 
 	Sequence_ResetDefaults( newCommandLine, &g_blockScopeDefaults );
@@ -1002,7 +1002,7 @@ void Sequence_CreateDefaultsCommand( sequenceEntry_s *entry )
 {
 	sequenceCommandLine_s *cmd;
 
-	cmd = Z_Malloc( sizeof( sequenceCommandLine_s ) );
+	cmd = static_cast<sequenceCommandLine_s *>(Z_Malloc(sizeof(sequenceCommandLine_s)));
 	memset( cmd, 0, sizeof( sequenceCommandLine_s ) );
 
 	Sequence_ResetDefaults( cmd, &g_fileScopeDefaults );
@@ -1038,7 +1038,7 @@ char Sequence_ParseEntry( void )
 	if( symbol != '{' )
 		Con_Reportf( S_ERROR  "Parsing error on line %d of %s.seq: expected '{' to start a\n new entry block; found '%c' instead!", g_lineNum, g_sequenceParseFileName, symbol );
 
-	entry = Z_Malloc( sizeof( sequenceEntry_s ) );
+	entry = static_cast<sequenceEntry_s *>(Z_Malloc(sizeof(sequenceEntry_s)));
 	Sequence_ResetDefaults( &g_blockScopeDefaults, &g_fileScopeDefaults );
 	entry->entryName    = copystring( token );
 	entry->fileName     = copystring( g_sequenceParseFileName );
@@ -1156,7 +1156,7 @@ sentenceGroupEntry_s *Sequence_AddSentenceGroup( char *groupName )
 {
 	sentenceGroupEntry_s *entry, *last;
 
-	entry                = Z_Malloc( sizeof( sentenceGroupEntry_s ) );
+	entry                = static_cast<sentenceGroupEntry_s *>(Z_Malloc(sizeof(sentenceGroupEntry_s)));
 	entry->numSentences  = 0;
 	entry->firstSentence = NULL;
 	entry->nextEntry     = NULL;
@@ -1196,7 +1196,7 @@ void Sequence_AddSentenceToGroup( char *groupName, char *data )
 			Con_Reportf( S_ERROR  "Unable to allocate sentence group %s at line %d in file %s.seq", groupName, g_lineNum, g_sequenceParseFileName );
 	}
 
-	entry            = Z_Malloc( sizeof( sentenceEntry_s ) );
+	entry            = static_cast<sentenceEntry_s *>(Z_Malloc(sizeof(sentenceEntry_s)));
 	entry->nextEntry = NULL;
 	entry->data      = copystring( data );
 	entry->index     = g_nonGlobalSentences;
@@ -1327,7 +1327,7 @@ sequenceCommandLine_s *Sequence_CopyCommand( sequenceCommandLine_s *commandOrig 
 {
 	sequenceCommandLine_s *commandCopy;
 
-	commandCopy = Z_Malloc( sizeof( sequenceCommandLine_s ) );
+	commandCopy = static_cast<sequenceCommandLine_s *>(Z_Malloc(sizeof(sequenceCommandLine_s)));
 
 	commandCopy->commandType      = commandOrig->commandType;
 	commandCopy->clientMessage    = commandOrig->clientMessage;

@@ -177,7 +177,7 @@ byte *Image_Copy( size_t size )
 {
 	byte	*out;
 
-	out = Mem_Malloc( host.imagepool, size );
+	out = static_cast<byte *>(Mem_Malloc(host.imagepool, size));
 	memcpy( out, image.tempbuffer, size );
 
 	return out; 
@@ -336,7 +336,7 @@ static void Image_ConvertPalTo24bit( rgbdata_t *pic )
 	if( pic->type == PF_INDEXED_24 )
 		return; // does nothing
 
-	pal24 = converted = Mem_Malloc( host.imagepool, 768 );
+	pal24 = converted = static_cast<byte *>(Mem_Malloc(host.imagepool, 768));
 	pal32 = pic->palette;
 
 	for( i = 0; i < 256; i++, pal24 += 3, pal32 += 4 )
@@ -354,7 +354,7 @@ static void Image_ConvertPalTo24bit( rgbdata_t *pic )
 void Image_CopyPalette32bit( void )
 {
 	if( image.palette ) return; // already created ?
-	image.palette = Mem_Malloc( host.imagepool, 1024 );
+	image.palette = static_cast<byte *>(Mem_Malloc(host.imagepool, 1024));
 	memcpy( image.palette, image.d_currentpal, 1024 );
 }
 
@@ -1130,7 +1130,8 @@ byte *Image_FlipInternal( const byte *in, word *srcwidth, word *srcheight, int t
 	case PF_BGR_24:
 	case PF_RGBA_32:
 	case PF_BGRA_32:
-		image.tempbuffer = Mem_Realloc( host.imagepool, image.tempbuffer, width * height * samples );
+		image.tempbuffer = static_cast<byte *>(Mem_Realloc(host.imagepool, image.tempbuffer,
+		                                                   width * height * samples));
 		break;
 	default:
 		return (byte *)in;	
@@ -1180,7 +1181,8 @@ byte *Image_CreateLumaInternal( byte *fin, int width, int height, int type, int 
 	{
 	case PF_INDEXED_24:
 	case PF_INDEXED_32:
-		out = image.tempbuffer = Mem_Realloc( host.imagepool, image.tempbuffer, width * height );
+		out = image.tempbuffer = static_cast<byte *>(Mem_Realloc(host.imagepool, image.tempbuffer,
+		                                                         width * height));
 		for( i = 0; i < width * height; i++ )
 			*out++ = fin[i] >= 224 ? fin[i] : 0;
 		break;
@@ -1209,7 +1211,7 @@ qboolean Image_AddIndexedImageToPack( const byte *in, int width, int height )
 	else Image_CopyPalette32bit(); 
 
 	// reallocate image buffer
-	image.rgba = Mem_Malloc( host.imagepool, image.size );	
+	image.rgba = static_cast<byte *>(Mem_Malloc(host.imagepool, image.size));
 	if( !expand_to_rgba ) memcpy( image.rgba, in, image.size );
 	else if( !Image_Copy8bitRGBA( in, image.rgba, mipsize ))
 		return false; // probably pallette not installed
@@ -1233,7 +1235,7 @@ qboolean Image_Decompress( const byte *data )
 	fin = (byte *)data;
 
 	size = image.width * image.height * 4;
-	image.tempbuffer = Mem_Realloc( host.imagepool, image.tempbuffer, size );
+	image.tempbuffer = static_cast<byte *>(Mem_Realloc(host.imagepool, image.tempbuffer, size));
 	fout = image.tempbuffer;
 
 	switch( PFDesc[image.type].format )
@@ -1306,7 +1308,7 @@ rgbdata_t *Image_DecompressInternal( rgbdata_t *pic )
 	// now we can change type to RGBA
 	pic->type = PF_RGBA_32;
 
-	pic->buffer = Mem_Realloc( host.imagepool, pic->buffer, image.size );
+	pic->buffer = static_cast<byte *>(Mem_Realloc(host.imagepool, pic->buffer, image.size));
 	memcpy( pic->buffer, image.tempbuffer, image.size );
 	if( pic->palette ) Mem_Free( pic->palette );
 	pic->flags = image.flags;
@@ -1388,7 +1390,7 @@ static void Image_ApplyFilter( rgbdata_t *pic, float factor )
 	pic = Image_DecompressInternal( pic );
 	factor = bound( 0.0f, factor, 1.0f );
 	size = image.width * image.height * 4;
-	image.tempbuffer = Mem_Realloc( host.imagepool, image.tempbuffer, size );
+	image.tempbuffer = static_cast<byte *>(Mem_Realloc(host.imagepool, image.tempbuffer, size));
 	fout = (uint *)image.tempbuffer;
 	fin = (uint *)pic->buffer;
 

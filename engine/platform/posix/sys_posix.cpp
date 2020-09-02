@@ -87,7 +87,7 @@ void Platform_ShellExecute( const char *path, const char *parms )
 	}
 	else
 	{
-		Con_Reportf( S_WARN "Could not find "OPEN_COMMAND" utility\n" );
+		Con_Reportf( S_WARN "Could not find " OPEN_COMMAND " utility\n" );
 	}
 }
 #endif // __ANDROID__

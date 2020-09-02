@@ -19,7 +19,7 @@ GNU General Public License for more details.
 #include "cvardef.h"
 
 #define CVAR_SENTINEL		0xDEADBEEF
-#define CVAR_CHECK_SENTINEL( cv )	((uint)(cv)->next == CVAR_SENTINEL)
+#define CVAR_CHECK_SENTINEL( cv )	(((uint)(uintptr_t)(cv)->next) == CVAR_SENTINEL)
 
 // NOTE: if this is changed, it must be changed in cvardef.h too
 typedef struct convar_s
@@ -30,12 +30,11 @@ typedef struct convar_s
 	int		flags;
 	float		value;
 	struct convar_s	*next;
+	void (*callback)(const char*, const char*); /* First param = old var, second param = new var */
 
 	// this part unique for convar_t
 	char		*desc;		// variable descrition info
 	char		*def_string;	// keep pointer to initial value
-
-	void (*callback)(const char*, const char*); /* First param = old var, second param = new var */
 } convar_t;
 
 // cvar internal flags
@@ -47,8 +46,8 @@ typedef struct convar_s
 #define FCVAR_TEMPORARY		(1<<21)	// these cvars holds their values and can be unlink in any time
 #define FCVAR_LOCALONLY     (1<<22) // can be set only from local buffers
 
-#define CVAR_DEFINE( cv, cvname, cvstr, cvflags, cvdesc )	convar_t cv = { cvname, cvstr, cvflags, 0.0f, (convar_t *)CVAR_SENTINEL, cvdesc }
-#define CVAR_DEFINE_AUTO( cv, cvstr, cvflags, cvdesc )	convar_t cv = { #cv, cvstr, cvflags, 0.0f, (convar_t *)CVAR_SENTINEL, cvdesc }
+#define CVAR_DEFINE( cv, cvname, cvstr, cvflags, cvdesc )	convar_t cv = { cvname, cvstr, cvflags, 0.0f, (convar_t *)CVAR_SENTINEL, NULL, cvdesc }
+#define CVAR_DEFINE_AUTO( cv, cvstr, cvflags, cvdesc )	convar_t cv = { #cv, cvstr, cvflags, 0.0f, (convar_t *)CVAR_SENTINEL, NULL, cvdesc }
 #define CVAR_TO_BOOL( x )		((x) && ((x)->value != 0.0f) ? true : false )
 
 cvar_t *Cvar_GetList( void );

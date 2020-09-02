@@ -87,7 +87,7 @@ byte *Sound_Copy( size_t size )
 {
 	byte	*out;
 
-	out = Mem_Malloc( host.soundpool, size );
+	out = static_cast<byte *>(Mem_Malloc(host.soundpool, size));
 	memcpy( out, sound.tempbuffer, size );
 
 	return out; 

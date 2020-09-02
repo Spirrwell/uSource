@@ -111,7 +111,7 @@ void Image_Reset( void )
 
 rgbdata_t *ImagePack( void )
 {
-	rgbdata_t	*pack = Mem_Calloc( host.imagepool, sizeof( rgbdata_t ));
+	rgbdata_t	*pack = static_cast<rgbdata_t *>(Mem_Calloc(host.imagepool, sizeof(rgbdata_t)));
 
 	// clear any force flags
 	image.force_flags = 0;
@@ -192,7 +192,7 @@ qboolean FS_AddSideToPack( const char *name, int adjust_flags )
 	if( !out ) return false; // try to reasmple dxt?
 	if( resampled ) image.rgba = Image_Copy( image.size );
 
-	image.cubemap = Mem_Realloc( host.imagepool, image.cubemap, image.ptr + image.size );
+	image.cubemap = static_cast<byte *>(Mem_Realloc(host.imagepool, image.cubemap, image.ptr + image.size));
 	memcpy( image.cubemap + image.ptr, image.rgba, image.size ); // add new side
 
 	Mem_Free( image.rgba );	// release source buffer
@@ -301,7 +301,8 @@ rgbdata_t *FS_LoadImage( const char *filename, const byte *buffer, size_t size )
 				// it contain info about image_type and dimensions, don't generate black cubemaps 
 				if( !image.cubemap ) break;
 				// Mem_Alloc already filled memblock with 0x00, no need to do it again
-				image.cubemap = Mem_Realloc( host.imagepool, image.cubemap, image.ptr + image.size );
+				image.cubemap = static_cast<byte *>(Mem_Realloc(host.imagepool, image.cubemap,
+				                                                image.ptr + image.size));
 				image.ptr += image.size; // move to next
 				image.num_sides++; // merge counter
 			}
@@ -464,7 +465,7 @@ rgbdata_t *FS_CopyImage( rgbdata_t *in )
 
 	if( !in ) return NULL;
 
-	out = Mem_Malloc( host.imagepool, sizeof( rgbdata_t ));
+	out = static_cast<rgbdata_t *>(Mem_Malloc(host.imagepool, sizeof(rgbdata_t)));
 	*out = *in;
 
 	switch( in->type )
@@ -479,13 +480,13 @@ rgbdata_t *FS_CopyImage( rgbdata_t *in )
 
 	if( palSize )
 	{
-		out->palette = Mem_Malloc( host.imagepool, palSize );
+		out->palette = static_cast<byte *>(Mem_Malloc(host.imagepool, palSize));
 		memcpy( out->palette, in->palette, palSize );
 	}
 
 	if( in->size )
 	{
-		out->buffer = Mem_Malloc( host.imagepool, in->size );
+		out->buffer = static_cast<byte *>(Mem_Malloc(host.imagepool, in->size));
 		memcpy( out->buffer, in->buffer, in->size );
 	}
 
