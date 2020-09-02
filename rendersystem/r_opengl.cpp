@@ -1,8 +1,8 @@
 
 #define GL_IMPL
 #include "gl_local.h"
-
 #include "tier1/tier1.h"
+#include "rendersystem.h"
 
 cvar_t	*gl_extensions;
 cvar_t	*gl_texture_anisotropy;
@@ -59,6 +59,8 @@ gl_globals_t	tr;
 glconfig_t	glConfig;
 glstate_t	glState;
 glwstate_t	glw_state;
+rendersystem::IRenderSystem* g_pRenderSystem;
+
 
 #ifdef XASH_GL_STATIC
 #define GL_CALL( x ) #x, NULL
@@ -898,6 +900,8 @@ qboolean R_Init( void )
 	if( glw_state.initialized )
 		return true;
 
+	g_pRenderSystem = rendersystem::CreateRenderSystem();
+
 	GL_InitCommands();
 	GL_InitRandomTable();
 
@@ -914,6 +918,8 @@ qboolean R_Init( void )
 	}
 
 	r_temppool = static_cast<byte *>(Mem_AllocPool("Render Zone"));
+
+	g_pRenderSystem->Init({});
 
 	GL_SetDefaults();
 	R_CheckVBO();

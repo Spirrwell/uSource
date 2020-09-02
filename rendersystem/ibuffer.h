@@ -1,9 +1,13 @@
 #pragma once
 
+#include "rendersystem_common.h"
+
 #include <stddef.h>
 #include <stdint.h>
 #include <initializer_list>
 #include "public/containers/list.h"
+
+BEGIN_RENDERSYSTEM_NAMESPACE
 
 /* Defines the type of buffer */
 enum class EBufferType
@@ -13,22 +17,179 @@ enum class EBufferType
 	CLIENT,   /* GPU only */
 };
 
-/* A single node for a buffer format */
-struct buffer_fmt_node_t
+/* Various supported types by CBufferFormat */
+enum class EBufferFormatType :
+	unsigned char
 {
-	size_t length;
+	VEC2F, // Float vectors
+	VEC3F,
+	VEC4F,
+	VEC2D, // Double vectors
+	VEC3D,
+	VEC4D,
+	I8,    // Signed integers
+	I16,
+	I32,
+	I64,
+	U8,    // Unsigned integers
+	U16,
+	U32,
+	U64,
+	F16,   // Floats
+	F32,
+	F64,
+	F80,
+	MAT2,  // 2x2 matricies
+	MAT3,
+	MAT4,
+	OTHER, // If your type is not listed here, select other
 };
 
-class CBufferFormat
+/*
+
+Buffer formats allow you to specify a format for an aribtrary buffer type. They can be used in conjunction with a
+ buffer view in order to access the buffer in a variety of different ways
+
+ Usage:
+
+ CBufferFormat Format(
+        CBufferFormatType(BITS(sizeof(int), "Index"),
+        CBufferFormatType(BITS(sizeof(vec3_t)), "Position"),
+        CBufferFormatType(BITS(sizeof(vec3_t)), "Normal"),
+        CBufferFormatType(BITS(sizeof(vec3_t)), "Tangent"))
+
+
+ */
+class CBufferFormatType
 {
-	List<buffer_fmt_node_t> nodes; 
+private:
+	int m_bits; /* Size of the type in bits */
+	const char* m_name; /* Reference name of the type */
+
+	template<class...T>
+	friend class CBufferFormatT;
 public:
-	CBufferFormat(std::initializer_list<buffer_fmt_node_t> fmtspec)
+	CBufferFormatType(int size_in_bits, const char* name) :
+		m_bits(size_in_bits),
+		m_name(name)
 	{
-		for(auto x : fmtspec)
-			nodes.push_back(x);
+	}
+};
+
+/* Pure virtual baseclass for CBufferFormat */
+class IBufferFormat
+{
+public:
+	virtual size_t StrideForType(unsigned index) const = 0;
+	virtual size_t SizeOfType(unsigned index) const = 0;
+	virtual unsigned int MaskOfType(unsigned index) const = 0;
+};
+
+template<class...T>
+class CBufferFormat : IBufferFormat
+{
+private:
+	CBufferFormatType m_nodes[sizeof...(T)];
+	size_t m_strides[sizeof...(T)];
+	size_t m_numNodes;
+public:
+	CBufferFormat() = delete;
+
+	CBufferFormat(const CBufferFormat& other)
+	{
+		m_numNodes = other.m_numNodes;
+		for(size_t i = 0; i < m_numNodes; i++)
+		{
+			m_nodes[i] = other.m_nodes[i];
+			m_strides[i] = other.m_strides[i];
+		}
 	}
 
+	CBufferFormat(T...args) :
+		m_numNodes(sizeof...(T))
+	{
+		m_nodes = {
+			args...
+		};
+
+		/* Compute total size */
+		size_t totalSize = 0;
+		for(int i = 0; i < m_numNodes; i++)
+			totalSize += m_nodes[i].m_bits;
+
+		/* Compute strides */
+		for(size_t i = 0; i < m_numNodes; i++)
+			m_strides[i] = totalSize - m_nodes[i].m_bits;
+	}
+
+	size_t StrideForType(unsigned index) const override
+	{
+		if(index >= m_numNodes) return 0;
+		return m_strides[index];
+	}
+
+	/* Returns the size of the type in BITS */
+	size_t SizeOfType(unsigned index) const override
+	{
+		if(index >= m_numNodes) return 0;
+		return m_nodes[index].m_bits;
+	}
+
+	/* Returns the access mask of the type, if it's not aligned to a byte boundary */
+	/* Basically, any types that don't have byte granularity */
+	unsigned int MaskOfType(unsigned index) const override
+	{
+		if(index >= m_numNodes) return 0;
+		return 0;
+	}
+
+	CBufferFormat& operator=(const CBufferFormat& other)
+	{
+		m_numNodes = other.m_numNodes;
+		for(size_t i = 0; i < m_numNodes; i++)
+		{
+			m_nodes[i] = other.m_nodes[i];
+			m_strides[i] = other.m_strides[i];
+		}
+	}
+};
+
+/*
+ * Wrapper around an IBuffer object that allows for accessing elements in relation to a
+ * buffer format
+ */
+class CBufferAccessor
+{
+private:
+	class IBuffer* m_buffer;
+	IBufferFormat* m_format;
+public:
+	CBufferAccessor() = delete;
+	CBufferAccessor(class IBuffer* buffer);
+	CBufferAccessor(class IBuffer& buffer);
+
+	~CBufferAccessor();
+
+	/**
+	 * Binds a new format to this object. By default, this object will use the
+	 * source buffer's format
+	 * @param fmt
+	 */
+	void BindFormat(const IBufferFormat* fmt);
+
+	/**
+	 * Unbinds all buffer formats from this object. This will revert the buffer format to
+	 * the source buffer's format
+	 */
+	void UnbindFormat();
+
+	/**
+	 * Accesses an element from the buffer using the currently bound buffer format.
+	 * @param element_index Index of the element inside of the buffer format. E.g. 0 for the first one, 1 for second, etc.
+	 * @param buffer_index Index of the element
+	 * @return
+	 */
+	void* AccessElement(size_t element_index, size_t buffer_index);
 };
 
 class IBuffer
@@ -46,7 +207,7 @@ public:
 	/**
 	 * Returns a const ref to the buffer format description 
 	 */ 
-	virtual const CBufferFormat& GetBufferFormatDesc() const = 0;
+	virtual const IBufferFormat* GetBufferFormatDesc() const = 0;
 
 	/**
 	 * Returns a ptr to the internal data store
@@ -200,3 +361,5 @@ public:
 	 */ 
 	virtual size_t GetSize() const = 0;
 };
+
+END_RENDERSYSTEM_NAMESPACE

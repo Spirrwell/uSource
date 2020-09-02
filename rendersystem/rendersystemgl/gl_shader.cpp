@@ -14,6 +14,8 @@
 #include <memory.h>
 #include "gl_material.h"
 
+BEGIN_RENDERSYSTEM_NAMESPACE
+
 /* Avoiding a bit of code duplication here */
 class CGenericShader_GL
 {
@@ -336,7 +338,7 @@ CShaderProgram_GL::~CShaderProgram_GL()
 
 GLint CShaderProgram_GL::FindOutputIndex(const char* s)
 {
-	for(auto x : m_shaderOutputs)
+	for(const auto& x : m_shaderOutputs)
 	{
 		if(x.name.equals(s))
 			return x.index;
@@ -346,7 +348,7 @@ GLint CShaderProgram_GL::FindOutputIndex(const char* s)
 
 GLint CShaderProgram_GL::FindParamIndex(const char* s)
 {
-	for(auto x : m_shaderParams)
+	for(const auto& x : m_shaderParams)
 	{
 		if(x.name.equals(s))
 			return x.index;
@@ -356,7 +358,7 @@ GLint CShaderProgram_GL::FindParamIndex(const char* s)
 
 GLint CShaderProgram_GL::FindUniformIndex(const char* s)
 {
-	for(auto x : m_shaderUniforms)
+	for(const auto& x : m_shaderUniforms)
 	{
 		if(x.name.equals(s))
 			return x.index;
@@ -890,3 +892,5 @@ void CShaderProgram_GL::SetupTextureUniforms(const char **uniforms, size_t lengt
 
 
 //=============================================================================================================================================//
+
+END_RENDERSYSTEM_NAMESPACE

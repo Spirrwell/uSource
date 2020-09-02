@@ -5,10 +5,14 @@
  */
 #pragma once
 
+#include "rendersystem_common.h"
+
 #include "common.h"
 #include "triangleapi.h"
 #include "const.h"
 #include "gl_local.h"
+
+BEGIN_RENDERSYSTEM_NAMESPACE
 
 class ITriangleAPI
 {
@@ -29,3 +33,5 @@ public:
 	virtual void FogParams( float flDensity, int iFogSkybox ) = 0;
 	virtual void CullFace( TRICULLSTYLE mode ) = 0;
 };
+
+END_RENDERSYSTEM_NAMESPACE

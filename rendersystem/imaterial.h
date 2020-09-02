@@ -2,6 +2,8 @@
 
 #include "mathlib/mathlib.h"
 
+BEGIN_RENDERSYSTEM_NAMESPACE
+
 enum class ETextureFormat
 {
 	RGB888 = 0,
@@ -59,20 +61,37 @@ class ITexture
 public:
 	virtual ETextureFlags Flags() const = 0;
 
+	/**
+	 * @brief Returns the texture format of this texture
+	 * @return
+	 */
 	virtual ETextureFormat GetFormat() const = 0;
-	
+
+	/**
+	 * Converts the texture to this format. Does not modify the texture object. Instead it creates a new one
+	 * @param fmt Texture format
+	 * @return Pointer to a new texture
+	 */
 	virtual ITexture* Convert(ETextureFormat fmt) = 0;
 
+	/**
+	 * Converts the texture to a new format, in place.
+	 * @param fmt The texture format
+	 */
 	virtual void ConvertInPlace(ETextureFormat fmt) = 0;
 
 	/* Returns the width/height of the render target or texture */
 	virtual int Width() const = 0;
 	virtual int Height() const = 0;
 
+
 	/**
-	 * Sets the internal data of this ITexture to the data of buffer.
-	 * buffer must be in a simple RGB or RGBA format, and not compressed. If you wish to use a compressed format
-	 * use LoadFromCompressedImage
+	 * Loads the texture from an image with the specified format. If you're trying to use a compressed format, such as DXT5, use
+	 * LoadFromCompressedImage
+	 * @param w Width of the texture
+	 * @param h Height of the texture
+	 * @param fmt Format of the texture
+	 * @param buffer Buffer to use
 	 */
 	virtual void LoadFromImage(int w, int h, ETextureFormat fmt, void* buffer) = 0;
 	virtual void LoadFromCompressedImage(int w, int h, ETextureFormat fmt, void* buffer) = 0;
@@ -80,16 +99,44 @@ public:
 	/* Copies the internal data of this texture to an output buffer */
 	/* Note: The texture output format must be a simple RGB, RGBA or Grayscale format. No copying into compressed buffers */
 	/* the mip param only applies to textures. */
+	/**
+	 * Copies the internal data of this texture into a destination buffer with the specified format
+	 * You cannot copy into a compressed buffer
+	 * @param dst Destination buffer
+	 * @param dstfmt Format of the destination buffer
+	 * @param mip The mip to copy
+	 */
 	virtual void CopyToBuffer(void* dst, ETextureFormat dstfmt, int mip = 0) = 0;
 
-	/* Generates mips on this texture if it's not a render target */
+	/**
+	 * Generates mips on this target. Will NOT work if this is a rendertarget
+	 * @param levels
+	 */
 	virtual void GenerateMips(int levels = 1) = 0;
 
-	/* Checks if this texture is a normal texture or a render target */
+	/**
+	 * Returns if this is a texture
+	 * @return
+	 */
 	virtual bool IsTexture() const = 0;
+
+	/**
+	 * Returns if this is a rendertarget
+	 * @return
+	 */
 	virtual bool IsRenderTarget() const = 0;
 
+	/**
+	 * Sets the texture wrapping flags
+	 * @param dim
+	 * @param flags
+	 */
 	virtual void SetTextureWrapParams(ETextureDimension dim, ETextureWrapFlags flags) = 0;
+
+	/**
+	 * Sets the filtering type on this texture
+	 * @param filtering
+	 */
 	virtual void SetTextureFiltering(ETextureFiltering filtering) = 0;
 };
 
@@ -149,3 +196,5 @@ static inline unsigned long long GetFormatSize(ETextureFormat fmt)
 	};
 	return 0;
 }
+
+END_RENDERSYSTEM_NAMESPACE

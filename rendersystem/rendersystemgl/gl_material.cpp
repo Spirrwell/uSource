@@ -10,6 +10,8 @@
 #include "gl_material.h"
 #include "tier1/dbg.h"
 
+BEGIN_RENDERSYSTEM_NAMESPACE
+
 CTexture_GL* CTexture_GL::Create(int w, int h, ETextureFlags flags, ETextureFormat fmt)
 {
 	return nullptr;
@@ -209,3 +211,5 @@ void CTexture_GL::SetTextureWrapParams(ETextureDimension dim, ETextureWrapFlags 
 }
 
 //=============================================================================================================================================//
+
+END_RENDERSYSTEM_NAMESPACE

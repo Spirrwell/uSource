@@ -10,6 +10,8 @@
 #include "ibuffer.h"
 #include "imaterial.h"
 
+BEGIN_RENDERSYSTEM_NAMESPACE
+
 struct shader_param_t 
 {
 	char* name;
@@ -109,6 +111,11 @@ public:
 };
 
 class IGeomShader : public IShader
+{
+public:
+};
+
+class IComputeShader : public IShader
 {
 public:
 };
@@ -236,3 +243,5 @@ public:
 	 */
 	virtual void Shutdown() = 0;
 };
+
+END_RENDERSYSTEM_NAMESPACE

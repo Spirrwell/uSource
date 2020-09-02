@@ -1,6 +1,8 @@
 #include "rendersystemgl.h"
 #include "rendersystem/itriapi.h"
 
+BEGIN_RENDERSYSTEM_NAMESPACE
+
 class CTriangleAPI_GL : public ITriangleAPI
 {
 public:
@@ -245,3 +247,5 @@ ITriangleAPI * CRenderSystem_GL::GetTriAPI()
 {
 	return &g_TriAPI;
 }
+
+END_RENDERSYSTEM_NAMESPACE

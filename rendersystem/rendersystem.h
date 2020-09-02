@@ -10,10 +10,14 @@
  */
 #pragma once
 
+#include "rendersystem_common.h"
+
 #include "imesh.h"
 #include "ishader.h"
 #include "ibuffer.h"
 #include "imaterial.h"
+
+BEGIN_RENDERSYSTEM_NAMESPACE
 
 struct render_params_t
 {
@@ -21,6 +25,41 @@ struct render_params_t
 	int height;
 	int bpp;
 	int refresh_rate;
+};
+
+/**
+ * Enum containing features that can be supported by each individual render API
+ */
+enum class EShaderAPIFeatures
+{
+	/**
+	 * If set, the render API implementation will support dynamic meshes, or meshes that can be modified in host memory
+	 */
+	SUPPORTS_DYNAMIC_MESH,
+
+	/**
+	 * If set, the render API implementation will support tesselation and tesselation shaders
+	 */
+	SUPPORTS_TESSELATION,
+
+	/**
+	 * If set, the render API supports geometry shaders
+	 */
+	SUPPORTS_GEOM_SHADERS,
+
+	/*
+	 * If set, the render API supports dxt5 compression
+	 */
+	SUPPORTS_DXT5_COMPRESSION,
+
+	/* DXT1 compression */
+	SUPPORTS_DXT1_COMPRESSION,
+
+	/* ATI2N */
+	SUPPORTS_ATI2N_COMPRESSION,
+
+	/* Is the render API fixed-function? e.g. OpenGL1 or DirectX 7 */
+	IS_FIXED_FUNCTION,
 };
 
 
@@ -140,3 +179,5 @@ public:
 /* This is the only function you must implement within your backend implementation */
 /* Internally you'll need to implement the Ixxxx classes, but those implementations should not be exposed */
 IRenderSystem* CreateRenderSystem();
+
+END_RENDERSYSTEM_NAMESPACE

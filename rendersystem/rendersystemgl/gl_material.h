@@ -3,6 +3,8 @@
 #include "rendersystem/imaterial.h"
 #include <GL/glew.h>
 
+BEGIN_RENDERSYSTEM_NAMESPACE
+
 class CTexture_GL : public ITexture
 {
 public:
@@ -35,3 +37,5 @@ public:
 	virtual bool IsRenderTarget() const { return m_renderBuffer != 0; };
 	virtual void SetTextureWrapParams(ETextureDimension dim, ETextureWrapFlags flags);
 };
+
+END_RENDERSYSTEM_NAMESPACE
