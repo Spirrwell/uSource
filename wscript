@@ -140,7 +140,7 @@ def configure(conf):
 	if conf.options.BUILD_TYPE == None:
 		conf.end_msg('not set', color='RED')
 		conf.fatal('Please set a build type, for example "-T release"')
-	elif not conf.options.BUILD_TYPE in ['fast', 'release', 'debug', 'nooptimize', 'sanitize', 'none']:
+	elif not conf.options.BUILD_TYPE in ['fast', 'release', 'debug', 'nooptimize', 'sanitize', 'trace', 'none']:
 		conf.end_msg(conf.options.BUILD_TYPE, color='RED')
 		conf.fatal('Invalid build type. Valid are "debug", "release" or "none"')
 	conf.end_msg(conf.options.BUILD_TYPE)
@@ -242,7 +242,7 @@ def configure(conf):
 		'common': {
 			# disable thread-safe local static initialization for C++11 code, as it cause crashes on Windows XP
 			'msvc':    ['/D_USING_V110_SDK71_', '/Zi', '/FS', '/Zc:threadSafeInit-', '/MT', '/DENABLE_XPROF'],
-			'clang': ['-g', '-gdwarf-2', '-fvisibility=hidden', '-Wall', '-Wextra', '-Wno-unused-parameter', '-fpermissive', '-Wno-unused-function', '-DENABLE_XPROF'],
+			'clang': ['-g', '-gdwarf-2', '-fvisibility=default', '-Wall', '-Wextra', '-Wno-unused-parameter', '-fpermissive', '-Wno-unused-function', '-DENABLE_XPROF'],
 			'gcc': ['-g', '-fvisibility=default', '-Wno-attributes', '-Wno-write-strings', '-Wall', '-Wextra', '-Wno-unused-parameter', '-fpermissive', '-Wno-unused-function', '-Wno-unused-variable', '-Wno-missing-field-initializers', '-Wno-invalid-offsetof', '-Wno-sign-compare', '-Wno-reorder', '-Wno-unknown-pragmas', '-DENABLE_XPROF']
 		},
 		'fast': {
@@ -269,6 +269,10 @@ def configure(conf):
 		'nooptimize': {
 			'msvc':    ['/Od'],
 			'default': ['-O0']
+		},
+		'trace': {
+			'default': [],
+			'clang': ['-fxray-instrument']
 		}
 	}
 

@@ -1393,12 +1393,3 @@ int Q_fileno(FILE* f)
 	return fileno(f);
 #endif
 }
-
-void* Q_alloca(size_t sz)
-{
-#ifdef _WIN32
-	return _alloca(sz);
-#else
-	return alloca(sz);
-#endif
-}

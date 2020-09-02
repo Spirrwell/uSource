@@ -97,7 +97,12 @@ int matchpattern_with_separator(const char *in, const char *pattern, qboolean ca
 char* Q_strdup(const char* s);
 void* Q_malloc(size_t sz);
 void Q_free(void* blk);
-void* Q_alloca(size_t sz);
+
+#ifdef _WIN32
+#define Q_alloca(sz) _alloca(sz)
+#else
+#define Q_alloca(sz) alloca(sz)
+#endif
 
 /* Format a color string using terminal escape codes */
 /* color_table is a table containing 10 entries of char[3] that specifies a color in RGB. if set to nullptr, a default is used */
