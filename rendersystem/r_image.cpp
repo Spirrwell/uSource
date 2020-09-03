@@ -45,18 +45,18 @@ static const char *GL_TargetToString( GLenum target )
 {
 	switch( target )
 	{
-	case GL_TEXTURE_1D:
-		return "1D";
-	case GL_TEXTURE_2D:
-		return "2D";
-	case GL_TEXTURE_3D:
-		return "3D";
-	case GL_TEXTURE_CUBE_MAP_ARB:
-		return "Cube";
-	case GL_TEXTURE_2D_ARRAY_EXT:
-		return "Array";
-	case GL_TEXTURE_RECTANGLE_EXT:
-		return "Rect";
+		case GL_TEXTURE_1D:
+			return "1D";
+		case GL_TEXTURE_2D:
+			return "2D";
+		case GL_TEXTURE_3D:
+			return "3D";
+		case GL_TEXTURE_CUBE_MAP_ARB:
+			return "Cube";
+		case GL_TEXTURE_2D_ARRAY_EXT:
+			return "Array";
+		case GL_TEXTURE_RECTANGLE_EXT:
+			return "Rect";
 	}
 	return "??";
 }
@@ -351,25 +351,25 @@ static size_t GL_CalcImageSize( pixformat_t format, int width, int height, int d
 
 	switch( format )
 	{
-	case PF_LUMINANCE:
-		size = width * height * depth;
-		break;
-	case PF_RGB_24:
-	case PF_BGR_24:
-		size = width * height * depth * 3;
-		break;
-	case PF_BGRA_32:
-	case PF_RGBA_32:
-		size = width * height * depth * 4;
-		break;
-	case PF_DXT1:
-		size = (((width + 3) >> 2) * ((height + 3) >> 2) * 8) * depth;
-		break;
-	case PF_DXT3:
-	case PF_DXT5:
-	case PF_ATI2:
-		size = (((width + 3) >> 2) * ((height + 3) >> 2) * 16) * depth;
-		break;
+		case PF_LUMINANCE:
+			size = width * height * depth;
+			break;
+		case PF_RGB_24:
+		case PF_BGR_24:
+			size = width * height * depth * 3;
+			break;
+		case PF_BGRA_32:
+		case PF_RGBA_32:
+			size = width * height * depth * 4;
+			break;
+		case PF_DXT1:
+			size = (((width + 3) >> 2) * ((height + 3) >> 2) * 8) * depth;
+			break;
+		case PF_DXT3:
+		case PF_DXT5:
+		case PF_ATI2:
+			size = (((width + 3) >> 2) * ((height + 3) >> 2) * 16) * depth;
+			break;
 	}
 
 	return size;
@@ -389,99 +389,99 @@ static size_t GL_CalcTextureSize( GLenum format, int width, int height, int dept
 
 	switch( format )
 	{
-	case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
-	case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
-		size = (((width + 3) >> 2) * ((height + 3) >> 2) * 8) * depth;
-		break;
-	case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
-	case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
-	case GL_COMPRESSED_RED_GREEN_RGTC2_EXT:
-	case GL_COMPRESSED_LUMINANCE_ALPHA_ARB:
-	case GL_COMPRESSED_LUMINANCE_ALPHA_3DC_ATI:
-		size = (((width + 3) >> 2) * ((height + 3) >> 2) * 16) * depth;
-		break;
-	case GL_RGBA8:
-	case GL_RGBA:
-		size = width * height * depth * 4;
-		break;
-	case GL_RGB8:
-	case GL_RGB:
-		size = width * height * depth * 3;
-		break;
-	case GL_RGB5:
-		size = (width * height * depth * 3) / 2;
-		break;
-	case GL_RGBA4:
-		size = (width * height * depth * 4) / 2;
-		break;
-	case GL_INTENSITY:
-	case GL_LUMINANCE:
-	case GL_INTENSITY8:
-	case GL_LUMINANCE8:
-		size = (width * height * depth);
-		break;
-	case GL_LUMINANCE_ALPHA:
-	case GL_LUMINANCE8_ALPHA8:
-		size = width * height * depth * 2;
-		break;
-	case GL_R8:
-		size = width * height * depth;
-		break;
-	case GL_RG8:
-		size = width * height * depth * 2;
-		break;
-	case GL_R16:
-		size = width * height * depth * 2;
-		break;
-	case GL_RG16:
-		size = width * height * depth * 4;
-		break;
-	case GL_R16F:
-	case GL_LUMINANCE16F_ARB:
-		size = width * height * depth * 2;	// half-floats
-		break;
-	case GL_R32F:
-	case GL_LUMINANCE32F_ARB:
-		size = width * height * depth * 4;
-		break;
-	case GL_RG16F:
-	case GL_LUMINANCE_ALPHA16F_ARB:
-		size = width * height * depth * 4;
-		break;
-	case GL_RG32F:
-	case GL_LUMINANCE_ALPHA32F_ARB:
-		size = width * height * depth * 8;
-		break;
-	case GL_RGB16F_ARB:
-		size = width * height * depth * 6;
-		break;
-	case GL_RGBA16F_ARB:
-		size = width * height * depth * 8;
-		break;
-	case GL_RGB32F_ARB:
-		size = width * height * depth * 12;
-		break;
-	case GL_RGBA32F_ARB:
-		size = width * height * depth * 16;
-		break;
-	case GL_DEPTH_COMPONENT16:
-		size = width * height * depth * 2;
-		break;
-	case GL_DEPTH_COMPONENT24:
-		size = width * height * depth * 3;
-		break;
-	case GL_DEPTH_COMPONENT32F:
-		size = width * height * depth * 4;
-		break;
-	default:
-		gEngfuncs.Host_Error( "GL_CalcTextureSize: bad texture internal format (%u)\n", format );
-		break;
+		case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
+		case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
+			size = (((width + 3) >> 2) * ((height + 3) >> 2) * 8) * depth;
+			break;
+		case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
+		case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
+		case GL_COMPRESSED_RED_GREEN_RGTC2_EXT:
+		case GL_COMPRESSED_LUMINANCE_ALPHA_ARB:
+		case GL_COMPRESSED_LUMINANCE_ALPHA_3DC_ATI:
+			size = (((width + 3) >> 2) * ((height + 3) >> 2) * 16) * depth;
+			break;
+		case GL_RGBA8:
+		case GL_RGBA:
+			size = width * height * depth * 4;
+			break;
+		case GL_RGB8:
+		case GL_RGB:
+			size = width * height * depth * 3;
+			break;
+		case GL_RGB5:
+			size = (width * height * depth * 3) / 2;
+			break;
+		case GL_RGBA4:
+			size = (width * height * depth * 4) / 2;
+			break;
+		case GL_INTENSITY:
+		case GL_LUMINANCE:
+		case GL_INTENSITY8:
+		case GL_LUMINANCE8:
+			size = (width * height * depth);
+			break;
+		case GL_LUMINANCE_ALPHA:
+		case GL_LUMINANCE8_ALPHA8:
+			size = width * height * depth * 2;
+			break;
+		case GL_R8:
+			size = width * height * depth;
+			break;
+		case GL_RG8:
+			size = width * height * depth * 2;
+			break;
+		case GL_R16:
+			size = width * height * depth * 2;
+			break;
+		case GL_RG16:
+			size = width * height * depth * 4;
+			break;
+		case GL_R16F:
+		case GL_LUMINANCE16F_ARB:
+			size = width * height * depth * 2;	// half-floats
+			break;
+		case GL_R32F:
+		case GL_LUMINANCE32F_ARB:
+			size = width * height * depth * 4;
+			break;
+		case GL_RG16F:
+		case GL_LUMINANCE_ALPHA16F_ARB:
+			size = width * height * depth * 4;
+			break;
+		case GL_RG32F:
+		case GL_LUMINANCE_ALPHA32F_ARB:
+			size = width * height * depth * 8;
+			break;
+		case GL_RGB16F_ARB:
+			size = width * height * depth * 6;
+			break;
+		case GL_RGBA16F_ARB:
+			size = width * height * depth * 8;
+			break;
+		case GL_RGB32F_ARB:
+			size = width * height * depth * 12;
+			break;
+		case GL_RGBA32F_ARB:
+			size = width * height * depth * 16;
+			break;
+		case GL_DEPTH_COMPONENT16:
+			size = width * height * depth * 2;
+			break;
+		case GL_DEPTH_COMPONENT24:
+			size = width * height * depth * 3;
+			break;
+		case GL_DEPTH_COMPONENT32F:
+			size = width * height * depth * 4;
+			break;
+		default:
+			gEngfuncs.Host_Error( "GL_CalcTextureSize: bad texture internal format (%u)\n", format );
+			break;
 	}
 
 	return size;
 }
 
-static int GL_CalcMipmapCount( gl_texture_t *tex, qboolean haveBuffer ) 
+static int GL_CalcMipmapCount( gl_texture_t *tex, qboolean haveBuffer )
 {
 	int	width, height;
 	int	mipcount;
@@ -494,7 +494,7 @@ static int GL_CalcMipmapCount( gl_texture_t *tex, qboolean haveBuffer )
 	// generate mip-levels by user request
 	if( FBitSet( tex->flags, TF_NOMIPMAP ))
 		return 1;
-		
+
 	// mip-maps can't exceeds 16
 	for( mipcount = 0; mipcount < 16; mipcount++ )
 	{
@@ -521,24 +521,24 @@ static void GL_SetTextureDimensions( gl_texture_t *tex, int width, int height, i
 
 	switch( tex->target )
 	{
-	case GL_TEXTURE_1D:
-	case GL_TEXTURE_2D:
-		maxTextureSize = glConfig.max_2d_texture_size;
-		break;
-	case GL_TEXTURE_2D_ARRAY_EXT:
-		maxDepthSize = glConfig.max_2d_texture_layers;
-		maxTextureSize = glConfig.max_2d_texture_size;
-		break;
-	case GL_TEXTURE_RECTANGLE_EXT:
-		maxTextureSize = glConfig.max_2d_rectangle_size;
-		break;
-	case GL_TEXTURE_CUBE_MAP_ARB:
-		maxTextureSize = glConfig.max_cubemap_size;
-		break;
-	case GL_TEXTURE_3D:
-		maxDepthSize = glConfig.max_3d_texture_size;
-		maxTextureSize = glConfig.max_3d_texture_size;
-		break;
+		case GL_TEXTURE_1D:
+		case GL_TEXTURE_2D:
+			maxTextureSize = glConfig.max_2d_texture_size;
+			break;
+		case GL_TEXTURE_2D_ARRAY_EXT:
+			maxDepthSize = glConfig.max_2d_texture_layers;
+			maxTextureSize = glConfig.max_2d_texture_size;
+			break;
+		case GL_TEXTURE_RECTANGLE_EXT:
+			maxTextureSize = glConfig.max_2d_rectangle_size;
+			break;
+		case GL_TEXTURE_CUBE_MAP_ARB:
+			maxTextureSize = glConfig.max_cubemap_size;
+			break;
+		case GL_TEXTURE_3D:
+			maxDepthSize = glConfig.max_3d_texture_size;
+			maxTextureSize = glConfig.max_3d_texture_size;
+			break;
 	}
 
 	// store original sizes
@@ -664,14 +664,14 @@ static void GL_SetTextureFormat( gl_texture_t *tex, pixformat_t format, int chan
 	{
 		switch( format )
 		{
-		case PF_DXT1: tex->format = GL_COMPRESSED_RGB_S3TC_DXT1_EXT; break;	// never use DXT1 with 1-bit alpha
-		case PF_DXT3: tex->format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT; break;
-		case PF_DXT5: tex->format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT; break;
-		case PF_ATI2:
-			if( glConfig.hardware_type == GLHW_RADEON )
-				tex->format = GL_COMPRESSED_LUMINANCE_ALPHA_3DC_ATI;
-			else tex->format = GL_COMPRESSED_RED_GREEN_RGTC2_EXT;
-			break;
+			case PF_DXT1: tex->format = GL_COMPRESSED_RGB_S3TC_DXT1_EXT; break;	// never use DXT1 with 1-bit alpha
+			case PF_DXT3: tex->format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT; break;
+			case PF_DXT5: tex->format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT; break;
+			case PF_ATI2:
+				if( glConfig.hardware_type == GLHW_RADEON )
+					tex->format = GL_COMPRESSED_LUMINANCE_ALPHA_3DC_ATI;
+				else tex->format = GL_COMPRESSED_RED_GREEN_RGTC2_EXT;
+				break;
 		}
 		return;
 	}
@@ -717,29 +717,29 @@ static void GL_SetTextureFormat( gl_texture_t *tex, pixformat_t format, int chan
 
 		switch( GL_CalcTextureSamples( channelMask ))
 		{
-		case 1: 
-			if( FBitSet( tex->flags, TF_ALPHACONTRAST ))
-				tex->format = GL_INTENSITY8;
-			else tex->format = GL_LUMINANCE8;
-			break;
-		case 2: tex->format = GL_LUMINANCE8_ALPHA8; break;
-		case 3:
-			switch( bits )
-			{
-			case 16: tex->format = GL_RGB5; break;
-			case 32: tex->format = GL_RGB8; break;
-			default: tex->format = GL_RGB; break;
-			}
-			break;	
-		case 4:
-		default:
-			switch( bits )
-			{
-			case 16: tex->format = GL_RGBA4; break;
-			case 32: tex->format = GL_RGBA8; break;
-			default: tex->format = GL_RGBA; break;
-			}
-			break;
+			case 1:
+				if( FBitSet( tex->flags, TF_ALPHACONTRAST ))
+					tex->format = GL_INTENSITY8;
+				else tex->format = GL_LUMINANCE8;
+				break;
+			case 2: tex->format = GL_LUMINANCE8_ALPHA8; break;
+			case 3:
+				switch( bits )
+				{
+					case 16: tex->format = GL_RGB5; break;
+					case 32: tex->format = GL_RGB8; break;
+					default: tex->format = GL_RGB; break;
+				}
+				break;
+			case 4:
+			default:
+				switch( bits )
+				{
+					case 16: tex->format = GL_RGBA4; break;
+					case 32: tex->format = GL_RGBA8; break;
+					default: tex->format = GL_RGBA; break;
+				}
+				break;
 		}
 	}
 }
@@ -948,11 +948,11 @@ static void GL_BuildMipMap( byte *in, int srcWidth, int srcHeight, int srcDepth,
 					if((( x << 1 ) + 1 ) < srcWidth )
 					{
 						normal[0] = MAKE_SIGNED( in[row+0] ) + MAKE_SIGNED( in[row+4] )
-						+ MAKE_SIGNED( next[row+0] ) + MAKE_SIGNED( next[row+4] );
+						            + MAKE_SIGNED( next[row+0] ) + MAKE_SIGNED( next[row+4] );
 						normal[1] = MAKE_SIGNED( in[row+1] ) + MAKE_SIGNED( in[row+5] )
-						+ MAKE_SIGNED( next[row+1] ) + MAKE_SIGNED( next[row+5] );
+						            + MAKE_SIGNED( next[row+1] ) + MAKE_SIGNED( next[row+5] );
 						normal[2] = MAKE_SIGNED( in[row+2] ) + MAKE_SIGNED( in[row+6] )
-						+ MAKE_SIGNED( next[row+2] ) + MAKE_SIGNED( next[row+6] );
+						            + MAKE_SIGNED( next[row+2] ) + MAKE_SIGNED( next[row+6] );
 					}
 					else
 					{
@@ -1233,42 +1233,43 @@ do specified actions on pixels
 static void GL_ProcessImage( gl_texture_t *tex, rgbdata_t *pic )
 {
 	float	emboss_scale = 0.0f;
-	uint	img_flags = 0; 
+	uint	img_flags = 0;
+	unsigned int tex_flags = (unsigned int)tex->flags; // I have to do this for language conformance! Sorry!
 
 	// force upload texture as RGB or RGBA (detail textures requires this)
 	if( tex->flags & TF_FORCE_COLOR ) pic->flags |= IMAGE_HAS_COLOR;
-	if( pic->flags & IMAGE_HAS_ALPHA ) tex->flags |= TF_HAS_ALPHA;
+	if( pic->flags & IMAGE_HAS_ALPHA ) tex_flags |= TF_HAS_ALPHA;
 
 	tex->encode = pic->encode; // share encode method
 
 	if( ImageDXT( pic->type ))
 	{
 		if( !pic->numMips )
-			tex->flags |= TF_NOMIPMAP; // disable mipmapping by user request
+			tex_flags |= TF_NOMIPMAP; // disable mipmapping by user request
 
 		// clear all the unsupported flags
-		tex->flags &= ~TF_KEEP_SOURCE;
+		tex_flags &= ~TF_KEEP_SOURCE;
 	}
 	else
 	{
 		// copy flag about luma pixels
 		if( pic->flags & IMAGE_HAS_LUMA )
-			tex->flags |= TF_HAS_LUMA;
+			tex_flags |= TF_HAS_LUMA;
 
 		if( pic->flags & IMAGE_QUAKEPAL )
-			tex->flags |= TF_QUAKEPAL;
+			tex_flags |= TF_QUAKEPAL;
 
 		// create luma texture from quake texture
 		if( tex->flags & TF_MAKELUMA )
 		{
 			img_flags |= IMAGE_MAKE_LUMA;
-			tex->flags &= ~TF_MAKELUMA;
+			tex_flags &= ~TF_MAKELUMA;
 		}
 
 		if( tex->flags & TF_ALLOW_EMBOSS )
 		{
 			img_flags |= IMAGE_EMBOSS;
-			tex->flags &= ~TF_ALLOW_EMBOSS;
+			tex_flags &= ~TF_ALLOW_EMBOSS;
 		}
 
 		if( !FBitSet( tex->flags, TF_IMG_UPLOADED ) && FBitSet( tex->flags, TF_KEEP_SOURCE ))
@@ -1288,6 +1289,7 @@ static void GL_ProcessImage( gl_texture_t *tex, rgbdata_t *pic )
 		if( FBitSet( tex->flags, TF_LUMINANCE ))
 			ClearBits( pic->flags, IMAGE_HAS_COLOR );
 	}
+	tex->flags = (texFlags_t)tex_flags;
 }
 
 /*
@@ -1472,7 +1474,7 @@ int GL_LoadTexture( const char *name, const byte *buf, size_t size, int flags )
 		SetBits( picFlags, IL_DONTFLIP_TGA );
 
 	if( FBitSet( flags, TF_KEEP_SOURCE ) && !FBitSet( flags, TF_EXPAND_SOURCE ))
-		SetBits( picFlags, IL_KEEP_8BIT );	
+		SetBits( picFlags, IL_KEEP_8BIT );
 
 	// set some image flags
 	gEngfuncs.Image_SetForceFlags( picFlags );
@@ -1615,7 +1617,7 @@ int GL_LoadTextureArray( const char **names, int flags )
 		gEngfuncs.Con_Printf( S_ERROR "GL_LoadTextureArray: not all layers were loaded. Texture array is not created\n" );
 		if( pic ) gEngfuncs.FS_FreeImage( pic );
 		return 0;
-	}	
+	}
 
 	// it's multilayer image!
 	SetBits( pic->flags, IMAGE_MULTILAYER );
@@ -1923,13 +1925,13 @@ void R_InitDlightTexture( void )
 		return; // already initialized
 
 	memset( &r_image, 0, sizeof( r_image ));
-	r_image.width = BLOCK_SIZE; 
+	r_image.width = BLOCK_SIZE;
 	r_image.height = BLOCK_SIZE;
 	r_image.flags = IMAGE_HAS_COLOR;
 	r_image.type = PF_RGBA_32;
 	r_image.size = r_image.width * r_image.height * 4;
 
-	tr.dlightTexture = GL_LoadTextureInternal( "*dlight", &r_image, (TF_NOMIPMAP|TF_CLAMP|TF_ATLAS_PAGE ));
+	tr.dlightTexture = GL_LoadTextureInternal( "*dlight", &r_image, TF_NOMIPMAP|TF_CLAMP|TF_ATLAS_PAGE );
 }
 
 /*
@@ -1996,7 +1998,7 @@ static void GL_CreateInternalTextures( void )
 
 	// cinematic dummy
 	pic = GL_FakeImage( 640, 100, 1, IMAGE_HAS_COLOR );
-	tr.cinTexture = GL_LoadTextureInternal( "*cintexture", pic, (TF_NOMIPMAP|TF_CLAMP ));
+	tr.cinTexture = GL_LoadTextureInternal( "*cintexture", pic, TF_NOMIPMAP|TF_CLAMP );
 }
 
 /*
@@ -2025,143 +2027,143 @@ void R_TextureList_f( void )
 
 		switch( image->format )
 		{
-		case GL_COMPRESSED_RGBA_ARB:
-			gEngfuncs.Con_Printf( "CRGBA " );
-			break;
-		case GL_COMPRESSED_RGB_ARB:
-			gEngfuncs.Con_Printf( "CRGB  " );
-			break;
-		case GL_COMPRESSED_LUMINANCE_ALPHA_ARB:
-			gEngfuncs.Con_Printf( "CLA   " );
-			break;
-		case GL_COMPRESSED_LUMINANCE_ARB:
-			gEngfuncs.Con_Printf( "CL    " );
-			break;
-		case GL_COMPRESSED_ALPHA_ARB:
-			gEngfuncs.Con_Printf( "CA    " );
-			break;
-		case GL_COMPRESSED_INTENSITY_ARB:
-			gEngfuncs.Con_Printf( "CI    " );
-			break;
-		case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
-			gEngfuncs.Con_Printf( "DXT1c " );
-			break;
-		case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
-			gEngfuncs.Con_Printf( "DXT1a " );
-			break;
-		case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
-			gEngfuncs.Con_Printf( "DXT3  " );
-			break;
-		case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
-			gEngfuncs.Con_Printf( "DXT5  " );
-			break;
-		case GL_COMPRESSED_RED_GREEN_RGTC2_EXT:
-		case GL_COMPRESSED_LUMINANCE_ALPHA_3DC_ATI:
-			gEngfuncs.Con_Printf( "ATI2  " );
-			break;
-		case GL_RGBA:
-			gEngfuncs.Con_Printf( "RGBA  " );
-			break;
-		case GL_RGBA8:
-			gEngfuncs.Con_Printf( "RGBA8 " );
-			break;
-		case GL_RGBA4:
-			gEngfuncs.Con_Printf( "RGBA4 " );
-			break;
-		case GL_RGB:
-			gEngfuncs.Con_Printf( "RGB   " );
-			break;
-		case GL_RGB8:
-			gEngfuncs.Con_Printf( "RGB8  " );
-			break;
-		case GL_RGB5:
-			gEngfuncs.Con_Printf( "RGB5  " );
-			break;
-		case GL_LUMINANCE4_ALPHA4:
-			gEngfuncs.Con_Printf( "L4A4  " );
-			break;
-		case GL_LUMINANCE_ALPHA:
-		case GL_LUMINANCE8_ALPHA8:
-			gEngfuncs.Con_Printf( "L8A8  " );
-			break;
-		case GL_LUMINANCE4:
-			gEngfuncs.Con_Printf( "L4    " );
-			break;
-		case GL_LUMINANCE:
-		case GL_LUMINANCE8:
-			gEngfuncs.Con_Printf( "L8    " );
-			break;
-		case GL_ALPHA8:
-			gEngfuncs.Con_Printf( "A8    " );
-			break;
-		case GL_INTENSITY8:
-			gEngfuncs.Con_Printf( "I8    " );
-			break;
-		case GL_DEPTH_COMPONENT:
-		case GL_DEPTH_COMPONENT24:
-			gEngfuncs.Con_Printf( "DPTH24" );
-			break;			
-		case GL_DEPTH_COMPONENT32F:
-			gEngfuncs.Con_Printf( "DPTH32" );
-			break;
-		case GL_LUMINANCE16F_ARB:
-			gEngfuncs.Con_Printf( "L16F  " );
-			break;
-		case GL_LUMINANCE32F_ARB:
-			gEngfuncs.Con_Printf( "L32F  " );
-			break;
-		case GL_LUMINANCE_ALPHA16F_ARB:
-			gEngfuncs.Con_Printf( "LA16F " );
-			break;
-		case GL_LUMINANCE_ALPHA32F_ARB:
-			gEngfuncs.Con_Printf( "LA32F " );
-			break;
-		case GL_RG16F:
-			gEngfuncs.Con_Printf( "RG16F " );
-			break;
-		case GL_RG32F:
-			gEngfuncs.Con_Printf( "RG32F " );
-			break;
-		case GL_RGB16F_ARB:
-			gEngfuncs.Con_Printf( "RGB16F" );
-			break;
-		case GL_RGB32F_ARB:
-			gEngfuncs.Con_Printf( "RGB32F" );
-			break;
-		case GL_RGBA16F_ARB:
-			gEngfuncs.Con_Printf( "RGBA16F" );
-			break;
-		case GL_RGBA32F_ARB:
-			gEngfuncs.Con_Printf( "RGBA32F" );
-			break;
-		default:
-			gEngfuncs.Con_Printf( " ^1ERROR^7 " );
-			break;
+			case GL_COMPRESSED_RGBA_ARB:
+				gEngfuncs.Con_Printf( "CRGBA " );
+				break;
+			case GL_COMPRESSED_RGB_ARB:
+				gEngfuncs.Con_Printf( "CRGB  " );
+				break;
+			case GL_COMPRESSED_LUMINANCE_ALPHA_ARB:
+				gEngfuncs.Con_Printf( "CLA   " );
+				break;
+			case GL_COMPRESSED_LUMINANCE_ARB:
+				gEngfuncs.Con_Printf( "CL    " );
+				break;
+			case GL_COMPRESSED_ALPHA_ARB:
+				gEngfuncs.Con_Printf( "CA    " );
+				break;
+			case GL_COMPRESSED_INTENSITY_ARB:
+				gEngfuncs.Con_Printf( "CI    " );
+				break;
+			case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
+				gEngfuncs.Con_Printf( "DXT1c " );
+				break;
+			case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
+				gEngfuncs.Con_Printf( "DXT1a " );
+				break;
+			case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
+				gEngfuncs.Con_Printf( "DXT3  " );
+				break;
+			case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
+				gEngfuncs.Con_Printf( "DXT5  " );
+				break;
+			case GL_COMPRESSED_RED_GREEN_RGTC2_EXT:
+			case GL_COMPRESSED_LUMINANCE_ALPHA_3DC_ATI:
+				gEngfuncs.Con_Printf( "ATI2  " );
+				break;
+			case GL_RGBA:
+				gEngfuncs.Con_Printf( "RGBA  " );
+				break;
+			case GL_RGBA8:
+				gEngfuncs.Con_Printf( "RGBA8 " );
+				break;
+			case GL_RGBA4:
+				gEngfuncs.Con_Printf( "RGBA4 " );
+				break;
+			case GL_RGB:
+				gEngfuncs.Con_Printf( "RGB   " );
+				break;
+			case GL_RGB8:
+				gEngfuncs.Con_Printf( "RGB8  " );
+				break;
+			case GL_RGB5:
+				gEngfuncs.Con_Printf( "RGB5  " );
+				break;
+			case GL_LUMINANCE4_ALPHA4:
+				gEngfuncs.Con_Printf( "L4A4  " );
+				break;
+			case GL_LUMINANCE_ALPHA:
+			case GL_LUMINANCE8_ALPHA8:
+				gEngfuncs.Con_Printf( "L8A8  " );
+				break;
+			case GL_LUMINANCE4:
+				gEngfuncs.Con_Printf( "L4    " );
+				break;
+			case GL_LUMINANCE:
+			case GL_LUMINANCE8:
+				gEngfuncs.Con_Printf( "L8    " );
+				break;
+			case GL_ALPHA8:
+				gEngfuncs.Con_Printf( "A8    " );
+				break;
+			case GL_INTENSITY8:
+				gEngfuncs.Con_Printf( "I8    " );
+				break;
+			case GL_DEPTH_COMPONENT:
+			case GL_DEPTH_COMPONENT24:
+				gEngfuncs.Con_Printf( "DPTH24" );
+				break;
+			case GL_DEPTH_COMPONENT32F:
+				gEngfuncs.Con_Printf( "DPTH32" );
+				break;
+			case GL_LUMINANCE16F_ARB:
+				gEngfuncs.Con_Printf( "L16F  " );
+				break;
+			case GL_LUMINANCE32F_ARB:
+				gEngfuncs.Con_Printf( "L32F  " );
+				break;
+			case GL_LUMINANCE_ALPHA16F_ARB:
+				gEngfuncs.Con_Printf( "LA16F " );
+				break;
+			case GL_LUMINANCE_ALPHA32F_ARB:
+				gEngfuncs.Con_Printf( "LA32F " );
+				break;
+			case GL_RG16F:
+				gEngfuncs.Con_Printf( "RG16F " );
+				break;
+			case GL_RG32F:
+				gEngfuncs.Con_Printf( "RG32F " );
+				break;
+			case GL_RGB16F_ARB:
+				gEngfuncs.Con_Printf( "RGB16F" );
+				break;
+			case GL_RGB32F_ARB:
+				gEngfuncs.Con_Printf( "RGB32F" );
+				break;
+			case GL_RGBA16F_ARB:
+				gEngfuncs.Con_Printf( "RGBA16F" );
+				break;
+			case GL_RGBA32F_ARB:
+				gEngfuncs.Con_Printf( "RGBA32F" );
+				break;
+			default:
+				gEngfuncs.Con_Printf( " ^1ERROR^7 " );
+				break;
 		}
 
 		switch( image->target )
 		{
-		case GL_TEXTURE_1D:
-			gEngfuncs.Con_Printf( " 1D   " );
-			break;
-		case GL_TEXTURE_2D:
-			gEngfuncs.Con_Printf( " 2D   " );
-			break;
-		case GL_TEXTURE_3D:
-			gEngfuncs.Con_Printf( " 3D   " );
-			break;
-		case GL_TEXTURE_CUBE_MAP_ARB:
-			gEngfuncs.Con_Printf( "CUBE  " );
-			break;
-		case GL_TEXTURE_RECTANGLE_EXT:
-			gEngfuncs.Con_Printf( "RECT  " );
-			break;
-		case GL_TEXTURE_2D_ARRAY_EXT:
-			gEngfuncs.Con_Printf( "ARRAY " );
-			break;
-		default:
-			gEngfuncs.Con_Printf( "????  " );
-			break;
+			case GL_TEXTURE_1D:
+				gEngfuncs.Con_Printf( " 1D   " );
+				break;
+			case GL_TEXTURE_2D:
+				gEngfuncs.Con_Printf( " 2D   " );
+				break;
+			case GL_TEXTURE_3D:
+				gEngfuncs.Con_Printf( " 3D   " );
+				break;
+			case GL_TEXTURE_CUBE_MAP_ARB:
+				gEngfuncs.Con_Printf( "CUBE  " );
+				break;
+			case GL_TEXTURE_RECTANGLE_EXT:
+				gEngfuncs.Con_Printf( "RECT  " );
+				break;
+			case GL_TEXTURE_2D_ARRAY_EXT:
+				gEngfuncs.Con_Printf( "ARRAY " );
+				break;
+			default:
+				gEngfuncs.Con_Printf( "????  " );
+				break;
 		}
 
 		if( image->flags & TF_NORMALMAP )
@@ -2170,27 +2172,27 @@ void R_TextureList_f( void )
 
 		switch( image->encode )
 		{
-		case DXT_ENCODE_COLOR_YCoCg:
-			gEngfuncs.Con_Printf( "YCoCg     " );
-			break;
-		case DXT_ENCODE_NORMAL_AG_ORTHO:
-			gEngfuncs.Con_Printf( "ortho     " );
-			break;
-		case DXT_ENCODE_NORMAL_AG_STEREO:
-			gEngfuncs.Con_Printf( "stereo    " );
-			break;
-		case DXT_ENCODE_NORMAL_AG_PARABOLOID:
-			gEngfuncs.Con_Printf( "parabolic " );
-			break;
-		case DXT_ENCODE_NORMAL_AG_QUARTIC:
-			gEngfuncs.Con_Printf( "quartic   " );
-			break;
-		case DXT_ENCODE_NORMAL_AG_AZIMUTHAL:
-			gEngfuncs.Con_Printf( "azimuthal " );
-			break;
-		default:
-			gEngfuncs.Con_Printf( "default   " );
-			break;
+			case DXT_ENCODE_COLOR_YCoCg:
+				gEngfuncs.Con_Printf( "YCoCg     " );
+				break;
+			case DXT_ENCODE_NORMAL_AG_ORTHO:
+				gEngfuncs.Con_Printf( "ortho     " );
+				break;
+			case DXT_ENCODE_NORMAL_AG_STEREO:
+				gEngfuncs.Con_Printf( "stereo    " );
+				break;
+			case DXT_ENCODE_NORMAL_AG_PARABOLOID:
+				gEngfuncs.Con_Printf( "parabolic " );
+				break;
+			case DXT_ENCODE_NORMAL_AG_QUARTIC:
+				gEngfuncs.Con_Printf( "quartic   " );
+				break;
+			case DXT_ENCODE_NORMAL_AG_AZIMUTHAL:
+				gEngfuncs.Con_Printf( "azimuthal " );
+				break;
+			default:
+				gEngfuncs.Con_Printf( "default   " );
+				break;
 		}
 
 		if( image->flags & TF_CLAMP )

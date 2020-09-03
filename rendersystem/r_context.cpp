@@ -855,7 +855,7 @@ public:
 
 	virtual void			GL_LoadTextureMatrix( const float *glmatrix ) 
 	{
-		::GL_LoadTexMatrix((matrix4x4)glmatrix);
+		::GL_LoadTexMatrixExt(glmatrix);
 	}
 
 	virtual void			GL_TexMatrixIdentity( void ) 
