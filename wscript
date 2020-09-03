@@ -222,11 +222,6 @@ def configure(conf):
 		opts.append("-mneon")
 		conf.env.append_unique('DEFINES', 'USE_NEON=1')
 
-	print("SSE Enabled: " + str(conf.options.USE_SSE))
-	print("SSE4.2 Enabled: " + str(conf.options.USE_SSE42))
-	print("AVX Enabled: " + str(conf.options.USE_AVX))
-	print("NEON Enabled: " + str(conf.options.USE_NEON))
-
 	linker_flags = {
 		'common': {
 			'msvc':    ['/DEBUG'], # always create PDB, doesn't affect result binaries
@@ -235,6 +230,9 @@ def configure(conf):
 		'sanitize': {
 			'clang':   ['-fsanitize=undefined', '-fsanitize=address'],
 			'gcc':     ['-fsanitize=undefined', '-fsanitize=address'],
+		},
+		'trace': {
+			'clang': ['-fxray-instrument']
 		}
 	}
 
