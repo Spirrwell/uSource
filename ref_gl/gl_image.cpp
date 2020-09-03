@@ -1234,42 +1234,42 @@ static void GL_ProcessImage( gl_texture_t *tex, rgbdata_t *pic )
 {
 	float	emboss_scale = 0.0f;
 	uint	img_flags = 0;
-	unsigned int tex_flags = (unsigned int)tex->flags; // I have to do this for language conformance! Sorry!
 
 	// force upload texture as RGB or RGBA (detail textures requires this)
 	if( tex->flags & TF_FORCE_COLOR ) pic->flags |= IMAGE_HAS_COLOR;
-	if( pic->flags & IMAGE_HAS_ALPHA ) tex_flags |= TF_HAS_ALPHA;
+	if( pic->flags & IMAGE_HAS_ALPHA )
+		SetBits(tex->flags, TF_HAS_ALPHA);
 
 	tex->encode = pic->encode; // share encode method
 
 	if( ImageDXT( pic->type ))
 	{
 		if( !pic->numMips )
-			tex_flags |= TF_NOMIPMAP; // disable mipmapping by user request
+			SetBits(tex->flags, TF_NOMIPMAP);
 
 		// clear all the unsupported flags
-		tex_flags &= ~TF_KEEP_SOURCE;
+		ClearBits(tex->flags, TF_KEEP_SOURCE);
 	}
 	else
 	{
 		// copy flag about luma pixels
 		if( pic->flags & IMAGE_HAS_LUMA )
-			tex_flags |= TF_HAS_LUMA;
+			SetBits(tex->flags, TF_HAS_LUMA);
 
 		if( pic->flags & IMAGE_QUAKEPAL )
-			tex_flags |= TF_QUAKEPAL;
+			SetBits(tex->flags, TF_QUAKEPAL);
 
 		// create luma texture from quake texture
 		if( tex->flags & TF_MAKELUMA )
 		{
 			img_flags |= IMAGE_MAKE_LUMA;
-			tex_flags &= ~TF_MAKELUMA;
+			ClearBits(tex->flags, TF_MAKELUMA);
 		}
 
 		if( tex->flags & TF_ALLOW_EMBOSS )
 		{
 			img_flags |= IMAGE_EMBOSS;
-			tex_flags &= ~TF_ALLOW_EMBOSS;
+			ClearBits(tex->flags, TF_ALLOW_EMBOSS);
 		}
 
 		if( !FBitSet( tex->flags, TF_IMG_UPLOADED ) && FBitSet( tex->flags, TF_KEEP_SOURCE ))
@@ -1289,7 +1289,6 @@ static void GL_ProcessImage( gl_texture_t *tex, rgbdata_t *pic )
 		if( FBitSet( tex->flags, TF_LUMINANCE ))
 			ClearBits( pic->flags, IMAGE_HAS_COLOR );
 	}
-	tex->flags = (texFlags_t)tex_flags;
 }
 
 /*
