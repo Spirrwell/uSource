@@ -34,9 +34,6 @@ namespace platform
 
 	unsigned long long GetCurrentThreadId();
 
-	/* Allows the engine to hook basic printing and error functions for log to console operations */
-	void HookFatalError(void(*fnHook)(const char*));
-
 	/* Fatal error function */
 	void FatalError(const char* fmt, ...);
 

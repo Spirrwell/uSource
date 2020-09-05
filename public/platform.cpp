@@ -58,14 +58,6 @@ unsigned long long platform::GetCurrentThreadId()
 #endif 
 }
 
-typedef void(*fnFatalHook_t)(const char*);
-List<fnFatalHook_t> g_fatal_hooks;
-
-void platform::HookFatalError(void (*fnHook)(const char *))
-{
-	g_fatal_hooks.push_back(fnHook);
-}
-
 void platform::FatalError(const char *fmt, ...)
 {
 	char tmp[4096];
@@ -73,8 +65,6 @@ void platform::FatalError(const char *fmt, ...)
 	va_start(va, fmt);
 	vsnprintf(tmp, sizeof(tmp), fmt, va);
 	va_end(va);
-	for(auto x : g_fatal_hooks)
-		x(tmp);
 	fprintf(stderr, "%s", tmp);
 	abort();
 }
