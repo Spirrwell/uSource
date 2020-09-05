@@ -11,6 +11,7 @@ from waftools import cmake, msdev, eclipse, codeblocks, export
 
 VERSION = '0.10'
 APPNAME = 'uSource'
+DESCRIPTION = 'Extended version of Xash3d/Goldsrc'
 top = '.'
 
 class Subproject:
@@ -134,6 +135,11 @@ def configure(conf):
 	conf.env.SERVER_DIR  = 'bin'
 
 	conf.options.NO_VGUI = True
+
+	# Add some defines that will let us configure project name, desc, ver, etc.
+	conf.env.append_unique('DEFINES', 'PROJECT_NAME=\"{0}\"'.format(APPNAME))
+	conf.env.append_unique('DEFINES', 'PROJECT_VERSION=\"{0}\"'.format(VERSION))
+	conf.env.append_unique('DEFINES', 'PROJECT_DESCRIPTION=\"{0}\"'.format(DESCRIPTION))
 
 	conf.load('fwgslib reconfigure cmake msdev eclipse codeblocks doxygen export')
 	conf.start_msg('Build type')
