@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -28,6 +28,8 @@
 #include "game_shared.h"
 #include "demo.h"
 #include "demo_api.h"
+#include "tier1/convar.h"
+#include "tier1/dbg.h"
 
 cvar_t *hud_textmode;
 float g_hud_text_color[3];
@@ -136,7 +138,7 @@ int __MsgFunc_RandomPC( const char *pszName, int iSize, void *pbuf )
 {
 	return 0;
 }
- 
+
 int __MsgFunc_ServerName( const char *pszName, int iSize, void *pbuf )
 {
 	return 0;
@@ -151,7 +153,7 @@ int __MsgFunc_AllowSpec( const char *pszName, int iSize, void *pbuf )
 {
 	return 0;
 }
- 
+
 // This is called every time the DLL is loaded
 void CHud::Init( void )
 {
@@ -233,9 +235,9 @@ void CHud::Init( void )
 	m_StatusIcons.Init();
 	m_MOTD.Init();
 	m_Scoreboard.Init();
-
+	m_BuildInfo.Init();
 	m_Menu.Init();
-	
+
 	MsgFunc_ResetHUD( 0, 0, NULL );
 }
 
@@ -287,7 +289,7 @@ void CHud::VidInit( void )
 	// ---------
 	//m_hsprFont = LoadSprite("sprites/%d_font.spr");
 
-	m_hsprLogo = 0;	
+	m_hsprLogo = 0;
 	m_hsprCursor = 0;
 
 	if( ScreenWidth < 640 )
@@ -414,6 +416,7 @@ void CHud::VidInit( void )
 	m_StatusIcons.VidInit();
 	m_Scoreboard.VidInit();
 	m_MOTD.VidInit();
+	m_BuildInfo.VidInit();
 }
 
 int CHud::MsgFunc_Logo( const char *pszName,  int iSize, void *pbuf )
@@ -447,7 +450,7 @@ void COM_FileBase ( const char *in, char *out )
 
 	if( in[end] != '.' )		// no '.', copy to end
 		end = len - 1;
-	else 
+	else
 		end--;					// Found ',', copy to left of '.'
 
 	// Scan backward for '/'
@@ -457,7 +460,7 @@ void COM_FileBase ( const char *in, char *out )
 
 	if( in[start] != '/' && in[start] != '\\' )
 		start = 0;
-	else 
+	else
 		start++;
 
 	// Length of new sting
@@ -542,12 +545,12 @@ int CHud::MsgFunc_SetFOV( const char *pszName,  int iSize, void *pbuf )
 
 	// Set a new sensitivity
 	if( m_iFOV == def_fov )
-	{  
+	{
 		// reset to saved sensitivity
 		m_flMouseSensitivity = 0;
 	}
 	else
-	{  
+	{
 		// set a new sensitivity that is proportional to the change from the FOV default
 		m_flMouseSensitivity = sensitivity->value * ((float)newfov / (float)def_fov) * CVAR_GET_FLOAT("zoom_sensitivity_ratio");
 	}
@@ -588,4 +591,53 @@ void CHud::AddHudElem( CHudBase *phudelem )
 float CHud::GetSensitivity( void )
 {
 	return m_flMouseSensitivity;
+}
+
+//-----------------------------------------------------
+// Build info in the top right corner of the game
+// Configured via convars
+//-----------------------------------------------------
+int CHudBuildInfo::Init()
+{
+	m_projectString = Q_strdup(va("%s version %s", PROJECT_NAME, PROJECT_VERSION));
+	m_descString = Q_strdup(PROJECT_DESCRIPTION);
+	m_commitString = Q_strdup(va("Commit %s", XASH_BUILD_COMMIT));
+	m_buildDateString = Q_strdup(va("Built on %s at %s", __DATE__, __TIME__));
+	gHUD.AddHudElem(this);
+	this->m_iFlags |= HUD_ACTIVE;
+	return 1;
+}
+
+int CHudBuildInfo::VidInit()
+{
+	/* Find the largest string out of the list */
+	int lengths[] = {
+		gHUD.DrawHudStringLen(m_projectString),
+		gHUD.DrawHudStringLen(m_descString),
+		gHUD.DrawHudStringLen(m_commitString),
+		gHUD.DrawHudStringLen(m_buildDateString),
+	};
+	m_maxStringWidth = 0;
+	for(int i = 0; i < 4; i++)
+		m_maxStringWidth = lengths[i] > m_maxStringWidth ? lengths[i] : m_maxStringWidth;
+	return 1;
+}
+
+int CHudBuildInfo::Draw(float dt)
+{
+#ifdef _DEBUG
+	// TODO: Text scaling needs to be done better
+	int charHeight = gHUD.m_scrinfo.iCharHeight;
+	gEngfuncs.pfnFillRGBABlend((ScreenWidth-(ScreenWidth/10))-10, (ScreenHeight/40)-10, m_maxStringWidth+20, ((charHeight + 1) * 4 + 20), 10, 10, 10, 120);
+	DrawUtfString(ScreenWidth-(ScreenWidth/10), ScreenHeight/40, ScreenWidth, m_projectString, 0, 255, 0);
+	DrawUtfString(ScreenWidth-(ScreenWidth/10), (charHeight)+(ScreenHeight/40), ScreenWidth, m_descString, 0, 255, 0);
+	DrawUtfString(ScreenWidth-(ScreenWidth/10), (charHeight*2)+(ScreenHeight/40), ScreenWidth, m_commitString, 0, 255, 0);
+	DrawUtfString(ScreenWidth-(ScreenWidth/10), (charHeight*3)+(ScreenHeight/40), ScreenWidth, m_buildDateString, 0, 255, 0);
+#endif
+	return 1;
+}
+
+void CHudBuildInfo::Reset()
+{
+
 }
