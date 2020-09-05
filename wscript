@@ -174,6 +174,14 @@ def configure(conf):
 		conf.options.GLWES  = True
 		conf.options.GL     = False
 
+	# Force _WIN32 definition for windows (generally good for IDE integration)
+	if conf.env.DEST_OS == 'win32':
+		conf.env.append_unique('DEFINES', '_WIN32')
+
+	# Hardcoded include path for Mingw on Linux, also for IDE integration
+	if conf.env.DEST_OS == 'win32' and sys.platform == 'linux':
+		conf.env.append_unique('CXXFLAGS', '-I/usr/x86_64-w64-mingw32/include/')
+
 	# We restrict 64-bit builds ONLY for Win/Linux/OSX running on Intel architecture
 	# Because compatibility with original GoldSrc
 	if conf.env.DEST_OS in ['win32', 'linux', 'darwin'] and conf.env.DEST_CPU in ['x86_64']:
