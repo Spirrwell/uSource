@@ -31,7 +31,11 @@
 
 /* Platform specific includes */
 #if defined(PLATFORM_X64) || defined(PLATFORM_X86)
-#       include <x86intrin.h>
+#       ifdef _WIN32
+#               include <intrin.h>
+#       else
+#               include <x86intrin.h>
+#       endif // _WIN32
 #       include <xmmintrin.h>
 #elif defined(PLATFORM_ARM) || defined(PLATFORM_ARM64)
 

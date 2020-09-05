@@ -93,6 +93,7 @@ int Win32_ExecProgram(const char *prog, const char *args, const char **env)
 	}
 	return -1;
 #endif
+	return 0;
 }
 
 int platform::ExecProgram(const char *prog, char *const *args, const char **env)
@@ -104,7 +105,7 @@ int platform::ExecProgram(const char *prog, char *const *args, const char **env)
 		Q_strncat(cmdline, args[i], sizeof(cmdline));
 	return Win32_ExecProgram(prog, cmdline, env);
 #else
-	return execve(prog, args, env);
+	return execve(prog, args, const_cast<char *const *>(env));
 #endif
 }
 
