@@ -39,4 +39,8 @@ namespace platform
 
 	/* Fatal error function */
 	void FatalError(const char* fmt, ...);
+
+	/* Execute a command */
+	int ExecProgram(const char* prog, char* const args[], const char* env[] = nullptr);
+
 }
