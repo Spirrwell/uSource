@@ -13,13 +13,15 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
+#include "common/common.h"
 #include "common.h"
 #include "client.h" // ConnectionProgress
 #include "netchan.h"
 #include "mathlib.h"
 #ifdef _WIN32
 // Winsock
-#include <WS2tcpip.h>
+#include <ws2tcpip.h>
+#include <io.h>
 #else
 // BSD sockets
 #include <sys/types.h>
@@ -360,7 +362,7 @@ void *NET_ThreadStart( void *unused )
 #define mutex_lock EnterCriticalSection
 #define mutex_unlock LeaveCriticalSection
 #define detach_thread( x ) CloseHandle(x)
-#define create_thread( pfn ) nsthread.thread = CreateThread( NULL, 0, pfn, NULL, 0, NULL )
+#define create_thread( pfn ) (nsthread.thread = CreateThread( NULL, 0, pfn, NULL, 0, NULL ))
 #define mutex_t  CRITICAL_SECTION
 #define thread_t HANDLE
 DWORD WINAPI NET_ThreadStart( LPVOID unused )
@@ -395,8 +397,8 @@ static struct nsthread_s
 static void NET_InitializeCriticalSections( void )
 {
 	net.threads_initialized = true;
-	pInitializeCriticalSection( &nsthread.mutexns );
-	pInitializeCriticalSection( &nsthread.mutexres );
+	InitializeCriticalSection( &nsthread.mutexns );
+	InitializeCriticalSection( &nsthread.mutexres );
 }
 #endif
 
@@ -1096,7 +1098,7 @@ qboolean NET_QueuePacket( netsrc_t sock, netadr_t *from, byte *data, size_t *len
 	if( NET_IsSocketValid( net_socket ) )
 	{
 		addr_len = sizeof( addr );
-		ret = recvfrom(net_socket, buf, sizeof( buf ), 0, (struct sockaddr *)&addr,
+		ret = recvfrom(net_socket, reinterpret_cast<char *>(buf), sizeof( buf ), 0, (struct sockaddr *)&addr,
 		               reinterpret_cast<socklen_t *>(&addr_len));
 
 		if( !NET_IsSocketError( ret ) )
@@ -1395,7 +1397,7 @@ static int NET_Isocket( const char *net_interface, int port, qboolean multicast 
 		return INVALID_SOCKET;
 	}
 
-	if( NET_IsSocketError( ioctlsocket( net_socket, FIONBIO, &_true ) ) )
+	if( NET_IsSocketError( ioctlsocket(net_socket, FIONBIO, reinterpret_cast<u_long *>(&_true)) ) )
 	{
 		Con_DPrintf( S_WARN "NET_UDsocket: port: %d ioctl FIONBIO: %s\n", port, NET_ErrorString( ));
 		closesocket( net_socket );
@@ -2146,7 +2148,7 @@ void HTTP_Run( void )
 			// You may skip this if not supported by system,
 			// but download will lock engine, maybe you will need to add manual returns
 			mode = 1;
-			ioctlsocket( curfile->socket, FIONBIO, &mode );
+			ioctlsocket(curfile->socket, FIONBIO, reinterpret_cast<u_long *>(&mode));
 	#ifdef __linux__
 			// SOCK_NONBLOCK is not portable, so use fcntl
 			fcntl( curfile->socket, F_SETFL, fcntl( curfile->socket, F_GETFL, 0 ) | O_NONBLOCK );

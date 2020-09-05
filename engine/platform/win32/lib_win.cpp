@@ -14,8 +14,8 @@ GNU General Public License for more details.
 */
 
 #if defined(_WIN32)
-#include "common.h"
-#include "library.h"
+#include "common/common.h"
+#include "common/library.h"
 
 #ifdef XASH_64BIT
 #include <dbghelp.h>
@@ -467,7 +467,9 @@ static int BuildImportTable( MEMORYMODULE *module )
 				break;
 			}
 
-			module->modules = (void *)Mem_Realloc( host.mempool, module->modules, (module->numModules + 1) * (sizeof( void* )));
+			module->modules = static_cast<void **>((void *) Mem_Realloc(host.mempool, module->modules,
+			                                                            (module->numModules + 1) *
+			                                                            (sizeof(void *))));
 			module->modules[module->numModules++] = handle;
 
 			if( importDesc->OriginalFirstThunk )
@@ -620,7 +622,7 @@ void *MemoryLoadLibrary( const char *name )
 	result->headers->OptionalHeader.ImageBase = (DWORD)code;
 
 	// copy sections from DLL file block to new memory location
-	CopySections( data, old_header, result );
+	CopySections( (byte*)data, old_header, result );
 
 	// adjust base address of imported data
 	locationDelta = (DWORD)(code - old_header->OptionalHeader.ImageBase);
@@ -864,7 +866,7 @@ qboolean LibraryLoadSymbols( dll_user_t *hInst )
 		goto table_error;
 	}
 
-	hInst->ordinals = Mem_Malloc( host.mempool, hInst->num_ordinals * sizeof( word ));
+	hInst->ordinals = static_cast<word *>(Mem_Malloc(host.mempool, hInst->num_ordinals * sizeof(word)));
 
 	if( FS_Read( f, hInst->ordinals, hInst->num_ordinals * sizeof( word )) != (hInst->num_ordinals * sizeof( word )))
 	{
@@ -880,7 +882,7 @@ qboolean LibraryLoadSymbols( dll_user_t *hInst )
 		goto table_error;
 	}
 
-	hInst->funcs = Mem_Malloc( host.mempool, hInst->num_ordinals * sizeof( dword ));
+	hInst->funcs = static_cast<dword *>(Mem_Malloc(host.mempool, hInst->num_ordinals * sizeof(dword)));
 
 	if( FS_Read( f, hInst->funcs, hInst->num_ordinals * sizeof( dword )) != (hInst->num_ordinals * sizeof( dword )))
 	{
@@ -896,7 +898,7 @@ qboolean LibraryLoadSymbols( dll_user_t *hInst )
 		goto table_error;
 	}
 
-	p_Names = Mem_Malloc( host.mempool, hInst->num_ordinals * sizeof( dword ));
+	p_Names = static_cast<dword *>(Mem_Malloc(host.mempool, hInst->num_ordinals * sizeof(dword)));
 
 	if( FS_Read( f, p_Names, hInst->num_ordinals * sizeof( dword )) != (hInst->num_ordinals * sizeof( dword )))
 	{
@@ -1074,7 +1076,7 @@ void *COM_GetProcAddress( void *hInstance, const char *name )
 
 	if( hInst->custom_loader )
 		return (void *)MemoryGetProcAddress( hInst->hInstance, name );
-	return (void *)GetProcAddress( hInst->hInstance, name );
+	return (void *)GetProcAddress( (HMODULE)hInst->hInstance, name );
 }
 
 void COM_FreeLibrary( void *hInstance )
@@ -1094,7 +1096,7 @@ void COM_FreeLibrary( void *hInstance )
 	
 	if( hInst->custom_loader )
 		MemoryFreeLibrary( hInst->hInstance );
-	else FreeLibrary( hInst->hInstance );
+	else FreeLibrary( (HMODULE)hInst->hInstance );
 
 	hInst->hInstance = NULL;
 
@@ -1116,7 +1118,7 @@ void *COM_FunctionFromName( void *hInstance, const char *pName )
 		if( !Q_strcmp( pName, hInst->names[i] ))
 		{
 			index = hInst->ordinals[i];
-			return hInst->funcs[index] + hInst->funcBase;
+			return reinterpret_cast<void *>(hInst->funcs[index] + hInst->funcBase);
 		}
 	}
 

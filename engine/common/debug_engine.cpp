@@ -126,14 +126,16 @@ CONCOMMAND(raise, "Raises a signal", 0)
 		raise(SIGILL);
 	else if(!Q_strcmp(sig, "SIGFPE"))
 		raise(SIGFPE);
+	else if(!Q_strcmp(sig, "SIGTERM"))
+		raise(SIGTERM);
+#ifndef _WIN32
 	else if(!Q_strcmp(sig, "SIGKILL"))
 		raise(SIGKILL);
 	else if(!Q_strcmp(sig, "SIGTRAP"))
 		raise(SIGTRAP);
-	else if(!Q_strcmp(sig, "SIGTERM"))
-		raise(SIGTERM);
 	else if(!Q_strcmp(sig, "SIGHUP"))
 		raise(SIGHUP);
+#endif
 	else
 		Msg("Unknown signal name\n");
 }

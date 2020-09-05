@@ -66,6 +66,12 @@ public:
 
 =======================
 */
+// sigh...windows strikes again
+#undef INVALID
+#undef INFO
+#undef WARNING
+#undef ERROR
+#undef FATAL
 enum class ELogLevel : int
 {
 	INVALID = -1,

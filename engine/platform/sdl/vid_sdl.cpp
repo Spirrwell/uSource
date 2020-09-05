@@ -503,6 +503,7 @@ void VID_RestoreScreenResolution( void )
 	}
 }
 
+#if 0
 #if defined(_WIN32) && !defined(XASH_64BIT) // ICO support only for Win32
 #include "SDL_syswm.h"
 static void WIN_SetWindowIcon( HICON ico )
@@ -512,12 +513,13 @@ static void WIN_SetWindowIcon( HICON ico )
 	if( !ico )
 		return;
 
-	if( SDL_GetWindowWMInfo( host.hWnd, &wminfo ) )
+	if( SDL_GetWindowWMInfo( (SDL_Window*)host.hWnd, &wminfo ) )
 	{
 		SetClassLong( wminfo.info.win.window, GCL_HICON, (LONG)ico );
 	}
 }
 #endif
+#endif // 0
 
 /*
 =================
@@ -590,7 +592,7 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 		VID_RestoreScreenResolution();
 	}
 
-#if defined(_WIN32) && !defined(XASH_64BIT) // ICO support only for Win32
+#if defined(_WIN32) && !defined(XASH_64BIT) && 0 // ICO support only for Win32
 	if( FS_FileExists( GI->iconpath, true ) )
 	{
 		HICON ico;
@@ -632,7 +634,7 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 		}
 	}
 
-#if defined(_WIN32) && !defined(XASH_64BIT) // ICO support only for Win32
+#if defined(_WIN32) && !defined(XASH_64BIT) && 0 // ICO support only for Win32
 	if( !iconLoaded )
 	{
 		WIN_SetWindowIcon( LoadIcon( host.hInst, MAKEINTRESOURCE( 101 ) ) );

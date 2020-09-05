@@ -14,7 +14,7 @@ GNU General Public License for more details.
 */
 
 #ifdef _WIN32
-#include "common.h"
+#include "common/common.h"
 
 /*
 ===============================================================================
@@ -276,7 +276,7 @@ void Wcon_CreateConsole( void )
 	wc.hInstance     = host.hInst;
 	wc.hIcon         = LoadIcon( host.hInst, MAKEINTRESOURCE( IDI_ICON1 ));
 	wc.hCursor       = LoadCursor( NULL, IDC_ARROW );
-	wc.hbrBackground = (void *)COLOR_3DSHADOW;
+	wc.hbrBackground = static_cast<HBRUSH>((void *) COLOR_3DSHADOW);
 	wc.lpszClassName = SYSCONSOLE;
 	wc.lpszMenuName  = 0;
 
@@ -349,7 +349,7 @@ void Wcon_CreateConsole( void )
 	// create the scrollbuffer
 	GetClientRect( s_wcd.hWnd, &rect );
 
-	s_wcd.hwndBuffer = CreateWindowEx( WS_EX_DLGMODALFRAME|WS_EX_CLIENTEDGE, "edit", NULL, CONSTYLE, 0, 0, rect.right - rect.left, min(365, rect.bottom), s_wcd.hWnd, (HMENU)EDIT_ID, host.hInst, NULL );
+	s_wcd.hwndBuffer = CreateWindowEx( WS_EX_DLGMODALFRAME|WS_EX_CLIENTEDGE, "edit", NULL, CONSTYLE, 0, 0, rect.right - rect.left, Q_min(365, rect.bottom), s_wcd.hWnd, (HMENU)EDIT_ID, host.hInst, NULL );
 	SendMessage( s_wcd.hwndBuffer, WM_SETFONT, (WPARAM)s_wcd.hfBufferFont, 0 );
 
 	if( host.type == HOST_DEDICATED )
