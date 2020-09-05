@@ -84,7 +84,7 @@ class CThread
 {
 private:
 #ifdef _WIN32
-
+	HANDLE hThread;
 #else
 	pthread_t m_thread;
 	pthread_attr_t m_attr;
@@ -158,7 +158,8 @@ class CThreadRWMutex
 {
 private:
 #ifdef _WIN32
-	void* m_mutex;
+	CThreadMutex m_r_mutex;
+	CThreadMutex m_w_mutex;
 #else
 	pthread_rwlock_t m_mutex;
 	pthread_rwlockattr_t m_attr;

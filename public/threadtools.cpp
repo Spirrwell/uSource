@@ -26,7 +26,7 @@ CThread::CThread(void *(*threadfn)(void *)) :
 	m_run(false)
 {
 #ifdef _WIN32
-
+	hThread = nullptr;
 #else
 	pthread_attr_init(&m_attr);
 #endif
@@ -35,7 +35,11 @@ CThread::CThread(void *(*threadfn)(void *)) :
 void CThread::Run(void* pvt)
 {
 #ifdef _WIN32
-
+	if(m_run && hThread)
+		TerminateThread(hThread, 1);
+	DWORD dwThreadId;
+	hThread = CreateThread(NULL, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(m_threadfn), pvt, 0, &dwThreadId);
+	m_run = true;
 #else
 	if(m_run)
 	{
@@ -49,7 +53,8 @@ void CThread::Run(void* pvt)
 void CThread::Terminate()
 {
 #ifdef _WIN32
-
+	if(hThread)
+		TerminateThread(hThread, 0);
 #else
 	pthread_kill(m_thread, SIGTERM);
 #endif
@@ -58,7 +63,8 @@ void CThread::Terminate()
 void CThread::Kill()
 {
 #ifdef _WIN32
-
+	if(hThread)
+		TerminateThread(hThread, 0);
 #else
 	pthread_kill(m_thread, SIGKILL);
 #endif
@@ -67,7 +73,8 @@ void CThread::Kill()
 void CThread::Join()
 {
 #ifdef _WIN32
-
+	if(hThread)
+		WaitForSingleObject(hThread, INFINITE);
 #else
 	pthread_join(m_thread, &m_ret);
 #endif
@@ -82,7 +89,7 @@ void CThread::Join()
 CThreadMutex::CThreadMutex()
 {
 #ifdef _WIN32
-
+	m_mutex = CreateMutexA(NULL, TRUE, NULL);
 #else
 	pthread_mutexattr_init(&m_attr);
 	pthread_mutex_init(&m_mutex, &m_attr);
@@ -92,7 +99,7 @@ CThreadMutex::CThreadMutex()
 CThreadMutex::~CThreadMutex()
 {
 #ifdef _WIN32
-
+	CloseHandle(m_mutex);
 #else
 	pthread_mutex_destroy(&m_mutex);
 	pthread_mutexattr_destroy(&m_attr);
@@ -102,7 +109,7 @@ CThreadMutex::~CThreadMutex()
 void CThreadMutex::Lock()
 {
 #ifdef _WIN32
-
+	WaitForSingleObject(m_mutex, INFINITE);
 #else
 	pthread_mutex_lock(&m_mutex);
 #endif
@@ -111,7 +118,8 @@ void CThreadMutex::Lock()
 bool CThreadMutex::TryLock()
 {
 #ifdef _WIN32
-
+	DWORD dwRes = WaitForSingleObject(m_mutex, 0);
+	return dwRes == WAIT_OBJECT_0;
 #else
 	return pthread_mutex_trylock(&m_mutex) == 0;
 #endif
@@ -120,7 +128,7 @@ bool CThreadMutex::TryLock()
 void CThreadMutex::Unlock()
 {
 #ifdef _WIN32
-
+	ReleaseMutex(m_mutex);
 #else
 	pthread_mutex_unlock(&m_mutex);
 #endif
@@ -283,7 +291,7 @@ CThreadRWMutex::~CThreadRWMutex()
 void CThreadRWMutex::RLock()
 {
 #ifdef _WIN32
-
+	m_r_mutex.Lock();
 #else
 	pthread_rwlock_rdlock(&m_mutex);
 #endif
@@ -292,7 +300,7 @@ void CThreadRWMutex::RLock()
 bool CThreadRWMutex::RTryLock()
 {
 #ifdef _WIN32
-
+	return m_r_mutex.TryLock();
 #else
 	return pthread_rwlock_tryrdlock(&m_mutex) == 0;
 #endif
@@ -301,7 +309,7 @@ bool CThreadRWMutex::RTryLock()
 void CThreadRWMutex::RUnlock()
 {
 #ifdef _WIN32
-
+	m_r_mutex.Unlock();
 #else
 	pthread_rwlock_unlock(&m_mutex);
 #endif
@@ -310,7 +318,7 @@ void CThreadRWMutex::RUnlock()
 void CThreadRWMutex::WLock()
 {
 #ifdef _WIN32
-
+	m_w_mutex.Lock();
 #else
 	pthread_rwlock_wrlock(&m_mutex);
 #endif
@@ -319,7 +327,7 @@ void CThreadRWMutex::WLock()
 bool CThreadRWMutex::WTryLock()
 {
 #ifdef _WIN32
-
+	return m_w_mutex.TryLock();
 #else
 	return pthread_rwlock_trywrlock(&m_mutex) == 0;
 #endif
@@ -328,7 +336,7 @@ bool CThreadRWMutex::WTryLock()
 void CThreadRWMutex::WUnlock()
 {
 #ifdef _WIN32
-
+	m_w_mutex.Unlock();
 #else
 	pthread_rwlock_unlock(&m_mutex);
 #endif
