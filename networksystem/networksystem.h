@@ -87,6 +87,8 @@ private:
 	bool m_init : 1;
 
 public:
+#undef ABSOLUTE
+#undef RELATIVE
 	enum {
 		ABSOLUTE,
 		RELATIVE
