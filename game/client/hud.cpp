@@ -629,10 +629,10 @@ int CHudBuildInfo::Draw(float dt)
 	// TODO: Text scaling needs to be done better
 	int charHeight = gHUD.m_scrinfo.iCharHeight;
 	gEngfuncs.pfnFillRGBABlend((ScreenWidth-(ScreenWidth/10))-10, (ScreenHeight/40)-10, m_maxStringWidth+20, ((charHeight + 1) * 4 + 20), 10, 10, 10, 120);
-	DrawUtfString(ScreenWidth-(ScreenWidth/10), ScreenHeight/40, ScreenWidth, m_projectString, 0, 255, 0);
-	DrawUtfString(ScreenWidth-(ScreenWidth/10), (charHeight)+(ScreenHeight/40), ScreenWidth, m_descString, 0, 255, 0);
-	DrawUtfString(ScreenWidth-(ScreenWidth/10), (charHeight*2)+(ScreenHeight/40), ScreenWidth, m_commitString, 0, 255, 0);
-	DrawUtfString(ScreenWidth-(ScreenWidth/10), (charHeight*3)+(ScreenHeight/40), ScreenWidth, m_buildDateString, 0, 255, 0);
+	gHUD.DrawHudString(ScreenWidth-(ScreenWidth/10), ScreenHeight/40, ScreenWidth, m_projectString, 0, 255, 0);
+	gHUD.DrawHudString(ScreenWidth-(ScreenWidth/10), (charHeight)+(ScreenHeight/40), ScreenWidth, m_descString, 0, 255, 0);
+	gHUD.DrawHudString(ScreenWidth-(ScreenWidth/10), (charHeight*2)+(ScreenHeight/40), ScreenWidth, m_commitString, 0, 255, 0);
+	gHUD.DrawHudString(ScreenWidth-(ScreenWidth/10), (charHeight*3)+(ScreenHeight/40), ScreenWidth, m_buildDateString, 0, 255, 0);
 #endif
 	return 1;
 }
