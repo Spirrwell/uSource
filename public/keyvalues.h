@@ -21,6 +21,7 @@ class KeyValues
 public:
 	struct key_t
 	{
+	private:
 		char* key;
 		char* value;
 		enum class ELastCached
@@ -38,6 +39,9 @@ public:
 		} cachedv;
 
                 bool quoted;
+                friend class KeyValues;
+
+	public:
 
 		key_t() { cached = ELastCached::NONE; };
 
@@ -45,7 +49,13 @@ public:
 		inline long int ReadInt(bool &ok);
 		inline double ReadFloat(bool &ok);
 
+		const char* Name() const { return key; };
+		const char* Value() const { return value; };
+		bool Quoted() const { return quoted; };
+
 	};
+
+private:
 	char* name;
 	bool good;
         bool quoted;
@@ -76,6 +86,10 @@ public:
 	void 		ParseFile(const char* file, bool use_escape_codes = false);
 	void		ParseFile(FILE* f, bool use_escape_codes = false);
 	void 		ParseString(const char* string, bool use_escape_codes = false, long long len = -1);
+
+	const std::vector<key_t>& Keys() const { return keys; };
+	const char* Name() const { return name; };
+	bool Quoted() const { return quoted; };
 
 	/* Clears a key's value setting it to "" */
 	void 		ClearKey(const char* key);

@@ -119,7 +119,7 @@ void CFontManager::VidInit( void )
 			font.wide = font.wide == 0 ? 10 : font.wide;
 			font.tall = kfont->GetInt("tall", 16);
 			font.weight = kfont->GetInt("weight", 500);
-			font.name = kfont->name;
+			font.name = kfont->Name();
 			font.font = CFontBuilder(kfont->GetString("name", "Tahoma"), font.tall * uiStatic.scaleY, font.weight).SetHandleNum(font_index).SetFlags(flags).Create();	
 			Assert(font.font > 3);
 			g_Fonts.push_back(font);

@@ -42,7 +42,7 @@ Array<weapon_script_sound_t> CWeaponScript::GetSounds()
 	for(auto kv : m_sounds->keys)
 	{
 		soundlist.push_back({
-			kv.key, kv.value,
+			kv.Name(), kv.Value(),
 		});
 	}
 	return soundlist;
