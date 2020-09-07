@@ -64,6 +64,15 @@ static void InitCrtLib()
 	g_pCrtPool = GlobalAllocator()._Mem_AllocPool("CrtlibPool", __FILE__, __LINE__);
 }
 
+int Q_countchar(const char* str, char c)
+{
+	int i = 0;
+	for(; *str; str++)
+		if(str[i] == c)
+			i++;
+	return i;
+}
+
 bool Q_startswith(const char* str, const char* sub)
 {
 	return Q_strncmp(str, sub, strlen(sub)) == 0;
@@ -1164,6 +1173,7 @@ char* Q_strdup(const char* s)
 void* Q_malloc(size_t sz)
 {
 	if(sz == 0) return nullptr;
+	InitCrtLib();
 	return GlobalAllocator()._Mem_Alloc(g_pCrtPool, sz, false, __FILE__, __LINE__);
 }
 
