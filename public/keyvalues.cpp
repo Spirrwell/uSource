@@ -29,9 +29,11 @@ KeyValues::KeyValues(const char* name) :
 }
 
 KeyValues::KeyValues() :
-	pCallback(NULL)
+	pCallback(NULL),
+	name(nullptr),
+	quoted(false)
 {
-
+	this->keys.reserve(10);
 }
 
 KeyValues::~KeyValues()
