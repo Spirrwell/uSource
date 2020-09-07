@@ -15,7 +15,7 @@
 void GameSharedInit() 
 {
 	/* Load our global interfaces from the engine */
-	ConnectTier1Libraries();
+	tier1::Connect();
 
 	/* Lod the networksystem libraries */
 	ConnectNetsystemLibraries();

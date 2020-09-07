@@ -1190,7 +1190,7 @@ UI_Init
 void UI_Init( void )
 {
 	/* Connect all tier1 interfaces */
-	ConnectTier1Libraries();
+	tier1::Connect();
 
 	// register our cvars and commands
 	ui_showmodels = EngFuncs::CvarRegister( "ui_showmodels", "0", FCVAR_ARCHIVE );

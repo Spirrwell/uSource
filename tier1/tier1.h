@@ -14,4 +14,7 @@ extern ILogSystem* g_pLogSystem;
 extern IEngineFilesystem* g_pFilesystem;
 extern IEngineDebug* g_pEngineDebug;
 
-void ConnectTier1Libraries();
+namespace tier1
+{
+	void Connect();
+}

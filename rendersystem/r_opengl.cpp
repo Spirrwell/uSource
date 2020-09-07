@@ -895,7 +895,7 @@ R_Init
 qboolean R_Init( void )
 {
 
-	ConnectTier1Libraries();
+	tier1::Connect();
 
 	if( glw_state.initialized )
 		return true;

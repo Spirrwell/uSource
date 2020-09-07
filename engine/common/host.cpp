@@ -1008,7 +1008,7 @@ extern "C" int EXPORT Host_Main( int argc, char **argv, const char *progname, in
 
 	Host_InitInterfaces();
 	Host_InitCommon( argc, argv, progname, bChangeGame );
-	ConnectTier1Libraries();
+	tier1::Connect();
 
 	// init commands and vars
 	if( host_developer.value >= DEV_EXTENDED )

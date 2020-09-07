@@ -7,7 +7,7 @@ ILogSystem* g_pLogSystem;
 IEngineFilesystem* g_pFilesystem;
 IEngineDebug* g_pEngineDebug;
 
-void ConnectTier1Libraries()
+void tier1::Connect()
 {
 	g_pFilesystem = (IEngineFilesystem*)AppFramework::FindInterface(IENGINEFILESYSTEM_INTERFACE);
 	g_pLogSystem = (ILogSystem*)AppFramework::FindInterface(ILOGSYSTEM_INTERFACE);
