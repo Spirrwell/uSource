@@ -413,35 +413,6 @@ Host_InitInterfaces
 */
 void Host_InitInterfaces()
 {
-	/* Set custom DLL loader here */
-	AppFramework::SetLoadLibrary([](const char* lib) -> void* {
-		return LoadLibrary(lib);
-	});
-	AppFramework::SetFreeLibrary([](void* lib) {
-		FreeLibrary(lib);
-	});
-
-	AppFramework::interface_t interfaces[] = {
-		{ENGINELIB, ILOGSYSTEM_INTERFACE},
-		/* Below are interfaces needed by other modules */
-		/* They are loaded here because I don't want to need to figure out the engine name in the client dll */
-		{ENGINELIB, IDEMOAPI_INTERFACE},
-		{ENGINELIB, IEFX_INTERFACE},
-		{ENGINELIB, IEVENTINTERFACE_INTERFACE},
-		{ENGINELIB, INETAPI_INTERFACE},
-		{ENGINELIB, IENGINEFILESYSTEM_INTERFACE},
-		{ENGINELIB, IENGINECVAR_INTERFACE},
-		{ENGINELIB, IENGINEDEBUG_INTERFACE},
-		{ENGINELIB, INETSYSTEM_INTERFACE},
-		{0,0},
-	};
-	
-	if(!AppFramework::AddInterfaces(interfaces)) 
-		Host_Error("Call to AppFramework::AddInterfaces failed. Check that all module export CreateInterface and GetInterfaces!");
-
-	if(!AppFramework::LoadInterfaces())
-		Host_Error("Failed to load interfaces");
-
 	g_pLoggingSystem = static_cast<ILogSystem *>(AppFramework::FindInterface(ILOGSYSTEM_INTERFACE));
 
 	AppFramework::ClearCustomFunctions();

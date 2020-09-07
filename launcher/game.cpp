@@ -16,6 +16,10 @@ GNU General Public License for more details.
 #include "port.h"
 #include "cmdline.h"
 #include "debug.h"
+#include "common.h"
+#include "public/keyvalues.h"
+#include "crtlib.h"
+#include "appframework.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -112,6 +116,65 @@ static void Sys_UnloadEngine( void )
 	Xash_Shutdown = NULL;
 }
 
+/* Loads the interfaces specified in the GameInfo */
+static void Sys_LoadInterfaces()
+{
+	const char* game = GlobalCommandLine().FindString("-game");
+	if(!game) game = GAME_PATH;
+	char filePath[256];
+	Q_snprintf(filePath, sizeof(filePath), "%s/gameinfo.txt", game);
+
+	KeyValues kv;
+	kv.ParseFile(filePath);
+	if(!kv.IsGood())
+	{
+		printf("Failed to parse GameInfo.txt!");
+		exit(1);
+	}
+
+	/* Try to find the interfaces subkey */
+	KeyValues* pInterfaces = kv.GetChild("interfaces");
+	if(!pInterfaces)
+	{
+		printf("No interfaces key in the gameinfo.txt. Your gameinfo might be malformed.\n");
+		return;
+	}
+	printf("Loading interfaces...\n");
+	/* Loop through all keys and add the interfaces */
+	for(auto k : pInterfaces->Keys())
+	{
+		/* Check if this is an absolute/relative path. If so, we will need to extract the filename and path components
+		 * before making a platform-specific library name */
+		char finalFile[512];
+		if(Q_countchar(k.Value(), '/') != 0 || Q_countchar(k.Value(), '\\') != 0)
+		{
+			char fileName[128];
+			Q_FileName(k.Value(), fileName, sizeof(fileName));
+			char filePath[255];
+			Q_BaseDirectory(k.Value(), filePath, sizeof(filePath));
+			/* I know the %s%s%s%s%s format seems kinda funny, but hey. It works. */
+			Q_snprintf(finalFile, sizeof(finalFile), "%s%s%s%s.%s", filePath, PATH_SEPARATOR, OS_LIB_PREFIX, fileName, OS_LIB_EXT);
+		}
+		else
+		{
+			/* If there is no existing file path, formatting is simple */
+			Q_snprintf(finalFile, sizeof(finalFile), "%s%s.%s", OS_LIB_PREFIX, k.Value(), OS_LIB_EXT);
+		}
+		printf("Loading interface %s from %s\n", k.Name(), finalFile);
+		if(!AppFramework::AddInterface(finalFile, k.Name()))
+		{
+			printf("Failed to add interface %s from %s\nExiting.\n", k.Name(), finalFile);
+			exit(1);
+		}
+	}
+	if(!AppFramework::LoadInterfaces())
+	{
+		printf("Failed to load some interfaces. This is a fatal error.\n");
+		exit(1);
+	}
+	printf("...Finished loading interfaces\n");
+}
+
 static void Sys_ChangeGame( const char *progname )
 {
 	if( !progname || !progname[0] )
@@ -132,6 +195,8 @@ _inline int Sys_Start( void )
 {
 	int ret;
 
+	/* Load interfaces immediately! */
+	Sys_LoadInterfaces();
 	Sys_LoadEngine();
 	ret = Xash_Main( szArgc, szArgv, GAME_PATH, 0, Xash_Shutdown ? Sys_ChangeGame : NULL );
 	Sys_UnloadEngine();
