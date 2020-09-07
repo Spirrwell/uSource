@@ -33,3 +33,15 @@ ConCommand __concommand__ ## _name(#_name, _desc, _flags, []() {\
 }); \
 void __func_command_ ## _name ## _namespace::__func_command_ ## _name ()
 
+#define CONCOMMAND_NAMED(_name, _func, _desc, _flags) \
+namespace __func_command_ ## _func ## _namespace { \
+int argc = 0; const char** argv = nullptr; \
+void __func_command_ ## _func ();\
+} \
+ConCommand __concommand__ ## _name(_name, _desc, _flags, []() {\
+	__func_command_ ## _func ## _namespace::argc = g_pEngineCvar->CmdArgc();\
+	__func_command_ ## _func ## _namespace::argv = g_pEngineCvar->CmdArgv();\
+	__func_command_ ## _func ## _namespace::__func_command_ ## _func (); \
+}); \
+void __func_command_ ## _func ## _namespace::__func_command_ ## _func ()
+
