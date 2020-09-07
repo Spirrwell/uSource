@@ -134,6 +134,29 @@ namespace AppFramework
 	void SetLoadLibrary(std::function<void*(const char*)> fn);
 	void SetFreeLibrary(std::function<void(void*)> fn);
 	void ClearCustomFunctions();
+
+
+	/**
+	 * Utility class that maintains a handle to an arbitrary AppSystem.
+	 * The handle returned from this is guaranteed to be valid, as SIGABRT will be raised if the interface is not found
+	 *
+	 * USAGE:
+	 * 	CAppSystemHandle<ILoggingSystem> g_LoggingSystem(IENGINELOGGING_INTERFACE);
+	 * 	g_LoggingSystem.Get().Log(....);
+	 */
+	template<class T>
+	class CAppSystemHandle
+	{
+	public:
+		CAppSystemHandle(const char* iface_name);
+
+		T& Get();
+		const T& Get() const;
+
+
+		void Load();
+		bool IsLoaded();
+	};
 }
 
 /*
