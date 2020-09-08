@@ -743,12 +743,12 @@ typedef unsigned short	word;
 typedef struct
 {
 	byte	r, g, b;
-} color24;
+} color24, colorRGB;
 
 typedef struct
 {
 	unsigned	r, g, b, a;
-} colorVec;
+} colorVec, color32, colorRGBA;
 
 typedef struct link_s
 {
