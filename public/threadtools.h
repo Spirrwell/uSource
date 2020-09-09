@@ -48,13 +48,79 @@ class CThreadRAIILock;
 namespace threadtools
 {
 	/* Atomically swaps pointers, returning the old value of dst */
-	void* AtomicSwapPtr(void** dst, void* src);
+	inline void* AtomicSwapPtr(void** dst, void* src)
+	{
+#ifdef __GNUC__
+		return (void*)__atomic_exchange_n(dst, src, __ATOMIC_RELAXED);
+#else
+
+#endif
+	}
 
 	/* Atomically swaps integers, returns old value of dst */
-	int AtomicSwapInt(int* dst, int src);
+	inline int AtomicSwapInt(int* dst, int src)
+	{
+#ifdef __GNUC__
+		return __atomic_exchange_n(dst, src, __ATOMIC_RELAXED);
+#else
 
-	void* AtomicGetPtr(void** atomic);
-	int AtomicGetInt(int* atomic);
+#endif
+	}
+
+	inline void* AtomicGetPtr(void** atomic)
+	{
+#ifdef __GNUC__
+		return (void*)__atomic_load_n(atomic, __ATOMIC_RELAXED);
+#else
+
+#endif
+	}
+
+
+	inline int AtomicGetInt(int* atomic)
+	{
+#ifdef __GNUC__
+		return __atomic_load_n(atomic, __ATOMIC_RELAXED);
+#else
+
+#endif
+	}
+
+	inline int AtomicIncInt(int* atomic)
+	{
+#ifdef __GNUC__
+		return __atomic_add_fetch(atomic, 1, __ATOMIC_RELAXED);
+#else
+
+#endif
+	}
+
+	inline void* AtomicIncPtr(void** ptr)
+	{
+#ifdef __GNUC__
+		return __atomic_add_fetch(ptr, 1, __ATOMIC_RELAXED);
+#else
+
+#endif
+	}
+
+	inline int AtomicDecInt(int* atomic)
+	{
+#ifdef __GNUC__
+		return __atomic_sub_fetch(atomic, 1, __ATOMIC_RELAXED);
+#else
+
+#endif
+	}
+
+	inline void* AtomicDecPtr(void** ptr)
+	{
+#ifdef __GNUC__
+		return __atomic_sub_fetch(ptr, 1, __ATOMIC_RELAXED);
+#else
+
+#endif
+	}
 
 	inline void mfence()
 	{
@@ -241,86 +307,205 @@ public:
 	int GetUsers() const;
 };
 
-/**
- * RAII-type mutex lock around a resource
- */
 template<class T>
-class CThreadLockedAccessor
+class CInterlockedAccessor;
+
+template<class T>
+class CInterlockedSharedPtr
 {
 private:
-	T* m_data;
-	CThreadMutex* m_mutex;
+	CInterlockedAccessor<T>* m_accessor;
+	const T* m_ptr;
+
+	template<class _X>
+	friend class CInterlockedAccessor;
 public:
-	CThreadLockedAccessor(CThreadMutex* mutex, T* data)
+	CInterlockedSharedPtr() = delete;
+
+	CInterlockedSharedPtr(CInterlockedAccessor<T>& accessor) :
+		m_accessor(&accessor),
+		m_ptr(m_accessor->m_resource)
 	{
-		this->m_data = data;
-		this->m_mutex = mutex;
-		mutex->Lock();
+		m_accessor->m_mutex.RLock();
 	}
 
-	~CThreadLockedAccessor()
+	~CInterlockedSharedPtr()
 	{
-		m_mutex->Unlock();
+		if(!m_accessor) return;
+		m_accessor->m_mutex.RUnlock();
 	}
 
-	T& Get() { return *m_data; };
-	const T& Get() const { return *m_data; };
+	CInterlockedSharedPtr(CInterlockedSharedPtr&& other) noexcept
+	{
+		this->m_accessor = other.m_accessor;
+		this->m_ptr = other.m_ptr;
+		other.m_accessor = nullptr;
+		other.m_ptr = nullptr;
+	}
 
-	/* Dispose of the accessor early, before we exit scope */
-	void Dispose() { m_data = nullptr; m_mutex->Unlock(); }
+	CInterlockedSharedPtr(const CInterlockedSharedPtr& other)
+	{
+		this->m_accessor = other.m_accessor;
+		this->m_ptr = other.m_ptr;
+		other.m_accessor->m_mutex.RLock();
+	}
 
-	T& operator*() { return *m_data; };
-	const T& operator*() const { return *m_data; };
-	T* operator->() { return m_data; };
-	const T* operator->() const { return m_data; };
+	const T& operator*() const
+	{
+		return *m_ptr;
+	}
+
+	const T* operator->() const
+	{
+		return m_ptr;
+	}
+
+	CInterlockedSharedPtr& operator=(CInterlockedSharedPtr&& other) noexcept
+	{
+		this->m_accessor = other.m_accessor;
+		this->m_ptr = other.m_ptr;
+		other.m_accessor = nullptr;
+		other.m_ptr = nullptr;
+		return *this;
+	}
+
+	CInterlockedSharedPtr& operator=(const CInterlockedSharedPtr& other)
+	{
+		this->m_accessor = other.m_accessor;
+		this->m_ptr = other.m_ptr;
+		other.m_accessor->m_mutex.RLock();
+		return *this;
+	}
+};
+
+template<class T>
+class CInterlockedSharedWritePtr
+{
+private:
+	CInterlockedAccessor<T>* m_accessor;
+	const T* m_ptr;
+
+	template<class _X>
+	friend class CInterlockedAccessor;
+public:
+	CInterlockedSharedWritePtr() = delete;
+
+	CInterlockedSharedWritePtr(CInterlockedAccessor<T>& accessor) :
+		m_accessor(&accessor),
+		m_ptr(m_accessor->m_resource)
+	{
+		m_accessor->m_mutex.WLock();
+	}
+
+	~CInterlockedSharedWritePtr()
+	{
+		if(!m_accessor) return;
+		m_accessor->m_mutex.WUnlock();
+	}
+
+	CInterlockedSharedWritePtr(CInterlockedSharedWritePtr&& other) noexcept
+	{
+		this->m_accessor = other.m_accessor;
+		this->m_ptr = other.m_ptr;
+		other.m_accessor = nullptr;
+		other.m_ptr = nullptr;
+	}
+
+	CInterlockedSharedWritePtr(const CInterlockedSharedWritePtr& other)
+	{
+		this->m_accessor = other.m_accessor;
+		this->m_ptr = other.m_ptr;
+		other.m_accessor->m_mutex.WLock();
+	}
+
+	T& operator*() const
+	{
+		return *m_ptr;
+	}
+
+	T* operator->() const
+	{
+		return m_ptr;
+	}
+
+	CInterlockedSharedWritePtr& operator=(CInterlockedSharedWritePtr&& other) noexcept
+	{
+		this->m_accessor = other.m_accessor;
+		this->m_ptr = other.m_ptr;
+		other.m_accessor = nullptr;
+		other.m_ptr = nullptr;
+		return *this;
+	}
+
+	CInterlockedSharedWritePtr& operator=(const CInterlockedSharedWritePtr& other)
+	{
+		this->m_accessor = other.m_accessor;
+		this->m_ptr = other.m_ptr;
+		other.m_accessor->m_mutex.WLock();
+		return *this;
+	}
 };
 
 /**
  * Purpose:
- * 	Interlocked, thread-safe access to a specific resource
- * 	Users of this class can either lock the resource for unrestricted use of the actual data,
- * 	or they can opt to copy the data into another container in the calling scope
- */ 
+ * 	CInterlockedAccessor is a thread-safe accessor to an arbitrary resource.
+ *	The resource can have any number of readers,
+ */
 template<class T>
 class CInterlockedAccessor
 {
 private:
-	T* m_data;
-	CThreadMutex m_mutex;
+	CThreadRWMutex m_mutex;
+	T* m_resource;
+
+
+	template<class _X>
+	friend class CInterlockedSharedPtr;
+
 public:
-	template<class ... Params>
-	CInterlockedAccessor(Params...args) :
-		m_mutex(CThreadMutex())
+	CInterlockedAccessor(T* ptr) :
+		m_resource(ptr)
 	{
-		m_data = new T(args...);
+
 	}
 
-	~CInterlockedAccessor()
+	CInterlockedAccessor(T& ref) :
+		m_resource(&ref)
 	{
-		delete m_data;
+
 	}
 
-	CThreadLockedAccessor<T> Get()
+	CInterlockedSharedPtr<T> GetForRead()
 	{
-		return CThreadLockedAccessor<T>(&m_mutex, m_data);
+		return CInterlockedSharedPtr<T>(*this);
 	}
 
-	const CThreadLockedAccessor<T> Get() const
+	CInterlockedSharedWritePtr<T> GetForWrite()
 	{
-		return CThreadLockedAccessor<T>(&m_mutex, m_data);
+		return CInterlockedSharedWritePtr<T>(*this);
 	}
 
-	void Set(T* element)
+	void ReadLock()
 	{
-		m_mutex.Lock();
-		m_data = element;
-		threadtools::sfence();
-		m_mutex.Unlock();
+		m_mutex.RLock();
+	}
+	
+	void ReadUnlock()
+	{
+		m_mutex.RUnlock();
 	}
 
-	T Retrieve()
+	void WriteLock()
 	{
-		CThreadRAIILock<CThreadMutex> lock(&m_mutex);
-		return *m_data;
+		m_mutex.WLock();
+	}
+
+	void WriteUnlock()
+	{
+		m_mutex.WUnlock();
 	}
 };
+
+static int dsdasasfasf = 0;
+static CInterlockedAccessor<int> g_Poop(dsdasasfasf);
+static auto ggggg = g_Poop.GetForRead();
