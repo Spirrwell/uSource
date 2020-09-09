@@ -191,38 +191,64 @@ void CThreadSpinlock::Unlock()
 
 CThreadSemaphore::CThreadSemaphore(const char* name, int max, bool shared) :
 	m_name(name),
+	m_max(max),
 	m_shared(shared)
 {
 #ifdef _WIN32
-
+	// NOTE: On windows, a semaphore's value is decreased by one each time it's obtained, and increased by a value each time it's released
+	if(shared)
+		m_sem = CreateSemaphoreExA(NULL, max, max, name, 0, 0);
+	else
+		m_sem = CreateSemaphoreA(NULL, max, max);
 #else
-
+	if(shared)
+		m_sem = sem_open(name, O_CREAT);
+	else
+	{
+		sem_init(&__m_sem, 0, max);
+		m_sem = &__m_sem;
+	}
 #endif
 }
 
 CThreadSemaphore::~CThreadSemaphore()
 {
-
+#ifdef _WIN32
+	CloseHandle(m_sem);
+#else
+	if(m_shared)
+		sem_close(m_sem);
+	else
+		sem_destroy(m_sem);
+#endif
 }
 
 void CThreadSemaphore::Lock()
 {
-
+#ifdef _WIN32
+	WaitForSingleObject(m_sem, INFINITE);
+#else
+	sem_wait(m_sem);
+#endif
 }
 
 void CThreadSemaphore::Unlock()
 {
-
+#ifdef _WIN32
+	ReleaseSemaphore(m_sem, 1, NULL);
+#else
+	sem_post(m_sem);
+#endif
 }
 
 bool CThreadSemaphore::TryLock()
 {
-	return false;
-}
-
-int CThreadSemaphore::GetUsers() const
-{
-	return 0;
+#ifdef _WIN32
+	DWORD res = WaitForSingleObject(m_sem, 0);
+	return res == WAIT_OBJECT_0;
+#else
+	return sem_trywait(m_sem) == 0;
+#endif
 }
 
 
@@ -341,3 +367,30 @@ void CThreadRWMutex::WUnlock()
 	pthread_rwlock_unlock(&m_mutex);
 #endif
 }
+
+CSharedMutex::CSharedMutex(const char *name) :
+	m_sem(name, 1, true)
+{
+
+}
+
+CSharedMutex::~CSharedMutex()
+{
+
+}
+
+void CSharedMutex::Lock()
+{
+	m_sem.Lock();
+}
+
+void CSharedMutex::Unlock()
+{
+	m_sem.Unlock();
+}
+
+bool CSharedMutex::TryLock()
+{
+	return m_sem.TryLock();
+}
+

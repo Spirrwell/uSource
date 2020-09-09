@@ -277,9 +277,11 @@ private:
 	void* m_sem;
 #else
 	sem_t*  m_sem;
+	sem_t __m_sem; // memory for the actual semaphore
 #endif
-	const char* m_name;
 	bool m_shared;
+	const char* m_name;
+	int m_max;
 public:
 	CThreadSemaphore(const char* name, int max, bool shared);
 	~CThreadSemaphore();
@@ -287,7 +289,23 @@ public:
 	void Lock();
 	void Unlock();
 	bool TryLock();
-	int GetUsers() const;
+};
+
+
+/**
+ * @brief A Mutex that
+ */
+class CSharedMutex
+{
+private:
+	CThreadSemaphore m_sem;
+public:
+	CSharedMutex(const char* name);
+	~CSharedMutex();
+
+	void Lock();
+	void Unlock();
+	bool TryLock();
 };
 
 /**
@@ -489,7 +507,7 @@ public:
 	{
 		m_mutex.RLock();
 	}
-	
+
 	void ReadUnlock()
 	{
 		m_mutex.RUnlock();
