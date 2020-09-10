@@ -351,3 +351,4 @@ CMakeLists.txt
 
 # More clangdb stuff
 compile_commands_*.json
+.clangd
