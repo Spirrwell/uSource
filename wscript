@@ -364,6 +364,7 @@ def configure(conf):
 	conf.recurse('tier1')
 	conf.recurse('tier2')
 	conf.recurse('networksystem')
+	conf.recurse('rendersystem/renderlib')
 
 	conf.env.ENABLE_RENDERER2 = conf.options.ENABLE_RENDERER2
 
@@ -389,6 +390,7 @@ def build(bld):
 	bld.recurse('tier1')
 	bld.recurse('tier2')
 	bld.recurse('networksystem')
+	bld.recurse('rendersystem/renderlib')
 
 	if bld.env.ENABLE_RENDERER2:
 		bld.recurse('rendersystem')
