@@ -27,7 +27,7 @@
 *    version.
 *
 */
-#include <extdll_menu.h>
+#include <ExtDllMenu.h>
 #include "UnicodeStringTools.h"
 #ifndef _MSC_VER
 #include <wctype.h>

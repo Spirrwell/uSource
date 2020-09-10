@@ -12,7 +12,7 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
-#include "extdll_menu.h"
+#include "ExtDllMenu.h"
 #include "BaseMenu.h"
 #include "Utils.h"
 #include "Action.h"

@@ -14,7 +14,7 @@ GNU General Public License for more details.
 */
 
 
-#include "extdll_menu.h"
+#include "ExtDllMenu.h"
 #include "BaseMenu.h"
 #include "Utils.h"
 
