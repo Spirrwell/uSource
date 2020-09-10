@@ -20,7 +20,7 @@ GNU General Public License for more details.
 #include "MenuStrings.h"
 #include "utlhashmap.h"
 #include "generichash.h"
-#include "unicode_strtools.h"
+#include "UnicodeStringTools.h"
 
 #define EMPTY_STRINGS_1 ""
 #define EMPTY_STRINGS_2 EMPTY_STRINGS_1, EMPTY_STRINGS_1

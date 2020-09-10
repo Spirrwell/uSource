@@ -28,7 +28,7 @@
 *
 */
 #include <extdll_menu.h>
-#include "unicode_strtools.h"
+#include "UnicodeStringTools.h"
 #ifndef _MSC_VER
 #include <wctype.h>
 #endif
