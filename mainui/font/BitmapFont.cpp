@@ -20,7 +20,7 @@ GNU General Public License for more details.
 CBitmapFont::CBitmapFont() : CBaseFont(), hImage( 0 ) { }
 CBitmapFont::~CBitmapFont() { }
 #ifndef MAINUI_FORCE_CONSOLE_BITMAP_FONT
-#include "menufont.h"
+#include "MenuFont.h"
 #endif
 
 #ifndef MAINUI_CONSOLE_FONT_HEIGHT
