@@ -18,7 +18,7 @@ GNU General Public License for more details.
 #ifdef CS16CLIENT
 #include "../public/cl_dll/IGameClientExports.h"
 #endif
-#include "enginecallback_menu.h"
+#include "EngineCallback.h"
 #include "keydefs.h"
 #include "Primitive.h"
 #include "EventSystem.h"
@@ -187,7 +187,7 @@ struct color_t
 	rgba_t color;
 };
 extern List<color_t> g_Colors;
-const byte* FindColorByName(const char* name);
+colorRGBA FindColorByName(const char* name);
 
 // TODO: Move it under namespace?
 

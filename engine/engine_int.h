@@ -9,6 +9,8 @@
 
 
 #include "appframework.h"
+#include "common.h"
+#include "menu_int.h"
 #include "public/containers/string.h"
 #include "eiface.h"
 
@@ -34,33 +36,34 @@
 #define IENGINEUI_001 "IEngineUI001"
 #define IENGINEUI_INTERFACE IENGINEUI_001
 
-#if 0 
+#undef FillRGBA
+//#if 0
 class IEngineUI : IAppInterface
 {
 public:
-	virtual HIMAGE	PIC_Load( const char *szPicName, const byte *ucRawImage, int ulRawImageSize, int flags );
-	virtual void	PIC_Free( const char *szPicName );
-	virtual int	PIC_Width( HIMAGE hPic );
-	virtual int	PIC_Height( HIMAGE hPic );
-	virtual void	PIC_Set( HIMAGE hPic, int r, int g, int b, int a );
-	virtual void	PIC_Draw( int x, int y, int width, int height, const wrect_t *prc );
-	virtual void	PIC_DrawHoles( int x, int y, int width, int height, const wrect_t *prc );
-	virtual void	PIC_DrawTrans( int x, int y, int width, int height, const wrect_t *prc );
-	virtual void	PIC_DrawAdditive( int x, int y, int width, int height, const wrect_t *prc );
-	virtual void	PIC_EnableScissor( int x, int y, int width, int height );
-	virtual void	PIC_DisableScissor( void );
-	virtual void	FillRGBA( int x, int y, int width, int height, int r, int g, int b, int a );
-	virtual void	DrawLogo( const char *filename, float x, float y, float width, float height );
-	virtual int	GetLogoWidth( void );
-	virtual int	GetLogoHeight( void );
-	virtual float	GetLogoLength( void );
-	virtual void	DrawCharacter( int x, int y, int width, int height, int ch, int ulRGBA, HIMAGE hFont );
-	virtual int	DrawConsoleString( int x, int y, const char *string );
-	virtual void	DrawSetTextColor( int r, int g, int b, int alpha );
-	virtual void	DrawConsoleStringLen(  const char *string, int *length, int *height );
-	virtual void	SetConsoleDefaultColor( int r, int g, int b );
+	virtual HIMAGE	PIC_Load( const char *szPicName, const byte *ucRawImage, int ulRawImageSize, int flags ) = 0;
+	virtual void	PIC_Free( const char *szPicName ) = 0;
+	virtual int	PIC_Width( HIMAGE hPic ) = 0;
+	virtual int	PIC_Height( HIMAGE hPic ) = 0;
+	virtual void	PIC_Set( HIMAGE hPic, int r, int g, int b, int a ) = 0;
+	virtual void	PIC_Draw( int x, int y, int width, int height, const wrect_t *prc ) = 0;
+	virtual void	PIC_DrawHoles( int x, int y, int width, int height, const wrect_t *prc ) = 0;
+	virtual void	PIC_DrawTrans( int x, int y, int width, int height, const wrect_t *prc ) = 0;
+	virtual void	PIC_DrawAdditive( int x, int y, int width, int height, const wrect_t *prc ) = 0;
+	virtual void	PIC_EnableScissor( int x, int y, int width, int height ) = 0;
+	virtual void	PIC_DisableScissor( void ) = 0;
+	virtual void	FillRGBA( int x, int y, int width, int height, int r, int g, int b, int a ) = 0;
+	virtual void	DrawLogo( const char *filename, float x, float y, float width, float height ) = 0;
+	virtual int	GetLogoWidth( void ) = 0;
+	virtual int	GetLogoHeight( void ) = 0;
+	virtual float	GetLogoLength( void ) = 0;
+	virtual void	DrawCharacter( int x, int y, int width, int height, int ch, int ulRGBA, HIMAGE hFont ) = 0;
+	virtual int	DrawConsoleString( int x, int y, const char *string ) = 0;
+	virtual void	DrawSetTextColor( int r, int g, int b, int alpha ) = 0;
+	virtual void	DrawConsoleStringLen(  const char *string, int *length, int *height ) = 0;
+	virtual void	SetConsoleDefaultColor( int r, int g, int b ) = 0;
 };
-#endif
+//#endif
 
 class IEngineDebug : public IAppInterface
 {

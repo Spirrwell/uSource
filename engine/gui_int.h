@@ -28,4 +28,13 @@ public:
 	virtual void FillRect(int x, int y, int w, int h, int r, int g, int b, int a = 255, int corner_radius = -1) = 0;
 	virtual void FillCircle(int x, int y, int w, int h, int r, int g, int b, int a = 255) = 0;
 	virtual void GetScreenSize(int &w, int &h) = 0;
+
+	virtual int FindFont(const char* name) = 0;
+	virtual colorRGBA FindColor(const char* color) = 0;
+	virtual void DrawTextSize(int font, const char* str, int& w, int& h) = 0;
+	virtual void DrawText(int font, int x, int y, int w, int h, const char *str, colorRGBA color, int charH, unsigned int intjustify, unsigned int flags) = 0;
+
+	/* Cursor functions */
+	virtual void GetCursorPos(int& x, int& y) = 0;
+	virtual void SetCursorPos(int x, int y) = 0;
 };

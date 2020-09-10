@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // ui_menu.c -- main menu interface
 #define OEMRESOURCE		// for OCR_* cursor junk
 
-#include "extdll_menu.h"
+#include "ExtDllMenu.h"
 #include "BaseMenu.h"
 #include "PicButton.h"
 #include "keydefs.h"
@@ -37,6 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 #include "tier1/dbg.h"
 #include "tier1/concommand.h"
+#include "crtlib.h"
 
 cvar_t		*ui_showmodels;
 cvar_t		*ui_show_window_stack;
@@ -1246,7 +1247,11 @@ void UI_Init( void )
 	KeyValues* colors = nullptr;
 	if((colors = scheme->GetChild("Colors")))
 	{
-
+		for(auto key : colors->Keys())
+		{
+			color_t color;
+			color.name = Q_strdup(key.Name());
+		}
 	}
 }
 
@@ -1296,14 +1301,14 @@ font_t FindFontDescByName(const char* name)
 }
 
 
-const byte* FindColorByName(const char* name)
+colorRGBA FindColorByName(const char* name)
 {
 	for(auto color : g_Colors)
 	{
 		if(strcmp(color.name, name) == 0)
-			return color.color;
+			return colorRGBA{color.color[0], color.color[1], color.color[2], color.color[3]};
 	}
-	static byte white[4] = {255, 255, 255, 255};
+	static const colorRGBA white = {255, 255, 255, 255};
 	return white;
 }
 
@@ -1347,9 +1352,10 @@ public:
 
 	virtual void FillRect(int x, int y, int w, int h, int r, int g, int b, int a = 255, int corner_radius = -1) override
 	{
-		unsigned int color = PackRGBA(r, g, b, a);
+		// Just use normal engine functions if no rounded corners
 		if(corner_radius <= 0)
-			UI_FillRect(x, y, w, h, color);
+			EngFuncs::FillRGBA(x, y, w, h, r, g, b, a);
+
 	}
 
 	virtual void FillCircle(int x, int y, int w, int h, int r, int g, int b, int a = 255) override
@@ -1362,6 +1368,40 @@ public:
 		w = ScreenWidth;
 		h = ScreenHeight;
 	}
+
+	virtual int FindFont(const char* name) override
+	{
+		return FindFontByName(name);
+	}
+
+	virtual colorRGBA FindColor(const char* color) override
+	{
+		return FindColorByName(color);
+	}
+
+	virtual void DrawTextSize(int font, const char* str, int& w, int& h) override
+	{
+
+		g_FontMgr->GetTextSize(font, str, &w, &h);
+	}
+
+	virtual void GetCursorPos(int& x, int& y) override
+	{
+		UI_GetCursorPos(&x, &y);
+	}
+
+	virtual void SetCursorPos(int x, int y) override
+	{
+		UI_SetCursorPos(x, y);
+	}
+
+
+	virtual void DrawText(int font, int x, int y, int w, int h, const char *str, colorRGBA color, int charH, unsigned int intjustify, unsigned int flags) override
+	{
+		unsigned int col = PackRGBA(color.r, color.g, color.b, color.a);
+		UI_DrawString(font, x, y, w, h, str, col, charH, intjustify, flags);
+	}
+
 };
 
 EXPOSE_INTERFACE(CMainUIGui);
