@@ -28,6 +28,7 @@
 #include <string.h> // strcpy
 #include <stdlib.h> // atoi
 #include <ctype.h>  // isspace
+#include <time.h>
 
 int g_bhopcap = 1;
 
@@ -2944,7 +2945,25 @@ void PM_PlayerMove( qboolean server )
 	pmove->numtouch = 0;                    
 
 	// # of msec to apply movement
-	pmove->frametime = pmove->cmd.msec * 0.001;    
+	pmove->frametime = pmove->cmd.msec * 0.001;
+
+	// HACK: cmd.msec can be 0 in some cases due to high framerates (> 1000fps). This will result in odd movement. In this case,
+	// we will need to calculate frametime ourselves.
+	if(pmove->cmd.msec <= 1)
+	{
+		if (server)
+		{
+			static double last_server_time = ((double) clock() / (double) CLOCKS_PER_SEC);
+			pmove->frametime = (((double) clock() / (double) CLOCKS_PER_SEC)) - last_server_time;
+			last_server_time = ((double) clock() / (double) CLOCKS_PER_SEC);
+		}
+		else
+		{
+			static double last_client_time = ((double) clock() / (double) CLOCKS_PER_SEC);
+			pmove->frametime = (((double) clock() / (double) CLOCKS_PER_SEC)) - last_client_time;
+			last_client_time = ((double) clock() / (double) CLOCKS_PER_SEC);
+		}
+	}
 
 	PM_ReduceTimers();
 
@@ -3291,7 +3310,6 @@ the engine.  The same PM_Move routine is built into the game .dll and the client
 invoked by each side as appropriate.  There should be no distinction, internally, between server
 and client.  This will ensure that prediction behaves appropriately.
 */
-
 void PM_Move( struct playermove_s *ppmove, int server )
 {
 	assert( pm_shared_initialized );
