@@ -41,7 +41,8 @@ void ui::DrawLine(int x1, int y1, int x2, int y2, colorRGBA color, int width)
 
 void ui::DrawText(ui::Font font, int x, int y, int w, int h, const char *str, colorRGBA color, int charH, ui::ETextJustify justify, unsigned int flags)
 {
-	// GlobalUI()->DrawText(font, x, y, w, h, str, color, charH, 0, flags);
+	UI_DrawString(font, x, y, w, h, str, PackRGBA(color.r, color.g, color.b, color.a), charH,
+	              static_cast<uint>(justify), flags);
 
 }
 
