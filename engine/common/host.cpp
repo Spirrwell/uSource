@@ -44,6 +44,7 @@ GNU General Public License for more details.
 #include "tier1/tier1.h"
 #include "tier1/dbg.h"
 #include "xprof.h"
+#include "cmdline.h"
 #include "tier1/concommand.h"
 
 /* Interface includes */
@@ -756,10 +757,10 @@ void Host_InitCommon( int argc, char **argv, const char *progname, qboolean bCha
 		Sys_Error( "Daemonize not supported on this platform!" );
 #endif
 	}
-
-	if( ( baseDir = getenv( "XASH3D_BASEDIR" ) ) )
+	
+	if((baseDir = GlobalCommandLine().FindString("-basedir")))
 	{
-		Q_strncpy( host.rootdir, baseDir, sizeof(host.rootdir) );
+		Q_strncpy(host.rootdir, baseDir, sizeof(host.rootdir));
 	}
 	else
 	{
@@ -781,6 +782,7 @@ void Host_InitCommon( int argc, char **argv, const char *progname, qboolean bCha
 		}
 #endif
 	}
+	printf("Root directory: %s\n", host.rootdir);
 
 	if( host.rootdir[Q_strlen( host.rootdir ) - 1] == '/' )
 		host.rootdir[Q_strlen( host.rootdir ) - 1] = 0;
