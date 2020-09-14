@@ -32,7 +32,7 @@ GNU General Public License for more details.
 	#if !__MINGW32__ && _MSC_VER >= 1200
 		#define USE_WINMAIN
 	#endif
-	#define XASHLIB "xash.dll"
+	#define XASHLIB "engine.dll"
 	#define dlerror() GetStringLastError()
 	#include <shellapi.h> // CommandLineToArgvW
 #endif
