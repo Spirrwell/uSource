@@ -337,12 +337,49 @@ def configure(conf):
 		conf.check_cc( lib='psapi' )
 		conf.check_cc( lib='ws2_32' )
 
+
 	# indicate if we are packaging for Linux/BSD
 	if(not conf.options.WIN_INSTALL and
 			conf.env.DEST_OS not in ['win32', 'darwin', 'android']):
 		conf.env.LIBDIR = conf.env.BINDIR = '${PREFIX}/lib/xash3d'
 	else:
 		conf.env.LIBDIR = conf.env.BINDIR = conf.env.PREFIX
+
+	# Figure out platform subdirectory
+	platform_matrix = {
+		"win32": {
+			"x86": "win32",
+			"x86_64": "win64",
+			"aarch32": "winarm32",
+			"aarch64": "winarm64"
+		},
+		"linux": {
+			"x86": "linux32",
+			"x86_64": "linux64",
+			"aarch32": "linuxarm32",
+			"aarch64": "linuxarm64"
+		},
+		"freebsd": {
+			"x86": "freebsd32",
+			"x86_64": "freebsd64",
+			"aarch32": "freebsdarm32",
+			"aarch64": "freebsdarm64",
+		},
+		"darwin": {
+			"x86": "osx32",
+			"x86_64": "osx64",
+			"aarch32": "osxarm32",
+			"aarch64": "osxarm64"
+		}
+	}
+	platform_subdir = platform_matrix[conf.env.DEST_OS][conf.env.DEST_CPU]
+
+	# Configure the library directories
+	conf.env.LIBDIR = conf.env.BINDIR = conf.env.PREFIX + '/bin/' + platform_subdir
+
+	# Set the platform subdir
+	conf.env.append_unique('DEFINES', 'PLATFORM_SUBDIR={0}'.format(platform_subdir))
+
 
 	conf.env.append_unique('DEFINES', 'XASH_BUILD_COMMIT="{0}"'.format(conf.env.GIT_VERSION if conf.env.GIT_VERSION else 'notset'))
 
