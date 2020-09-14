@@ -28,8 +28,10 @@ GNU General Public License for more details.
 		#include "TargetConditionals.h"
 		#define OS_LIB_EXT "dylib"
 		#define OPEN_COMMAND "open"
+		#define OS_EXE_EXT ""
 	#else
 		#define OS_LIB_EXT "so"
+		#define OS_EXE_EXT ""
 		#define OPEN_COMMAND "xdg-open"
 	#endif
 
@@ -118,6 +120,7 @@ GNU General Public License for more details.
 
 	#define OS_LIB_PREFIX ""
 	#define OS_LIB_EXT "dll"
+	#define OS_EXE_EXT "exe"
 	#define VGUI_SUPPORT_DLL "../vgui_support." OS_LIB_EXT
 	#ifdef XASH_64BIT
 		// windows NameForFunction not implemented yet

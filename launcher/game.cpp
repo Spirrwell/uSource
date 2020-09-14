@@ -20,11 +20,17 @@ GNU General Public License for more details.
 #include "public/keyvalues.h"
 #include "crtlib.h"
 #include "appframework.h"
+#include "crtlib.h"
+#include "platformspec.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
+
+#ifdef _WIN32
+#define chdir _chdir
+#endif
 
 #if defined(__APPLE__) || defined(__unix__)
 	#define XASHLIB    "libengine." OS_LIB_EXT
@@ -194,6 +200,28 @@ static void Sys_ChangeGame( const char *progname )
 _inline int Sys_Start( void )
 {
 	int ret;
+
+	/* Launching with the editor? */
+	if(GlobalCommandLine().Find("-editor"))
+	{
+		printf("Starting DarkRadiant..\n");
+		const char* dir = GlobalCommandLine().FindString("-basedir");
+		if(dir) chdir(dir);
+		char fsGame[64];
+		const char* game = GlobalCommandLine().FindString("-game");
+		Q_snprintf(fsGame, sizeof(fsGame), "fs_game=%s", game ? game : GAME_PATH);
+		const char* const args[] = {
+			"fs_game=hl1",
+			NULL,
+		};
+
+		char darkRadiantPath[512];
+		const char* dot = "";
+		if(Q_strcmp(OS_EXE_EXT, "") != 0) dot = ".";
+		Q_snprintf(darkRadiantPath, sizeof(darkRadiantPath), "darkradiant/bin/darkradiant%s%s", dot, OS_EXE_EXT);
+		platform::ExecProgram(darkRadiantPath, const_cast<char *const *>(args));
+		return 0;
+	}
 
 	/* Load interfaces immediately! */
 	Sys_LoadInterfaces();
