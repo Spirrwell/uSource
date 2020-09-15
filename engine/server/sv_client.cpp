@@ -2521,12 +2521,27 @@ static List<pfnMsgHook_t> g_sv_msg_hooks[clc_lastmsg+1];
 
 void SV_ExecuteMsgHooks(int cmd, sv_client_t* cl, sizebuf_t* msg)
 {
+	// NOTE: Need to save the sizebuffer and restore it after each loop
+	sizebuf_t old;
+	old.bOverflow = msg->bOverflow;
+	old.iCurBit = msg->iCurBit;
+	old.nDataBits = msg->nDataBits;
+
 	if(cmd > clc_lastmsg || cmd < 0) return;
 	if(!cl || !msg) return;
 	for(auto fn : g_sv_msg_hooks[cmd])
 	{
+		/* Restore message before each iter */
+		msg->bOverflow = old.bOverflow;
+		msg->iCurBit = old.iCurBit;
+		msg->nDataBits = old.nDataBits;
 		fn(cl->edict, msg);
 	}
+
+	/* Restore before returning */
+	msg->bOverflow = old.bOverflow;
+	msg->iCurBit = old.iCurBit;
+	msg->nDataBits = old.nDataBits;
 }
 
 void pfnHookServerNetsystemMsg(void(*pfnHook)(edict_t*,void*))

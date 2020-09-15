@@ -2804,10 +2804,25 @@ void CL_ExecuteMsgHooks(int cmd, sizebuf_t* msg)
 	if(cmd < 0 || cmd > svc_lastmsg) return;
 	Assert(msg != nullptr);
 	if(!msg) return;
+
+	// NOTE: Need to save the sizebuffer and restore it after each loop
+	sizebuf_t old;
+	old.bOverflow = msg->bOverflow;
+	old.iCurBit = msg->iCurBit;
+	old.nDataBits = msg->nDataBits;
+
 	for(auto fn : g_cl_msg_hooks[cmd])
 	{
+		msg->iCurBit = old.iCurBit;
+		msg->nDataBits = old.nDataBits;
+		msg->bOverflow = old.bOverflow;
 		fn(msg);
 	}
+
+	/* Restore before returning */
+	msg->iCurBit = old.iCurBit;
+	msg->nDataBits = old.nDataBits;
+	msg->bOverflow = old.bOverflow;
 }
 
 void pfnHookClientNetsystemMsg(void(*pfnHook)(void*))
