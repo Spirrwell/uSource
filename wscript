@@ -87,6 +87,8 @@ def options(opt):
 
 	grp.add_option('--dev', action='store_true', dest='DEV', default=False, help='Force development build macros to be enabled. This is enabled implicitly when building in debug mode')
 
+	grp.add_option('--enable-remote-control', action='store_true', dest='ENABLE_RCSYS', help='Enables the experimental remote control system')
+
 	opt.load('subproject')
 
 	opt.add_subproject(subdirs())
@@ -130,6 +132,8 @@ def configure(conf):
 	conf.env.PUBLIC = str(conf.env.ROOT + "/public")
 	conf.env.FAKEVGUI = str(conf.env.ROOT + "/utils/false_vgui/include")
 	conf.env.MATHLIB = str(conf.env.ROOT + "/mathlib")
+
+	conf.env.ENABLE_RCSYS = conf.options.ENABLE_RCSYS
 
 	# Set some opts needed by the server
 	conf.env.GAMEDIR = 'hl1'
