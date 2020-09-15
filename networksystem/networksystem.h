@@ -7,7 +7,7 @@
 #include "const.h"
 #include "reflection.h"
 
-extern IEngineNetsystem* g_pNetworkSystem;
+IEngineNetsystem* GlobalNetworkSystem();
 
 void ConnectNetsystemLibraries();
 void NetworksystemInit();
@@ -185,3 +185,16 @@ public:
 
 	static void Init();
 };
+
+/*
+ * Utility macros that let you define a usermessage handler
+ */
+#define HANDLE_CLIENT_USERMESSAGE(_id, _func) \
+void __ ## _func ## _usermsg_hook_fn(edict_t* ed, const CNetworkMessage& msg);                                    \
+CServerUserMessageHook g_ ## _func ## _usermsg_hook(_id, -1, __ ## _func ## _usermsg_hook_fn); \
+void __ ## _func ## _usermsg_hook_fn(edict_t* ed, const CNetworkMessage& msg)
+
+#define HANDLE_SERVER_USERMESSAGE(_id, _func) \
+void __ ## _func ## _usermsg_hook_fn(const CNetworkMessage& msg);                                    \
+CClientUserMessageHook g_ ## _func ## _usermsg_hook(_id, __ ## _func ## _usermsg_hook_fn); \
+void __ ## _func ## _usermsg_hook_fn(const CNetworkMessage& msg)

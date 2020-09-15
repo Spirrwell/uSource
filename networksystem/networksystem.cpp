@@ -15,7 +15,7 @@
 
 Convar net_debug_messages("net_debug_messages", "0", FCVAR_CHEAT | FCVAR_ARCHIVE);
 
-IEngineNetsystem* g_pNetworkSystem;
+IEngineNetsystem* g_pNetworkSystem = NULL;
 byte* NetworkSystem::g_pNetworkPool;
 
 /* Callbacks registered BY the client FOR messages sent BY the server */
@@ -77,6 +77,11 @@ void NetworksystemInit_Server()
 {
 	g_pNetworkSystem->HookServerNetsystemMsg(SV_ParseNetsysMessage);
 	CServerUserMessageHook::Init();
+}
+
+IEngineNetsystem* GlobalNetworkSystem()
+{
+	return g_pNetworkSystem;
 }
 
 
@@ -369,6 +374,7 @@ CNetworkMessage::CNetworkMessage(unsigned long size) :
 	m_bufpos(0),
 	m_overflowed(false)
 {
+	m_data = Mem_Alloc(size);
 }
 
 CNetworkMessage::CNetworkMessage(void *data, size_t size) :
