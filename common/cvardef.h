@@ -32,7 +32,8 @@
 #define FCVAR_CHANGED		(1<<13)	// set each time the cvar is changed
 #define FCVAR_GAMEUIDLL		(1<<14)	// defined by the menu DLL
 #define FCVAR_CHEAT			(1<<15)	// can not be changed if cheats are disabled
-		
+#define FCVAR_DEV               (1<<24) /* Hidden in non-development builds */
+
 typedef struct cvar_s
 {
 	char		*name;

@@ -437,6 +437,12 @@ void Cvar_RegisterVariable( convar_t *var )
 
 	ASSERT( var != NULL );
 
+#ifndef _DEV
+	/* Don't register dev cvars in development mode */
+	if(var->flags & FCVAR_DEV)
+		return;
+#endif
+
 	// first check to see if it has allready been defined
 	dup = Cvar_FindVar( var->name );
 
@@ -977,10 +983,13 @@ public:
 	virtual const char** CmdArgv();
 };
 
+extern int Cmd_AddCommandEx( const char *funcname, const char *cmd_name, xcommand_t function,
+                      const char *cmd_desc, int iFlags );
+
 void CEngineCvar::AddCommand(const char* cmd, void(*function)(), const char* desc, int flags) 
 {
 	/* Add the command with a wrapper */
-	Cmd_AddCommand(cmd, function, desc);
+	Cmd_AddCommandEx(__FUNCTION__, cmd, function, desc, flags);
 }
 
 void CEngineCvar::RegisterCvar(const char* name, const char* default_val, const char* desc, int flags, void(*callback)(const char*,const char*))

@@ -626,10 +626,16 @@ void Cmd_TokenizeString( char *text )
 Cmd_AddCommandEx
 ============
 */
-static int Cmd_AddCommandEx( const char *funcname, const char *cmd_name, xcommand_t function,
+int Cmd_AddCommandEx( const char *funcname, const char *cmd_name, xcommand_t function,
 	const char *cmd_desc, int iFlags )
 {
 	cmd_t	*cmd, *cur, *prev;
+
+#ifndef _DEV
+	/* Don't add development cvars in non-dev mode */
+	if(iFlags & FCVAR_DEV)
+		return 1;
+#endif
 
 	if( !COM_CheckString( cmd_name ))
 	{

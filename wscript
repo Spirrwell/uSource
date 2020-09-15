@@ -85,6 +85,8 @@ def options(opt):
 	grp.add_option('--enable-new-renderer', action='store_true', dest='ENABLE_RENDERER2', default=False, help='Enables the use of the new renderer')
 	grp.add_option('--enable-vulkan', action='store_true', dest='ENABLE_VULKAN', default=False, help='Enables the use of the vulkan backend')
 
+	grp.add_option('--dev', action='store_true', dest='DEV', default=False, help='Force development build macros to be enabled. This is enabled implicitly when building in debug mode')
+
 	opt.load('subproject')
 
 	opt.add_subproject(subdirs())
@@ -268,9 +270,9 @@ def configure(conf):
 			'default': ['-O3']
 		},
 		'debug': {
-			'msvc':    ['/O1', '/DDEBUG', '/D_DEBUG'],
-			'gcc':     ['-Og', '-DDEBUG=1', '-D_DEBUG=1'],
-			'default': ['-O1', '-DDEBUG=1', '-D_DEBUG=1']
+			'msvc':    ['/O1', '/DDEBUG', '/D_DEBUG', '/D_DEV'],
+			'gcc':     ['-Og', '-DDEBUG=1', '-D_DEBUG=1', '-D_DEV=1'],
+			'default': ['-O1', '-DDEBUG=1', '-D_DEBUG=1', '-D_DEV=1']
 		},
 		'sanitize': {
 			'msvc':    ['/Od', '/RTC1'],
@@ -296,6 +298,10 @@ def configure(conf):
 		'-Werror=return-type',
 		'-Werror=parentheses',
 	]
+
+	# Are we forcibly running a development build?
+	if conf.options.DEV:
+		conf.env.append_unique('DEFINES', '_DEV=1')
 
 	cflags = conf.get_flags_by_type(compiler_c_cxx_flags, conf.options.BUILD_TYPE, conf.env.COMPILER_CC)
 
