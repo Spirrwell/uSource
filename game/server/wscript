@@ -19,6 +19,7 @@ def build(bld):
 	source += bld.path.parent.ant_glob([
 		'shared/*.cpp'
 	])
+	source += bld.path.parent.ant_glob(['shared/tests/*.cpp'])
 	source += [
 		'../../pm_shared/pm_debug.cpp',
 		'../../pm_shared/pm_shared.cpp',

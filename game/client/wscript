@@ -19,6 +19,7 @@ def build(bld):
 	#])
 	source = []
 	source += bld.path.parent.ant_glob(['shared/*.cpp'])
+	source += bld.path.parent.ant_glob(['shared/tests/*.cpp'])
 	source += [
 		'hl/hl_baseentity.cpp',
 		'hl/hl_events.cpp',
