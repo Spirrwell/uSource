@@ -1,0 +1,88 @@
+syntax="proto2";
+
+package rcs;
+
+/**
+NOTES:
+
+tid is the transaction ID associated with the message and is used to associate a response with a request
+ */
+
+/* Queries a convar's value from the engine. */
+message QueryCvarValue
+{
+  required int32 tid = 1;
+  required string name = 2;
+}
+
+message QueryCvarValueResponse
+{
+  required int32 tid = 1;
+  required string name = 2;
+  required string value = 3;
+}
+
+
+/* Sets a Convar's value */
+message SetCvarValue
+{
+  required int32 tid = 1;
+  required string name = 2;
+  required string value = 3;
+}
+
+
+/* Returns a list of convars */
+message GetCvarList
+{
+  required int32 tid = 1;
+}
+
+message GetCvarListResponse
+{
+  required int32 tid = 1;
+  required int32 num = 2;
+
+  message Cvar {
+    required string name = 1;
+    required int32 flags = 2;
+    required string value = 3;
+  }
+  repeated Cvar cvars = 3;
+}
+
+
+/* Executes a console command */
+message ExecCommand
+{
+  required int32 tid = 1;
+  // Full command string. Ex: mycommand arg1 arg2 arg3
+  required string cmdstring = 2;
+}
+
+message ExecCommandResponse
+{
+  required int32 tid = 1;
+  required string output = 2;
+}
+
+
+
+/* Returns a list of all console commands */
+message GetCommandList
+{
+  required int32 tid = 1;
+}
+
+message GetCommandListResponse
+{
+  required int32 tid = 1;
+  required int32 num = 2;
+
+  message Command {
+    required string name = 1;
+    required int32 flags = 2;
+  }
+
+  repeated Command commands = 3;
+}

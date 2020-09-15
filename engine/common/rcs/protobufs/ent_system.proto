@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+package rcs;
+
+import "engine/common/rcs/protobufs/common.proto";
+
+message CreateEntity
+{
+  required int32 tid = 1;
+  required string class = 2;
+  required Vector3 position = 3;
+  required QAngle angles = 4;
+}
