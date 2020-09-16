@@ -148,10 +148,10 @@ def build(bld):
 
 	if bld.env.ENABLE_RCSYS:
 		libs += ['PROTOBUF']
-		protobufs = bld.path.ant_glob([
-			'common/rcs/protobufs/*.proto'
+		source += bld.path.ant_glob([
+			'common/rcs/protobufs/*.proto',
+			'common/rcs/*.cpp'
 		])
-		source += protobufs
 		features += ' protoc'
 
 	bld(source   = source,

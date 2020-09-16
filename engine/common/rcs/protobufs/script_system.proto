@@ -1,0 +1,7 @@
+syntax = "proto2";
+
+package rcs;
+
+import "engine/common/rcs/protobufs/common.proto";
+
+// Stub until we implement a scripting system

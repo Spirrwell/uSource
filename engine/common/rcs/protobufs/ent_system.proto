@@ -4,10 +4,72 @@ package rcs;
 
 import "engine/common/rcs/protobufs/common.proto";
 
-message CreateEntity
+message CreateEntityRequest
 {
-  required int32 tid = 1;
+  required uint32 tid = 1;
   required string class = 2;
   required Vector3 position = 3;
   required QAngle angles = 4;
+  required string keyvalues = 5;
+}
+
+message CreateEntityResponse
+{
+  required uint32 tid = 1;
+  required int32 entid = 2;
+}
+
+
+
+message DeleteEntityRequest
+{
+  required uint32 tid = 1;
+  required int32 entid = 2;
+}
+
+message DeleteEntityResponse
+{
+  required uint32 tid = 1;
+  required bool deleted = 2;
+}
+
+
+message ListEntitiesRequest
+{
+  required uint32 tid = 1;
+
+  // Filter params
+  optional string class = 2;
+}
+
+message FindEntitiesInSphereRequest
+{
+  required uint32 tid = 1;
+  required float radius = 2;
+  required Vector3 pos = 3;
+}
+
+message FindEntitiesInBoxRequest
+{
+  required uint32 tid = 1;
+  required float lwh = 2;
+  required Vector3 pos = 3;
+}
+
+message ListEntitiesResponse
+{
+  required uint32 tid = 1;
+  required int32 num = 2;
+  repeated Entity ents = 3;
+}
+
+
+/* Primary service interface */
+service EntityService
+{
+  rpc FindEntitiesInBox(FindEntitiesInBoxRequest) returns (ListEntitiesResponse);
+  rpc FindEntitiesInSphere(FindEntitiesInSphereRequest) returns (ListEntitiesResponse);
+  rpc ListEntities(ListEntitiesRequest) returns (ListEntitiesRequest);
+  rpc CreateEntity(CreateEntityRequest) returns (CreateEntityResponse);
+  rpc DeleteEntity(DeleteEntityRequest) returns (DeleteEntityResponse);
 }

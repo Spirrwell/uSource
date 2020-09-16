@@ -2,6 +2,46 @@ syntax = "proto2";
 
 package rcs;
 
+/*
+
+PROTOCOL DESCRIPTION
+
+The application host must always initiate a connection with the game engine.
+By default, no authentication procedures occur. Optionally, the game can generate a randomized, one-time use token
+that the application will need to send to connect to the game. This provides a base layer of security, but it should not be
+relied on. Never port forward and remotely control someone's game from outside of your LAN, and if you DO, ALWAYS use
+something like SSH port forwarding to ensure security.
+
+There are two types of messages:
+1. Reliable
+2. Unreliable
+
+Reliable messages will contain both a transaction ID and have a corresponding response message that contains that transaction ID.
+The CvarQuery message is a good example of this, as it must return the convar's value.
+
+Unreliable messages are fire and forget. For example, the PlayUISound message has no returned value or state because it's unnecessary.
+
+
+Depending on the settings of the connection, Response messages may be sent in only one direction and requests may be sent in the opposite.
+The TOOL_TO_ENGINE connection type ensures that requests are always sent from the tool to the engine, and responses are sent engine to tool.
+ENGINE_TO_TOOL is the opposite of this and is generally used for tools that want to replicate the game world.
+BOTH means requests may go in either direction. This is useful for tools that allow you to modify the game world in tool and in engine.
+
+Transaction IDs are 32-bit integers and progressively increase until a wrap around occurs, and the value will restart at 0.
+TIDs should be used to pair up a request with a response, at which point a request will be retired. The implementation should also
+retire requests after a period of time to ensure that an incorrect response is not paired up with an unfulfilled request, as might happen
+if the connection is lost for a period of time or something like that.
+
+The Connect and ConnectResponse message types should almost never be modified!
+
+
+ */
+
+message NullMessage
+{
+
+}
+
 message Vector3
 {
   required float x = 1;
@@ -28,4 +68,44 @@ message Vector4
   required float y = 2;
   required float z = 3;
   required float m = 4;
+}
+
+message Color
+{
+  required float r = 1;
+  required float g = 2;
+  required float b = 3;
+  required float a = 4;
+}
+
+message Entity
+{
+  required int32 entid = 1;
+  required Vector3 pos = 2;
+  required QAngle angles = 3;
+  required string keyvalues = 4;
+  optional string model = 5;
+}
+
+
+enum ConnectionType {
+  TOOL_TO_ENGINE = 1;
+  ENGINE_TO_TOOL = 2;
+  BOTH = 3;
+}
+
+
+/* Request connection to the game */
+/* DO NOT CHANGE THIS */
+message Connect
+{
+  required int32 protocol_version = 1; // Requested protocol version
+  required ConnectionType type = 2; // Requested connection type
+  optional string token = 3; // Game's generated token
+}
+
+message ConnectResponse
+{
+  required bool connected = 1; // Set to TRUE when the connection is accepted
+  required int32 protocol_version = 2; // Engine's proto version
 }

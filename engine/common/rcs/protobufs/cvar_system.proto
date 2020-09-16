@@ -2,6 +2,8 @@ syntax="proto2";
 
 package rcs;
 
+import "engine/common/rcs/protobufs/common.proto";
+
 /**
 NOTES:
 
@@ -9,38 +11,39 @@ tid is the transaction ID associated with the message and is used to associate a
  */
 
 /* Queries a convar's value from the engine. */
-message QueryCvarValue
+message QueryCvarRequest
 {
-  required int32 tid = 1;
+  required uint32 tid = 1;
   required string name = 2;
 }
 
 message QueryCvarValueResponse
 {
-  required int32 tid = 1;
+  required uint32 tid = 1;
   required string name = 2;
   required string value = 3;
 }
 
 
 /* Sets a Convar's value */
-message SetCvarValue
+message SetCvarValueRequest
 {
-  required int32 tid = 1;
+  required uint32 tid = 1;
   required string name = 2;
   required string value = 3;
 }
 
 
 /* Returns a list of convars */
-message GetCvarList
+message GetCvarListRequest
 {
-  required int32 tid = 1;
+  required uint32 tid = 1;
+  optional string filter = 2;
 }
 
 message GetCvarListResponse
 {
-  required int32 tid = 1;
+  required uint32 tid = 1;
   required int32 num = 2;
 
   message Cvar {
@@ -53,30 +56,31 @@ message GetCvarListResponse
 
 
 /* Executes a console command */
-message ExecCommand
+message ExecCommandRequest
 {
-  required int32 tid = 1;
+  required uint32 tid = 1;
   // Full command string. Ex: mycommand arg1 arg2 arg3
   required string cmdstring = 2;
 }
 
 message ExecCommandResponse
 {
-  required int32 tid = 1;
+  required uint32 tid = 1;
   required string output = 2;
 }
 
 
 
 /* Returns a list of all console commands */
-message GetCommandList
+message GetCommandListRequest
 {
-  required int32 tid = 1;
+  required uint32 tid = 1;
+  optional string filter = 2;
 }
 
 message GetCommandListResponse
 {
-  required int32 tid = 1;
+  required uint32 tid = 1;
   required int32 num = 2;
 
   message Command {
@@ -85,4 +89,16 @@ message GetCommandListResponse
   }
 
   repeated Command commands = 3;
+}
+
+
+
+
+service ConvarService
+{
+  rpc QueryCvar(QueryCvarRequest) returns (QueryCvarValueResponse);
+  rpc SetCvar(SetCvarValueRequest) returns (NullMessage);
+  rpc GetCvarList(GetCvarListRequest) returns (GetCvarListResponse);
+  rpc ExecCommand(ExecCommandRequest) returns (ExecCommandResponse);
+  rpc GetCommandList(GetCommandListRequest) returns (GetCommandListResponse);
 }
