@@ -504,7 +504,7 @@ Cvar_DirectSet
 way to change value for many cvars
 ============
 */
-void Cvar_DirectSet( convar_t *var, const char *value )
+void Cvar_DirectSet( convar_t *var, const char *value, bool force )
 {
 	const char	*pszValue;
 	
@@ -521,13 +521,13 @@ void Cvar_DirectSet( convar_t *var, const char *value )
 	if( var != Cvar_FindVar( var->name ))
 		return; // how this possible?
 
-	if( FBitSet( var->flags, FCVAR_READ_ONLY|FCVAR_GLCONFIG ))
+	if( FBitSet( var->flags, FCVAR_READ_ONLY|FCVAR_GLCONFIG ) && !force)
 	{
 		Con_Printf( "%s is read-only.\n", var->name );
 		return;
 	}
 	
-	if( FBitSet( var->flags, FCVAR_CHEAT ) && !host.allow_cheats )
+	if( FBitSet( var->flags, FCVAR_CHEAT ) && !host.allow_cheats && !force )
 	{
 		Con_Printf( "%s is cheat protected.\n", var->name );
 		return;

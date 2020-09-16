@@ -57,7 +57,7 @@ void Cvar_RegisterVariable( convar_t *var );
 convar_t *Cvar_Get( const char *var_name, const char *value, int flags, const char *description );
 void Cvar_LookupVars( int checkbit, void *buffer, void *ptr, setpair_t callback );
 void Cvar_FullSet( const char *var_name, const char *value, int flags );
-void Cvar_DirectSet( convar_t *var, const char *value );
+void Cvar_DirectSet( convar_t *var, const char *value, bool force = false );
 void Cvar_Set( const char *var_name, const char *value );
 void Cvar_SetValue( const char *var_name, float value );
 const char *Cvar_BuildAutoDescription( int flags );
