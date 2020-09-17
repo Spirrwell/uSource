@@ -129,7 +129,7 @@ static void Sys_LoadInterfaces()
 	const char* game = GlobalCommandLine().FindString("-game");
 	if(!game) game = GAME_PATH;
 	char filePath[256];
-	Q_snprintf(filePath, sizeof(filePath), "%s/gameinfo.txt", game);
+	Q_snprintf(filePath, sizeof(filePath), "%s%sgameinfo.txt", game, PATH_SEPARATOR);
 
 	KeyValues kv;
 	kv.ParseFile(filePath);
