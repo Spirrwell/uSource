@@ -12,7 +12,7 @@ void tier1::Connect()
 	static bool bInit = false;
 	if(bInit) return;
 	bInit = true;
-	
+
 	g_pFilesystem = (IEngineFilesystem*)AppFramework::FindInterface(IENGINEFILESYSTEM_INTERFACE);
 	g_pLogSystem = (ILogSystem*)AppFramework::FindInterface(ILOGSYSTEM_INTERFACE);
 	g_pEngineCvar = (IEngineCvar*)AppFramework::FindInterface(IENGINECVAR_INTERFACE);

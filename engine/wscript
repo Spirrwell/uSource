@@ -138,6 +138,7 @@ def build(bld):
 	includes.append(str(bld.env.COMMON))
 	includes.append('../')
 	includes.append('../thirdparty')
+	includes.append('../build/engine/common/rcs/protobufs/')
 
 	if bld.env.SINGLE_BINARY:
 		install_path = bld.env.BINDIR
@@ -146,11 +147,11 @@ def build(bld):
 		install_path = bld.env.LIBDIR
 		features = 'c cxx cxxshlib cshlib'
 
+	#includes += ['../build/engine/common/rcs/protobufs/']
 	if bld.env.ENABLE_RCSYS:
 		libs += ['PROTOBUF']
 		source += bld.path.ant_glob([
-			'common/rcs/protobufs/*.proto',
-			'common/rcs/*.cpp'
+			'common/rcs/protobufs/*.proto'
 		])
 		features += ' protoc'
 

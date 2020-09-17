@@ -46,6 +46,7 @@ GNU General Public License for more details.
 #include "xprof.h"
 #include "cmdline.h"
 #include "tier1/concommand.h"
+#include "rcs/rcs.h"
 
 /* Interface includes */
 #include "log_int.h"
@@ -1027,6 +1028,8 @@ extern "C" int EXPORT Host_Main( int argc, char **argv, const char *progname, in
 
 	HTTP_Init();
 	ID_Init();
+
+	rcs::Init();
 
 	if( Host_IsDedicated() )
 	{

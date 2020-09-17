@@ -37,6 +37,8 @@ The Connect and ConnectResponse message types should almost never be modified!
 
  */
 
+option cc_generic_services = true;
+
 message NullMessage
 {
 
@@ -94,12 +96,17 @@ enum ConnectionType {
   BOTH = 3;
 }
 
+enum ConnectionFailureReason {
+  BAD_TOKEN = 1;
+  WRONG_VERSION = 2;
+}
+
 
 /* Request connection to the game */
 /* DO NOT CHANGE THIS */
-message Connect
+message ConnectRequest
 {
-  required int32 protocol_version = 1; // Requested protocol version
+  required uint32 protocol_version = 1; // Requested protocol version
   required ConnectionType type = 2; // Requested connection type
   optional string token = 3; // Game's generated token
 }
@@ -107,5 +114,11 @@ message Connect
 message ConnectResponse
 {
   required bool connected = 1; // Set to TRUE when the connection is accepted
-  required int32 protocol_version = 2; // Engine's proto version
+  required uint32 protocol_version = 2; // Engine's proto version
+  required ConnectionFailureReason reason = 3;
+}
+
+service RCSService
+{
+  rpc Connect(ConnectRequest) returns(ConnectResponse);
 }
