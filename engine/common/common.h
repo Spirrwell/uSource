@@ -167,7 +167,7 @@ typedef enum
 
 #ifdef _DEBUG
 void DBG_AssertFunction( qboolean fExpr, const char* szExpr, const char* szFile, int szLine, const char* szMessage );
-#define Assert( f )		DBG_AssertFunction( f, #f, __FILE__, __LINE__, NULL )
+#define Assert( f )		if(!(f)) { DBG_AssertFunction( f, #f, __FILE__, __LINE__, NULL ); }
 #else
 #define Assert( f )
 #endif
