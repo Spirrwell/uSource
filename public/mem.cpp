@@ -67,7 +67,7 @@ typedef struct mempool_s
 
 mempool_t *poolchain = NULL; // critical stuff
 
-CZoneAllocator& GlobalAllocator()
+EXPORT CZoneAllocator& GlobalAllocator()
 {
 	return *g_pZoneAllocator;
 }

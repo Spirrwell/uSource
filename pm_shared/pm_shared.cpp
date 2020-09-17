@@ -30,13 +30,20 @@
 #include <ctype.h>  // isspace
 #include <time.h>
 
-int g_bhopcap = 1;
+extern "C" int g_bhopcap = 1;
 
 #ifdef CLIENT_DLL
 // Spectator Mode
 int iJumpSpectator;
 extern float vJumpOrigin[3];
 extern float vJumpAngles[3];
+#else
+
+// this is done in some util.cpp file on the client already so
+#ifdef _MSC_VER
+vec3_t vec3_origin;
+#endif
+
 #endif
 
 static int pm_shared_initialized = 0;

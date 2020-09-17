@@ -7,6 +7,7 @@
 
 #include "build.h"
 #include "containers/array.h"
+#include "../common/common.h"
 
 #define BEGIN_DBG_NAMESPACE namespace dbg {
 #define END_DBG_NAMESPACE }
@@ -15,7 +16,7 @@ BEGIN_DBG_NAMESPACE
 
 void Init();
 
-class CAssert
+class EXPORT CAssert
 {
 public:
 	int m_line;
@@ -36,41 +37,41 @@ public:
 };
 
 /* Called to fire an assertion. Returns true if the assertion is enabled and a message should be printed */
-bool FireAssertion(const char* file, int line, const char* exp);
+EXPORT bool FireAssertion(const char* file, int line, const char* exp);
 
 /* Creates a new assertion */
-void CreateAssert(const char* file, int line, const char* exp);
+EXPORT void CreateAssert(const char* file, int line, const char* exp);
 
 /* Finds or creates a new assertion, always returns a valid pointer */
-CAssert FindOrCreateAssert(const char* file, int line, const char* exp);
+EXPORT CAssert FindOrCreateAssert(const char* file, int line, const char* exp);
 
 /* Disables the assertion at the specified line and file */
-void DisableAssert(const char* file, int line);
-void EnableAssert(const char* file, int line);
+EXPORT void DisableAssert(const char* file, int line);
+EXPORT void EnableAssert(const char* file, int line);
 
 /* Tries to find an assertion that's already registered. Returns nullptr if not found */
-CAssert FindAssert(const char* file, int line);
+EXPORT CAssert FindAssert(const char* file, int line);
 
 /* Returns true if an assertion is enabled */
-bool IsAssertEnabled(const char* file, int line);
+EXPORT bool IsAssertEnabled(const char* file, int line);
 
 /* Causes a break into debugger when the specified assertion is hit */
-void BreakAssert(const char* file, int line);
-void UnBreakAssert(const char* file, int line);
+EXPORT void BreakAssert(const char* file, int line);
+EXPORT void UnBreakAssert(const char* file, int line);
 
 /* Returns true if the assertion was hit */
-bool WasAssertHit(const char* file, int line);
+EXPORT bool WasAssertHit(const char* file, int line);
 
 /* Returns a list of assertions */
-Array<CAssert> GetAssertList();
+EXPORT Array<CAssert> GetAssertList();
 
 /* Enable/Disable features globally */
 /* These act on ALL asserts */
-void EnableAssertOnce();
-void DisableAssertOnce();
-void EnableAssertBreak();
-void DisableAssertBreak();
-void EnableAsserts();
-void DisableAsserts();
+EXPORT void EnableAssertOnce();
+EXPORT void DisableAssertOnce();
+EXPORT void EnableAssertBreak();
+EXPORT void DisableAssertBreak();
+EXPORT void EnableAsserts();
+EXPORT void DisableAsserts();
 
 END_DBG_NAMESPACE

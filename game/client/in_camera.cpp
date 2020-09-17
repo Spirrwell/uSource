@@ -19,9 +19,9 @@ float CL_KeyState( kbutton_t *key );
 
 extern "C"
 {
-	void DLLEXPORT CAM_Think( void );
-	int DLLEXPORT CL_IsThirdPerson( void );
-	void DLLEXPORT CL_CameraOffset( float *ofs );
+	void CAM_Think( void );
+	int  CL_IsThirdPerson( void );
+	void CL_CameraOffset( float *ofs );
 }
 
 extern cl_enginefunc_t gEngfuncs;
@@ -140,7 +140,7 @@ typedef struct
 
 extern trace_t SV_ClipMoveToEntity( edict_t *ent, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end );
 
-void DLLEXPORT CAM_Think( void )
+void CAM_Think( void )
 {
 	vec3_t origin;
 	vec3_t ext, pnt, camForward, camRight, camUp;
@@ -640,12 +640,12 @@ void CAM_EndDistance( void )
 	iMouseInUse = 0;
 }
 
-int DLLEXPORT CL_IsThirdPerson( void )
+int CL_IsThirdPerson( void )
 {
 	return ( cam_thirdperson ? 1 : 0 ) || ( g_iUser1 && ( g_iUser2 == gEngfuncs.GetLocalPlayer()->index ) );
 }
 
-void DLLEXPORT CL_CameraOffset( float *ofs )
+void CL_CameraOffset( float *ofs )
 {
 	VectorCopy( cam_ofs, ofs );
 }

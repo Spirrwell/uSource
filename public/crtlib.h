@@ -52,57 +52,57 @@ enum
 //
 
 /* Returns the number of occurences of c in str */
-int Q_countchar(const char* str, char c);
-int Q_strcasecmp(const char* a, const char* b);
+EXPORT int Q_countchar(const char* str, char c);
+EXPORT int Q_strcasecmp(const char* a, const char* b);
 #define Q_strupr(in, out) Q_strnupr( in, out, 99999 )
-void Q_strnupr(const char *in, char *out, size_t size_out);
+EXPORT void Q_strnupr(const char* in, char* out, size_t size_out);
 #define Q_strlwr(in, out) Q_strnlwr( in, out, 99999 )
-void Q_strnlwr(const char *in, char *out, size_t size_out);
-int Q_strlen(const char *string);
-int Q_colorstr(const char *string);
-char Q_toupper(const char in);
-char Q_tolower(const char in);
+EXPORT void Q_strnlwr(const char* in, char* out, size_t size_out);
+EXPORT int  Q_strlen(const char* string);
+EXPORT int  Q_colorstr(const char* string);
+EXPORT char Q_toupper(const char in);
+EXPORT char Q_tolower(const char in);
 #define Q_strcat(dst, src) Q_strncat( dst, src, 99999 )
-size_t Q_strncat(char *dst, const char *src, size_t siz);
+EXPORT size_t Q_strncat(char* dst, const char* src, size_t siz);
 #define Q_strcpy(dst, src) Q_strncpy( dst, src, 99999 )
-size_t Q_strncpy(char *dst, const char *src, size_t siz);
-uint Q_hashkey(const char *string, uint hashSize, qboolean caseinsensitive);
-qboolean Q_isdigit(const char *str);
-int Q_atoi(const char *str);
-float Q_atof(const char *str);
-void Q_atov(float *vec, const char *str, size_t siz);
-char *Q_strchr(const char *s, char c);
-char *Q_strrchr(const char *s, char c);
+EXPORT size_t	Q_strncpy(char* dst, const char* src, size_t siz);
+EXPORT uint   Q_hashkey(const char* string, uint hashSize, qboolean caseinsensitive);
+EXPORT qboolean Q_isdigit(const char* str);
+EXPORT int	Q_atoi(const char* str);
+EXPORT float	Q_atof(const char* str);
+EXPORT void	Q_atov(float* vec, const char* str, size_t siz);
+EXPORT char*	Q_strchr(const char* s, char c);
+EXPORT char*	Q_strrchr(const char* s, char c);
 #define Q_stricmp(s1, s2) Q_strnicmp( s1, s2, 99999 )
-int Q_strnicmp(const char *s1, const char *s2, int n);
+EXPORT int Q_strnicmp(const char* s1, const char* s2, int n);
 #define Q_strcmp(s1, s2) Q_strncmp( s1, s2, 99999 )
-int Q_strncmp(const char *s1, const char *s2, int n);
-qboolean Q_stricmpext(const char *s1, const char *s2);
-const char *Q_timestamp(int format);
-char *Q_stristr(const char *string, const char *string2);
-char *Q_strstr(const char *string, const char *string2);
+EXPORT int  Q_strncmp(const char* s1, const char* s2, int n);
+EXPORT qboolean	   Q_stricmpext(const char* s1, const char* s2);
+EXPORT const char* Q_timestamp(int format);
+EXPORT char*	   Q_stristr(const char* string, const char* string2);
+EXPORT char*	   Q_strstr(const char* string, const char* string2);
 #define Q_vsprintf(buffer, format, args) Q_vsnprintf( buffer, 99999, format, args )
-int Q_vsnprintf(char *buffer, size_t buffersize, const char *format, va_list args);
-int Q_snprintf(char *buffer, size_t buffersize, const char *format, ...) _format(3);
-int Q_sprintf(char *buffer, const char *format, ...) _format(2);
+EXPORT int Q_vsnprintf(char* buffer, size_t buffersize, const char* format, va_list args);
+EXPORT int Q_snprintf(char* buffer, size_t buffersize, const char* format, ...) _format(3);
+EXPORT int Q_sprintf(char* buffer, const char* format, ...) _format(2);
 #define Q_memprint(val) Q_pretifymem( val, 2 )
-char *Q_pretifymem(float value, int digitsafterdecimal);
-char *va(const char *format, ...) _format(1);
-void COM_FileBase(const char *in, char *out);
-const char *COM_FileExtension(const char *in);
-void COM_DefaultExtension(char *path, const char *extension);
-void COM_ReplaceExtension(char *path, const char *extension);
-void COM_ExtractFilePath(const char *path, char *dest);
-const char *COM_FileWithoutPath(const char *in);
-void COM_StripExtension(char *path);
+EXPORT char* Q_pretifymem(float value, int digitsafterdecimal);
+EXPORT char* va(const char* format, ...) _format(1);
+EXPORT void	   COM_FileBase(const char* in, char* out);
+EXPORT const char* COM_FileExtension(const char* in);
+EXPORT void	   COM_DefaultExtension(char* path, const char* extension);
+EXPORT void	   COM_ReplaceExtension(char* path, const char* extension);
+EXPORT void	   COM_ExtractFilePath(const char* path, char* dest);
+EXPORT const char* COM_FileWithoutPath(const char* in);
+EXPORT void	   COM_StripExtension(char* path);
 #define COM_CheckString(string) ( ( !string || !*string ) ? 0 : 1 )
-int matchpattern(const char *in, const char *pattern, qboolean caseinsensitive);
-int matchpattern_with_separator(const char *in, const char *pattern, qboolean caseinsensitive, const char *separators,
-                                qboolean wildcard_least_one);
+EXPORT int matchpattern(const char* in, const char* pattern, qboolean caseinsensitive);
+EXPORT int matchpattern_with_separator(const char* in, const char* pattern, qboolean caseinsensitive, const char* separators,
+                                       qboolean wildcard_least_one);
 
-char* Q_strdup(const char* s);
-void* Q_malloc(size_t sz);
-void Q_free(void* blk);
+EXPORT char* Q_strdup(const char* s);
+EXPORT void* Q_malloc(size_t sz);
+EXPORT void  Q_free(void* blk);
 
 #ifdef _WIN32
 #define Q_alloca(sz) _alloca(sz)
@@ -118,35 +118,35 @@ void Q_free(void* blk);
 #define FMT_BOLD 1
 #define FMT_UNDERLINE 2
 #define FMT_BLINK 3
-char* Q_fmtcolorstr(const char* s, char* out, size_t n);
-char* Q_fmtcolorstr(const char* s, char* out, size_t n, const unsigned char color_table[10][3]);
-char* Q_fmtcolorstr(const char* s, char* out, size_t n, const unsigned char color_table[10][3], const unsigned char modifier_table[10]);
+EXPORT char* Q_fmtcolorstr(const char* s, char* out, size_t n);
+EXPORT char* Q_fmtcolorstr(const char* s, char* out, size_t n, const unsigned char color_table[10][3]);
+EXPORT char* Q_fmtcolorstr(const char* s, char* out, size_t n, const unsigned char color_table[10][3], const unsigned char modifier_table[10]);
 
 /* Safe string conversions */
-bool Q_strint(const char* str, int& out, int base = 10);
-bool Q_strfloat(const char* str, float& out);
-bool Q_strdouble(const char* str, double& out);
-bool Q_strlong(const char* str, long long& out, int base = 10);
-bool Q_strbool(const char* str, bool& out);
+EXPORT bool Q_strint(const char* str, int& out, int base = 10);
+EXPORT bool Q_strfloat(const char* str, float& out);
+EXPORT bool Q_strdouble(const char* str, double& out);
+EXPORT bool Q_strlong(const char* str, long long& out, int base = 10);
+EXPORT bool Q_strbool(const char* str, bool& out);
 
 /* Path operations */
-char* Q_FileExtension(const char* s, char* out, size_t len);
-char* Q_FileName(const char* s, char* out, size_t len);
-char* Q_BaseDirectory(const char* s, char* out, size_t len);
-char* Q_StripExtension(const char* s, char* out, size_t len);
-char* Q_StripDirectory(const char* s, char* out, size_t len);
-char* Q_FixSlashes(const char* s, char* out, size_t len);
-char* Q_FixSlashesInPlace(char* s);
-String& Q_FixSlashesInPlace(String& s);
-char* Q_MakeAbsolute(const char* s, char* out, size_t len);
+EXPORT char* Q_FileExtension(const char* s, char* out, size_t len);
+EXPORT char* Q_FileName(const char* s, char* out, size_t len);
+EXPORT char* Q_BaseDirectory(const char* s, char* out, size_t len);
+EXPORT char* Q_StripExtension(const char* s, char* out, size_t len);
+EXPORT char* Q_StripDirectory(const char* s, char* out, size_t len);
+EXPORT char* Q_FixSlashes(const char* s, char* out, size_t len);
+EXPORT char* Q_FixSlashesInPlace(char* s);
+EXPORT String& Q_FixSlashesInPlace(String& s);
+EXPORT char* Q_MakeAbsolute(const char* s, char* out, size_t len);
 
-bool Q_startswith(const char* string, const char* startingString);
-bool Q_endswith(const char* str, const char* subst);
+EXPORT bool Q_startswith(const char* string, const char* startingString);
+EXPORT bool Q_endswith(const char* str, const char* subst);
 
 /* Other C std functions which might not be portable */
-char* Q_getcwd(char* buf, size_t sz);
-int Q_getpid();
-int Q_mkstemp(char* tmpl);
-int Q_unlink(const char* path);
-int Q_mkdir(const char* path);
-int Q_fileno(FILE* f);
+EXPORT char* Q_getcwd(char* buf, size_t sz);
+EXPORT int Q_getpid();
+EXPORT int Q_mkstemp(char* tmpl);
+EXPORT int Q_unlink(const char* path);
+EXPORT int Q_mkdir(const char* path);
+EXPORT int Q_fileno(FILE* f);

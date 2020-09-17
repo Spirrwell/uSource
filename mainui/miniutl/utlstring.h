@@ -12,8 +12,9 @@
 
 #include "miniutl.h"
 #include "generichash.h"
+#include "../common/common.h"
 
-class CUtlString;
+class EXPORT CUtlString;
 
 //
 // Maximum number of allowable characters in a CUtlString.
@@ -30,7 +31,7 @@ const uint k_cchMaxString = 0x7fff0000;
 //			to be used primarily to replace of char array buffers
 //			tries to match CUtlSymbol interface wherever possible
 //-----------------------------------------------------------------------------
-class CUtlString
+class EXPORT CUtlString
 {
 public:
 	CUtlString();

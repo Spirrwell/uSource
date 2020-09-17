@@ -12,7 +12,7 @@ def options(opt):
 	return
 
 def configure(conf):
-	# stub
+	conf.env.append_unique('DEFINES', 'LIBPUBLIC=1')
 	return
 
 def build(bld):
@@ -29,12 +29,12 @@ def build(bld):
 		libs += ['RT', 'DL', 'PTHREAD']
 	else:
 		libs += ['USER32', 'SHELL32']
-
+        
 	bld(
 		source   = source,
 		target   = 'public',
 		features = 'cxx cxxshlib',
 		includes = includes,
-		use      = libs,
+		use	  = libs,
 		subsystem = bld.env.MSVC_SUBSYSTEM
 	)

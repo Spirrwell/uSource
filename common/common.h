@@ -106,9 +106,11 @@ static bool ColorIndex(char c) { return (c - '0') & 7; };
 #endif
 #elif defined(_MSC_VER)
 #define EXPORT          __declspec( dllexport )
+#define IMPORT          __declspec( dllimport )
 #define GAME_EXPORT
 #else
 #define EXPORT
+#define IMPORT
 #define GAME_EXPORT
 #endif
 

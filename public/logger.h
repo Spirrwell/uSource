@@ -5,6 +5,8 @@
  */
 #pragma once
 
+#include "common.h"
+
 #define COLOR_NORMAL "^1"
 #define COLOR_RED "^2"
 #define COLOR_GREEN "^3"
@@ -16,7 +18,7 @@
 
 namespace logger
 {
-	void Printf(const char* fmt, ...);
-	void Errorf(const char* fmt, ...);
-	void Warnf(const char* fmt, ...);
+	EXPORT void Printf(const char* fmt, ...);
+	EXPORT void Errorf(const char* fmt, ...);
+	EXPORT void Warnf(const char* fmt, ...);
 }

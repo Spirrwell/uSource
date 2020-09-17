@@ -13,6 +13,8 @@
 #include <semaphore.h>
 #endif
 
+#include "common.h"
+
 #if defined(_M_X86) || defined(__i386__)
 #       define PLATFORM_X86
 #endif
@@ -150,7 +152,7 @@ namespace threadtools
 	}
 }
 
-class CThread
+class EXPORT CThread
 {
 private:
 #ifdef _WIN32
@@ -188,7 +190,7 @@ public:
  * @tparam T lock class to use
  */
 template<class T>
-class CThreadRAIILock
+class EXPORT CThreadRAIILock
 {
 private:
 	T* m_mutex;
@@ -201,7 +203,7 @@ public:
 /**
  * @brief Basic mutex class
  */
-class CThreadMutex
+class EXPORT CThreadMutex
 {
 private:
 #ifdef _WIN32
@@ -224,7 +226,7 @@ public:
 /**
  * @brief Basic mutex class
  */
-class CThreadRWMutex
+class EXPORT CThreadRWMutex
 {
 private:
 #ifdef _WIN32
@@ -252,7 +254,7 @@ public:
 /**
  * @brief Spinlock class
  */
-class CThreadSpinlock
+class EXPORT CThreadSpinlock
 {
 private:
 	unsigned int m_atomicFlag;
@@ -270,7 +272,7 @@ public:
 /**
  * @brief platform agnostic Semaphore class
  */
-class CThreadSemaphore
+class EXPORT CThreadSemaphore
 {
 private:
 #ifdef _WIN32
@@ -295,7 +297,7 @@ public:
 /**
  * @brief A Mutex that
  */
-class CSharedMutex
+class EXPORT CSharedMutex
 {
 private:
 	CThreadSemaphore m_sem;
@@ -311,7 +313,7 @@ public:
 /**
  * @brief Semaphore implemented using a spinlock
  */
-class CThreadSpinSemaphore
+class EXPORT CThreadSpinSemaphore
 {
 private:
 
@@ -326,10 +328,10 @@ public:
 };
 
 template<class T>
-class CInterlockedAccessor;
+class EXPORT CInterlockedAccessor;
 
 template<class T>
-class CInterlockedSharedPtr
+class EXPORT CInterlockedSharedPtr
 {
 private:
 	CInterlockedAccessor<T>* m_accessor;
@@ -397,7 +399,7 @@ public:
 };
 
 template<class T>
-class CInterlockedSharedWritePtr
+class EXPORT CInterlockedSharedWritePtr
 {
 private:
 	CInterlockedAccessor<T>* m_accessor;
@@ -470,7 +472,7 @@ public:
  *	The resource can have any number of readers,
  */
 template<class T>
-class CInterlockedAccessor
+class EXPORT CInterlockedAccessor
 {
 private:
 	CThreadRWMutex m_mutex;

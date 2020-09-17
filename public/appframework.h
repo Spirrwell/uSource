@@ -2,6 +2,7 @@
 #pragma once
 
 #include "containers/list.h"
+#include "../common/common.h"
 
 /* Make sure these dumbos are not here */
 #undef min
@@ -57,11 +58,11 @@ typedef struct
 
 /* Returns a list of interfaces exported by this module */
 /* The single int parameter should be set to the number of interfaces in the returned array */
-typedef iface_t*(*pfnGetInterfaces)(int*);
+EXPORT typedef iface_t* (*pfnGetInterfaces)(int*);
 
 /* Returns a new pointer to the specified interface */
 /* First parameter is the interface name (not the parent!) and the second is an out parameter for the status code */
-typedef void*(*pfnCreateInterface)(const char*, int*);
+EXPORT typedef void* (*pfnCreateInterface)(const char*, int*);
 
 /* Used for the iface status parameter in pfnCreateInterface */
 enum EIfaceStatus
@@ -99,41 +100,41 @@ namespace AppFramework
 	 * @param iface Interface name
 	 * @return True if added, false otherwise
 	 */
-	bool AddInterface(const char *module, const char *iface);
+	EXPORT bool AddInterface(const char* module, const char* iface);
 
-	bool AddInterfaces(std::initializer_list<interface_t> interfaces); 
-	bool AddInterfaces(interface_t* interfaces);
+	EXPORT bool AddInterfaces(std::initializer_list<interface_t> interfaces); 
+	EXPORT bool AddInterfaces(interface_t* interfaces);
 
 	/**
 	 * @brief Gets the last error that happened or empty string
 	 * @return last error
 	 */ 
-	const char* GetLastError();
+	EXPORT const char* GetLastError();
 
 	/**
 	 * @brief Called to load all interfaces queued for load
 	 * @return True if OK, false if something failed
 	 */
-	bool LoadInterfaces();
+	EXPORT bool LoadInterfaces();
 
 	/**
 	 * @brief Finds a pointer to a loaded interface
 	 * @param iface Name of the interface
 	 * @return Pointer to the iface or NULL if not found
 	 */
-	void * FindInterface(const char *iface);
+	EXPORT void* FindInterface(const char* iface);
 
 	/**
 	 * @brief Unloads all added interfaces
 	 */
-	void UnloadInterfaces();
+	EXPORT void UnloadInterfaces();
 
 	/**
 	 * Set a custom LoadLibrary/FreeLibrary function
 	 */ 
-	void SetLoadLibrary(std::function<void*(const char*)> fn);
-	void SetFreeLibrary(std::function<void(void*)> fn);
-	void ClearCustomFunctions();
+	EXPORT void SetLoadLibrary(std::function<void*(const char*)> fn);
+	EXPORT void SetFreeLibrary(std::function<void(void*)> fn);
+	EXPORT void ClearCustomFunctions();
 
 
 	/**

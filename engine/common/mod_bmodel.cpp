@@ -162,11 +162,11 @@ typedef struct
 
 typedef struct
 {
-	const int		lumpnumber;
-	const size_t	mincount;
-	const size_t	maxcount;
-	const int		entrysize;
-	const int		entrysize32;	// alternative (-1 by default)
+	const int		lumpnumber  = -1;
+	const size_t		mincount    = -1;
+	const size_t		maxcount    = -1;
+	const int		entrysize = -1;
+	const int		entrysize32 = -1;	// alternative (-1 by default)
 	const char	*loadname;
 	int		flags;
 	const void	**dataptr;

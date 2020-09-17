@@ -189,6 +189,7 @@ def configure(conf):
 	# Force _WIN32 definition for windows (generally good for IDE integration)
 	if conf.env.DEST_OS == 'win32':
 		conf.env.append_unique('DEFINES', '_WIN32')
+		conf.env.append_value('INCLUDES', ['common'])
 
 	# Hardcoded include path for Mingw on Linux, also for IDE integration
 	if conf.env.DEST_OS == 'win32' and sys.platform == 'linux':

@@ -9,11 +9,12 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include "common.h"
 
-class String;
-class StringView;
+class EXPORT String;
+class EXPORT StringView;
 
-class String 
+class EXPORT String
 {
 private:
 	char* m_string;

@@ -166,7 +166,7 @@ enum
 	PNG_CT_RGB = BIT(1),
 	PNG_CT_ALPHA = BIT(2),
 	PNG_CT_RGBA = (PNG_CT_RGB|PNG_CT_ALPHA)
-} png_colortype;
+};
 
 enum
 {
@@ -175,7 +175,7 @@ enum
 	PNG_F_UP,
 	PNG_F_AVERAGE,
 	PNG_F_PAETH
-} png_filter;
+};
 
 #pragma pack( push, 1 )
 typedef struct png_ihdr_s

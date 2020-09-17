@@ -61,42 +61,42 @@ int __MsgFunc_Bhopcap( const char *pszName, int iSize, void *pbuf )
 
 extern "C" 
 {
-int	DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion );
-int	DLLEXPORT HUD_VidInit( void );
-void	DLLEXPORT HUD_Init( void );
-int	DLLEXPORT HUD_Redraw( float flTime, int intermission );
-int	DLLEXPORT HUD_UpdateClientData( client_data_t *cdata, float flTime );
-void	DLLEXPORT HUD_Reset ( void );
-void	DLLEXPORT HUD_PlayerMove( struct playermove_s *ppmove, int server );
-void	DLLEXPORT HUD_PlayerMoveInit( struct playermove_s *ppmove );
-char	DLLEXPORT HUD_PlayerMoveTexture( char *name );
-int	DLLEXPORT HUD_ConnectionlessPacket( const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size );
-int	DLLEXPORT HUD_GetHullBounds( int hullnumber, float *mins, float *maxs );
-void	DLLEXPORT HUD_Frame( double time );
-void	DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking);
-void	DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf );
-void 	DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *gpMobileEngfuncs );
+int	Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion );
+int	HUD_VidInit( void );
+void	HUD_Init( void );
+int	HUD_Redraw( float flTime, int intermission );
+int	HUD_UpdateClientData( client_data_t *cdata, float flTime );
+void	HUD_Reset ( void );
+void	HUD_PlayerMove( struct playermove_s *ppmove, int server );
+void	HUD_PlayerMoveInit( struct playermove_s *ppmove );
+char	HUD_PlayerMoveTexture( char *name );
+int	HUD_ConnectionlessPacket( const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size );
+int	HUD_GetHullBounds( int hullnumber, float *mins, float *maxs );
+void	HUD_Frame( double time );
+void	HUD_VoiceStatus(int entindex, qboolean bTalking);
+void	HUD_DirectorMessage( int iSize, void *pbuf );
+void 	HUD_MobilityInterface( mobile_engfuncs_t *gpMobileEngfuncs );
 
 /* From in_camera.cpp */
-extern void 	DLLEXPORT CAM_Think( void );
-extern int 	DLLEXPORT CL_IsThirdPerson( void );
-extern void 	DLLEXPORT CL_CameraOffset( float *ofs );
+extern void 	CAM_Think( void );
+extern int 	CL_IsThirdPerson( void );
+extern void 	CL_CameraOffset( float *ofs );
 
-extern int DLLEXPORT HUD_AddEntity( int type, struct cl_entity_s *ent, const char *modelname );
-extern void DLLEXPORT HUD_CreateEntities( void );
-extern void DLLEXPORT HUD_StudioEvent( const struct mstudioevent_s *event, const struct cl_entity_s *entity );
-extern void DLLEXPORT HUD_TxferLocalOverrides( struct entity_state_s *state, const struct clientdata_s *client );
-extern void DLLEXPORT HUD_ProcessPlayerState( struct entity_state_s *dst, const struct entity_state_s *src );
-extern void DLLEXPORT HUD_TxferPredictionData ( struct entity_state_s *ps, const struct entity_state_s *pps, struct clientdata_s *pcd, const struct clientdata_s *ppcd, struct weapon_data_s *wd, const struct weapon_data_s *pwd );
-extern void DLLEXPORT HUD_TempEntUpdate( double frametime, double client_time, double cl_gravity, struct tempent_s **ppTempEntFree, struct tempent_s **ppTempEntActive, int ( *Callback_AddVisibleEntity )( struct cl_entity_s *pEntity ), void ( *Callback_TempEntPlaySound )( struct tempent_s *pTemp, float damp ) );
-extern struct cl_entity_s DLLEXPORT *HUD_GetUserEntity( int index );
+extern int HUD_AddEntity( int type, struct cl_entity_s *ent, const char *modelname );
+extern void HUD_CreateEntities( void );
+extern void HUD_StudioEvent( const struct mstudioevent_s *event, const struct cl_entity_s *entity );
+extern void HUD_TxferLocalOverrides( struct entity_state_s *state, const struct clientdata_s *client );
+extern void HUD_ProcessPlayerState( struct entity_state_s *dst, const struct entity_state_s *src );
+extern void HUD_TxferPredictionData ( struct entity_state_s *ps, const struct entity_state_s *pps, struct clientdata_s *pcd, const struct clientdata_s *ppcd, struct weapon_data_s *wd, const struct weapon_data_s *pwd );
+extern void HUD_TempEntUpdate( double frametime, double client_time, double cl_gravity, struct tempent_s **ppTempEntFree, struct tempent_s **ppTempEntActive, int ( *Callback_AddVisibleEntity )( struct cl_entity_s *pEntity ), void ( *Callback_TempEntPlaySound )( struct tempent_s *pTemp, float damp ) );
+extern struct cl_entity_s *HUD_GetUserEntity(int index);
 
-extern void DLLEXPORT HUD_DrawNormalTriangles( void );
-extern void DLLEXPORT HUD_DrawTransparentTriangles( void );
+extern void HUD_DrawNormalTriangles( void );
+extern void HUD_DrawTransparentTriangles( void );
 
-extern void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams );
+extern void V_CalcRefdef( struct ref_params_s *pparams );
 
-extern void DLLEXPORT Demo_ReadBuffer( int size, unsigned char *buffer );
+extern void Demo_ReadBuffer( int size, unsigned char *buffer );
 
 }
 
@@ -309,7 +309,7 @@ HUD_GetHullBounds
   Engine calls this to enumerate player collision hulls, for prediction.  Return 0 if the hullnumber doesn't exist.
 ================================
 */
-int DLLEXPORT HUD_GetHullBounds( int hullnumber, float *mins, float *maxs )
+int HUD_GetHullBounds( int hullnumber, float *mins, float *maxs )
 {
 	int iret = 0;
 
@@ -343,7 +343,7 @@ HUD_ConnectionlessPacket
   size of the response_buffer, so you must zero it out if you choose not to respond.
 ================================
 */
-int DLLEXPORT HUD_ConnectionlessPacket( const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size )
+int HUD_ConnectionlessPacket( const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size )
 {
 	// Parse stuff from args
 	int max_buffer_size = *response_buffer_size;
@@ -357,22 +357,22 @@ int DLLEXPORT HUD_ConnectionlessPacket( const struct netadr_s *net_from, const c
 	return 0;
 }
 
-void DLLEXPORT HUD_PlayerMoveInit( struct playermove_s *ppmove )
+void HUD_PlayerMoveInit( struct playermove_s *ppmove )
 {
 	PM_Init( ppmove );
 }
 
-char DLLEXPORT HUD_PlayerMoveTexture( char *name )
+char HUD_PlayerMoveTexture( char *name )
 {
 	return PM_FindTextureType( name );
 }
 
-void DLLEXPORT HUD_PlayerMove( struct playermove_s *ppmove, int server )
+void HUD_PlayerMove( struct playermove_s *ppmove, int server )
 {
 	PM_Move( ppmove, server );
 }
 
-int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
+int Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 {
 	gEngfuncs = *pEnginefuncs;
 
@@ -457,7 +457,7 @@ so the HUD can reinitialize itself.
 ==========================
 */
 
-int DLLEXPORT HUD_VidInit( void )
+int HUD_VidInit( void )
 {
 	gHUD.VidInit();
 #ifdef USE_VGUI_FOR_GOLDSOURCE_SUPPORT
@@ -492,7 +492,7 @@ the hud variables.
 ==========================
 */
 
-void DLLEXPORT HUD_Init( void )
+void HUD_Init( void )
 {
 	InitInput();
 	gHUD.Init();
@@ -509,7 +509,7 @@ redraw the HUD.
 ===========================
 */
 
-int DLLEXPORT HUD_Redraw( float time, int intermission )
+int HUD_Redraw( float time, int intermission )
 {
 	gHUD.Redraw( time, intermission );
 
@@ -529,7 +529,7 @@ returns 1 if anything has been changed, 0 otherwise.
 ==========================
 */
 
-int DLLEXPORT HUD_UpdateClientData( client_data_t *pcldata, float flTime )
+int HUD_UpdateClientData( client_data_t *pcldata, float flTime )
 {
 	IN_Commands();
 
@@ -544,7 +544,7 @@ Called at start and end of demos to restore to "non"HUD state.
 ==========================
 */
 
-void DLLEXPORT HUD_Reset( void )
+void HUD_Reset( void )
 {
 	gHUD.VidInit();
 }
@@ -557,7 +557,7 @@ Called by engine every frame that client .dll is loaded
 ==========================
 */
 
-void DLLEXPORT HUD_Frame( double time )
+void HUD_Frame( double time )
 {
 #ifdef USE_VGUI_FOR_GOLDSOURCE_SUPPORT
 	if (!gViewPort)
@@ -575,7 +575,7 @@ Called when a player starts or stops talking.
 ==========================
 */
 
-void DLLEXPORT HUD_VoiceStatus( int entindex, qboolean bTalking )
+void HUD_VoiceStatus( int entindex, qboolean bTalking )
 {
 
 }
@@ -588,12 +588,12 @@ Called when a director event message was received
 ==========================
 */
 
-void DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf )
+void HUD_DirectorMessage( int iSize, void *pbuf )
 {
 	 gHUD.m_Spectator.DirectorMessage( iSize, pbuf );
 }
 
-void DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *gpMobileEngfuncs )
+void HUD_MobilityInterface( mobile_engfuncs_t *gpMobileEngfuncs )
 {
 	if( gpMobileEngfuncs->version != MOBILITY_API_VERSION )
 		return;

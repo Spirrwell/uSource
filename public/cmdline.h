@@ -5,14 +5,17 @@
  */
 #pragma once
 
-class CCommandLine
+#include "../common/common.h"
+
+class EXPORT CCommandLine
 {
 private:
 	char** m_argv;
 	int m_argc;
 	CCommandLine();
 	~CCommandLine();
-	friend CCommandLine& GlobalCommandLine();
+	friend EXPORT CCommandLine& GlobalCommandLine();
+
 public:
 	void Set(int argc, char** argv);
 
@@ -28,4 +31,4 @@ public:
 
 };
 
-CCommandLine& GlobalCommandLine();
+EXPORT CCommandLine& GlobalCommandLine();

@@ -27,15 +27,15 @@ typedef struct
 } MD5Context_t;
 
 
-void CRC32_Init( dword *pulCRC );
-byte CRC32_BlockSequence( byte *base, int length, int sequence );
-void CRC32_ProcessBuffer( dword *pulCRC, const void *pBuffer, int nBuffer );
-void CRC32_ProcessByte( dword *pulCRC, byte ch );
-dword CRC32_Final( dword pulCRC );
-void MD5Init( MD5Context_t *ctx );
-void MD5Update( MD5Context_t *ctx, const byte *buf, uint len );
-void MD5Final( byte digest[16], MD5Context_t *ctx );
-uint COM_HashKey( const char *string, uint hashSize );
-char *MD5_Print( byte hash[16] );
+EXPORT void CRC32_Init(dword* pulCRC);
+EXPORT byte CRC32_BlockSequence(byte* base, int length, int sequence);
+EXPORT void CRC32_ProcessBuffer(dword* pulCRC, const void* pBuffer, int nBuffer);
+EXPORT void CRC32_ProcessByte(dword* pulCRC, byte ch);
+EXPORT dword CRC32_Final(dword pulCRC);
+EXPORT void  MD5Init(MD5Context_t* ctx);
+EXPORT void  MD5Update(MD5Context_t* ctx, const byte* buf, uint len);
+EXPORT void  MD5Final(byte digest[16], MD5Context_t* ctx);
+EXPORT uint COM_HashKey(const char* string, uint hashSize);
+EXPORT char* MD5_Print(byte hash[16]);
 
 #endif // CRCLIB_H

@@ -4,6 +4,10 @@
  * 
  */ 
 
+// this needs to be included early here
+// otherwise you get a bunch of stupid syntax errors from this later
+#include <cmath>
+
 #include "game_shared.h"
 
 #include "public/appframework.h"

@@ -22,7 +22,7 @@
 #include "common.h"
 
 /* Different from the other classes as we're trying to replace the engine's zone allocator */
-class CZoneAllocator
+class EXPORT CZoneAllocator
 {
 public:
 	CZoneAllocator();
@@ -39,11 +39,15 @@ public:
 	virtual void Mem_PrintStats( void );
 };
 
-extern CZoneAllocator* g_pZoneAllocator;
+#ifdef LIBPUBLIC
+EXPORT extern CZoneAllocator* g_pZoneAllocator;
+#else
+IMPORT extern CZoneAllocator* g_pZoneAllocator;
+#endif
 
-CZoneAllocator& GlobalAllocator();
+EXPORT CZoneAllocator& GlobalAllocator();
 
-class IBaseMemoryAllocator
+class EXPORT IBaseMemoryAllocator
 {
 public:
 	virtual void* malloc(size_t sz) = 0;

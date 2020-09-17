@@ -15,24 +15,26 @@ GNU General Public License for more details.
 #ifndef AVI_H
 #define AVI_H
 
+#include "common.h"
+
 //
 // avikit.c
 //
-typedef struct movie_state_s  movie_state_t;
-int AVI_GetVideoFrameNumber( movie_state_t *Avi, float time );
-byte *AVI_GetVideoFrame( movie_state_t *Avi, int frame );
-qboolean AVI_GetVideoInfo( movie_state_t *Avi, int *xres, int *yres, float *duration );
-qboolean AVI_GetAudioInfo( movie_state_t *Avi, wavdata_t *snd_info );
-int AVI_GetAudioChunk( movie_state_t *Avi, char *audiodata, int offset, int length );
-void AVI_OpenVideo( movie_state_t *Avi, const char *filename, qboolean load_audio, int quiet );
-movie_state_t *AVI_LoadVideo( const char *filename, qboolean load_audio );
-int AVI_TimeToSoundPosition( movie_state_t *Avi, int time );
-int AVI_GetVideoFrameCount( movie_state_t *Avi );
-void AVI_CloseVideo( movie_state_t *Avi );
-qboolean AVI_IsActive( movie_state_t *Avi );
-void AVI_FreeVideo( movie_state_t *Avi );
-movie_state_t *AVI_GetState( int num );
-qboolean AVI_Initailize( void );
-void AVI_Shutdown( void );
+typedef struct movie_state_s movie_state_t;
+EXPORT int			    AVI_GetVideoFrameNumber(movie_state_t* Avi, float time);
+byte*   AVI_GetVideoFrame(movie_state_t* Avi, int frame);
+EXPORT qboolean AVI_GetVideoInfo(movie_state_t* Avi, int* xres, int* yres, float* duration);
+EXPORT qboolean AVI_GetAudioInfo(movie_state_t* Avi, wavdata_t* snd_info);
+EXPORT int	AVI_GetAudioChunk(movie_state_t* Avi, char* audiodata, int offset, int length);
+EXPORT void	AVI_OpenVideo(movie_state_t* Avi, const char* filename, qboolean load_audio, int quiet);
+EXPORT movie_state_t* AVI_LoadVideo(const char* filename, qboolean load_audio);
+EXPORT int	      AVI_TimeToSoundPosition(movie_state_t* Avi, int time);
+EXPORT int	      AVI_GetVideoFrameCount(movie_state_t* Avi);
+EXPORT void	      AVI_CloseVideo(movie_state_t* Avi);
+EXPORT qboolean	      AVI_IsActive(movie_state_t* Avi);
+EXPORT void	      AVI_FreeVideo(movie_state_t* Avi);
+EXPORT movie_state_t* AVI_GetState(int num);
+EXPORT qboolean	      AVI_Initailize(void);
+EXPORT void	      AVI_Shutdown(void);
 
 #endif // AVI_H

@@ -16,7 +16,9 @@
 #include <vector>
 #include <stdio.h>
 
-class KeyValues
+#include "../common/common.h"
+
+class EXPORT KeyValues
 {
 public:
 	struct key_t

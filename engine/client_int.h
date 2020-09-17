@@ -317,7 +317,7 @@ typedef struct cl_enginefuncs_s
 #define ICLIENTINTERFACE_001 "IClientInterface001"
 #define ICLIENTINTERFACE_INTERFACE ICLIENTINTERFACE_001
 
-class IClientInterface : public IAppInterface
+class EXPORT IClientInterface : public IAppInterface
 {
 public:
 	virtual int	Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion ) = 0;

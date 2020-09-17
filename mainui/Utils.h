@@ -53,7 +53,7 @@ extern ui_globalvars_t		*gpGlobals;
 
 // exports
 extern int UI_VidInit( void );
-extern void UI_Init( void );
+EXPORT extern void UI_Init(void);
 extern void UI_Shutdown( void );
 extern void UI_UpdateMenu( float flTime );
 extern void UI_KeyEvent( int key, int down );
@@ -154,7 +154,7 @@ int colorstrcmp( const char *a, const char *b );
 extern int ColorStrlen( const char *str );	// returns string length without color symbols
 extern int ColorPrexfixCount( const char *str );
 extern const unsigned int g_iColorTable[8];
-extern void COM_FileBase( const char *in, char *out );		// ripped out from hlsdk 2.3
+EXPORT extern void	  COM_FileBase(const char* in, char* out); // ripped out from hlsdk 2.3
 extern int UI_FadeAlpha( int starttime, int endtime );
 extern const char *Info_ValueForKey( const char *s, const char *key );
 extern int KEY_GetKey( const char *binding );			// ripped out from engine
@@ -171,7 +171,7 @@ void UI_FreeCustomStrings( void );
 #define register
 #endif // __APPLE__
 
-inline size_t Q_strncpy( char *dst, const char *src, size_t size )
+EXPORT inline size_t Q_strncpy(char* dst, const char* src, size_t size)
 {
 	char	*d = dst;
 	const char	*s = src;

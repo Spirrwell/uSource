@@ -17,13 +17,13 @@ typedef enum { false, true }	qboolean;
 typedef int qboolean;
 #endif
 
-#if _MSC_VER == 1200
+/*#if _MSC_VER == 1200
 typedef __int64 integer64; //msvc6
 #elif defined (XASH_SDL) && !defined(REF_DLL)
 typedef Uint64 integer64;
-#else
+#else*/
 typedef unsigned long long integer64;
-#endif
+// #endif
 typedef integer64 longtime_t;
 
 typedef unsigned int	dword;

@@ -78,7 +78,7 @@ namespace xprof
 	}
 }
 
-class CXProf
+class EXPORT CXProf
 {
 private:
 	List<class CXProfNode*> m_nodes;
@@ -146,7 +146,7 @@ private:
 	void DumpNodeTreeInternal(class CXProfNode* node, int indent, int(*printFn)(const char*,...) = printf);
 };
 
-class CXProfNode
+class EXPORT CXProfNode
 {
 private:
 	CXProfNode* m_parent; /* Pointer to the node that is one above this, or null */
@@ -237,11 +237,16 @@ public:
 	Array<CXProfTest> TestQueue() const;
 };
 
-extern CXProf* g_pXProf;
-CXProf& GlobalXProf();
+#ifdef LIBPUBLIC
+EXPORT extern CXProf* g_pXProf;
+#else
+IMPORT extern CXProf* g_pXProf;
+#endif
+
+EXPORT CXProf& GlobalXProf();
 
 /* defined in header to avoid cross DLL calls */
-class CXProfTest
+class EXPORT CXProfTest
 {
 public:
 	CXProfNode* node;
@@ -253,14 +258,14 @@ public:
 	{
 		m_disabled = !g_pXProf->Enabled();
 		this->node = node;
-		start = platform::GetCurrentTime();
+		// start = platform::GetCurrentTime();
 		g_pXProf->PushNode(node);
 	}
 
 	~CXProfTest()
 	{
 		if(m_disabled) return;
-		stop = platform::GetCurrentTime();
+		// stop = platform::GetCurrentTime();
 		this->node->SubmitTest(this);
 		g_pXProf->PopNode();
 	}

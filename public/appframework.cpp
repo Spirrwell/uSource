@@ -80,12 +80,12 @@ void AppFramework::ClearCustomFunctions()
 #endif 
 }
 
-void* _LoadLibraryA(const char* lib)
+EXPORT void* _LoadLibraryA(const char* lib)
 {
 	return g_load_library(lib);
 }
 
-void _FreeLibrary(void* lib)
+EXPORT void _FreeLibrary(void* lib)
 {
 	g_free_library(lib);
 }

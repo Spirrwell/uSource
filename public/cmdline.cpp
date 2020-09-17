@@ -81,7 +81,7 @@ float CCommandLine::FindFloat(const char *arg, float _default)
 	return _default;
 }
 
-CCommandLine &GlobalCommandLine()
+EXPORT CCommandLine& GlobalCommandLine()
 {
 	static CCommandLine g_cmdline;
 	return g_cmdline;
