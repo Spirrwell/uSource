@@ -310,7 +310,7 @@ static void WIN_SetDPIAwareness( void )
 
 	if( ( hModule = LoadLibrary( "shcore.dll" ) ) )
 	{
-		if( ( pSetProcessDpiAwareness = (void*)GetProcAddress( hModule, "SetProcessDpiAwareness" ) ) )
+		if( ( pSetProcessDpiAwareness = (HRESULT (__stdcall*)(XASH_DPI_AWARENESS))GetProcAddress( hModule, "SetProcessDpiAwareness" ) ) )
 		{
 			// I hope SDL don't handle WM_DPICHANGED message
 			HRESULT hResult = pSetProcessDpiAwareness( XASH_SYSTEM_DPI_AWARE );
@@ -335,7 +335,7 @@ static void WIN_SetDPIAwareness( void )
 
 		if( ( hModule = LoadLibrary( "user32.dll" ) ) )
 		{
-			if( ( pSetProcessDPIAware = ( void* )GetProcAddress( hModule, "SetProcessDPIAware" ) ) )
+			if( ( pSetProcessDPIAware = (BOOL (__stdcall*)())GetProcAddress( hModule, "SetProcessDPIAware" ) ) )
 			{
 				// I hope SDL don't handle WM_DPICHANGED message
 				BOOL hResult = pSetProcessDPIAware();

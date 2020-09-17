@@ -432,7 +432,7 @@ static qboolean R_LoadProgs( const char *name )
 	if( ref.hInstance ) R_UnloadProgs();
 
 	FS_AllowDirectPaths( true );
-	if( !(ref.hInstance = COM_LoadLibrary( name, false, true ) ))
+	if (!(ref.hInstance = (HINSTANCE)COM_LoadLibrary(name, false, true)))
 	{
 		FS_AllowDirectPaths( false );
 		return false;

@@ -30,6 +30,7 @@ GNU General Public License for more details.
 #include <direct.h>
 #include <process.h>
 #include <io.h>
+#include <malloc.h>
 #undef min
 #undef max
 #else

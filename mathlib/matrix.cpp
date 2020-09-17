@@ -14,6 +14,7 @@ GNU General Public License for more details.
 */
 
 #include "mathlib/mathlib.h"
+#include <cmath>
 
 const matrix3x4 matrix3x4_identity =
 	{

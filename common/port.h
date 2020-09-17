@@ -87,6 +87,7 @@ GNU General Public License for more details.
 		int x, y;
 	} POINT;
 #else // WIN32
+	#include <io.h>
 	#define PATH_SPLITTER "\\"
 	#ifdef __MINGW32__
 		#define _inline static inline

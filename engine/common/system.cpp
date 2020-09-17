@@ -321,7 +321,7 @@ void* Sys_GetProcAddress( dll_info_t *dll, const char* name )
 	if( !dll || !dll->link ) // invalid desc
 		return NULL;
 
-	return (void *)GetProcAddress( dll->link, name );
+	return (void *)GetProcAddress( (HMODULE)dll->link, name );
 }
 
 qboolean Sys_FreeLibrary( dll_info_t *dll )
@@ -338,7 +338,7 @@ qboolean Sys_FreeLibrary( dll_info_t *dll )
 	}
 	else Con_Reportf( "Sys_FreeLibrary: Unloading %s\n", dll->name );
 
-	FreeLibrary( dll->link );
+	FreeLibrary( (HMODULE)dll->link );
 	dll->link = NULL;
 
 	return true;

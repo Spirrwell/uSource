@@ -173,7 +173,7 @@ static void stack_trace( PEXCEPTION_POINTERS pInfo )
 	}
 #ifdef XASH_SDL
 	if( host.type != HOST_DEDICATED ) // let system to restart server automaticly
-		SDL_ShowSimpleMessageBox( SDL_MESSAGEBOX_ERROR,"Sys_Crash", message, host.hWnd );
+		SDL_ShowSimpleMessageBox( SDL_MESSAGEBOX_ERROR,"Sys_Crash", message, (SDL_Window*)host.hWnd );
 #endif
 	Sys_PrintLog(message);
 

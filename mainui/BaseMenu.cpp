@@ -844,6 +844,8 @@ void UI_SetActiveMenu( int fActive )
 #if defined _WIN32
 #include <windows.h>
 #include <winbase.h>
+#undef DrawText
+
 /*
 ================
 Sys_DoubleTime

@@ -203,7 +203,7 @@ qboolean AVI_ACMConvertAudio( movie_state_t *Avi )
 	}
 
 	// get the size of the output buffer for streaming the compressed audio
-	if( pacmStreamSize( Avi->cpa_conversion_stream, Avi->cpa_blockalign, &dest_length, ACM_STREAMSIZEF_SOURCE ) != MMSYSERR_NOERROR )
+	if( pacmStreamSize( Avi->cpa_conversion_stream, Avi->cpa_blockalign, (LPDWORD)&dest_length, ACM_STREAMSIZEF_SOURCE ) != MMSYSERR_NOERROR )
 	{
 		if( !Avi->quiet )
 			Con_Reportf( S_ERROR "Couldn't get ACM conversion stream size.\n" );
@@ -665,7 +665,7 @@ movie_state_t *AVI_LoadVideo( const char *filename, qboolean load_audio )
 		return NULL;
 	}
 
-	Avi = Mem_Malloc( cls.mempool, sizeof( movie_state_t ));
+	Avi = (movie_state_t*)Mem_Malloc(cls.mempool, sizeof(movie_state_t));
 	AVI_OpenVideo( Avi, fullpath, load_audio, false );
 
 	if( !AVI_IsActive( Avi ))

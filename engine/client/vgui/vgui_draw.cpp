@@ -277,11 +277,11 @@ void VGui_Startup( const char *clientlib, int width, int height )
 		if( !vguiloader[0] && !Sys_GetParmFromCmdLine( "-vguiloader", vguiloader ) )
 			Q_strncpy( vguiloader, VGUI_SUPPORT_DLL, 256 );
 
-		s_pVGuiSupport = COM_LoadLibrary( vguiloader, false, false );
+		s_pVGuiSupport = (HINSTANCE)COM_LoadLibrary( vguiloader, false, false );
 
 		if( !s_pVGuiSupport )
 		{
-			s_pVGuiSupport = COM_LoadLibrary( va( "../%s", vguiloader ), false, false );
+			s_pVGuiSupport = (HINSTANCE)COM_LoadLibrary(va("../%s", vguiloader), false, false);
 		}
 
 		if( !s_pVGuiSupport )

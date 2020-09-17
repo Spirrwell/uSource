@@ -2794,7 +2794,7 @@ void pfnGetMousePos( struct tagPOINT *ppt )
 	if( !ppt )
 		return;
 
-	Platform_GetMousePos( &ppt->x, &ppt->y );
+	Platform_GetMousePos( (int*)&ppt->x, (int*)&ppt->y );
 }
 
 /*

@@ -29,6 +29,7 @@ GNU General Public License for more details.
 #include <stdarg.h>
 
 #ifdef _WIN32
+#include <direct.h>
 #define chdir _chdir
 #endif
 
