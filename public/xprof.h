@@ -258,14 +258,14 @@ public:
 	{
 		m_disabled = !g_pXProf->Enabled();
 		this->node = node;
-		// start = platform::GetCurrentTime();
+		start = platform::GetCurrentTime();
 		g_pXProf->PushNode(node);
 	}
 
 	~CXProfTest()
 	{
 		if(m_disabled) return;
-		// stop = platform::GetCurrentTime();
+		stop = platform::GetCurrentTime();
 		this->node->SubmitTest(this);
 		g_pXProf->PopNode();
 	}

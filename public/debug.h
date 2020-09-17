@@ -14,7 +14,7 @@
 
 BEGIN_DBG_NAMESPACE
 
-void Init();
+EXPORT void Init();
 
 class EXPORT CAssert
 {
