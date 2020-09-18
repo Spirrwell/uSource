@@ -147,7 +147,7 @@ CThreadSpinlock::CThreadSpinlock()
 	unsigned int f = 0;
 	__atomic_store(&m_atomicFlag, &f, __ATOMIC_RELAXED);
 #else
-
+	InterlockedExchange(&m_atomicFlag, 0);
 #endif
 }
 
@@ -160,7 +160,7 @@ void CThreadSpinlock::Lock()
 #ifdef __GNUC__
 	while(__sync_bool_compare_and_swap(&m_atomicFlag, 0, 1)) {};
 #else
-
+	while(InterlockedCompareExchange(&m_atomicFlag, 1, 0)) {};
 #endif
 }
 
@@ -169,7 +169,7 @@ bool CThreadSpinlock::TryLock()
 #ifdef __GNUC__
 	return __sync_bool_compare_and_swap(&m_atomicFlag, 0, 1);
 #else
-
+	return InterlockedCompareExchange(&m_atomicFlag, 1, 0);
 #endif
 }
 
@@ -178,7 +178,7 @@ void CThreadSpinlock::Unlock()
 #ifdef __GNUC__
 	__sync_bool_compare_and_swap(&m_atomicFlag, 1, 0);
 #else
-
+	InterlockedCompareExchange(&m_atomicFlag, 0, 1);
 #endif
 }
 
@@ -199,7 +199,7 @@ CThreadSemaphore::CThreadSemaphore(const char* name, int max, bool shared) :
 	if(shared)
 		m_sem = CreateSemaphoreExA(NULL, max, max, name, 0, 0);
 	else
-		m_sem = CreateSemaphoreA(NULL, max, max);
+		m_sem = CreateSemaphoreA(NULL, max, max, name);
 #else
 	if(shared)
 		m_sem = sem_open(name, O_CREAT);
