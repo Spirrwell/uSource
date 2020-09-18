@@ -14,6 +14,10 @@ GNU General Public License for more details.
 */
 #pragma once
 
+#ifdef _WIN32
+#include <malloc.h>
+#endif
+
 #include <stdarg.h>
 #include "build.h"
 #include "containers/string.h"
