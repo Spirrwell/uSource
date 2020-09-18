@@ -45,6 +45,8 @@ xprof.h - Realtime profiling
 /* XProf Flags */
 #define XPROF_DUMP_ON_EXIT (1<<0)
 
+#undef GetCurrentTime
+
 namespace xprof
 {
 	constexpr inline unsigned long long SecondsToNs(unsigned long long sec)
