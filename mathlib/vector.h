@@ -14,6 +14,10 @@ typedef float vec_t;
 #include <stdio.h>
 #include <math.h>
 
+#ifndef M_PI
+#define M_PI 3.1415926535f
+#endif
+
 #if defined(CLIENT_DLL) || defined(SERVER_DLL)
 
 
