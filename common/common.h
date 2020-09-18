@@ -100,6 +100,7 @@ static bool ColorIndex(char c) { return (c - '0') & 7; };
 #ifdef __i386__
 #define EXPORT __attribute__ ((visibility ("default"),force_align_arg_pointer))
 #define GAME_EXPORT __attribute((force_align_arg_pointer))
+#define IMPORT
 #else
 #define EXPORT __attribute__ ((visibility ("default")))
 #define GAME_EXPORT
