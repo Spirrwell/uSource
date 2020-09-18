@@ -157,7 +157,6 @@ static void Sys_LoadInterfaces()
 		{
 			char fileName[128];
 			Q_FileName(k.Value(), fileName, sizeof(fileName));
-			char filePath[255];
 			Q_BaseDirectory(k.Value(), filePath, sizeof(filePath));
 			/* I know the %s%s%s%s%s format seems kinda funny, but hey. It works. */
 			Q_snprintf(finalFile, sizeof(finalFile), "%s%s%s%s.%s", filePath, PATH_SEPARATOR, OS_LIB_PREFIX, fileName, OS_LIB_EXT);
