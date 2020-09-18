@@ -14,6 +14,9 @@
 #include "public/containers/string.h"
 #include "eiface.h"
 
+#include "com_image.h"
+#include "com_sound.h"
+
 #define IENGINETRACE_001 "IEngineTrace001"
 #define IENGINETRACE_INTERFACE IENGINETRACE_001
 
@@ -28,7 +31,8 @@
 #define IENGINEMALLOC_INTERFACE IENGINEMALLOC_001
 
 #define IENGINEFILESYSTEM_001 "IEngineFilesystem001"
-#define IENGINEFILESYSTEM_INTERFACE IENGINEFILESYSTEM_001
+#define IENGINEFILESYSTEM_002 "IEngineFilesystem002"
+#define IENGINEFILESYSTEM_INTERFACE IENGINEFILESYSTEM_002
 
 #define IENGINEDEBUG_001 "IEngineDebug001"
 #define IENGINEDEBUG_INTERFACE IENGINEDEBUG_001
@@ -76,15 +80,30 @@ public:
 	virtual void HostError(const char* fmt) = 0;
 };
 
+typedef void* FileHandle_t;
+
 class IEngineFilesystem : public IAppInterface
 {
 public:
-	virtual FILE* OpenFile(const char* path, const char* mode, bool gamedironly = false) = 0;
-	virtual void CloseFile(FILE* file) = 0;
 	virtual size_t FileSize(const char* file, bool gamedironly = false) = 0;
 	virtual bool FileExists(const char* file, bool gamedironly = false) = 0;
 	virtual void AddSearchPath(const char* dir) = 0;
 	virtual String GetFullPath(const char* file, bool gamedironly = false) = 0;
+
+	virtual FileHandle_t OpenFile(const char* path, const char* mode, bool gamedironly = false) = 0;
+	virtual void CloseFile(FileHandle_t handle) = 0;
+	virtual uint64_t Tell(FileHandle_t handle) = 0;
+	virtual bool Seek(FileHandle_t handle, size_t offset, int whence) = 0;
+	virtual char GetC(FileHandle_t handle) = 0;
+	virtual uint64_t Read(FileHandle_t handle, void* buf, size_t bufsize) = 0;
+	virtual char GetS(FileHandle_t handle, char* str, size_t strsize) = 0;
+	virtual int FileTime(const char* file, bool gamedironly = false) = 0;
+
+	/* Special load funcs */
+	virtual rgbdata_t* LoadImage(const char* img) = 0;
+	virtual wavdata_t* LoadSound(const char* snd) = 0;
+	virtual void FreeImage(rgbdata_t* img) = 0;
+	virtual void FreeSound(wavdata_t* wav) = 0;
 };
 
 class IEngineTrace : public IAppInterface

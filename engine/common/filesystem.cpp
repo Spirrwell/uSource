@@ -3783,40 +3783,56 @@ public:
 	virtual const char* GetParentInterface() { return IENGINEFILESYSTEM_INTERFACE; };
 	virtual const char* GetName() { return "CEngineFilesystem001"; };
 
-	virtual FILE* OpenFile(const char* path, const char* mode, bool gamedironly = false)
+	virtual FileHandle_t OpenFile(const char* path, const char* mode, bool gamedironly = false)
 	{
-		int index;
-		searchpath_t* _path = FS_FindFile(path, &index, gamedironly);
-
-		if(!_path) return nullptr;
-
-		char buf[512];
-		Q_snprintf(buf, sizeof(buf), "%s%s", _path->filename, path);
-		return fopen(buf, mode);
+		return (FileHandle_t)FS_Open(path, mode, gamedironly);
 	}
 
-	virtual void CloseFile(FILE* file)
+	virtual void CloseFile(FileHandle_t handle)
 	{
-		Assert(file != nullptr);
-		fclose(file);
+		FS_Close((file_t*)handle);
+
+	}
+
+	virtual uint64_t Tell(FileHandle_t handle)
+	{
+		return FS_Tell((file_t*)handle);
+	}
+
+	virtual bool Seek(FileHandle_t handle, uint64_t offset, int whence)
+	{
+		return FS_Seek((file_t*)handle, offset, whence) != -1;
+	}
+
+	virtual char GetC(FileHandle_t handle)
+	{
+		return FS_Getc((file_t*)handle);
+	}
+
+	virtual uint64_t Read(FileHandle_t handle, void* buf, uint64_t bufsize)
+	{
+		return FS_Read((file_t*)handle, buf, bufsize);
+	}
+
+	virtual char GetS(FileHandle_t handle, char* str, uint64_t strsize)
+	{
+		return (char)FS_Gets((file_t*)handle, reinterpret_cast<byte *>(str), strsize);
+	}
+
+	virtual int FileTime(const char* file, bool gamedironly = false)
+	{
+		return FS_FileTime(file, gamedironly);
 	}
 
 	virtual size_t FileSize(const char* file, bool gamedironly = false)
 	{
-		FILE* fs = this->OpenFile(file, "r", gamedironly);
-		if(!fs) return 0;
-
-		fseek(fs, 0, SEEK_END);
-		size_t sz = ftell(fs);
-		fclose(fs);
-		return sz;
+		return FS_FileSize(file, gamedironly);
 	}
 
 	virtual bool FileExists(const char* file, bool casesensitive = false)
 	{
 		return (bool)FS_FileExists(file, casesensitive);
 	}
-
 
 	virtual void AddSearchPath(const char* dir)
 	{
@@ -3841,6 +3857,25 @@ public:
 		return ret;
 	}
 
+	virtual rgbdata_t* LoadImage(const char* img)
+	{
+		return FS_LoadImage(img, nullptr, 0);
+	}
+
+	virtual wavdata_t* LoadSound(const char* snd)
+	{
+		return FS_LoadSound(snd, nullptr, 0);
+	}
+
+	virtual void FreeImage(rgbdata_t* img)
+	{
+		FS_FreeImage(img);
+	}
+
+	virtual void FreeSound(wavdata_t* wav)
+	{
+		FS_FreeSound(wav);
+	}
 };
 
 EXPOSE_INTERFACE(CEngineFilesystem);

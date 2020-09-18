@@ -40,6 +40,8 @@ XASH SPECIFIC			- sort of hack that works only in Xash3D not in GoldSrc
 /* Interface includes */
 #include "log_int.h"
 
+#include "com_sound.h"
+
 #include <stdio.h>
 #include <stdlib.h> // rand, adbs
 #include <stdarg.h> // va
@@ -646,19 +648,6 @@ typedef enum
 	SOUND_RESAMPLE	= BIT(12),	// resample sound to specified rate
 	SOUND_CONVERT16BIT	= BIT(13),	// change sound resolution from 8 bit to 16
 } sndFlags_t;
-
-typedef struct
-{
-	word	rate;		// num samples per second (e.g. 11025 - 11 khz)
-	byte	width;		// resolution - bum bits divided by 8 (8 bit is 1, 16 bit is 2)
-	byte	channels;		// num channels (1 - mono, 2 - stereo)
-	int	loopStart;	// offset at this point sound will be looping while playing more than only once
-	int	samples;		// total samplecount in wav
-	uint	type;		// compression type
-	uint	flags;		// misc sound flags
-	byte	*buffer;		// sound buffer
-	size_t	size;		// for bounds checking
-} wavdata_t;
 
 //
 // soundlib

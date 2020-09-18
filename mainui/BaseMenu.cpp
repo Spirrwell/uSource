@@ -1235,10 +1235,29 @@ void UI_Init( void )
 
 	/* Load the client scheme */
 	g_pClientScheme = new KeyValues();
-	FILE* clfs = g_pFilesystem->OpenFile("resource/ClientScheme.res", "r");
-	Assert(clfs);
-	g_pClientScheme->ParseFile(clfs);
-	g_pFilesystem->CloseFile(clfs);
+
+	/* TODO: Move this to use the tier1 file api when I finish it */
+	{
+		size_t fileSize = g_pFilesystem->FileSize("resource/ClientScheme.res");
+		FileHandle_t clfs = g_pFilesystem->OpenFile("resource/ClientScheme.res", "r");
+
+		AssertMsg(clfs, "Failed to open resource/ClientScheme.res");
+		if(clfs)
+		{
+
+			/* Alloc buffer */
+			char *buf = (char *) Q_malloc(fileSize + 1);
+			g_pFilesystem->Read(clfs, buf, fileSize);
+			buf[fileSize] = 0;
+
+			/* Parse */
+			g_pClientScheme->ParseString(buf, false, fileSize);
+
+			g_pFilesystem->CloseFile(clfs);
+			Q_free(buf);
+		}
+	}
+
 	AssertMsg(g_pClientScheme->IsGood(), "Parsing of resource/ClientScheme.res failed");
 
 	if(!g_pClientScheme->IsGood()) return;
