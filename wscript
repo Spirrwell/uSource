@@ -259,37 +259,38 @@ def configure(conf):
 	compiler_c_cxx_flags = {
 		'common': {
 			# disable thread-safe local static initialization for C++11 code, as it cause crashes on Windows XP
-			'msvc':    ['/D_USING_V110_SDK71_', '/Zi', '/FS', '/Zc:threadSafeInit-', '/MT', '/DENABLE_XPROF'],
+			'msvc':    ['/D_USING_V110_SDK71_', '/Zi', '/FS', '/Zc:threadSafeInit-', '/DENABLE_XPROF'],
 			'clang': ['-g', '-gdwarf-2', '-fvisibility=default', '-Wall', '-Wextra', '-Wno-unused-parameter', '-fpermissive', '-Wno-unused-function', '-DENABLE_XPROF'],
 			'gcc': ['-g', '-fvisibility=default', '-Wno-attributes', '-Wno-write-strings', '-Wall', '-Wextra', '-Wno-unused-parameter', '-fpermissive', '-Wno-unused-function', '-Wno-unused-variable', '-Wno-missing-field-initializers', '-Wno-invalid-offsetof', '-Wno-sign-compare', '-Wno-reorder', '-Wno-unknown-pragmas', '-DENABLE_XPROF']
 		},
 		'fast': {
-			'msvc':    ['/O2', '/Oy'], #todo: check /GL /LTCG
+			'msvc':    ['/O2', '/Oy', '/MT'], #todo: check /GL /LTCG
 			'gcc':     ['-Ofast', '-march=native', '-funsafe-math-optimizations', '-funsafe-loop-optimizations', '-fomit-frame-pointer'],
 			'clang':   ['-Ofast', '-march=native'],
 			'default': ['-O3']
 		},
 		'release': {
-			'msvc':    ['/O2'],
+			'msvc':    ['/O2', '/MT'],
 			'default': ['-O3']
 		},
 		'debug': {
-			'msvc':    ['/O1', '/DDEBUG', '/D_DEBUG', '/D_DEV'],
+			'msvc':    ['/O1', '/DDEBUG', '/D_DEBUG', '/D_DEV', '/MTd'],
 			'gcc':     ['-Og', '-DDEBUG=1', '-D_DEBUG=1', '-D_DEV=1'],
 			'default': ['-O1', '-DDEBUG=1', '-D_DEBUG=1', '-D_DEV=1']
 		},
 		'sanitize': {
-			'msvc':    ['/Od', '/RTC1'],
+			'msvc':    ['/Od', '/RTC1', '/MT'],
 			'gcc':     ['-Og', '-fsanitize=undefined', '-fsanitize=address'],
 			'clang':   ['-O0', '-fsanitize=undefined', '-fsanitize=address'],
 			'default': ['-O0']
 		},
 		'nooptimize': {
-			'msvc':    ['/Od'],
+			'msvc':    ['/Od', '/MT'],
 			'default': ['-O0']
 		},
 		'trace': {
 			'default': [],
+			'msvc': ['/MT'],
 			'clang': ['-fxray-instrument']
 		}
 	}
