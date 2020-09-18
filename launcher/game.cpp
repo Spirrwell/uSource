@@ -201,6 +201,10 @@ _inline int Sys_Start( void )
 {
 	int ret;
 
+	/* Initialization for libpublic */
+	GlobalCommandLine().Set(szArgc, szArgv);
+	dbg::Init();
+
 	/* Launching with the editor? */
 	if(GlobalCommandLine().Find("-editor"))
 	{
@@ -237,10 +241,6 @@ int main( int argc, char **argv )
 {
 	szArgc = argc;
 	szArgv = argv;
-
-	/* Initialization for libpublic */
-	GlobalCommandLine().Set(argc, argv);
-	dbg::Init();
 
 	return Sys_Start();
 }
