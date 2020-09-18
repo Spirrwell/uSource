@@ -46,7 +46,10 @@ GNU General Public License for more details.
 #include "xprof.h"
 #include "cmdline.h"
 #include "tier1/concommand.h"
+
+#ifdef ENABLE_RCSYS
 #include "rcs/rcs.h"
+#endif
 
 /* Interface includes */
 #include "log_int.h"
@@ -1029,8 +1032,10 @@ extern "C" int EXPORT Host_Main( int argc, char **argv, const char *progname, in
 	HTTP_Init();
 	ID_Init();
 
+#ifdef ENABLE_RCSYS
 	rcs::Init();
-
+#endif
+	
 	if( Host_IsDedicated() )
 	{
 #ifdef _WIN32
