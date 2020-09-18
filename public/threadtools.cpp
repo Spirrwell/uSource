@@ -1,8 +1,5 @@
 #ifdef _WIN32
-#undef _WIN32_WINNT
-#define _WIN32_WINNT 0x600 /* ugh for mingw */
-#include <windows.h>
-#include <fileapi.h>
+#include "winplatform.h"
 #endif
 
 #include "threadtools.h"

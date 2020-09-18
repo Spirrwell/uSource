@@ -6,7 +6,7 @@
 #pragma once
 
 #ifdef _WIN32
-#include <synchapi.h>
+#include "winplatform.h"
 #else
 #include <unistd.h>
 #include <pthread.h>
