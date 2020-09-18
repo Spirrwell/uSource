@@ -1,3 +1,10 @@
+#ifdef _WIN32
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0x600 /* ugh for mingw */
+#include <windows.h>
+#include <fileapi.h>
+#endif
+
 #include "threadtools.h"
 
 #ifdef _POSIX
@@ -7,8 +14,6 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <signal.h>
-#else
-#include <windows.h>
 #endif
 
 #include <stdio.h>
