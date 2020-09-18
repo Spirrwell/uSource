@@ -8,7 +8,7 @@
 #include "common.h"
 #include "mod_local.h"
 #include "imagelib/imagelib.h"
-#include "mem.h"
+#include "public/mem.h"
 
 /* cgltf includes */
 #define CGLTF_IMPLEMENTATION
