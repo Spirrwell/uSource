@@ -4,6 +4,7 @@
  *
  */ 
 #include "keyvalues.h"
+#include "mem.h"
 
 #include <memory.h>
 #include <stdlib.h>
@@ -68,10 +69,11 @@ void KeyValues::ParseFile(FILE* fs, bool use_esc_codes)
 
 	/* Read the entire file */
 	char* buffer = static_cast<char*>(Q_malloc(size + 1));
+	memset(buffer, 0, size);
 	fseek(fs, 0, SEEK_SET);
 	fread(buffer, size, 1, fs);
 	buffer[size] = 0;
-	
+
 	this->ParseString(buffer, use_esc_codes, size);
 
 	/* Free the allocated buffer */
@@ -95,6 +97,7 @@ void KeyValues::ParseFile(const char *file, bool use_escape_codes)
 
 	/* Read the entire file */
 	char* buffer = static_cast<char*>(Q_malloc(size + 1));
+	memset(buffer, 0, size);
 	fseek(fs, 0, SEEK_SET);
 	fread(buffer, size, 1, fs);
 	fclose(fs);
@@ -140,6 +143,12 @@ void KeyValues::ParseString(const char* string, bool escape, long long len)
 	for(int i = 0; i < nlen; i++, nchar++)
 	{
 		c = string[i];
+
+		if (c == '\0')
+		{
+			break;
+		}
+		
 		if(i > 0) pc = string[i-1];
 		if(i < nlen-1) nc = string[i+1];
 
