@@ -32,6 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "public/containers/array.h"
 #include "tier1/concommand.h"
 #include "crtlib.h"
+#include "tier1/vfs.h"
 
 #define ART_MINIMIZE_N	"gfx/shell/min_n"
 #define ART_MINIMIZE_F	"gfx/shell/min_f"
@@ -196,9 +197,10 @@ void CMenuMain::_Init( void )
 	this->pMainMenuScheme = new KeyValues();
 	
 	/* Try to parse the main menu scheme */
-	FILE* scheme = g_pFilesystem->OpenFile("resource/GameMenu.res", "r");
-	this->pMainMenuScheme->ParseFile(scheme);
-	g_pFilesystem->CloseFile(scheme);
+	char* fileBuf = fs::ReadFileToBuffer("resource/GameMenu.res");
+	this->pMainMenuScheme->ParseString(fileBuf);
+	fs::DestroyReadBuffer(fileBuf);
+
 	Assert(this->pMainMenuScheme->IsGood());
 
 	if( gMenu.m_gameinfo.trainmap[0] && stricmp( gMenu.m_gameinfo.trainmap, gMenu.m_gameinfo.startmap ) != 0 )

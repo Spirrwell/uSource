@@ -28,3 +28,4 @@ typedef integer64 longtime_t;
 
 typedef unsigned int	dword;
 typedef unsigned int	uint;
+typedef unsigned short  word;

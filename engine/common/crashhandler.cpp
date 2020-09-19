@@ -181,6 +181,7 @@ static void stack_trace( PEXCEPTION_POINTERS pInfo )
 }
 #endif //DBGHELP
 LPTOP_LEVEL_EXCEPTION_FILTER       oldFilter;
+
 long _stdcall Sys_Crash( PEXCEPTION_POINTERS pInfo )
 {
 	// save config

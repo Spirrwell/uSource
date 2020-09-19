@@ -64,8 +64,8 @@ GNU General Public License for more details.
 	#define SetCurrentDirectory( x )	(!chdir( x ))
 	#define FreeLibrary( x )			dlclose( x )
 	//#define MAKEWORD( a, b )			((short int)(((unsigned char)(a))|(((short int)((unsigned char)(b)))<<8)))
-	#define max( a, b )                 (((a) > (b)) ? (a) : (b))
-	#define min( a, b )                 (((a) < (b)) ? (a) : (b))
+	//#define max( a, b )                 (((a) > (b)) ? (a) : (b))
+	//#define min( a, b )                 (((a) < (b)) ? (a) : (b))
 	#define tell( a )					lseek(a, 0, SEEK_CUR)
 
 	typedef unsigned char	BYTE;
@@ -134,6 +134,7 @@ GNU General Public License for more details.
 #include <limits.h>
 
 #if defined XASH_SDL && !defined REF_DLL
+#include <algorithm>
 #include <SDL.h>
 #endif
 

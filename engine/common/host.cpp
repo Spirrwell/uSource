@@ -1035,7 +1035,7 @@ extern "C" int EXPORT Host_Main( int argc, char **argv, const char *progname, in
 #ifdef ENABLE_RCSYS
 	rcs::Init();
 #endif
-	
+
 	if( Host_IsDedicated() )
 	{
 #ifdef _WIN32

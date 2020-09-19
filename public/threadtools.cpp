@@ -1,3 +1,7 @@
+#ifdef _WIN32
+#include "winplatform.h"
+#endif
+
 #include "threadtools.h"
 
 #ifdef _POSIX
@@ -7,8 +11,6 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <signal.h>
-#else
-#include <windows.h>
 #endif
 
 #include <stdio.h>

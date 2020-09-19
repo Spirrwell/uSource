@@ -97,9 +97,11 @@ static bool IsColorString(const char* p) { return (( p && *( p ) == '^' && *(( p
 static bool ColorIndex(char c) { return (c - '0') & 7; };
 
 #if defined(__GNUC__)
+#define _stdcall __attribute__((stdcall))
 #ifdef __i386__
 #define EXPORT __attribute__ ((visibility ("default"),force_align_arg_pointer))
 #define GAME_EXPORT __attribute((force_align_arg_pointer))
+#define IMPORT
 #else
 #define EXPORT __attribute__ ((visibility ("default")))
 #define GAME_EXPORT
