@@ -128,7 +128,7 @@ static void Sys_LoadInterfaces()
 {
 	const char* game = GlobalCommandLine().FindString("-game");
 	if(!game) game = GAME_PATH;
-	char filePath[256];
+	static char filePath[256];
 	Q_snprintf(filePath, sizeof(filePath), "%s%sgameinfo.txt", game, PATH_SEPARATOR);
 
 	KeyValues kv;
@@ -262,6 +262,10 @@ int __stdcall WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR cmdLine, int 
 	}
 
 	LocalFree( lpArgv );
+
+	/* Initialization for libpublic */
+	GlobalCommandLine().Set(szArgc, szArgv);
+	dbg::Init();
 
 	ret = Sys_Start();
 
