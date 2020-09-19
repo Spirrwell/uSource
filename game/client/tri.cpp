@@ -19,8 +19,8 @@
 
 extern "C"
 {
-	void HUD_DrawNormalTriangles( void );
-	void HUD_DrawTransparentTriangles( void );
+	EXPORT void HUD_DrawNormalTriangles( void );
+	EXPORT void HUD_DrawTransparentTriangles( void );
 }
 
 //#define TEST_IT

@@ -61,21 +61,21 @@ int __MsgFunc_Bhopcap( const char *pszName, int iSize, void *pbuf )
 
 extern "C" 
 {
-int	Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion );
-int	HUD_VidInit( void );
-void	HUD_Init( void );
-int	HUD_Redraw( float flTime, int intermission );
-int	HUD_UpdateClientData( client_data_t *cdata, float flTime );
-void	HUD_Reset ( void );
-void	HUD_PlayerMove( struct playermove_s *ppmove, int server );
-void	HUD_PlayerMoveInit( struct playermove_s *ppmove );
-char	HUD_PlayerMoveTexture( char *name );
-int	HUD_ConnectionlessPacket( const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size );
-int	HUD_GetHullBounds( int hullnumber, float *mins, float *maxs );
-void	HUD_Frame( double time );
-void	HUD_VoiceStatus(int entindex, qboolean bTalking);
-void	HUD_DirectorMessage( int iSize, void *pbuf );
-void 	HUD_MobilityInterface( mobile_engfuncs_t *gpMobileEngfuncs );
+EXPORT int	Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion );
+EXPORT int	HUD_VidInit( void );
+EXPORT void	HUD_Init( void );
+EXPORT int	HUD_Redraw( float flTime, int intermission );
+EXPORT int	HUD_UpdateClientData( client_data_t *cdata, float flTime );
+EXPORT void	HUD_Reset ( void );
+EXPORT void	HUD_PlayerMove( struct playermove_s *ppmove, int server );
+EXPORT void	HUD_PlayerMoveInit( struct playermove_s *ppmove );
+EXPORT char	HUD_PlayerMoveTexture( char *name );
+EXPORT int	HUD_ConnectionlessPacket( const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size );
+EXPORT int	HUD_GetHullBounds( int hullnumber, float *mins, float *maxs );
+EXPORT void	HUD_Frame( double time );
+EXPORT void	HUD_VoiceStatus(int entindex, qboolean bTalking);
+EXPORT void	HUD_DirectorMessage( int iSize, void *pbuf );
+EXPORT void HUD_MobilityInterface( mobile_engfuncs_t *gpMobileEngfuncs );
 
 /* From in_camera.cpp */
 extern void 	CAM_Think( void );

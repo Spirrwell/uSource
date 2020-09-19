@@ -19,9 +19,9 @@ float CL_KeyState( kbutton_t *key );
 
 extern "C"
 {
-	void CAM_Think( void );
-	int  CL_IsThirdPerson( void );
-	void CL_CameraOffset( float *ofs );
+	EXPORT void CAM_Think( void );
+	EXPORT int  CL_IsThirdPerson( void );
+	EXPORT void CL_CameraOffset( float *ofs );
 }
 
 extern cl_enginefunc_t gEngfuncs;
