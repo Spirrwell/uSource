@@ -263,10 +263,6 @@ int __stdcall WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR cmdLine, int 
 
 	LocalFree( lpArgv );
 
-	/* Initialization for libpublic */
-	GlobalCommandLine().Set(szArgc, szArgv);
-	dbg::Init();
-
 	ret = Sys_Start();
 
 	for( ; i < szArgc; ++i )
