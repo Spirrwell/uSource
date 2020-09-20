@@ -352,3 +352,7 @@ CMakeLists.txt
 # More clangdb stuff
 compile_commands_*.json
 .clangd
+
+*.kdev4 
+cmake-build*
+
