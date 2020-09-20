@@ -8,7 +8,7 @@
  * 		 this will probably lead to memory fragmentation.
  * TODO: Improve the error handling
  * TODO: Add support for conditionals
- */ 
+ */
 #pragma once
 
 #undef min
@@ -63,10 +63,15 @@ private:
         bool quoted;
 public:
 
+	KeyValues(const KeyValues& kv);
+	KeyValues(KeyValues&& kv);
 	explicit KeyValues(const char* name);
 	KeyValues();
 
 	~KeyValues();
+
+	KeyValues& operator=(const KeyValues& kv);
+	KeyValues& operator=(KeyValues&& kv);
 
 	/* Getters */
 	bool 		GetBool(const char* key, bool _default = false);

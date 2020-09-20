@@ -2,7 +2,7 @@
  *
  * Key Values parser
  *
- */ 
+ */
 #include "keyvalues.h"
 #include "mem.h"
 
@@ -19,6 +19,29 @@
 inline bool _internal_isspace(char c)
 {
 	return (c == ' ' || c == '\t' || c == '\n' || c == '\r');
+}
+
+KeyValues::KeyValues(const KeyValues& kv)
+{
+	this->child_sections = kv.child_sections;
+	this->name = Q_strdup(kv.name);
+	this->good = kv.good;
+	this->quoted = kv.quoted;
+	this->keys = kv.keys;
+}
+
+KeyValues::KeyValues(KeyValues&& kv)
+{
+	this->child_sections = kv.child_sections;
+	this->name = kv.name;
+	this->good = kv.good;
+	this->quoted = kv.quoted;
+	this->keys = kv.keys;
+	kv.keys.clear();
+	kv.child_sections.clear();
+	kv.name = nullptr;
+	kv.quoted = false;
+	kv.good = false;
 }
 
 KeyValues::KeyValues(const char* name) :
@@ -102,7 +125,7 @@ void KeyValues::ParseFile(const char *file, bool use_escape_codes)
 	fread(buffer, size, 1, fs);
 	fclose(fs);
 	buffer[size] = 0;
-	
+
 	this->ParseString(buffer, use_escape_codes, size);
 
 	/* Free the allocated buffer */
@@ -113,7 +136,7 @@ void KeyValues::ParseFile(const char *file, bool use_escape_codes)
 void KeyValues::ParseString(const char* string, bool escape, long long len)
 {
 	XPROF_NODE(XPROF_CATEGORY_KVPARSE);
-	
+
 	int nline = 0, nchar = 0, bracket_level = 0;
 	bool inquote = false, incomment = false, parsed_key = false;
 	char buf[512];
@@ -148,7 +171,7 @@ void KeyValues::ParseString(const char* string, bool escape, long long len)
 		{
 			break;
 		}
-		
+
 		if(i > 0) pc = string[i-1];
 		if(i < nlen-1) nc = string[i+1];
 
@@ -328,7 +351,7 @@ void KeyValues::DumpToStreamInternal(FILE* fs, int indent)
 	for(auto key : this->keys)
         {
 	        if(key.quoted)
-                        fprintf(fs, "%s\"%s\" \"%s\"\n", buf, key.key, key.value); 
+                        fprintf(fs, "%s\"%s\" \"%s\"\n", buf, key.key, key.value);
                 else
                         fprintf(fs, "%s%s \"%s\"\n", buf, key.key, key.value);
         }
@@ -599,4 +622,29 @@ void KeyValues::RemoveKey(const char *key)
 void KeyValues::SetErrorCallback(KeyValues::pfnErrorCallback_t callback)
 {
 	this->pCallback = callback;
+}
+
+KeyValues& KeyValues::operator=(KeyValues&& kv)
+{
+	this->child_sections = kv.child_sections;
+	this->name = kv.name;
+	this->good = kv.good;
+	this->quoted = kv.quoted;
+	this->keys = kv.keys;
+	kv.keys.clear();
+	kv.child_sections.clear();
+	kv.name = nullptr;
+	kv.quoted = false;
+	kv.good = false;
+	return *this;
+}
+
+KeyValues& KeyValues::operator=(const KeyValues& kv)
+{
+	this->child_sections = kv.child_sections;
+	this->name = Q_strdup(kv.name);
+	this->good = kv.good;
+	this->quoted = kv.quoted;
+	this->keys = kv.keys;
+	return *this;
 }
