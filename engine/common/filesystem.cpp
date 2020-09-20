@@ -3809,12 +3809,12 @@ public:
 		return FS_Getc((file_t*)handle);
 	}
 
-	virtual uint64_t Read(FileHandle_t handle, void* buf, uint64_t bufsize)
+	virtual uint64_t Read(FileHandle_t handle, void* buf, size_t bufsize)
 	{
 		return FS_Read((file_t*)handle, buf, bufsize);
 	}
 
-	virtual char GetS(FileHandle_t handle, char* str, uint64_t strsize)
+	virtual char GetS(FileHandle_t handle, char* str, size_t strsize)
 	{
 		return (char)FS_Gets((file_t*)handle, reinterpret_cast<byte *>(str), strsize);
 	}

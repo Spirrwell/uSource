@@ -1,9 +1,9 @@
 /**
- * 
+ *
  * engine_int.h
- * 
+ *
  * Various interfaces used and exported by the engine itself
- * 
+ *
  */
 #pragma once
 
@@ -93,7 +93,7 @@ public:
 	virtual FileHandle_t OpenFile(const char* path, const char* mode, bool gamedironly = false) = 0;
 	virtual void CloseFile(FileHandle_t handle) = 0;
 	virtual uint64_t Tell(FileHandle_t handle) = 0;
-	virtual bool Seek(FileHandle_t handle, size_t offset, int whence) = 0;
+	virtual bool Seek(FileHandle_t handle, uint64_t offset, int whence) = 0;
 	virtual char GetC(FileHandle_t handle) = 0;
 	virtual uint64_t Read(FileHandle_t handle, void* buf, size_t bufsize) = 0;
 	virtual char GetS(FileHandle_t handle, char* str, size_t strsize) = 0;
@@ -120,8 +120,8 @@ public:
 
 /**
  * IEngineCvar
- * 	Provides console variable and command managment. This interface can be use either standalone, or with some type of adapter. 
- */ 
+ * 	Provides console variable and command managment. This interface can be use either standalone, or with some type of adapter.
+ */
 class IEngineCvar : public IAppInterface
 {
 public:
