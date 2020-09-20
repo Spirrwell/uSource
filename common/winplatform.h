@@ -21,7 +21,6 @@
 #undef CreateEvent
 #undef GetCurrentTime
 #undef LoadLibrary
-#undef
 
 
 #endif // _WIN32
