@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -195,11 +195,9 @@ void CMenuMain::HazardCourseCb()
 void CMenuMain::_Init( void )
 {
 	this->pMainMenuScheme = new KeyValues();
-	
+
 	/* Try to parse the main menu scheme */
-	char* fileBuf = fs::ReadFileToBuffer("resource/GameMenu.res");
-	this->pMainMenuScheme->ParseString(fileBuf);
-	fs::DestroyReadBuffer(fileBuf);
+	*this->pMainMenuScheme = fs::ReadKeyValues("resource/GameMenu.res");
 
 	Assert(this->pMainMenuScheme->IsGood());
 
@@ -229,7 +227,7 @@ void CMenuMain::_Init( void )
 			if(!section) break;
 			const char* localized = section->GetString("label");
 			const char* cmd = section->GetString("command");
-			
+
 			main_menu_button_t btndesc;
 			CMenuPicButton* btn = new CMenuPicButton();
 
@@ -241,6 +239,7 @@ void CMenuMain::_Init( void )
 			btn->SetPicture(PC_DISCONNECT); // ?
 			btn->iFlags |= QMF_NOTIFY;
 			btn->onReleased.SetCommand(TRUE, cmd);
+
 			btndesc.btn = btn;
 			btndesc.singleonly = section->GetBool("notmulti");
 			btndesc.gameonly = section->GetBool("OnlyInGame", false);
@@ -249,7 +248,6 @@ void CMenuMain::_Init( void )
 			AddItem(*btn);
 		}
 	}
-
 }
 
 /*
@@ -289,11 +287,16 @@ void CMenuMain::VidInit( bool connected )
 	int iheight = 640 - enabled_buttons * (fontHeight / (ScreenHeight / 640));
 	for(auto btn : this->m_buttons)
 	{
+		/* Don't display disabled buttons */
+		if(!btn.btn->IsVisible()) continue;
+
+		/* Calc text size, and button size based on this */
 		int w, h;
 		g_FontMgr->GetTextSize(this->font, btn.btn->szName, &w, &h);
-		if(!isGameLoaded && btn.gameonly) continue;
+
 		btn.btn->SetCoord(25, iheight);
 		btn.btn->SetRect(25, iheight, w, h);
+
 		iheight += fontHeight / (ScreenHeight / 640) + 10;
 		btn.btn->CalcPosition();
 	}

@@ -133,23 +133,6 @@ void CMenuPicButton::Draw( )
 {
 	int state = BUTTON_NOFOCUS;
 
-#ifdef CS16CLIENT
-	if( UI_CursorInRect( m_scPos, m_scSize ) &&
-		m_pParent && m_pParent->IsVisible() )
-	{
-		if( !bRollOver )
-		{
-			PlayLocalSound( uiSoundRollOver );
-			bRollOver = true;
-		}
-	}
-	else
-	{
-		if( bRollOver )
-			bRollOver = false;
-	}
-#endif // CS16CLIENT
-
 	if( iFlags & (QMF_HASMOUSEFOCUS|QMF_HASKEYBOARDFOCUS))
 	{
 		state = BUTTON_FOCUS;

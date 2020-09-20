@@ -9,7 +9,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -38,6 +38,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tier1/dbg.h"
 #include "tier1/concommand.h"
 #include "crtlib.h"
+#include "tier1/vfs.h"
 
 cvar_t		*ui_showmodels;
 cvar_t		*ui_show_window_stack;
@@ -686,7 +687,7 @@ void UI_UpdateMenu( float flTime )
 
 		uiStatic.firstDraw = false;
 		static int first = TRUE;
-                    
+
 		if( first )
 		{
 			// if game was launched with commandline e.g. +map or +load ignore the music
@@ -1076,7 +1077,7 @@ int UI_VidInit( void )
 	if( uiStatic.textInput )
 	{
 		uiStatic.menu.InputMethodResized();
-		
+
 		return 0;
 	}
 	UI_Precache ();
@@ -1094,7 +1095,7 @@ int UI_VidInit( void )
 		uiStatic.yOffset = 0;
 	}
 
-	
+
 	uiStatic.width = ScreenWidth / uiStatic.scaleX;
 	// move cursor to screen center
 	uiStatic.cursorX = ScreenWidth / 2;
@@ -1236,27 +1237,8 @@ void UI_Init( void )
 	/* Load the client scheme */
 	g_pClientScheme = new KeyValues();
 
-	/* TODO: Move this to use the tier1 file api when I finish it */
-	{
-		size_t fileSize = g_pFilesystem->FileSize("resource/ClientScheme.res");
-		FileHandle_t clfs = g_pFilesystem->OpenFile("resource/ClientScheme.res", "r");
-
-		AssertMsg(clfs, "Failed to open resource/ClientScheme.res");
-		if(clfs)
-		{
-
-			/* Alloc buffer */
-			char *buf = (char *) Q_malloc(fileSize + 1);
-			g_pFilesystem->Read(clfs, buf, fileSize);
-			buf[fileSize] = 0;
-
-			/* Parse */
-			g_pClientScheme->ParseString(buf, false, fileSize);
-
-			g_pFilesystem->CloseFile(clfs);
-			Q_free(buf);
-		}
-	}
+	/* Read the file */
+	*g_pClientScheme = fs::ReadKeyValues("resource/ClientScheme.res");
 
 	AssertMsg(g_pClientScheme->IsGood(), "Parsing of resource/ClientScheme.res failed");
 
