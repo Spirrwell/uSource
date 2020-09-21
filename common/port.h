@@ -90,12 +90,18 @@ GNU General Public License for more details.
 	#include <io.h>
 	#define PATH_SPLITTER "\\"
 	#ifdef __MINGW32__
+		#undef _inline
+		#undef FORCEINLINE
 		#define _inline static inline
 		#define FORCEINLINE inline __attribute__((always_inline))
 	#else
+		#undef FORCEINLINE
 		#define FORCEINLINE __forceinline
 	#endif
 
+	#undef open
+	#undef read
+	#undef alloca
 	#define open _open
 	#define read _read
 	#define alloca _alloca
