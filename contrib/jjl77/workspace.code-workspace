@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"name": "uSource",
+			"path": "."
+		},
+		{
+			"name": "Game",
+			"path": "../../../Games/uSource"
+		}
+	],
+	"settings": {
+		"python.pythonPath": "/usr/bin/python"
+	},
+	"launch": {
+		"configurations": [],
+		"compounds": []
+	}
+}

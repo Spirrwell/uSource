@@ -1,0 +1,46 @@
+{
+	// See https://go.microsoft.com/fwlink/?LinkId=733558
+	// for the documentation about the tasks.json format
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Configure - GCC",
+			"type": "shell",
+			"command": "./contrib/jjl77/configure.sh",
+			"problemMatcher": []
+		},
+		{
+			"label": "Configure - Clang",
+			"type": "shell",
+			"command": "./contrib/jjl77/configure-clang.sh"
+		},
+		{
+			"label": "Configure - Mingw",
+			"type": "shell",
+			"command": "./contrib/jjl77/configure-mingw.sh",
+			"problemMatcher": []
+		},
+		{
+			"label": "IDE Project Generation",
+			"type": "shell",
+			"command": "./contrib/jjl77/ide-clangdb.sh",
+			"problemMatcher": []
+		},
+		{
+			"label": "Build and Install",
+			"type": "shell",
+			"command": "./waf install --no-strip",
+			"problemMatcher": [
+				"$gcc"
+			]
+		},
+		{
+			"label": "Run Clang-Tidy",
+			"type": "shell",
+			"command": "./scripts/run-clang-tidy.sh",
+			"problemMatcher": [
+				"$gcc"
+			]
+		}
+	]
+}
