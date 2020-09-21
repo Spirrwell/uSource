@@ -10,8 +10,8 @@
  * static initialization is now a thing and it's used a LOT. Problem is, sometimes statically initialized objects
  * (such as cvars), depend on the engine's memory allocator internally, due to how the cvar system works.
  * Since the engine allocator isn't initialized like *as soon* as the program starts, we sometimes get engine crashes
- * with various tier1 utils, or other things.
- * - Jeremy L. Aug 8th, 2020
+ * with various tier1 utils, or other things. To fix this we've just moved the zone allocator here, which is a much better
+ * solution overall.
  */
 
 #pragma once
