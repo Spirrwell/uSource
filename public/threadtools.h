@@ -13,6 +13,8 @@
 #include <semaphore.h>
 #endif
 
+#include <atomic>
+
 #include "common.h"
 
 #if defined(_M_X86) || defined(__i386__)
@@ -49,82 +51,148 @@ class CThreadRAIILock;
 
 namespace threadtools
 {
+	/* Just wanted an explicit thing so we don't end up with someone using long as an atomic flag or something like that */
+	typedef uint32_t AtomicUInt;
+	typedef int32_t AtomicInt;
+	typedef uint32_t AtomicFlag;
+
 	/* Atomically swaps pointers, returning the old value of dst */
-	inline void* AtomicSwapPtr(void** dst, void* src)
+	static inline void* AtomicSwapPtr(void** dst, void* src)
 	{
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 		return (void*)__atomic_exchange_n(dst, src, __ATOMIC_RELAXED);
 #else
-
+		return (void*)InterlockedExchangePointer(dst, src);
 #endif
 	}
 
 	/* Atomically swaps integers, returns old value of dst */
-	inline int AtomicSwapInt(int* dst, int src)
+	static inline int AtomicSwapInt(int* dst, int src)
 	{
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 		return __atomic_exchange_n(dst, src, __ATOMIC_RELAXED);
 #else
-
+		return (int)InterlockedExchange(dst, src);
 #endif
 	}
 
-	inline void* AtomicGetPtr(void** atomic)
+	static inline void* AtomicGetPtr(void** atomic)
 	{
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 		return (void*)__atomic_load_n(atomic, __ATOMIC_RELAXED);
 #else
-
+	#ifdef XASH_64BIT
+		return (void*)InterlockedOr64(atomic, 0);
+	#else
+		return (void*)InterlockedOr(atomic, 0);
+	#endif
 #endif
 	}
 
 
-	inline int AtomicGetInt(int* atomic)
+	static inline int AtomicGetInt(int* atomic)
 	{
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 		return __atomic_load_n(atomic, __ATOMIC_RELAXED);
 #else
-
+		/* Note: we're using interlocked Or here because Windows doesn't provide a raw interlocked get function */
+		return (int)InterlockedOr(atomic, 0);
 #endif
 	}
 
-	inline int AtomicIncInt(int* atomic)
+	static inline int AtomicIncInt(int* atomic)
 	{
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 		return __atomic_add_fetch(atomic, 1, __ATOMIC_RELAXED);
 #else
-
+		return (int)InterlockedIncrement(atomic);
 #endif
 	}
 
-	inline void* AtomicIncPtr(void** ptr)
+	static inline void* AtomicIncPtr(void** ptr)
 	{
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 		return __atomic_add_fetch(ptr, 1, __ATOMIC_RELAXED);
 #else
-
+	#ifdef XASH_64BIT
+		return (void*)InterlockedIncrement64(atomic);
+	#else
+		return (void*)InterlockedIncrement(atomic);
+	#endif
 #endif
 	}
 
-	inline int AtomicDecInt(int* atomic)
+	static inline int AtomicDecInt(int* atomic)
 	{
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 		return __atomic_sub_fetch(atomic, 1, __ATOMIC_RELAXED);
 #else
-
+		return (int)InterlockedDecrement(atomic);
 #endif
 	}
 
-	inline void* AtomicDecPtr(void** ptr)
+	static inline void* AtomicDecPtr(void** ptr)
 	{
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 		return __atomic_sub_fetch(ptr, 1, __ATOMIC_RELAXED);
 #else
-
+	#ifdef XASH_64BIT
+		return (void*)InterlockedDecrement64(atomic);
+	#else
+		return (void*)InterlockedDecrement(atomic);
+	#endif
 #endif
 	}
 
-	inline void mfence()
+	/* Adds num to the atomic and returns the result of the operation */
+	static inline int AtomicAddInt(int* atomic, int num)
+	{
+#if defined(__GNUC__) || defined(__clang__)
+		return __atomic_add_fetch(atomic, num, __ATOMIC_RELAXED);
+#else
+		return (int)InterlockedAdd(atomic, num);
+#endif
+	}
+
+	static inline void* AtomicAddPtr(void** atomic, uintptr_t num)
+	{
+#if defined(__GNUC__) || defined(__clang__)
+		return __atomic_add_fetch(atomic, num, __ATOMIC_RELAXED);
+#else
+	#ifdef XASH_64BIT
+		return (void*)InterlockedAdd64(atomic, num);
+	#else
+		return (void*)InterlockedAdd(atomic, num);
+	#endif
+#endif
+	}
+
+	/* Subtract a number from the atomic and return the new value */
+	static inline int AtomicSubInt(int* atomic, int num)
+	{
+#if defined(__GNUC__) || defined(__clang__)
+		return __atomic_sub_fetch(atomic, num, __ATOMIC_RELAXED);
+#else
+		return (int)InterlockedAdd(atomic, -num);
+#endif
+	}
+
+	static inline void* AtomicSubPtr(void** atomic, uintptr_t num)
+	{
+#if defined(__GNUC__) || defined(__clang__)
+		return __atomic_add_fetch(atomic, num, __ATOMIC_RELAXED);
+#else
+	#ifdef XASH_64BIT
+		return (void*)InterlockedAdd64(atomic, -num);
+	#else
+		return (void*)InterlockedAdd(atomic, -num);
+	#endif
+#endif
+	}
+
+
+
+	static inline void mfence()
 	{
 #if defined(PLATFORM_X64) || defined(PLATFORM_X86)
 		_mm_mfence();
@@ -133,7 +201,7 @@ namespace threadtools
 #endif
 	}
 
-	inline void lfence()
+	static inline void lfence()
 	{
 #if defined(PLATFORM_X64) || defined(PLATFORM_X86)
 		_mm_lfence();
@@ -142,7 +210,7 @@ namespace threadtools
 #endif
 	}
 
-	inline void sfence()
+	static inline void sfence()
 	{
 #if defined(PLATFORM_X64) || defined(PLATFORM_X86)
 		_mm_sfence();
