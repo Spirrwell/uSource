@@ -525,7 +525,3 @@ public:
 		m_mutex.WUnlock();
 	}
 };
-
-static int dsdasasfasf = 0;
-static CInterlockedAccessor<int> g_Poop(dsdasasfasf);
-static auto ggggg = g_Poop.GetForRead();
