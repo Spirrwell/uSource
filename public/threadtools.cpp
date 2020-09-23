@@ -139,54 +139,6 @@ void CThreadMutex::Unlock()
 
 //===========================================
 //
-//      CThreadSpinlock
-//
-//===========================================
-
-CThreadSpinlock::CThreadSpinlock()
-{
-#ifdef __GNUC__
-	unsigned int f = 0;
-	__atomic_store(&m_atomicFlag, &f, __ATOMIC_RELAXED);
-#else
-	InterlockedExchange(&m_atomicFlag, 0);
-#endif
-}
-
-CThreadSpinlock::~CThreadSpinlock()
-{
-}
-
-void CThreadSpinlock::Lock()
-{
-#ifdef __GNUC__
-	while(__sync_bool_compare_and_swap(&m_atomicFlag, 0, 1)) {};
-#else
-	while(InterlockedCompareExchange(&m_atomicFlag, 1, 0)) {};
-#endif
-}
-
-bool CThreadSpinlock::TryLock()
-{
-#ifdef __GNUC__
-	return __sync_bool_compare_and_swap(&m_atomicFlag, 0, 1);
-#else
-	return InterlockedCompareExchange(&m_atomicFlag, 1, 0);
-#endif
-}
-
-void CThreadSpinlock::Unlock()
-{
-#ifdef __GNUC__
-	__sync_bool_compare_and_swap(&m_atomicFlag, 1, 0);
-#else
-	InterlockedCompareExchange(&m_atomicFlag, 0, 1);
-#endif
-}
-
-
-//===========================================
-//
 //      CThreadSemaphore
 //
 //===========================================

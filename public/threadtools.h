@@ -16,6 +16,7 @@
 #include <atomic>
 
 #include "common.h"
+#include "debug.h"
 
 #if defined(_M_X86) || defined(__i386__)
 #       define PLATFORM_X86
@@ -51,145 +52,14 @@ class CThreadRAIILock;
 
 namespace threadtools
 {
-	/* Just wanted an explicit thing so we don't end up with someone using long as an atomic flag or something like that */
-	typedef uint32_t AtomicUInt;
-	typedef int32_t AtomicInt;
-	typedef uint32_t AtomicFlag;
 
-	/* Atomically swaps pointers, returning the old value of dst */
-	static inline void* AtomicSwapPtr(void** dst, void* src)
-	{
-#if defined(__GNUC__) || defined(__clang__)
-		return (void*)__atomic_exchange_n(dst, src, __ATOMIC_RELAXED);
-#else
-		return (void*)InterlockedExchangePointer(dst, src);
-#endif
-	}
-
-	/* Atomically swaps integers, returns old value of dst */
-	static inline int AtomicSwapInt(int* dst, int src)
-	{
-#if defined(__GNUC__) || defined(__clang__)
-		return __atomic_exchange_n(dst, src, __ATOMIC_RELAXED);
-#else
-		return (int)InterlockedExchange(dst, src);
-#endif
-	}
-
-	static inline void* AtomicGetPtr(void** atomic)
-	{
-#if defined(__GNUC__) || defined(__clang__)
-		return (void*)__atomic_load_n(atomic, __ATOMIC_RELAXED);
-#else
-	#ifdef XASH_64BIT
-		return (void*)InterlockedOr64(atomic, 0);
-	#else
-		return (void*)InterlockedOr(atomic, 0);
-	#endif
-#endif
-	}
-
-
-	static inline int AtomicGetInt(int* atomic)
-	{
-#if defined(__GNUC__) || defined(__clang__)
-		return __atomic_load_n(atomic, __ATOMIC_RELAXED);
-#else
-		/* Note: we're using interlocked Or here because Windows doesn't provide a raw interlocked get function */
-		return (int)InterlockedOr(atomic, 0);
-#endif
-	}
-
-	static inline int AtomicIncInt(int* atomic)
-	{
-#if defined(__GNUC__) || defined(__clang__)
-		return __atomic_add_fetch(atomic, 1, __ATOMIC_RELAXED);
-#else
-		return (int)InterlockedIncrement(atomic);
-#endif
-	}
-
-	static inline void* AtomicIncPtr(void** ptr)
-	{
-#if defined(__GNUC__) || defined(__clang__)
-		return __atomic_add_fetch(ptr, 1, __ATOMIC_RELAXED);
-#else
-	#ifdef XASH_64BIT
-		return (void*)InterlockedIncrement64(atomic);
-	#else
-		return (void*)InterlockedIncrement(atomic);
-	#endif
-#endif
-	}
-
-	static inline int AtomicDecInt(int* atomic)
-	{
-#if defined(__GNUC__) || defined(__clang__)
-		return __atomic_sub_fetch(atomic, 1, __ATOMIC_RELAXED);
-#else
-		return (int)InterlockedDecrement(atomic);
-#endif
-	}
-
-	static inline void* AtomicDecPtr(void** ptr)
-	{
-#if defined(__GNUC__) || defined(__clang__)
-		return __atomic_sub_fetch(ptr, 1, __ATOMIC_RELAXED);
-#else
-	#ifdef XASH_64BIT
-		return (void*)InterlockedDecrement64(atomic);
-	#else
-		return (void*)InterlockedDecrement(atomic);
-	#endif
-#endif
-	}
-
-	/* Adds num to the atomic and returns the result of the operation */
-	static inline int AtomicAddInt(int* atomic, int num)
-	{
-#if defined(__GNUC__) || defined(__clang__)
-		return __atomic_add_fetch(atomic, num, __ATOMIC_RELAXED);
-#else
-		return (int)InterlockedAdd(atomic, num);
-#endif
-	}
-
-	static inline void* AtomicAddPtr(void** atomic, uintptr_t num)
-	{
-#if defined(__GNUC__) || defined(__clang__)
-		return __atomic_add_fetch(atomic, num, __ATOMIC_RELAXED);
-#else
-	#ifdef XASH_64BIT
-		return (void*)InterlockedAdd64(atomic, num);
-	#else
-		return (void*)InterlockedAdd(atomic, num);
-	#endif
-#endif
-	}
-
-	/* Subtract a number from the atomic and return the new value */
-	static inline int AtomicSubInt(int* atomic, int num)
-	{
-#if defined(__GNUC__) || defined(__clang__)
-		return __atomic_sub_fetch(atomic, num, __ATOMIC_RELAXED);
-#else
-		return (int)InterlockedAdd(atomic, -num);
-#endif
-	}
-
-	static inline void* AtomicSubPtr(void** atomic, uintptr_t num)
-	{
-#if defined(__GNUC__) || defined(__clang__)
-		return __atomic_add_fetch(atomic, num, __ATOMIC_RELAXED);
-#else
-	#ifdef XASH_64BIT
-		return (void*)InterlockedAdd64(atomic, -num);
-	#else
-		return (void*)InterlockedAdd(atomic, -num);
-	#endif
-#endif
-	}
-
+	/** Originally, atomic operations were done by means of compiler-specific intrinsics
+	 * that were abstracted. however, a lot of these (especially so on MSVC), required alignment to either 4-byte or
+	 * 8-byte boundary. So instead, we'll rely on vanilla C++ atomics, albeit typedef'ed :) */
+	typedef std::atomic_bool AtomicBool;
+	typedef std::atomic_bool AtomicFlag;
+	typedef std::atomic<void*> AtomicPtr;
+	typedef std::atomic_int32_t AtomicInt;
 
 
 	static inline void mfence()
@@ -321,18 +191,50 @@ public:
 
 /**
  * @brief Spinlock class
+ * Avoid using this as much as possible, as spinlocks are far from ideal on most platforms.
+ * This is mainly aimed towards brief locks where you only need to guard something for a few hundred or maybe thousand cycles.
+ * For example, a thread-safe list class where you want to performed thread-safe atomic swaps to modify the bucket count and pointer to the first bucket or something.
  */
 class EXPORT CThreadSpinlock
 {
 private:
-	unsigned int m_atomicFlag;
+	threadtools::AtomicFlag m_atomicFlag;
 public:
-	CThreadSpinlock();
-	~CThreadSpinlock();
+	CThreadSpinlock()
+	{
+		m_atomicFlag.store(0);
+	}
 
-	void Lock();
-	bool TryLock();
-	void Unlock();
+	~CThreadSpinlock()
+	{
+		m_atomicFlag.store(1);
+	}
+
+	/* NOTE: These are deleted as copying a lock is generally NOT what you want */
+	CThreadSpinlock(const CThreadSpinlock&) = delete;
+	CThreadSpinlock(CThreadSpinlock&&) = delete;
+
+	inline void Lock()
+	{
+		bool ex = false;
+		while(!m_atomicFlag.compare_exchange_strong(ex, true)) {};
+	}
+
+	inline bool TryLock()
+	{
+		bool ex = false;
+		return m_atomicFlag.compare_exchange_strong(ex, true);
+	}
+
+	inline void Unlock()
+	{
+		bool ex = true;
+		if(!m_atomicFlag.compare_exchange_strong(ex, false))
+		{
+			/* If we return false, the lock has already been unlocked, which is a fatal error */
+			dbg::FireAssertion(__FILE__, __LINE__, "m_atomicFlag.compare_exchange_strong(ex, false) == TRUE");
+		}
+	}
 
 	CThreadRAIILock<CThreadSpinlock> RAIILock() { return CThreadRAIILock<CThreadSpinlock>(this); };
 };
