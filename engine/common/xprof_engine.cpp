@@ -3,6 +3,12 @@
  * xprof_engine.cpp - Engine component of the profiler
  *
  */
+
+#ifdef _WIN32
+// i seriously don't understand windows, we need to include this here, otherwise we get a bunch of junk syntax errors later
+#include <winsock2.h>
+#endif
+
 #include "xprof.h"
 #include <stddef.h>
 #include "common.h"
