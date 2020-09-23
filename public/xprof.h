@@ -98,7 +98,7 @@ public:
 	/* Creates a new node category */
 	/* THREAD SAFE */
 	void AddCategoryNode(const char* name, unsigned long long budget);
-	
+
 	class CXProfNode* CreateNode(const char* category, const char* func, const char* file, unsigned long long budget);
 	void PushNode(class CXProfNode* node);
 	void PopNode();
@@ -201,17 +201,33 @@ public:
 	CXProfNode(const char* category, const char* function, const char* file, unsigned long long budget);
 	~CXProfNode();
 
+	CXProfNode(const CXProfNode& other)
+	{
+		/* Copy all-nontrivial types */
+		memcpy(this, &other, sizeof(CXProfNode));
+		/* Copy trivial types */
+		m_children = other.m_children;
+		m_testQueue = other.m_testQueue;
+		m_lastSampleTime = other.m_lastSampleTime;
+	}
+
 	/* Returns a copy of this node for reading */
+	/* Also note that this will intentionally unset fields like m_parent, m_root and m_children */
 	/* THREAD SAFE */
 	CXProfNode LockRead()
 	{
 		auto lock = m_mutex.RAIILock();
+		/* Make a copy of the node and then clear all fields out that we do not want the accessor to use */
+		CXProfNode copy = *this;
+		copy.m_parent = copy.m_root = nullptr;
+		copy.m_testQueue.clear();
+		copy.m_children.clear();
 		return *this;
 	}
 
 	/**
 	 * @brief Submit a new XProf time test to the node
-	 */ 
+	 */
 	void SubmitTest(class CXProfTest* test);
 
 	void SetBudget(unsigned long long time);
@@ -219,7 +235,7 @@ public:
 
 	/**
 	 * @brief Get or reset the remaining budget constraints
-	 */ 
+	 */
 	unsigned long long GetRemainingBudget() const;
 	void ResetBudget();
 
@@ -255,7 +271,7 @@ public:
 	platform::time_t start, stop;
 	bool m_disabled;
 
-	CXProfTest(CXProfNode* node) : 
+	CXProfTest(CXProfNode* node) :
 		m_disabled(false)
 	{
 		m_disabled = !g_pXProf->Enabled();
@@ -279,13 +295,13 @@ public:
 
 #define XPROF_NODE(category) \
 static CXProfNode* __xprof_node = new CXProfNode((category), __PRETTY_FUNCTION__, __FILE__, 0); \
-CXProfTest __xprof_test(__xprof_node); 
+CXProfTest __xprof_test(__xprof_node);
 
 #else
 
 #define XPROF_NODE(category) \
 static CXProfNode* __xprof_node = new CXProfNode((category), __FUNCSIG__, __FILE__, 0); \
-CXProfTest __xprof_test(__xprof_node); 
+CXProfTest __xprof_test(__xprof_node);
 
 #endif // msc
 
