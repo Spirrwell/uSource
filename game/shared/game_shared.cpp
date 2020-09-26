@@ -7,6 +7,9 @@
 // this needs to be included early here
 // otherwise you get a bunch of stupid syntax errors from this later
 #include <cmath>
+#ifdef _WIN32
+#include <xlocnum>
+#endif
 
 #include "game_shared.h"
 
