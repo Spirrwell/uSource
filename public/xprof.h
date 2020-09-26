@@ -11,6 +11,7 @@ xprof.h - Realtime profiling
 #include <initializer_list>
 #include <stdio.h>
 #include <stack>
+#include <memory.h>
 
 #define MAX_NODESTACK_DEPTH 32
 #define MAX_NODESTACKS 64
@@ -204,12 +205,23 @@ public:
 	CXProfNode(const CXProfNode& other)
 	{
 		/* Copy all-nontrivial types */
-		memcpy(this, &other, sizeof(CXProfNode));
-		/* Copy trivial types */
+		memcpy((void*)this, &other, sizeof(CXProfNode));
+		/* Copy non-trivial types */
 		m_children = other.m_children;
 		m_testQueue = other.m_testQueue;
 		m_lastSampleTime = other.m_lastSampleTime;
 	}
+
+	CXProfNode(CXProfNode&& other) noexcept
+	{
+		/* Copy all-nontrivial types */
+		memcpy((void*)this, &other, sizeof(CXProfNode));
+		/* Copy non-trivial types */
+		m_children = std::move(other.m_children);
+		m_testQueue = std::move(other.m_testQueue);
+		m_lastSampleTime = other.m_lastSampleTime;
+	}
+
 
 	/* Returns a copy of this node for reading */
 	/* Also note that this will intentionally unset fields like m_parent, m_root and m_children */
