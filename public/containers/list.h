@@ -7,8 +7,8 @@
 #undef max
 #include <list>
 
-template<class T>
-class List : public std::list<T>
+template<class T, class A = std::allocator<T>>
+class List : public std::list<T, A>
 {
 public:
 
