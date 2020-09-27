@@ -73,6 +73,8 @@ def options(opt):
 	grp.add_option('--neon', action='store_true', dest='USE_NEON', default=False,
 				   help='Enables the use of NEON vectorization on AArch64 and AArch32 targets.')
 
+	grp.add_option('--no-sse', action='store_true', dest='NO_SSE', default=False, help='Explicitly disables the use of SSE, even on x86_64 targets')
+
 	grp.add_option('--memory-debug', action='store_true', dest='MEMORY_DEBUG', default=False,
 				   help='Enables the use of memory debugging. This will define various Mem_XXX functions as macros which will include the locations where the allocations tool place')
 
@@ -167,7 +169,10 @@ def configure(conf):
 	# subsystem=bld.env.MSVC_SUBSYSTEM
 	# TODO: wrapper around bld.stlib, bld.shlib and so on?
 	conf.env.MSVC_SUBSYSTEM = 'WINDOWS,5.01'
-	conf.env.MSVC_TARGETS = ['x86'] # explicitly request x86 target for MSVC
+	if not conf.options.ALLOW64:
+		conf.env.MSVC_TARGETS = ['x86'] # explicitly request x86 target for MSVC
+	else:
+		conf.env.MSVC_TARGETS = ['x86_64']
 	if sys.platform == 'win32':
 		conf.load('msvc msvcfix msdev msvs')
 	conf.load('xcompile compiler_c compiler_cxx gitversion clang_compilation_database strip_on_install')
@@ -229,24 +234,10 @@ def configure(conf):
 	conf.options.USE_AVX    = conf.options.USE_AVX if conf.env.DEST_CPU in ['x86_64'] else False
 	conf.options.USE_NEON   = conf.options.USE_NEON if conf.env.DEST_CPU in ['aarch32', 'aarch64'] else False
 
-	opts = list()
-	if conf.options.USE_SSE:
-		opts.append("-msse")
-		conf.env.append_unique('DEFINES', 'USE_SSE=1')
-	if conf.options.USE_SSE42:
-		opts.append("-msse4.2")
-		conf.env.append_unique('DEFINES', 'USE_SSE42=1')
-	if conf.options.USE_AVX:
-		opts.append("-mavx")
-		conf.env.append_unique('DEFINES', 'USE_AVX=1')
-	if conf.options.USE_NEON:
-		opts.append("-mneon")
-		conf.env.append_unique('DEFINES', 'USE_NEON=1')
-
 	linker_flags = {
 		'common': {
 			'msvc':    ['/DEBUG'], # always create PDB, doesn't affect result binaries
-			'gcc': ['-Wl,--no-undefined', '-g']
+			'gcc': ['-Wl,--no-undefined', '-g', '-lstdc++']
 		},
 		'sanitize': {
 			'clang':   ['-fsanitize=undefined', '-fsanitize=address'],
@@ -296,14 +287,39 @@ def configure(conf):
 		}
 	}
 
-	compiler_c_cxx_flags['common']['gcc'] += opts
-	compiler_c_cxx_flags['common']['clang'] += opts
-
 	compiler_optional_flags = [
 		'-fdiagnostics-color=always',
 		'-Werror=return-type',
 		'-Werror=parentheses',
 	]
+
+	# SIMD Extension support
+	if conf.options.USE_SSE and not conf.options.NO_SSE:
+		compiler_c_cxx_flags['common']['gcc'].append("-msse")
+		compiler_c_cxx_flags['common']['clang'].append("-msse")
+		if not conf.options.ALLOW64:
+			compiler_c_cxx_flags['common']['msvc'] += ['/arch:SSE', '/arch:SSE2']
+		conf.env.append_unique('DEFINES', 'USE_SSE=1')
+	if conf.options.USE_SSE42:
+		compiler_c_cxx_flags['common']['gcc'].append("-msse4.2")
+		compiler_c_cxx_flags['common']['clang'].append("-msse4.2")
+		# MSVC does not allow you to control this behaviour -_-
+		conf.env.append_unique('DEFINES', 'USE_SSE42=1')
+	if conf.options.USE_AVX:
+		compiler_c_cxx_flags['common']['gcc'].append("-mavx")
+		compiler_c_cxx_flags['common']['clang'].append("-mavx")
+		compiler_c_cxx_flags['common']['msvc'].append('/arch:AVX')
+		conf.env.append_unique('DEFINES', 'USE_AVX=1')
+	if conf.options.USE_AVX2:
+		compiler_c_cxx_flags['common']['gcc'].append("-mavx")
+		compiler_c_cxx_flags['common']['clang'].append("-mavx")
+		compiler_c_cxx_flags['common']['msvc'].append('/arch:AVX2')
+		conf.env.append_unique('DEFINES', 'USE_AVX2=1')
+	if conf.options.USE_NEON:
+		compiler_c_cxx_flags['common']['gcc'].append("-mneon")
+		compiler_c_cxx_flags['common']['clang'].append("-mneon")
+		# MSVC does not support arm -_-
+		conf.env.append_unique('DEFINES', 'USE_NEON=1')
 
 	# Are we forcibly running a development build?
 	if conf.options.DEV:
