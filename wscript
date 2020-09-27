@@ -70,6 +70,8 @@ def options(opt):
 	grp.add_option('--avx', action='store_true', dest='USE_AVX', default=False,
 				   help='Enables the use of AVX on x86_64 targets.')
 
+	grp.add_option('--avx2', action='store_true', dest='USE_AVX2', default=False, help='Enables the use of AVX2')
+
 	grp.add_option('--neon', action='store_true', dest='USE_NEON', default=False,
 				   help='Enables the use of NEON vectorization on AArch64 and AArch32 targets.')
 
