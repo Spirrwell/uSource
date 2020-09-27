@@ -98,7 +98,7 @@ def options(opt):
 	opt.add_subproject(subdirs())
 
 	opt.load('xcompile compiler_cxx compiler_c sdl2 clang_compilation_database strip_on_install')
-	opt.load('cmake msdev eclipse codeblocks doxygen export', tooldir=waftools.location)
+	opt.load('cmake msdev eclipse codeblocks doxygen export cppcheck', tooldir=waftools.location)
 	if sys.platform == 'win32':
 		opt.load('msvc msdev msvs')
 	opt.load('reconfigure')
@@ -151,7 +151,7 @@ def configure(conf):
 	conf.env.append_unique('DEFINES', 'PROJECT_VERSION=\"{0}\"'.format(VERSION))
 	conf.env.append_unique('DEFINES', 'PROJECT_DESCRIPTION=\"{0}\"'.format(DESCRIPTION))
 
-	conf.load('fwgslib reconfigure cmake msdev eclipse codeblocks doxygen export')
+	conf.load('fwgslib reconfigure cmake msdev eclipse codeblocks doxygen export cppcheck')
 	conf.start_msg('Build type')
 	if conf.options.BUILD_TYPE == None:
 		conf.end_msg('not set', color='RED')
