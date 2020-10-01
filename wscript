@@ -413,6 +413,14 @@ def configure(conf):
 
 	conf.env.append_unique('DEFINES', 'XASH_BUILD_COMMIT="{0}"'.format(conf.env.GIT_VERSION if conf.env.GIT_VERSION else 'notset'))
 
+	# Set platform props
+	if conf.options.ALLOW64:
+		conf.env.PLATFORM_64BIT = True
+		conf.env.PLATFORM_32BIT = False
+	else:
+		conf.env.PLATFORM_64BIT = False
+		conf.env.PLATFORM_32BIT = True
+
 	for i in SUBDIRS:
 		if conf.env.SINGLE_BINARY and i.singlebin:
 			continue
@@ -432,6 +440,10 @@ def configure(conf):
 	conf.recurse('tier2')
 	conf.recurse('networksystem')
 	conf.recurse('rendersystem/renderlib')
+	conf.recurse('utils/hlbsp')
+	conf.recurse('utils/hlvis')
+	conf.recurse('utils/hlcsg')
+	conf.recurse('utils/hlrad')
 
 	conf.env.ENABLE_RENDERER2 = conf.options.ENABLE_RENDERER2
 
@@ -458,6 +470,10 @@ def build(bld):
 	bld.recurse('tier2')
 	bld.recurse('networksystem')
 	bld.recurse('rendersystem/renderlib')
+	bld.recurse('utils/hlbsp')
+	bld.recurse('utils/hlvis')
+	bld.recurse('utils/hlcsg')
+	bld.recurse('utils/hlrad')
 
 	if bld.env.ENABLE_RENDERER2:
 		bld.recurse('rendersystem')
