@@ -7,7 +7,6 @@
             ],
             "defines": [],
             "compilerPath": "/usr/bin/g++",
-	    "compileCommands": "${workspaceFolder}/compile_commands_gcc_debug.json",
 	    "configurationProvider": "ms-vscode.cmake-tools"
         }
     ],
