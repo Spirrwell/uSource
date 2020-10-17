@@ -18,6 +18,21 @@
 #define END_SCRIPTSYS_NAMESPACE }
 
 BEGIN_SCRIPTSYS_NAMESPACE
+/*
+
+ API Design
+
+ UserData is a concept that exists in a few languages like squirrel and lua. The idea is you create an object
+ and give it to the script, it's really simple. In both lua and squirrel, UserData objects can have table-like
+ behaviour, which is something we want to target here. The script_class_desc_t will describe a class type
+ that can have any number of fields and method members. It will be used to both generate a table and the userdata
+ definition in the language.
+
+
+
+
+ */
+
 
 /*
 ====================================================
