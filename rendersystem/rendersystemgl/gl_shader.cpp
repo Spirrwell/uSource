@@ -110,6 +110,8 @@ public:
 	bool m_depth : 1; // do we have a depth attachment already??
 	bool m_stencil : 1; // do we have a stencil attachment??
 	GLint m_currentColorBuffer;
+	IShaderShadow* m_shadow;
+
 	struct rendertarget_t
 	{
 		String name;
@@ -165,8 +167,10 @@ public:
 	virtual void SetupTextureUniforms(const char** uniforms, size_t length);
 	virtual void AddRenderTarget(const char* param, int &index, ITexture* pTexture);
 	virtual void ClearRenderTargets();
-	virtual void PostDraw();
-	virtual void PreDraw();
+
+	virtual void Init();
+	virtual void PostDraw(IMesh* pmesh);
+	virtual void PreDraw(IMesh* pMesh);
 
 	virtual void EnableDepthWrite(bool enable);
 
@@ -215,6 +219,8 @@ public:
 	virtual void SetDouble4Uniform(const char* param, double d[4]);
 
 	virtual void SetTextureUniform(const char* param, ITexture* pTex);
+
+	virtual void SetShaderShadow(class IShaderShadow* pShadow);
 };
 
 //=============================================================================================================================================//
@@ -324,7 +330,8 @@ CShaderProgram_GL::CShaderProgram_GL(const char* name) :
 	m_stencil(false),
 	m_currentColorBuffer(0),
 	m_depth(0),
-	m_maxRenderTargets(0)
+	m_maxRenderTargets(0),
+	m_shadow(nullptr)
 {
 	m_name = strdup(name);
 	m_programIndex = glCreateProgram();
@@ -534,13 +541,18 @@ const char *CShaderProgram_GL::GetInfoLog()
 	return log;
 }
 
-void CShaderProgram_GL::PostDraw()
+void CShaderProgram_GL::PostDraw(IMesh* pMesh)
 {
-
+	if(m_shadow)
+		m_shadow->PostDraw(pMesh, this);
 }
 
-void CShaderProgram_GL::PreDraw()
+void CShaderProgram_GL::PreDraw(IMesh* pMesh)
 {
+	/* Call into the shadow state manager */
+	if(m_shadow)
+		m_shadow->PreDraw(pMesh, this);
+
 	/* Setup the render targets */
 	Assert(m_renderTargets.size() < 8);
 	GLenum targets[10];
@@ -888,6 +900,17 @@ void CShaderProgram_GL::SetupTextureUniforms(const char **uniforms, size_t lengt
 		active_unit++;
 		m_shaderTextures.push_back(param);
 	}
+}
+
+void CShaderProgram_GL::SetShaderShadow(struct IShaderShadow *pShadow)
+{
+	m_shadow = pShadow;
+}
+
+void CShaderProgram_GL::Init()
+{
+	if(m_shadow)
+		m_shadow->Init(this);
 }
 
 
