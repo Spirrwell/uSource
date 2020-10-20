@@ -48,7 +48,7 @@ def configure(conf):
 
 	conf.env.append_unique('DEFINES', 'REF_DLL')
 	if conf.env.DEST_OS2 == 'android':
-		conf.check_cc(lib='log')
+		conf.check_cxx(lib='log')
 
 def build(bld):
 	libs = [ 'public', 'M', 'mathlib' ]
