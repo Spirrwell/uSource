@@ -82,7 +82,7 @@ void dct36( float *inbuf, float *o1, float *o2, float *wintab, float *tsbuf )
 	float	tmp[18];
 
 	{
-		register float *in = inbuf;
+		float *in = inbuf;
 
 		in[17] += in[16]; in[16] += in[15]; in[15] += in[14];
 		in[14] += in[13]; in[13] += in[12]; in[12] += in[11];
@@ -195,10 +195,10 @@ void dct36( float *inbuf, float *o1, float *o2, float *wintab, float *tsbuf )
 
 
 		{
-			register float *out2 = o2;
-			register float *w = wintab;
-			register float *out1 = o1;
-			register float *ts = tsbuf;
+			float *out2 = o2;
+			float *w = wintab;
+			float *out1 = o1;
+			float *ts = tsbuf;
 
 			MACRO(0);
 			MACRO(1);
@@ -214,11 +214,11 @@ void dct36( float *inbuf, float *o1, float *o2, float *wintab, float *tsbuf )
 	}
 }
 
-void dct12( float *in, float *rawout1, float *rawout2, register float *wi, register float *ts )
+void dct12( float *in, float *rawout1, float *rawout2, float *wi, float *ts )
 {
 	{
 		float in0,in1,in2,in3,in4,in5;
-		register float *out1 = rawout1;
+		float *out1 = rawout1;
 		ts[SBLIMIT*0] = out1[0]; ts[SBLIMIT*1] = out1[1]; ts[SBLIMIT*2] = out1[2];
 		ts[SBLIMIT*3] = out1[3]; ts[SBLIMIT*4] = out1[4]; ts[SBLIMIT*5] = out1[5];
  
@@ -254,7 +254,7 @@ void dct12( float *in, float *rawout1, float *rawout2, register float *wi, regis
 
 	{
 		float in0,in1,in2,in3,in4,in5;
-		register float *out2 = rawout2;
+		float *out2 = rawout2;
  
 		DCT12_PART1
 
@@ -288,7 +288,7 @@ void dct12( float *in, float *rawout1, float *rawout2, register float *wi, regis
 
 	{
 		float in0,in1,in2,in3,in4,in5;
-		register float *out2 = rawout2;
+		float *out2 = rawout2;
 		out2[12]=out2[13]=out2[14]=out2[15]=out2[16]=out2[17]=0.0;
 
 		DCT12_PART1
