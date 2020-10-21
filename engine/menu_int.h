@@ -19,6 +19,7 @@ GNU General Public License for more details.
 #include "cvardef.h"
 #include "gameinfo.h"
 #include "wrect.h"
+#include "appframework.h"
 
 // a macro for mainui_cpp, indicating that mainui should be compiled for
 // Xash3D 1.0 interface
@@ -234,5 +235,45 @@ typedef int (*UITEXTAPI)( ui_extendedfuncs_t* engfuncs );
 
 #define PLATFORM_UPDATE_PAGE "PlatformUpdatePage"
 #define GENERIC_UPDATE_PAGE "GenericUpdatePage"
+
+
+#define IMAINUI_001 "IMainUI001"
+#define IMAINUI_INTERFACE IMAINUI_001
+
+class IMainUIInterface : public IAppInterface
+{
+public:
+	virtual int VidInit( void ) = 0;
+	virtual void UIInit( void ) = 0;
+	virtual void UIShutdown( void ) = 0;
+	virtual void Redraw( float flTime ) = 0;
+	virtual void KeyEvent( int key, int down ) = 0;
+	virtual void MouseMove( int x, int y ) = 0;
+	virtual void SetActiveMenu( int active ) = 0;
+	virtual void AddServerToList( struct netadr_s adr, const char *info ) = 0;
+	virtual void GetCursorPos( int *pos_x, int *pos_y ) = 0;
+	virtual void SetCursorPos( int pos_x, int pos_y ) = 0;
+	virtual void ShowCursor( int show ) = 0;
+	virtual void CharEvent( int key ) = 0;
+	virtual int MouseInRect( void ) = 0;
+	virtual int IsVisible( void ) = 0;
+	virtual int CreditsActive( void ) = 0;
+	virtual void FinalCredits( void ) = 0;
+	virtual void ResetPing( void ) = 0;
+	virtual void ShowConnectionWarning( void ) = 0;
+	virtual void ShowUpdateDialog( int preferStore ) = 0;
+	virtual void ShowMessageBox( const char *text ) = 0;
+	virtual void ConnectionProgress_Disconnect( void ) = 0;
+	virtual void ConnectionProgress_Download( const char *pszFileName, const char *pszServerName, int iCurrent, int iTotal, const char *comment ) = 0;
+	virtual void ConnectionProgress_DownloadEnd( void ) = 0;
+	virtual void ConnectionProgress_Precache( void ) = 0;
+	virtual void ConnectionProgress_Connect( const char *server ) = 0;
+	virtual void ConnectionProgress_ChangeLevel( void ) = 0;
+	virtual void ConnectionProgress_ParseServerInfo( const char *server ) = 0;
+	virtual void EnableTextInput( int enable ) = 0;
+	virtual int UtfProcessChar( int ch ) = 0;
+	virtual int UtfMoveLeft( char *str, int pos ) = 0;
+	virtual int UtfMoveRight( char *str, int pos, int length ) = 0;
+};
 
 #endif//MENU_INT_H
