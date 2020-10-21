@@ -21,11 +21,7 @@
 #include <windows.h>
 #undef HSPRITE
 #else
-typedef struct point_s
-{
-	int x;
-	int y;
-} POINT;
+#include "port.h"
 #define GetCursorPos(x)
 #define SetCursorPos(x,y)
 #endif

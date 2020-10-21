@@ -453,7 +453,7 @@ static int III_get_side_info( mpg123_handle_t *fr, III_sideinfo *si, int stereo,
 	{
 		for( ch = 0; ch < stereo; ch++ )
 		{
-			register gr_info_t	*gr_info = &( si->ch[ch].gr[gr] );
+			gr_info_t	*gr_info = &( si->ch[ch].gr[gr] );
 
 			gr_info->part2_3_length = getbits( fr, 12 );
 			gr_info->big_values = getbits( fr, 9 );
@@ -759,9 +759,9 @@ static int III_dequantize_sample( mpg123_handle_t *fr, float xr[SBLIMIT][SSLIMIT
 		int		i, max[4];
 		int		step = 0;
 		int		lwin = 3;
-		register float	v = 0.0f;
+		float	v = 0.0f;
 		int		cb = 0;
-		register int	*m, mc;
+		int	*m, mc;
 		int		rmax;
 
 		// decoding with short or mixed mode BandIndex table
@@ -789,7 +789,7 @@ static int III_dequantize_sample( mpg123_handle_t *fr, float xr[SBLIMIT][SSLIMIT
 
 			for( ; lp; lp--, mc-- )
 			{
-				register long	x, y;
+				long	x, y;
 
 				if( (!mc) )
 				{
@@ -887,7 +887,7 @@ static int III_dequantize_sample( mpg123_handle_t *fr, float xr[SBLIMIT][SSLIMIT
 		{
 			const struct newhuff	*h;
 			const short		*val;
-			register short		a;
+			short		a;
 
 			// this is only a humble hack to prevent a special segfault.
 			// more insight into the float workings is still needed.
@@ -1000,7 +1000,7 @@ static int III_dequantize_sample( mpg123_handle_t *fr, float xr[SBLIMIT][SSLIMIT
 		int		*m = map[sfreq][2];
 		int		i,max = -1;
 		int		cb = 0;
-		register float	v = 0.0;
+		float	v = 0.0;
 		int		mc = 0;
 
 		// long hash table values
@@ -1093,7 +1093,7 @@ static int III_dequantize_sample( mpg123_handle_t *fr, float xr[SBLIMIT][SSLIMIT
 		{
 			const struct newhuff	*h = htc+gr_info->count1table_select;
 			const short		*val = h->table;
-			register short		a;
+			short		a;
 
 			REFRESH_MASK;
 			while(( a = *val++ ) < 0 )
@@ -1366,8 +1366,8 @@ static void III_antialias( float xr[SBLIMIT][SSLIMIT], gr_info_t *gr_info )
 		for( ss = 7; ss >= 0; ss-- )
 		{
 			// upper and lower butterfly inputs
-			register float bu = *--xr2;
-			register float bd = *xr1;
+			float bu = *--xr2;
+			float bd = *xr1;
 
 			*xr2 = REAL_MUL( bu, *cs ) - REAL_MUL( bd, *ca );
 			*xr1++ = REAL_MUL( bd, *cs++ ) + REAL_MUL( bu, *ca++ );
@@ -1489,8 +1489,8 @@ int do_layer3( mpg123_handle_t *fr )
 
 		if( stereo == 2 )
 		{
-			register float	*in0, *in1;
-			register int	i;
+			float	*in0, *in1;
+			int	i;
 
 			gr_info = &(sideinfo.ch[1].gr[gr]);
 

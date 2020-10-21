@@ -460,7 +460,7 @@ int do_layer3( mpg123_handle_t *fr );
 // dct36.c
 //
 void dct36( float *inbuf, float *o1, float *o2, float *wintab, float *tsbuf );
-void dct12( float *in, float *rawout1, float *rawout2, register float *wi, register float *ts );
+void dct12( float *in, float *rawout1, float *rawout2, float *wi, float *ts );
 
 //
 // dct64.c

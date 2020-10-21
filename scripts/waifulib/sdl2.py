@@ -72,7 +72,7 @@ def configure(conf):
 
 	if conf.env.HAVE_SDL2 and conf.options.SDL2_SANITY_CHECK:
 		try:
-			conf.check_cc(
+			conf.check_cxx(
 				fragment='''
 				#define SDL_MAIN_HANDLED
 				#include <SDL.h>
