@@ -270,10 +270,6 @@ public:
 	virtual void ConnectionProgress_Connect( const char *server ) = 0;
 	virtual void ConnectionProgress_ChangeLevel( void ) = 0;
 	virtual void ConnectionProgress_ParseServerInfo( const char *server ) = 0;
-	virtual void EnableTextInput( int enable ) = 0;
-	virtual int UtfProcessChar( int ch ) = 0;
-	virtual int UtfMoveLeft( char *str, int pos ) = 0;
-	virtual int UtfMoveRight( char *str, int pos, int length ) = 0;
 };
 
 #endif//MENU_INT_H

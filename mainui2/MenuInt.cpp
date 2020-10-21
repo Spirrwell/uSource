@@ -140,10 +140,6 @@ public:
 	void ConnectionProgress_Connect( const char *server ) override;
 	void ConnectionProgress_ChangeLevel( void ) override;
 	void ConnectionProgress_ParseServerInfo( const char *server ) override;
-	void EnableTextInput( int enable ) override;
-	int UtfProcessChar( int ch ) override;
-	int UtfMoveLeft( char *str, int pos ) override;
-	int UtfMoveRight( char *str, int pos, int length ) override;
 };
 
 EXPOSE_INTERFACE(CMainUI001);
@@ -284,24 +280,4 @@ void CMainUI001::ConnectionProgress_ChangeLevel(void)
 void CMainUI001::ConnectionProgress_ParseServerInfo(const char *server)
 {
 	UI_ConnectionProgress_ParseServerInfo(server);
-}
-
-void CMainUI001::EnableTextInput(int enable)
-{
-	UI_EnableTextInput(enable);
-}
-
-int CMainUI001::UtfProcessChar(int ch)
-{
-	return Con_UtfProcessChar(ch);
-}
-
-int CMainUI001::UtfMoveLeft(char *str, int pos)
-{
-	return Con_UtfMoveLeft(str, pos);
-}
-
-int CMainUI001::UtfMoveRight(char *str, int pos, int length)
-{
-	return Con_UtfMoveRight(str, pos, length);
 }
