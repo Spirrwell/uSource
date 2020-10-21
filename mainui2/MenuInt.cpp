@@ -143,7 +143,6 @@ public:
 };
 
 EXPOSE_INTERFACE(CMainUI001);
-MODULE_INTERFACE_IMPL();
 
 int CMainUI001::VidInit(void)
 {
