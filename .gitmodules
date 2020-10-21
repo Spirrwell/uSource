@@ -16,7 +16,3 @@
 [submodule "darkradiant"]
 	path = darkradiant
 	url = https://github.com/MicroSource/darkradiant
-[submodule "public"]
-	path = public
-        url = https://github.com/JJL772/libpublic
-        branch = dev
