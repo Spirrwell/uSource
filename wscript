@@ -444,6 +444,7 @@ def configure(conf):
 	conf.recurse('utils/hlvis')
 	conf.recurse('utils/hlcsg')
 	conf.recurse('utils/hlrad')
+	conf.recurse('mainui2')
 
 	conf.env.ENABLE_RENDERER2 = conf.options.ENABLE_RENDERER2
 
@@ -474,6 +475,7 @@ def build(bld):
 	bld.recurse('utils/hlvis')
 	bld.recurse('utils/hlcsg')
 	bld.recurse('utils/hlrad')
+	bld.recurse('mainui2')
 
 	if bld.env.ENABLE_RENDERER2:
 		bld.recurse('rendersystem')
