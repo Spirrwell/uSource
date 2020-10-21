@@ -50,12 +50,12 @@ def configure(conf):
 
 	conf.env.append_unique('DEFINES', 'REF_DLL')
 	if conf.env.DEST_OS2 == 'android':
-		conf.check_cc(lib='log')
+		conf.check_cxx(lib='log')
 
 	if conf.env.GL and conf.env.DEST_OS in ['linux', 'darwin', 'freebsd']:
-		conf.check_cc(lib='GLEW')
-		conf.check_cc(lib='GLX')
-		conf.check_cc(lib='GL')
+		conf.check_cxx(lib='GLEW')
+		conf.check_cxx(lib='GLX')
+		conf.check_cxx(lib='GL')
 
 def build(bld):
 	libs = [ 'public', 'M', 'mathlib', 'tier1' ]

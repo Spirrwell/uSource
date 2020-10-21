@@ -60,7 +60,7 @@ int synth_1to1( float *bandPtr, int channel, mpg123_handle_t *fr, int final )
 
 	{
 		float		*window = fr->decwin + 16 - bo1;
-		register int	j;
+		int	j;
 
 		for( j = (BLOCK / 4); j; j--, b0 += 0x400 / BLOCK - BACKPEDAL, window += 0x800 / BLOCK - BACKPEDAL, samples += step )
 		{

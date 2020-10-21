@@ -21,9 +21,9 @@ void dct64( float *out0, float *out1, float *samples )
 	float	bufs[64];
 
 	{
-		register float	*b1, *b2, *bs;
-		register float	*costab;
-		register int	i, j;
+		float	*b1, *b2, *bs;
+		float	*costab;
+		int	i, j;
 
 		b1 = samples;
 		bs = bufs;
@@ -113,8 +113,8 @@ void dct64( float *out0, float *out1, float *samples )
 	}
 
 	{
-		register float	*b1;
-		register int	i;
+		float	*b1;
+		int	i;
 
 		for( b1 =bufs, i = 8; i; i--, b1 += 4 )
 			b1[2] += b1[3];
