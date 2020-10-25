@@ -30,7 +30,7 @@ SUBDIRS = [
 	Subproject('launcher', singlebin=True),
 	Subproject('ref_gl'),
 	#Subproject('ref_soft'),
-	Subproject('mainui'),
+	#Subproject('mainui'),
 	# Subproject('vgui_support'),
 	Subproject('engine', dedicated=False),
 	#Subproject('game/server'),
