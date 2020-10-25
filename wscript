@@ -198,6 +198,8 @@ def configure(conf):
 		conf.env.append_unique('DEFINES', '_WIN32')
 		conf.env.append_value('INCLUDES', ['common'])
 
+	conf.env.append_value('INCLUDES', 'thirdparty/nuklear')
+
 	# Hardcoded include path for Mingw on Linux, also for IDE integration
 	if conf.env.DEST_OS == 'win32' and sys.platform == 'linux':
 		conf.env.append_unique('CXXFLAGS', '-I/usr/x86_64-w64-mingw32/include/')
