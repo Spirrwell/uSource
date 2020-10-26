@@ -19,9 +19,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #pragma once
-#ifndef COORD_H
-#define COORD_H
 
+#include "MainUI.h"
+
+#if 0
 struct Point
 {
 	Point() { x = y = 0; }
@@ -49,7 +50,9 @@ struct Point
 	Point operator *( float scale ) { return Point( x * scale, y * scale );	}
 	Point operator /( float scale ) { return Point( x / scale, y / scale );	}
 };
+#endif
 
+#if 0
 struct Size
 {
 	Size() { w = h = 0; }
@@ -58,5 +61,128 @@ struct Size
 	int w, h;
 	Size Scale();
 };
+#endif
 
-#endif // COORD_H
+BEGIN_MAINUI_NAMESPACE
+
+struct Size
+{
+	float w, h;
+	enum class Type {
+		PX,
+		PT,
+		PERCENT,
+		MM, // millimeters
+	} type;
+
+	Size() : w(0), h(0), type(Type::PX) {};
+	Size(float _w, float _h) : w(_w), h(_h), type(Size::Type::PX) {};
+	Size(float _w, float _h, Size::Type _type) : w(_w), h(_h), type(_type) {};
+
+	/* Converts the value stored in here to pixels */
+	void pixels(float& _w, float& _h) const
+	{
+		switch(type)
+		{
+			case Type::PX:
+			{
+				_w = w;
+				_h = h;
+				return;
+			}
+			case Type::PT:
+			{
+
+			}
+			case Type::PERCENT:
+			{
+				int sw, sh;
+				GetScreenSize(sw, sh);
+				_w = (w / 100.0f) * sw;
+				_h = (h / 100.0f) * sh;
+			}
+			case Type::MM:
+			{
+
+			}
+		}
+	}
+
+	/* Converts the value stored into percent */
+	void percent(float& px, float& py) const
+	{
+		switch(type)
+		{
+			case Type::PX:
+			{
+
+			}
+			case Type::PT:
+			{
+
+			}
+			case Type::PERCENT:
+			{
+				px = w;
+				py = h;
+			}
+			case Type::MM:
+			{
+
+			}
+		}
+	}
+
+	/* Converts the stored value into point */
+	void point(float& px, float& py) const
+	{
+		switch(type)
+		{
+			case Type::PX:
+			{
+
+			}
+			case Type::PT:
+			{
+				px = w;
+				py = h;
+			}
+			case Type::PERCENT:
+			{
+
+			}
+			case Type::MM:
+			{
+
+			}
+		}
+	}
+
+	/* Converts the stored value into millimeters  */
+	void millimeters(float& mmw, float& mmh) const
+	{
+		switch(type)
+		{
+			case Type::PX:
+			{
+
+			}
+			case Type::PT:
+			{
+			}
+			case Type::PERCENT:
+			{
+
+			}
+			case Type::MM:
+			{
+				mmw = w;
+				mmh = h;
+			}
+		}
+	}
+};
+
+using Point = Size;
+
+END_MAINUI_NAMESPACE

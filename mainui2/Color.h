@@ -14,8 +14,6 @@ GNU General Public License for more details.
 */
 
 #pragma once
-#ifndef COLOR_H
-#define COLOR_H
 
 class CColor
 {
@@ -73,5 +71,3 @@ private:
 public:
 		const ColorWrap r,g,b,a;
 };
-
-#endif // COLOR_H

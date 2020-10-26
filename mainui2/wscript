@@ -94,7 +94,8 @@ def build(bld):
 				'model/*.cpp',
 				'controls/*.cpp',
 				'controls2/*.cpp',
-				'menus2/*.cpp'
+				'menus2/*.cpp',
+				'nuklear/*.cpp'
 		])
 
 		includes = [
@@ -109,7 +110,8 @@ def build(bld):
 				'../pm_shared',
 				'..',
 				'../mathlib',
-				'../public/'
+				'../public/',
+				'../thirdparty/nuklear'
 		]
 
 		bld.shlib(

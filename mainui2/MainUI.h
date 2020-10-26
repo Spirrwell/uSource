@@ -15,10 +15,58 @@
 
 #include "containers/list.h"
 
+/*
+
+ MAINUI VERSION 2 DESIGN
+
+ v2 of mainui has been redesigned to use Nuklear as the ui library.
+ Nuklear is pretty nice, it's immediate mode and it's beautiful out
+ of the box. However, since this is being redesigned around am immediate
+ mode UI, we're going to partially destroy the OOP design method mainui
+ already uses.
+
+ Since Nuklear operates on a simple buffer and literally just inserts draw
+ calls into a queue, we can do all UI "rendering" in a separate thread.
+ So there will be a new design for controls and rendering things:
+
+ Each frame, UpdateState() will be called from the MAIN thread of the engine.
+ This will be used to grab important values from the game, engine, whatever.
+ Anything that's in the main thread that cannot be safely accessed from
+ a separate thread. This should also be used to update control sizes
+ and such.
+
+ After UpdateState is called the rendering of the UI in a separate thread will begin.
+ UpdateState() will ALWAYS be called before Draw
+
+ Draw(ui_state_t) is called in it's own thread. You should only be issuing draw calls here, no state
+ access unless it's absolutely 100% safe. Draw calls are then accumulated into a buffer
+ and rendered by the Nuklear renderer.
+
+
+
+ */
+
+
+
+
+#define BEGIN_MAINUI_NAMESPACE namespace ui {
+#define END_MAINUI_NAMESPACE }
+#define MAINUI_SOURCEFILE using namespace ui
+
 namespace ui
 {
 	typedef int Font;
 	typedef int Image;
+
+	/* State passed to each widget/control/frame during draw time */
+	/* this struct should have only basic types or classes */
+	/* no pointers or references are allowed, unless they are 100% thread safe */
+	struct ui_state_t
+	{
+		double curtime; // current time
+		double dt; // time between this frame and last
+		unsigned long long framecount; // Number of rendered frames
+	};
 
 	enum class EImageDrawMode
 	{
