@@ -19,7 +19,7 @@ struct Delegate
 	{
 	}
 
-	Delegate(R(*g)(T...)) :
+	explicit Delegate(R(*g)(T...)) :
 		m_ptr(g)
 	{
 	}
@@ -29,7 +29,7 @@ struct Delegate
 		this->m_ptr = other.m_ptr;
 	}
 
-	Delegate(Delegate<R,T...>&& other)
+	Delegate(Delegate<R,T...>&& other) noexcept
 	{
 		this->m_ptr = other.m_ptr;
 		other.m_ptr = nullptr;
