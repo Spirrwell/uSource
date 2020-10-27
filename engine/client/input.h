@@ -92,16 +92,42 @@ enum
 };
 
 qboolean Joy_IsActive( void );
-void Joy_HatMotionEvent( byte hat, byte value );
-void Joy_AxisMotionEvent( byte axis, short value );
-void Joy_BallMotionEvent( byte ball, short xrel, short yrel );
-void Joy_ButtonEvent( byte button, byte down );
+void Joy_HatMotionEvent(int id, byte hat, byte value );
+void Joy_AxisMotionEvent(int id, byte axis, short value );
+void Joy_BallMotionEvent(int id, byte ball, short xrel, short yrel );
+void Joy_ButtonEvent(int id, byte button, byte down );
 void Joy_AddEvent( void );
 void Joy_RemoveEvent( void );
 void Joy_FinalizeMove( float *fw, float *side, float *dpitch, float *dyaw );
 void Joy_Init( void );
 void Joy_Shutdown( void );
 void Joy_EnableTextInput(qboolean enable, qboolean force);
+
+// Public joystick API
+
+#define JOYSTICK_INPUT_TYPE_AXIS 1
+#define JOYSTICK_INPUT_TYPE_BALL 2
+#define JOYSTICK_INPUT_TYPE_BUTTON 3
+#define JOYSTICK_INPUT_TYPE_HAT 4
+
+bool Joy_AdvancedAPISupported();
+int Joy_GetCount();
+void Joy_Activate(int stick_number);
+void Joy_Deactivate(int stick_number);
+int Joy_ActiveCount();
+const char* Joy_NameForIndex(int stick_number);
+int Joy_NumButtons(int stick_number);
+int Joy_NumAxes(int stick_number);
+int Joy_NumBalls(int stick_number);
+int Joy_NumHats(int stick_number);
+int Joy_ValueForAxis(int stick_number, int axis);       // Value for an axis
+int Joy_ValueForBall(int stick_number, int ball);       // value for a ball
+int Joy_ValueForButton(int stick_number, int button);   // value for a button
+int Joy_ValueForHat(int stick_number, int hat);         // value for a hat
+void Joy_AddBallNotifyFunc(int stick_number, void(*pfnNotify)(int index, short dx, short dy));
+void Joy_AddAxisNotifyFunc(int stick_number, void(*pfnNotify)(int index, short old_value, short new_value));
+void Joy_AddButtonNotifyFunc(int stick_number, void(*pfnNotify)(int index, bool newval));
+void Joy_AddHatNotifyFunc(int stick_number, void(*pfnNotify)(int index, bool newval));
 
 //
 // in_evdev.c
