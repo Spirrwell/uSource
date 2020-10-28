@@ -898,15 +898,19 @@ int Joy_NumHats(int stick_number)
 int Joy_ValueForAxis(int stick_number, int axis)
 {
 #ifdef XASH_SDL
-
+	return FindJoystick(stick_number).getAxisValue(axis);
 #else
         return 0;
 #endif
 }
 
-int Joy_ValueForBall(int stick_number, int ball)
+void Joy_ValueForBall(int stick_number, int ball, short& x, short& y)
 {
-        return 0;
+#ifdef XASH_SDL
+        return FindJoystick(stick_number).getBallValue(ball, x,y);
+#else
+        x = y = 0;
+#endif
 }
 
 int Joy_ValueForButton(int stick_number, int button)

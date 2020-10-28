@@ -121,7 +121,7 @@ int Joy_NumAxes(int stick_number);
 int Joy_NumBalls(int stick_number);
 int Joy_NumHats(int stick_number);
 int Joy_ValueForAxis(int stick_number, int axis);       // Value for an axis
-int Joy_ValueForBall(int stick_number, int ball);       // value for a ball
+void Joy_ValueForBall(int stick_number, int ball, short& x, short& y);       // value for a ball
 int Joy_ValueForButton(int stick_number, int button);   // value for a button
 int Joy_ValueForHat(int stick_number, int hat);         // value for a hat
 void Joy_AddBallNotifyFunc(int stick_number, void(*pfnNotify)(int index, short dx, short dy));
