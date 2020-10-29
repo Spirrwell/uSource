@@ -41,11 +41,12 @@ def sdl2_configure_path(conf, path):
 			os.path.abspath(os.path.join(path, 'include/SDL2'))
 		]
 		libpath = 'lib'
+		# NOTE: Only supporting x86 and x64 windows right now.
 		if conf.env.COMPILER_CC == 'msvc':
-			if conf.env.DEST_CPU == 'x86_64':
-				libpath = 'lib/x64'
+			if conf.env.DEST_CPU == 'amd64':
+				libpath = 'lib/win64'
 			else:
-				libpath = 'lib/' + conf.env.DEST_CPU
+				libpath = 'lib/win32'
 		conf.env.LIBPATH_SDL2 = [os.path.abspath(os.path.join(path, libpath))]
 		conf.env.LIB_SDL2 = ['SDL2']
 
@@ -64,7 +65,7 @@ def configure(conf):
 				uselib_store='SDL2')
 		except conf.errors.ConfigurationError:
 			conf.env.HAVE_SDL2 = 0
-	
+
 	if not conf.env.HAVE_SDL2 and conf.env.CONAN:
 		conf.load('conan')
 		conf.add_conan_remote('bincrafters', 'https://api.bintray.com/conan/bincrafters/public-conan')
