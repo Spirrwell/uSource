@@ -144,4 +144,13 @@ GNU General Public License for more details.
 #include <SDL.h>
 #endif
 
+
+// Builds a library or exe name from the specified string literal
+#define MAKE_LIB_NAME(x) OS_LIB_PREFIX x "." OS_LIB_EXT
+#ifdef _WIN32
+	#define MAKE_EXE_NAME(x) x "." OS_EXE_EXT
+#else
+	#define MAKE_EXE_NAME(x) x
+#endif 
+
 #endif // PORT_H
