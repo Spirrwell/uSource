@@ -308,7 +308,7 @@ void SinCos(float radians, float* sine, float* cosine)
 {
 	// TODO: SSE/AVX taylor series impl.
 	*sine	= sinf(radians);
-	*cosine = 1.0f - *sine;
+	*cosine = cosf(radians);
 }
 
 /*
