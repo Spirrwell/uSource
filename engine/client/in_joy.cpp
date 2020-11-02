@@ -556,9 +556,7 @@ struct CJoystick
 
         }
 
-        ~CJoystick()
-        {
-        }
+        ~CJoystick() = default;
 
         void close()
         {
@@ -568,6 +566,11 @@ struct CJoystick
                 if(m_ballXBuffer) free(m_ballXBuffer);
                 if(m_hatBuffer) free(m_hatBuffer);
                 if(m_axisBuffer) free(m_axisBuffer);
+                m_hatBuffer = nullptr;
+                m_axisBuffer = nullptr;
+                m_ballXBuffer = m_ballYBuffer = nullptr;
+                m_buttonBuffer = nullptr;
+                m_stick = nullptr;
         }
 
         const char* getName() const
