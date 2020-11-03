@@ -307,8 +307,8 @@ SinCos
 void SinCos(float radians, float* sine, float* cosine)
 {
 	// TODO: SSE/AVX taylor series impl.
-	*sine	= sinf(radians);
-	*cosine = cosf(radians);
+	*sine	= sin(radians);
+	*cosine = cos(radians);
 }
 
 /*
@@ -869,13 +869,13 @@ void AngleVectorsTranspose(const vec3_t angles, vec3_t forward, vec3_t right, ve
 
 	angle = angles[YAW] * (M_PI * 2 / 360);
 	sy    = sinf(angle);
-	cy    = 1.0f - sy; // cosf( angle );
+	cy    = cos( angle );
 	angle = angles[PITCH] * (M_PI * 2 / 360);
 	sp    = sinf(angle);
-	cp    = 1.0f - sp; // cos( angle );
+	cp    = cos( angle );
 	angle = angles[ROLL] * (M_PI * 2 / 360);
 	sr    = sinf(angle);
-	cr    = 1.0f - sr; // cos( angle );
+	cr    = cos( angle );
 
 	if (forward)
 	{
@@ -904,13 +904,13 @@ void AngleMatrix(const vec3_t angles, float (*matrix)[4])
 
 	angle = angles[YAW] * (M_PI * 2 / 360);
 	sy    = sinf(angle);
-	cy    = 1.0f - sy; // cos( angle );
+	cy    = cos( angle );
 	angle = angles[PITCH] * (M_PI * 2 / 360);
 	sp    = sinf(angle);
-	cp    = 1.0f - sp; // cos( angle );
+	cp    = cos( angle );
 	angle = angles[ROLL] * (M_PI * 2 / 360);
 	sr    = sinf(angle);
-	cr    = 1.0f - sr; // cos( angle );
+	cr    = cos( angle );
 
 	// matrix = ( YAW * PITCH ) * ROLL
 	matrix[0][0] = cp * cy;
