@@ -297,20 +297,20 @@ static void SDLash_EventFilter( SDL_Event *event )
 
 	/* Joystick events */
 	case SDL_JOYAXISMOTION:
-		Joy_AxisMotionEvent( event->jaxis.axis, event->jaxis.value );
+		Joy_AxisMotionEvent(event->jaxis.which, event->jaxis.axis, event->jaxis.value );
 		break;
 
 	case SDL_JOYBALLMOTION:
-		Joy_BallMotionEvent( event->jball.ball, event->jball.xrel, event->jball.yrel );
+		Joy_BallMotionEvent( event->jball.which, event->jball.ball, event->jball.xrel, event->jball.yrel );
 		break;
 
 	case SDL_JOYHATMOTION:
-		Joy_HatMotionEvent( event->jhat.hat, event->jhat.value );
+		Joy_HatMotionEvent( event->jhat.which, event->jhat.hat, event->jhat.value );
 		break;
 
 	case SDL_JOYBUTTONDOWN:
 	case SDL_JOYBUTTONUP:
-		Joy_ButtonEvent( event->jbutton.button, event->jbutton.state );
+		Joy_ButtonEvent( event->jhat.which, event->jbutton.button, event->jbutton.state );
 		break;
 
 	case SDL_JOYDEVICEADDED:
@@ -332,7 +332,7 @@ static void SDLash_EventFilter( SDL_Event *event )
 		else if( event->caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT )
 			event->caxis.axis = SDL_CONTROLLER_AXIS_TRIGGERLEFT;
 
-		Joy_AxisMotionEvent( event->caxis.axis, event->caxis.value );
+		Joy_AxisMotionEvent(event->caxis.which, event->caxis.axis, event->caxis.value );
 		break;
 
 	case SDL_CONTROLLERBUTTONDOWN:

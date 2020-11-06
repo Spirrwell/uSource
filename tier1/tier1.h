@@ -11,7 +11,6 @@
 
 extern IEngineCvar* g_pEngineCvar;
 extern ILogSystem* g_pLogSystem;
-extern IEngineFilesystem* g_pFilesystem;
 extern IEngineDebug* g_pEngineDebug;
 
 namespace tier1

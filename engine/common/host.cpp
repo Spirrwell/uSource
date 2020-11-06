@@ -60,6 +60,7 @@ GNU General Public License for more details.
 #include "demo_int.h"
 
 #include "tier1/tier1.h"
+#include "tier1/convar.h"
 
 /* Interface globals */
 ILogSystem* g_pLoggingSystem;
@@ -82,6 +83,10 @@ convar_t	*host_framerate;
 convar_t	*host_sleeptime;
 convar_t	*con_gamemaps;
 convar_t	*build, *ver;
+
+/* External functions from xprof_engine.cpp */
+extern void xprof_engine_init();
+extern void xprof_engine_shutdown();
 
 int Host_CompareFileTime( int ft1, int ft2 )
 {
@@ -575,7 +580,7 @@ void Host_Frame( float time )
 	if( !Host_FilterTime( time ))
 		return;
 
-	GlobalXProf().Frame();
+	GlobalXProf().BeginFrame();
 
 	XPROF_NODE(XPROF_CATEGORY_FRAME);
 
@@ -585,6 +590,8 @@ void Host_Frame( float time )
 	Host_ServerFrame (); // server frame
 	Host_ClientFrame (); // client frame
 	HTTP_Run();			 // both server and client
+
+	GlobalXProf().EndFrame();
 
 	host.framecount++;
 }
@@ -839,9 +846,6 @@ void Host_InitCommon( int argc, char **argv, const char *progname, qboolean bCha
 
 	host.con_showalways = true;
 
-	/* XProf dump on exit */
-	if(Sys_CheckParm("-xprof-dump-on-exit"))
-		GlobalXProf().SetFlag(XPROF_DUMP_ON_EXIT);
 
 #ifdef XASH_DEDICATED
 	host.type = HOST_DEDICATED; // predict state
@@ -981,11 +985,10 @@ extern "C" int EXPORT Host_Main( int argc, char **argv, const char *progname, in
 
 	pChangeGame = func;	// may be NULL
 
-	GlobalXProf().Enable();
-
 	Host_InitInterfaces();
 	Host_InitCommon( argc, argv, progname, bChangeGame );
 	tier1::Connect();
+	xprof_engine_init();
 
 	// init commands and vars
 	if( host_developer.value >= DEV_EXTENDED )
