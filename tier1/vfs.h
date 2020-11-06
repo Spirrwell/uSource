@@ -12,7 +12,7 @@
 
 BEGIN_FS_NAMESPACE
 
-IEngineFilesystem* GlobalFileSystem();
+IEngineFilesystem& GlobalFileSystem();
 
 /* Reads the file into a string */
 char* ReadFileToString(const char* file, size_t& sz, bool gamedironly = false);

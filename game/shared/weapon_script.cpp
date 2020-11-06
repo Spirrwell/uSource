@@ -1,12 +1,13 @@
 #include "weapon_script.h"
 
 #include "game_shared.h"
+#include "tier1/vfs.h"
 
 CWeaponScript::CWeaponScript(const char *filename) 
 {
 	this->m_kv = new KeyValues();
 
-	String fullFile = g_pFilesystem->GetFullPath(filename);
+	String fullFile = fs::GlobalFileSystem().GetFullPath(filename);
 	if(!fullFile.empty())
 		m_kv->ParseFile(fullFile.c_str());
 
