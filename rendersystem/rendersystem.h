@@ -65,7 +65,7 @@ enum class EShaderAPIFeatures
 
 enum class EShaderDepthFunc
 {
-	NEVER,
+	NEVER = 0,
 	NEARER,
 	EQUAL,
 	NEAREROREQUAL,
@@ -77,7 +77,7 @@ enum class EShaderDepthFunc
 
 enum class EShaderBlendFunc
 {
-	ZERO,
+	ZERO = 0,
 	ONE,
 	DST_COLOR,
 	ONE_MINUS_DST_COLOR,
@@ -92,7 +92,7 @@ enum class EShaderBlendFunc
 
 enum class EShaderBlendEq
 {
-	ADD,
+	ADD = 0,
 	SUBTRACT,
 	REVSUBTRACT,
 	MIN,
@@ -101,7 +101,7 @@ enum class EShaderBlendEq
 
 enum class EShaderAlphaFunc
 {
-	NEVER,
+	NEVER = 0,
 	LESS,
 	EQUAL,
 	LEQUAL,

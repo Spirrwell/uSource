@@ -48,6 +48,17 @@ public:
 	virtual void SetAlphaFunc(EShaderAlphaFunc func) override;
 	virtual void SetStencilFunc(EShaderStencilFunc func) override;
 	virtual void SetStencilOp(EShaderStencilOp op) override;
+
+private:
+	EShaderDepthFunc m_depthFunc;
+	EShaderBlendEq m_blendEquation;
+	EShaderBlendFunc m_blendFunc;
+	EShaderAlphaFunc m_alphaFunc;
+	EShaderStencilFunc m_stencilFunc;
+	EShaderStencilOp m_stencilOp;
+
+	int m_stencilRef;
+	unsigned int m_stencilMask;
 };
 
 namespace GL
