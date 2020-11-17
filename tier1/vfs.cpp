@@ -63,7 +63,7 @@ KeyValues fs::ReadKeyValues(const char* file, bool gamedironly)
 }
 
 
-IEngineFilesystem* fs::GlobalFileSystem()
+IEngineFilesystem& fs::GlobalFileSystem()
 {
-	return g_pFilesystem;
+	return *g_pFilesystem;
 }

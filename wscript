@@ -174,7 +174,7 @@ def configure(conf):
 	if not conf.options.ALLOW64:
 		conf.env.MSVC_TARGETS = ['x86'] # explicitly request x86 target for MSVC
 	else:
-		conf.env.MSVC_TARGETS = ['x86_64']
+		conf.env.MSVC_TARGETS = ['x64']
 	if sys.platform == 'win32':
 		conf.load('msvc msvcfix msdev msvs')
 	conf.load('xcompile compiler_c compiler_cxx gitversion clang_compilation_database strip_on_install')
@@ -379,7 +379,7 @@ def configure(conf):
 	platform_matrix = {
 		"win32": {
 			"x86": "win32",
-			"x86_64": "win64",
+			"amd64": "win64",
 			"aarch32": "winarm32",
 			"aarch64": "winarm64"
 		},
