@@ -1,0 +1,5 @@
+terminal:
+        image: debian:sid
+        before_script:
+                - apt-get update
+                - apt-get install gcc g++ cmake python3
