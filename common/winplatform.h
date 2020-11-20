@@ -1,4 +1,5 @@
 // Main header for Windows. Undefines all crappy Windows macros
+#pragma once
 
 #ifdef _WIN32
 
@@ -12,8 +13,8 @@
 
 #endif
 
-#include <synchapi.h>
 #include <windows.h>
+#include <synchapi.h>
 
 // Macros we want to undefine
 #undef min
