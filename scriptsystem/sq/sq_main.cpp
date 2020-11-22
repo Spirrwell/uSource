@@ -13,7 +13,7 @@ struct script_internal_data_sq
 
 uint32_t g_CurrentID = 0;
 Array<class CSquirrelScriptSystem *> g_SQEnvs;
-
+#if 0
 /* Forward decls */
 void
 Squirrel_CompileErrorCallback(HSQUIRRELVM vm, const SQChar *desc, const SQChar *source, SQInteger line, SQInteger col);
@@ -33,7 +33,7 @@ public:
 
 	/* Initializes the script env. The feature bits specified in features are the things we need to enable. It's computed
 		based on the GetEnvFeatures() bits */
-	virtual bool Init(script_env_settings_t settings, uint64_t features) override
+	virtual bool Init(ScriptEnvSettings_t settings, uint64_t features) override
 	{
 		/* Set features, open VM */
 		m_features = features;
@@ -78,8 +78,8 @@ public:
 	 * @param settings Settings to compile with
 	 * @return If the compile succeeded, returns a pointer to a new script, otherwise, NULL
 	 */
-	virtual script_t *
-	CompileScript(const char *file, const char *buf, size_t buf_size, script_compile_settings_t settings) override
+	virtual Script_t *
+	CompileScript(const char *file, const char *buf, size_t buf_size, ScriptCompileSettings_t settings) override
 	{
 		sq_enabledebuginfo(m_vm, settings.debuginfo);
 
@@ -88,7 +88,7 @@ public:
 			return NULL;
 		}
 		/* Allocate and return the script handle */
-		script_t *script = (script_t *) malloc(sizeof(script_t));
+		Script_t *script = (Script_t *) malloc(sizeof(Script_t));
 		script->script_data = malloc(sizeof(script_internal_data_sq));
 
 		script_internal_data_sq idat;
@@ -103,7 +103,7 @@ public:
 	/**
 	 * @brief Delete a script object
 	 */
-	virtual void FreeScript(script_t *scr) override
+	virtual void FreeScript(Script_t *scr) override
 	{
 		script_internal_data_sq *idat = (script_internal_data_sq *) scr->script_data;
 		free(idat->file);
@@ -114,9 +114,9 @@ public:
 	/**
 	 * @brief Returns the script compile log
 	 */
-	virtual script_compile_result_t GetCompileLog() override
+	virtual ScriptCompileResult_t GetCompileLog() override
 	{
-		script_compile_result_t res;
+		ScriptCompileResult_t res;
 		res.col = m_lastErrorCol;
 		res.line = m_lastErrorLine;
 		res.source = m_lastErrorSrc;
@@ -128,24 +128,24 @@ public:
 	/**
 	 * @brief Sets a breakpoint in the script
 	 */
-	virtual void SetBreakpoint(const script_t &script, const char *file, int line) = 0;
+	virtual void SetBreakpoint(const Script_t &script, const char *file, int line) = 0;
 
 	/**
 	 * @brief Clears a breakpoint in the script
 	 */
-	virtual void ClearBreakpoint(script_t &script, const script_breakpoint_t &bp) = 0;
+	virtual void ClearBreakpoint(Script_t &script, const ScriptBreakpoint_t &bp) = 0;
 
-	virtual void ClearAllBreakpoints(script_t &script) = 0;
+	virtual void ClearAllBreakpoints(Script_t &script) = 0;
 
 	/**
 	 * @brief Returns a list of all script variables for this stack
 	 */
-	virtual Array<script_debug_var_t> GetScriptVariables(script_t &scr, int level) = 0;
+	virtual Array<ScriptDebugVar_t> GetScriptVariables(Script_t &scr, int level) = 0;
 
 	/**
 	 * @brief Sets the value of a stack variable.
 	 */
-	virtual void SetScriptVariableValue(script_t &scr, script_debug_var_t &var, EDataType type, void *value) = 0;
+	virtual void SetScriptVariableValue(Script_t &scr, ScriptDebugVar_t &var, EDataType type, void *value) = 0;
 
 	/**
 	 * @brief Changes the runtime state of the VM
@@ -168,7 +168,7 @@ public:
 	/**
 	 * Returns a list of the functions defined in the script, along with their info
 	 */
-	virtual Array<script_function_t> GetScriptFunctions(const script_t &scr) override
+	virtual Array<ScriptFunction_t> GetScriptFunctions(const Script_t &scr) override
 	{
 	}
 
@@ -176,12 +176,12 @@ public:
 	 * Puts function info about the named function into funcinfo. Returns true if the function is found (and thus funcinfo was modified)
 	 * If the function is not found, returns false and funcinfo is not modified.
 	 */
-	virtual bool GetScriptFunctionInfo(const script_t &scr, const char *func, script_function_t &funcinfo) override
+	virtual bool GetScriptFunctionInfo(const Script_t &scr, const char *func, ScriptFunction_t &funcinfo) override
 	{
 	}
 
-	virtual script_value_t CallFunctionInternal(script_t &script, const char *function, EDataType expected_return,
-	                                            std::initializer_list<script_value_t> params)
+	virtual ScriptValue_t CallFunctionInternal(Script_t &script, const char *function, EDataType expected_return,
+	                                           std::initializer_list<ScriptValue_t> params)
 	{
 		sq_pushroottable(m_vm);
 		sq_pushstring(m_vm, function, -1); // Push function string, -1 means compute the length yourself
@@ -225,7 +225,7 @@ public:
 		/* save return value */
 		if (expected_return != EDataType::NONE)
 		{
-			script_value_t ret;
+			ScriptValue_t ret;
 			SQInteger top = sq_gettop(m_vm);
 			switch (expected_return)
 			{
@@ -310,3 +310,4 @@ Squirrel_CompileErrorCallback(HSQUIRRELVM vm, const SQChar *desc, const SQChar *
 	env->m_lastErrorLine = line;
 	env->m_lastErrorCol = col;
 }
+#endif
