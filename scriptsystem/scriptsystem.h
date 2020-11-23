@@ -11,6 +11,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#undef min
+#undef max
+
+#include <functional>
+
 #include "containers/string.h"
 #include "containers/array.h"
 
@@ -53,11 +58,11 @@ typedef struct
 
 } ScriptEnvSettings_t;
 
-typedef struct
-{
-	void* script_data;
-	class IScriptEnvironment* env;
-} Script_t;
+//typedef struct
+//{
+//	void* script_data;
+//	class IScriptEnvironment* env;
+//} Script_t;
 
 typedef struct
 {
@@ -80,18 +85,18 @@ Debugging structures and info
 ====================================================
 */
 
-typedef struct
+struct ScriptBreakpoint_t
 {
-	Script_t* script;
+	class IScript* script;
 	const char* file;
 	int line;
-} ScriptBreakpoint_t;
+};
 
-typedef struct
+struct ScriptDebugVar_t
 {
 	const char* name;
 	size_t stack_index;
-} ScriptDebugVar_t;
+};
 
 enum class EScriptEnvState
 {
@@ -158,7 +163,7 @@ Script value boilerplate
 ====================================================
 */
 
-typedef struct
+struct ScriptValue_t
 {
 	EDataType type;
 	union {
@@ -168,15 +173,20 @@ typedef struct
 		long long ival;
 		double fval;
 	};
-} ScriptValue_t;
+};
 
 /* Functions defined by the script itself */
-typedef struct
+struct ScriptFunction_t
 {
 	const char* name;
 	EDataType return_type;
 	Array<EDataType> params;
-} ScriptFunction_t;
+};
+
+struct ScriptClass_t
+{
+	String baseclass;
+};
 
 /*
 ====================================================
@@ -220,7 +230,7 @@ class ClassBinding
 public:
 	const char* m_name;
 	Array<FieldBinding> m_fields;
-	Array<MethodBinding> m_methods;
+	Array<FunctionBinding> m_methods;
 };
 
 /* Variables only reside outside of classes in namespaces */
@@ -234,6 +244,39 @@ public:
 
 typedef void(*ErrorCallback_t)();
 typedef void(*ExceptionCallback_t)();
+
+
+/*
+====================================================
+
+Script Class
+	Represents a script itself
+
+====================================================
+*/
+
+class IScript
+{
+public:
+	/* === DEBUGGING API === */
+
+	virtual ScriptBreakpoint_t SetBreakpoint(const char* file, int line) = 0;
+	virtual void ClearBreakpoint(const ScriptBreakpoint_t& bp) = 0;
+	virtual void ClearAllBreakpoints() = 0;
+	virtual Array<ScriptDebugVar_t> GetStackVariables(int level) = 0;
+	virtual void SetStackVariable(ScriptDebugVar_t& var, ScriptValue_t value) = 0;
+	virtual Array<ScriptFunction_t> GetScriptFunctions() = 0;
+	virtual bool GetScriptFunctionInfo(const char* func, ScriptFunction_t& funcinfo) = 0;
+
+	/* === GENERAL API === */
+
+	virtual ScriptValue_t InvokeFunction(const char* function, EDataType expected_return, std::initializer_list<ScriptValue_t> params) = 0;
+	virtual ScriptClass_t* GetExtensionClasses(IScript& script, int& num) = 0;
+
+	virtual class IScriptEnvironment& Environment() const = 0;
+
+};
+
 
 /*
 ====================================================
@@ -263,7 +306,7 @@ public:
 	 * @param settings Settings to compile with
 	 * @return If the compile succeeded, returns a pointer to a new script, otherwise, NULL
 	 */
-	virtual Script_t* CompileScript(const char* source_file, const char* buf, size_t buf_size, ScriptCompileSettings_t settings) = 0;
+	virtual IScript* CompileScript(const char* source_file, const char* buf, size_t buf_size, ScriptCompileSettings_t settings, ScriptCompileResult_t& result) = 0;
 
 	/**
 	 * @brief If direct module loading is supported, this will load the binary specified by the buffer.
@@ -273,39 +316,16 @@ public:
 	 * @param settings
 	 * @return
 	 */
-	virtual Script_t* LoadModule(const char* file_path, const void* data, size_t data_len, ScriptCompileSettings_t settings) = 0;
+	virtual IScript* LoadModule(const char* file_path, const void* data, size_t data_len, ScriptCompileSettings_t settings, ScriptCompileResult_t& result) = 0;
 
 	/**
 	 * @brief Delete a script object
 	 */
-	virtual void FreeScript(Script_t* scr) = 0;
+	virtual void FreeScript(IScript* scr) = 0;
 
-	/**
-	 * @brief Returns the script compile log
-	 */
-	virtual ScriptCompileResult_t GetCompileLog() = 0;
+	virtual void UnloadScript(IScript* scr) = 0;
 
-	/**
-	 * @brief Sets a breakpoint in the script
-	 */
-	virtual void SetBreakpoint(const Script_t& script, const char* file, int line) = 0;
-
-	/**
-	 * @brief Clears a breakpoint in the script
-	 */
-	virtual void ClearBreakpoint(Script_t& script, const ScriptBreakpoint_t& bp) = 0;
-	virtual void ClearAllBreakpoints(Script_t& script) = 0;
-
-	/**
-	 * @brief Returns a list of all script variables for this stack
-	 */
-	virtual Array<ScriptDebugVar_t> GetScriptVariables(Script_t& scr, int level) = 0;
-
-	/**
-	 * @brief Sets the value of a stack variable.
-	 */
-	virtual void SetScriptVariableValue(Script_t& scr, ScriptDebugVar_t& var, EDataType type, void* value) = 0;
-
+	virtual void ReloadScript(IScript* scr) = 0;
 
 	/**
 	 * @brief Changes the runtime state of the VM
@@ -317,21 +337,6 @@ public:
 	virtual void Resume() = 0;
 	virtual EScriptEnvState GetEnvironmentState() = 0;
 
-	/**
-	 * Returns a list of the functions defined in the script, along with their info
-	 * ONLY ENABLED IF SCRIPT WAS COMPILED WITH DEBUG INFO
-	 */
-	virtual Array<ScriptFunction_t> GetScriptFunctions(const Script_t& scr) = 0;
-
-	/**
-	 * Puts function info about the named function into funcinfo. Returns true if the function is found (and thus funcinfo was modified)
-	 * If the function is not found, returns false and funcinfo is not modified.
-	 * ONLY ENABLED IF SCRIPT WAS COMPILED WITH DEBUG INFO
-	 */
-	virtual bool GetScriptFunctionInfo(const Script_t& scr, const char* func, ScriptFunction_t& funcinfo) = 0;
-
-	virtual ScriptValue_t InvokeFunctionInternal(Script_t& script, const char* function, EDataType expected_return, std::initializer_list<ScriptValue_t> params) = 0;
-
 
 	/**
 	 * @brief Invokes an event handler that is registered by the script.
@@ -340,6 +345,28 @@ public:
 	 * @return true if invoked
 	 */
 	virtual bool InvokeEvent(const char* eventName, std::initializer_list<ScriptValue_t> params) = 0;
+
+	/**
+	 * Register a native function with all scripts
+	 * @param binding
+	 * @return
+	 */
+	virtual bool BindFunction(FunctionBinding& binding) = 0;
+
+	/**
+	 * Register a class with all scripts
+	 * @param binding
+	 * @return
+	 */
+	virtual bool BindClass(ClassBinding& binding) = 0;
+
+	/**
+	 * Binds an extension class. These are classes that scripts can extend or implement.
+	 * These classes can then be instantiated on the C++ side of things
+	 * @param binding
+	 * @return
+	 */
+	virtual bool BindExtensionClass(ClassBinding& binding) = 0;
 };
 
 /*
@@ -486,14 +513,79 @@ void ArgsToScriptValueArray(ScriptValue_t* argArray, T...args)
 	ArgsToScriptValueArray_Recurse(0, argArray, args...);
 }
 
+template<class A, class...T>
+void TypeToScriptTypeArray_Recurse(int& index, EDataType* typeArray);
+template<class A>
+void TypeToScriptTypeArray_Recurse(int& index, EDataType* typeArray);
+void TypeToScriptTypeArray_Recurse(int& index, EDataType* typeArray);
+
+
+template<class A, class...T>
+void TypeToScriptTypeArray_Recurse(int& index, EDataType* typeArray)
+{
+	typeArray[index] = TypeToScriptType<A>();
+	index++;
+	TypeToScriptTypeArray_Recurse<T...>(index, typeArray);
+}
+
+
+template<class A>
+void TypeToScriptTypeArray_Recurse(int& index, EDataType* typeArray)
+{
+	typeArray[index] = TypeToScriptType<A>();
+	index++;
+}
+
+void TypeToScriptTypeArray_Recurse(int& index, EDataType* typeArray)
+{
+}
+
+template<class...T>
+void TypeToScriptTypeArray(EDataType* typeArray)
+{
+	int i = 0;
+	TypeToScriptTypeArray_Recurse<T...>(i, typeArray);
+}
 
 template<class R, class...T>
-R Invoke(Script_t& script, const char* func, T...args)
+R Invoke(IScript& script, const char* func, T...args)
 {
 	ScriptValue_t argsArray[sizeof...(args)];
 	ArgsToScriptValueArray(argsArray, args...);
-	script.env->InvokeFunctionInternal(script, func, TypeToScriptType<R>(), argsArray);
+	script.InvokeFunction(func, TypeToScriptType<R>(), argsArray);
 }
 
+template<class R, class...T>
+void BindFunction(IScriptEnvironment* env, std::function<R(T...)> function, const char* name)
+{
+	FunctionBinding binding;
+	binding.m_returnType = TypeToScriptType<R>();
+	binding.m_name = name;
+	binding.m_params.reserve(sizeof...(T));
+	TypeToScriptTypeArray<T...>(binding.m_params.data());
+	env->BindFunction(binding);
+}
+
+template<class R, class...T>
+FunctionBinding CreateFunctionBinding(std::function<R(T...)> function, const char* name)
+{
+	FunctionBinding binding;
+	binding.m_returnType = TypeToScriptType<R>();
+	binding.m_name = name;
+	binding.m_params.reserve(sizeof...(T));
+	TypeToScriptTypeArray<T...>(binding.m_params.data());
+	return binding;
+}
+
+template<class R, class...T>
+FunctionBinding CreateFunctionBindingWithPtr(R(*function)(T...), const char* name)
+{
+	FunctionBinding binding;
+	binding.m_returnType = TypeToScriptType<R>();
+	binding.m_name = name;
+	binding.m_params.reserve(sizeof...(T));
+	TypeToScriptTypeArray<T...>(binding.m_params.data());
+	return binding;
+}
 
 END_SCRIPTSYS_NAMESPACE
