@@ -15,6 +15,7 @@
 #undef max
 
 #include <functional>
+#include <array>
 
 #include "containers/string.h"
 #include "containers/array.h"
@@ -76,6 +77,48 @@ typedef struct
 	const char* source;
 	int line, col;
 } ScriptCompileResult_t;
+
+class _ScriptArrayBase {};
+
+/* Used to pass arrays of data */
+
+template<class T>
+class ScriptArrayView : public _ScriptArrayBase
+{
+private:
+	T* m_mem;
+	size_t m_len;
+public:
+	ScriptArrayView() = delete;
+
+	explicit ScriptArrayView(std::vector<T> array)
+	{
+		m_len = array.size();
+		m_mem = array.data();
+	}
+
+	template<size_t N>
+	explicit ScriptArrayView(T dat[N])
+	{
+		m_len = N;
+		m_mem = dat;
+	}
+
+	const T& at(size_t n) const
+	{
+		return m_mem[n];
+	}
+
+	T& at(size_t n)
+	{
+		return m_mem[n];
+	}
+
+	size_t length() const { return m_len; };
+
+	T* data() const { return m_mem; };
+};
+
 
 /*
 ====================================================
@@ -203,7 +246,6 @@ public:
 	EDataType m_dataType;
 	uint16_t m_flags;
 	const char* m_name;
-	ClassBinding* m_class;
 	size_t m_offset;
 };
 
@@ -258,6 +300,7 @@ Script Class
 class IScript
 {
 public:
+	virtual ~IScript() = 0;
 	/* === DEBUGGING API === */
 
 	virtual ScriptBreakpoint_t SetBreakpoint(const char* file, int line) = 0;
@@ -270,7 +313,7 @@ public:
 
 	/* === GENERAL API === */
 
-	virtual ScriptValue_t InvokeFunction(const char* function, EDataType expected_return, std::initializer_list<ScriptValue_t> params) = 0;
+	virtual ScriptValue_t InvokeFunction(const char* function, EDataType expected_return, const std::vector<ScriptValue_t>& params) = 0;
 	virtual ScriptClass_t* GetExtensionClasses(IScript& script, int& num) = 0;
 
 	virtual class IScriptEnvironment& Environment() const = 0;
@@ -290,6 +333,7 @@ Script Environment Class
 class IScriptEnvironment
 {
 public:
+	virtual ~IScriptEnvironment() = 0;
 	/* Initializes the script env. The feature bits specified in features are the things we need to enable. It's computed
 		based on the GetEnvFeatures() bits */
 	virtual bool Init(ScriptEnvSettings_t settings, uint64_t features) = 0;
