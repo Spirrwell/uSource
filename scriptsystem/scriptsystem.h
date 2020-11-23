@@ -187,7 +187,7 @@ Binding types
 */
 
 /* Fields may only reside inside of classes */
-class CFieldBinding
+class FieldBinding
 {
 public:
 	EDataType m_dataType;
@@ -198,7 +198,7 @@ public:
 };
 
 /* Functions are either static member functions or functions that reside in some namespace */
-class CFunctionBinding
+class FunctionBinding
 {
 public:
 	const char* m_name;
@@ -207,7 +207,7 @@ public:
 };
 
 /* Method bindings are for member functions */
-class CMethodBinding
+class MethodBinding
 {
 public:
 	const char* m_name;
@@ -215,16 +215,16 @@ public:
 	EDataType m_returnType;
 };
 
-class CClassBinding
+class ClassBinding
 {
 public:
 	const char* m_name;
-	Array<CFieldBinding> m_fields;
-	Array<CMethodBinding> m_methods;
+	Array<FieldBinding> m_fields;
+	Array<MethodBinding> m_methods;
 };
 
 /* Variables only reside outside of classes in namespaces */
-class CVariableBinding
+class VariableBinding
 {
 public:
 	EDataType m_dataType;
@@ -350,7 +350,7 @@ class _ObjectWrapperBase
 {
 public:
 	virtual void* ObjectPtr() const = 0;
-	virtual CClassBinding& ClassBinding() const = 0;
+	virtual ClassBinding& Binding() const = 0;
 };
 
 /**
@@ -385,18 +385,18 @@ class GenericObjectWrapper : public _ObjectWrapperBase
 {
 private:
 	T& m_obj;
-	CClassBinding& m_classBinding;
+	ClassBinding& m_classBinding;
 
 public:
 	GenericObjectWrapper() = delete;
-	GenericObjectWrapper(T& object, CClassBinding& binding) :
+	GenericObjectWrapper(T& object, ClassBinding& binding) :
 		m_obj(object),
 		m_classBinding(binding)
 	{
 	}
 	~GenericObjectWrapper() = default;
 
-	CClassBinding & ClassBinding() const override { return m_classBinding; }
+	ClassBinding & Binding() const override { return m_classBinding; }
 	void * ObjectPtr() const override { return m_obj; };
 	T& Object() const { return m_obj; }
 };
