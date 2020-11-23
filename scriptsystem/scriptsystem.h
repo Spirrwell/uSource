@@ -203,7 +203,7 @@ public:
 	EDataType m_dataType;
 	uint16_t m_flags;
 	const char* m_name;
-	class CClassBinding* m_class;
+	ClassBinding* m_class;
 	size_t m_offset;
 };
 
@@ -230,7 +230,7 @@ class ClassBinding
 public:
 	const char* m_name;
 	Array<FieldBinding> m_fields;
-	Array<FunctionBinding> m_methods;
+	Array<MethodBinding> m_methods;
 };
 
 /* Variables only reside outside of classes in namespaces */
@@ -587,5 +587,34 @@ FunctionBinding CreateFunctionBindingWithPtr(R(*function)(T...), const char* nam
 	TypeToScriptTypeArray<T...>(binding.m_params.data());
 	return binding;
 }
+
+template<class R, class C, class...T>
+MethodBinding CreateMethodBinding(R(C::*function)(T...), const char* name)
+{
+	MethodBinding binding;
+	binding.m_returnType = TypeToScriptType<R>();
+	binding.m_name = name;
+	binding.m_params.reserve(sizeof...(T)+1);
+	binding.m_params[0] = EDataType::USERPOINTER;
+	TypeToScriptTypeArray<T...>(binding.m_params.data() + 1);
+	return binding;
+}
+
+
+/* Use this macro to declare a scripted class */
+/* It will create a static class binding macro */
+#define DECLARE_SCRIPTED_CLASS() \
+public:                          \
+static scriptsystem::ClassBinding& GetClassBinding();
+
+#define BEGIN_SCRIPTED_CLASS_DESC(_class) \
+scriptsystem::ClassBinding& _class::GetClassBinding() { \
+using _Class = _class;                                          \
+static ClassBinding* binding = nullptr;   \
+if(!binding) { binding = new ClassBinding();
+
+#define END_SCRIPTED_CLASS_DESC() } return *binding; }
+
+#define SCRIPTED_CLASS_METHOD(_method) binding->m_methods.push_back(CreateMethodBinding(&_Class::_method, #_method));
 
 END_SCRIPTSYS_NAMESPACE
