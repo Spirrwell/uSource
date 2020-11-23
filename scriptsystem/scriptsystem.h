@@ -342,6 +342,65 @@ public:
 	virtual bool InvokeEvent(const char* eventName, std::initializer_list<ScriptValue_t> params) = 0;
 };
 
+/*
+ * Baseclass for object wrappers
+ * Serves no real purpose other than being food for std::is_base_of
+ */
+class _ObjectWrapperBase
+{
+public:
+	virtual void* ObjectPtr() const = 0;
+	virtual CClassBinding& ClassBinding() const = 0;
+};
+
+/**
+ * Wrapper class around reflected types. Always wrap your objects in this when passing to the invoke function.
+ * This is really a big giant hack, as there's no real way to pass an object by reference to a function with
+ * template parameter packs, so you'll end up invoking the copy constructor on an object when trying to invoke
+ * something. Also, since we're supporting userpointers as types, you cant just take the address of an object.
+ * std::reference should behave similarly, but I want to be able to bind custom class descriptions to arbitrary
+ * objects.
+ * @tparam T
+ */
+template<class T>
+class ObjectWrapper : public _ObjectWrapperBase
+{
+private:
+	T& m_obj;
+public:
+	ObjectWrapper() = delete;
+	explicit ObjectWrapper(T& object) :
+		m_obj(object)
+	{
+	}
+
+	~ObjectWrapper() = default;
+
+	T& Object() const { return m_obj; }
+	void * ObjectPtr() const override { return m_obj; }
+};
+
+template<class T>
+class GenericObjectWrapper : public _ObjectWrapperBase
+{
+private:
+	T& m_obj;
+	CClassBinding& m_classBinding;
+
+public:
+	GenericObjectWrapper() = delete;
+	GenericObjectWrapper(T& object, CClassBinding& binding) :
+		m_obj(object),
+		m_classBinding(binding)
+	{
+	}
+	~GenericObjectWrapper() = default;
+
+	CClassBinding & ClassBinding() const override { return m_classBinding; }
+	void * ObjectPtr() const override { return m_obj; };
+	T& Object() const { return m_obj; }
+};
+
 template<class T>
 ScriptValue_t ObjectToScriptValue(T arg)
 {
@@ -366,9 +425,10 @@ ScriptValue_t ObjectToScriptValue(T arg)
 		sv.vval = arg;
 		sv.type = EDataType::USERPOINTER;
 	}
-	else if(std::is_class<T>::value)
+	else if(std::is_class<T>::value && std::is_base_of<_ObjectWrapperBase, T>::value)
 	{
-
+		sv.vval = ((_ObjectWrapperBase*)&arg)->ObjectPtr();
+		sv.type = EDataType::USERDATA;
 	}
 	else if(std::is_integral<T>::value)
 	{
@@ -394,7 +454,7 @@ EDataType TypeToScriptType()
 		return EDataType::STRING;
 	else if(std::is_pointer<T>::value)
 		return EDataType::USERPOINTER;
-	else if(std::is_class<T>::value)
+	else if(std::is_class<T>::value && std::is_base_of<_ObjectWrapperBase, T>::value)
 		return EDataType::USERDATA;
 	else if(std::is_integral<T>::value)
 		return EDataType::INTEGER;
