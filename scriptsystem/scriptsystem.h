@@ -256,6 +256,7 @@ public:
 	const char* m_name;
 	Array<EDataType> m_params;
 	EDataType m_returnType;
+	class _FunctionBinderBase* m_binder;
 };
 
 /* Method bindings are for member functions */
@@ -473,9 +474,9 @@ public:
 };
 
 template<class T>
-ScriptValue_t ObjectToScriptValue(T arg)
+constexpr ScriptValue_t ObjectToScriptValue(T arg)
 {
-	ScriptValue_t sv;
+	ScriptValue_t sv = {};
 	if(std::is_same<T, bool>::value)
 	{
 		sv.bval = arg;
@@ -506,6 +507,10 @@ ScriptValue_t ObjectToScriptValue(T arg)
 		sv.ival = arg;
 		sv.type = EDataType::INTEGER;
 	}
+	else if(std::is_void<T>::value)
+	{
+		sv.type = EDataType::NONE;
+	}
 	else
 	{
 		sv.type = EDataType::BAD;
@@ -515,7 +520,7 @@ ScriptValue_t ObjectToScriptValue(T arg)
 }
 
 template<class T>
-EDataType TypeToScriptType()
+constexpr EDataType TypeToScriptType()
 {
 	if(std::is_same<T, bool>::value)
 		return EDataType::BOOL;
@@ -536,7 +541,7 @@ EDataType TypeToScriptType()
 }
 
 template<class A, class...T>
-void ArgsToScriptValueArray_Recurse(int& index, ScriptValue_t* argArray, A a1, T...args)
+constexpr void ArgsToScriptValueArray_Recurse(int& index, ScriptValue_t* argArray, A a1, T...args)
 {
 	argArray[index] = ObjectToScriptValue(a1);
 	index++;
@@ -544,28 +549,27 @@ void ArgsToScriptValueArray_Recurse(int& index, ScriptValue_t* argArray, A a1, T
 }
 
 template<class A>
-void ArgsToScriptValueArray_Recurse(int& index, ScriptValue_t* argArray, A a1)
+constexpr void ArgsToScriptValueArray_Recurse(int& index, ScriptValue_t* argArray, A a1)
 {
 	argArray[index] = ObjectToScriptValue(a1);
 	index++;
 }
 
 template<class...T>
-void ArgsToScriptValueArray(ScriptValue_t* argArray, T...args)
+constexpr void ArgsToScriptValueArray(ScriptValue_t* argArray, T...args)
 {
 	int i = 0;
 	ArgsToScriptValueArray_Recurse(0, argArray, args...);
 }
 
 template<class A, class...T>
-void TypeToScriptTypeArray_Recurse(int& index, EDataType* typeArray);
+constexpr void TypeToScriptTypeArray_Recurse(int& index, EDataType* typeArray);
 template<class A>
-void TypeToScriptTypeArray_Recurse(int& index, EDataType* typeArray);
-void TypeToScriptTypeArray_Recurse(int& index, EDataType* typeArray);
-
+constexpr void TypeToScriptTypeArray_Recurse(int& index, EDataType* typeArray);
+constexpr void TypeToScriptTypeArray_Recurse(int& index, EDataType* typeArray);
 
 template<class A, class...T>
-void TypeToScriptTypeArray_Recurse(int& index, EDataType* typeArray)
+constexpr void TypeToScriptTypeArray_Recurse(int& index, EDataType* typeArray)
 {
 	typeArray[index] = TypeToScriptType<A>();
 	index++;
@@ -574,18 +578,18 @@ void TypeToScriptTypeArray_Recurse(int& index, EDataType* typeArray)
 
 
 template<class A>
-void TypeToScriptTypeArray_Recurse(int& index, EDataType* typeArray)
+constexpr void TypeToScriptTypeArray_Recurse(int& index, EDataType* typeArray)
 {
 	typeArray[index] = TypeToScriptType<A>();
 	index++;
 }
 
-void TypeToScriptTypeArray_Recurse(int& index, EDataType* typeArray)
+constexpr void TypeToScriptTypeArray_Recurse(int& index, EDataType* typeArray)
 {
 }
 
 template<class...T>
-void TypeToScriptTypeArray(EDataType* typeArray)
+constexpr void TypeToScriptTypeArray(EDataType* typeArray)
 {
 	int i = 0;
 	TypeToScriptTypeArray_Recurse<T...>(i, typeArray);
@@ -597,17 +601,6 @@ R Invoke(IScript& script, const char* func, T...args)
 	ScriptValue_t argsArray[sizeof...(args)];
 	ArgsToScriptValueArray(argsArray, args...);
 	script.InvokeFunction(func, TypeToScriptType<R>(), argsArray);
-}
-
-template<class R, class...T>
-void BindFunction(IScriptEnvironment* env, std::function<R(T...)> function, const char* name)
-{
-	FunctionBinding binding;
-	binding.m_returnType = TypeToScriptType<R>();
-	binding.m_name = name;
-	binding.m_params.reserve(sizeof...(T));
-	TypeToScriptTypeArray<T...>(binding.m_params.data());
-	env->BindFunction(binding);
 }
 
 template<class R, class...T>
@@ -642,6 +635,560 @@ MethodBinding CreateMethodBinding(R(C::*function)(T...), const char* name)
 	binding.m_params[0] = EDataType::USERPOINTER;
 	TypeToScriptTypeArray<T...>(binding.m_params.data() + 1);
 	return binding;
+}
+
+template<class T>
+T ValueFromScriptValue(const ScriptValue_t& v)
+{
+	return T();
+};
+
+template<>
+long long ValueFromScriptValue<long long>(const ScriptValue_t& v)
+{
+	return v.ival;
+}
+template<>
+long ValueFromScriptValue<long>(const ScriptValue_t& v)
+{
+	return v.ival;
+}
+template<>
+int ValueFromScriptValue<int>(const ScriptValue_t& v)
+{
+	return v.ival;
+}
+template<>
+short ValueFromScriptValue<short>(const ScriptValue_t& v)
+{
+	return v.ival;
+}
+template<>
+unsigned short ValueFromScriptValue<unsigned short>(const ScriptValue_t& v)
+{
+	return v.ival;
+}
+template<>
+unsigned int ValueFromScriptValue<unsigned int>(const ScriptValue_t& v)
+{
+	return v.ival;
+}
+template<>
+unsigned long ValueFromScriptValue<unsigned long>(const ScriptValue_t& v)
+{
+	return v.ival;
+}
+template<>
+unsigned long long ValueFromScriptValue<unsigned long long>(const ScriptValue_t& v)
+{
+	return v.ival;
+}
+template<>
+float ValueFromScriptValue<float>(const ScriptValue_t& v)
+{
+	return v.fval;
+}
+template<>
+double ValueFromScriptValue<double>(const ScriptValue_t& v)
+{
+	return v.fval;
+}
+template<>
+void* ValueFromScriptValue<void*>(const ScriptValue_t& v)
+{
+	return v.vval;
+}
+template<>
+const char* ValueFromScriptValue<const char*>(const ScriptValue_t& v)
+{
+	return v.sval;
+}
+template<>
+bool ValueFromScriptValue<bool>(const ScriptValue_t& v)
+{
+	return v.bval;
+}
+
+class _FunctionBinderBase
+{
+public:
+	virtual ScriptValue_t Invoke(const Array<ScriptValue_t>& values) = 0;
+};
+
+template<class R>
+class FunctionBinder0 : public _FunctionBinderBase
+{
+public:
+	R(*m_function)();
+	ScriptValue_t Invoke(const Array<ScriptValue_t>& values) override
+	{
+		return ObjectToScriptValue<R>(m_function());
+	}
+};
+
+template<class R, class A1>
+class FunctionBinder1 : public _FunctionBinderBase
+{
+public:
+	R(*m_function)(A1);
+	ScriptValue_t Invoke(const Array<ScriptValue_t>& v) override
+	{
+		return ObjectToScriptValue<R>(m_function(ValueFromScriptValue<A1>(v[0])));
+	}
+};
+
+template<class R, class A1, class A2>
+class FunctionBinder2 : public _FunctionBinderBase
+{
+public:
+	R(*m_function)(A1, A2);
+	ScriptValue_t Invoke(const Array<ScriptValue_t>& v) override
+	{
+		return ObjectToScriptValue<R>(
+			m_function(ValueFromScriptValue<A1>(v[0]), ValueFromScriptValue<A2>(v[1]))
+		);
+	}
+};
+
+template<class R, class A1, class A2, class A3>
+class FunctionBinder3 : public _FunctionBinderBase
+{
+public:
+	R(*m_function)(A1, A2, A3);
+	ScriptValue_t Invoke(const Array<ScriptValue_t>& v) override
+	{
+		return ObjectToScriptValue<R>(
+			m_function(ValueFromScriptValue<A1>(v[0]), ValueFromScriptValue<A2>(v[1]), ValueFromScriptValue<A3>(v[2]))
+		);
+	}
+};
+template<class R, class A1, class A2, class A3, class A4>
+class FunctionBinder4 : public _FunctionBinderBase
+{
+public:
+	R(*m_function)(A1, A2, A3, A4);
+	ScriptValue_t Invoke(const Array<ScriptValue_t>& v) override
+	{
+		return ObjectToScriptValue<R>(
+			m_function(ValueFromScriptValue<A1>(v[0]), ValueFromScriptValue<A2>(v[1]), ValueFromScriptValue<A3>(v[2]), ValueFromScriptValue<A4>(v[3]))
+		);
+	}
+};
+template<class R, class A1, class A2, class A3, class A4, class A5>
+class FunctionBinder5 : public _FunctionBinderBase
+{
+public:
+	R(*m_function)(A1, A2, A3, A4, A5);
+	ScriptValue_t Invoke(const Array<ScriptValue_t>& v) override
+	{
+		return ObjectToScriptValue<R>(
+			m_function(
+				ValueFromScriptValue<A1>(v[0]),
+				ValueFromScriptValue<A2>(v[1]),
+				ValueFromScriptValue<A3>(v[2]),
+				ValueFromScriptValue<A4>(v[3]),
+				ValueFromScriptValue<A5>(v[4])
+			)
+		);
+	}
+};
+template<class R, class A1, class A2, class A3, class A4, class A5, class A6>
+class FunctionBinder6 : public _FunctionBinderBase
+{
+public:
+	R(*m_function)(A1, A2, A3, A4, A5, A6);
+	ScriptValue_t Invoke(const Array<ScriptValue_t>& v) override
+	{
+		return ObjectToScriptValue<R>(
+			m_function(
+				ValueFromScriptValue<A1>(v[0]),
+				ValueFromScriptValue<A2>(v[1]),
+				ValueFromScriptValue<A3>(v[2]),
+				ValueFromScriptValue<A4>(v[3]),
+				ValueFromScriptValue<A5>(v[4]),
+				ValueFromScriptValue<A6>(v[5])
+			)
+		);
+	}
+};
+template<class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7>
+class FunctionBinder7 : public _FunctionBinderBase
+{
+public:
+	R(*m_function)(A1, A2, A3, A4, A5, A6, A7);
+	ScriptValue_t Invoke(const Array<ScriptValue_t>& v) override
+	{
+		return ObjectToScriptValue<R>(
+			m_function(
+				ValueFromScriptValue<A1>(v[0]),
+				ValueFromScriptValue<A2>(v[1]),
+				ValueFromScriptValue<A3>(v[2]),
+				ValueFromScriptValue<A4>(v[3]),
+				ValueFromScriptValue<A5>(v[4]),
+				ValueFromScriptValue<A6>(v[5]),
+				ValueFromScriptValue<A7>(v[6])
+			)
+		);
+	}
+};
+template<class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
+class FunctionBinder8 : public _FunctionBinderBase
+{
+public:
+	R(*m_function)(A1, A2, A3, A4, A5, A6, A7, A8);
+	ScriptValue_t Invoke(const Array<ScriptValue_t>& v) override
+	{
+		return ObjectToScriptValue<R>(
+			m_function(
+				ValueFromScriptValue<A1>(v[0]),
+				ValueFromScriptValue<A2>(v[1]),
+				ValueFromScriptValue<A3>(v[2]),
+				ValueFromScriptValue<A4>(v[3]),
+				ValueFromScriptValue<A5>(v[4]),
+				ValueFromScriptValue<A6>(v[5]),
+				ValueFromScriptValue<A7>(v[6]),
+				ValueFromScriptValue<A8>(v[7])
+			)
+		);
+	}
+};
+template<class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
+class FunctionBinder9 : public _FunctionBinderBase
+{
+public:
+	R(*m_function)(A1, A2, A3, A4, A5, A6, A7, A8, A9);
+	ScriptValue_t Invoke(const Array<ScriptValue_t>& v) override
+	{
+		return ObjectToScriptValue<R>(
+			m_function(
+				ValueFromScriptValue<A1>(v[0]),
+				ValueFromScriptValue<A2>(v[1]),
+				ValueFromScriptValue<A3>(v[2]),
+				ValueFromScriptValue<A4>(v[3]),
+				ValueFromScriptValue<A5>(v[4]),
+				ValueFromScriptValue<A6>(v[5]),
+				ValueFromScriptValue<A7>(v[6]),
+				ValueFromScriptValue<A8>(v[7]),
+				ValueFromScriptValue<A9>(v[8])
+			)
+		);
+	}
+};
+template<class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
+class FunctionBinder10 : public _FunctionBinderBase
+{
+public:
+	R(*m_function)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10);
+	ScriptValue_t Invoke(const Array<ScriptValue_t>& v) override
+	{
+		return ObjectToScriptValue<R>(
+			m_function(
+				ValueFromScriptValue<A1>(v[0]),
+				ValueFromScriptValue<A2>(v[1]),
+				ValueFromScriptValue<A3>(v[2]),
+				ValueFromScriptValue<A4>(v[3]),
+				ValueFromScriptValue<A5>(v[4]),
+				ValueFromScriptValue<A6>(v[5]),
+				ValueFromScriptValue<A7>(v[6]),
+				ValueFromScriptValue<A8>(v[7]),
+				ValueFromScriptValue<A9>(v[8]),
+				ValueFromScriptValue<A10>(v[9])
+			)
+		);
+	}
+};
+template<class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11>
+class FunctionBinder11 : public _FunctionBinderBase
+{
+public:
+	R(*m_function)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11);
+	ScriptValue_t Invoke(const Array<ScriptValue_t>& v) override
+	{
+		return ObjectToScriptValue<R>(
+			m_function(
+				ValueFromScriptValue<A1>(v[0]),
+				ValueFromScriptValue<A2>(v[1]),
+				ValueFromScriptValue<A3>(v[2]),
+				ValueFromScriptValue<A4>(v[3]),
+				ValueFromScriptValue<A5>(v[4]),
+				ValueFromScriptValue<A6>(v[5]),
+				ValueFromScriptValue<A7>(v[6]),
+				ValueFromScriptValue<A8>(v[7]),
+				ValueFromScriptValue<A9>(v[8]),
+				ValueFromScriptValue<A10>(v[9]),
+				ValueFromScriptValue<A11>(v[10])
+			)
+		);
+	}
+};
+template<class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12>
+class FunctionBinder12 : public _FunctionBinderBase
+{
+public:
+	R(*m_function)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12);
+	ScriptValue_t Invoke(const Array<ScriptValue_t>& v) override
+	{
+		return ObjectToScriptValue<R>(
+			m_function(
+				ValueFromScriptValue<A1>(v[0]),
+				ValueFromScriptValue<A2>(v[1]),
+				ValueFromScriptValue<A3>(v[2]),
+				ValueFromScriptValue<A4>(v[3]),
+				ValueFromScriptValue<A5>(v[4]),
+				ValueFromScriptValue<A6>(v[5]),
+				ValueFromScriptValue<A7>(v[6]),
+				ValueFromScriptValue<A8>(v[7]),
+				ValueFromScriptValue<A9>(v[8]),
+				ValueFromScriptValue<A10>(v[9]),
+				ValueFromScriptValue<A11>(v[10]),
+				ValueFromScriptValue<A12>(v[11])
+			)
+		);
+	}
+};
+template<class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13>
+class FunctionBinder13 : public _FunctionBinderBase
+{
+public:
+	R(*m_function)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13);
+	ScriptValue_t Invoke(const Array<ScriptValue_t>& v) override
+	{
+		return ObjectToScriptValue<R>(
+			m_function(
+				ValueFromScriptValue<A1>(v[0]),
+				ValueFromScriptValue<A2>(v[1]),
+				ValueFromScriptValue<A3>(v[2]),
+				ValueFromScriptValue<A4>(v[3]),
+				ValueFromScriptValue<A5>(v[4]),
+				ValueFromScriptValue<A6>(v[5]),
+				ValueFromScriptValue<A7>(v[6]),
+				ValueFromScriptValue<A8>(v[7]),
+				ValueFromScriptValue<A9>(v[8]),
+				ValueFromScriptValue<A10>(v[9]),
+				ValueFromScriptValue<A11>(v[10]),
+				ValueFromScriptValue<A12>(v[11]),
+				ValueFromScriptValue<A13>(v[12])
+			)
+		);
+	}
+};
+template<class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
+class FunctionBinder14 : public _FunctionBinderBase
+{
+public:
+	R(*m_function)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14);
+	ScriptValue_t Invoke(const Array<ScriptValue_t>& v) override
+	{
+		return ObjectToScriptValue<R>(
+			m_function(
+				ValueFromScriptValue<A1>(v[0]),
+				ValueFromScriptValue<A2>(v[1]),
+				ValueFromScriptValue<A3>(v[2]),
+				ValueFromScriptValue<A4>(v[3]),
+				ValueFromScriptValue<A5>(v[4]),
+				ValueFromScriptValue<A6>(v[5]),
+				ValueFromScriptValue<A7>(v[6]),
+				ValueFromScriptValue<A8>(v[7]),
+				ValueFromScriptValue<A9>(v[8]),
+				ValueFromScriptValue<A10>(v[9]),
+				ValueFromScriptValue<A11>(v[10]),
+				ValueFromScriptValue<A12>(v[11]),
+				ValueFromScriptValue<A13>(v[12]),
+				ValueFromScriptValue<A14>(v[13])
+			)
+		);
+	}
+};
+template<class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
+class FunctionBinder15 : public _FunctionBinderBase
+{
+public:
+	R(*m_function)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15);
+	ScriptValue_t Invoke(const Array<ScriptValue_t>& v) override
+	{
+		return ObjectToScriptValue<R>(
+			m_function(
+				ValueFromScriptValue<A1>(v[0]),
+				ValueFromScriptValue<A2>(v[1]),
+				ValueFromScriptValue<A3>(v[2]),
+				ValueFromScriptValue<A4>(v[3]),
+				ValueFromScriptValue<A5>(v[4]),
+				ValueFromScriptValue<A6>(v[5]),
+				ValueFromScriptValue<A7>(v[6]),
+				ValueFromScriptValue<A8>(v[7]),
+				ValueFromScriptValue<A9>(v[8]),
+				ValueFromScriptValue<A10>(v[9]),
+				ValueFromScriptValue<A11>(v[10]),
+				ValueFromScriptValue<A12>(v[11]),
+				ValueFromScriptValue<A13>(v[12]),
+				ValueFromScriptValue<A14>(v[13]),
+				ValueFromScriptValue<A15>(v[14])
+			)
+		);
+	}
+};
+template<class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16>
+class FunctionBinder16 : public _FunctionBinderBase
+{
+public:
+	R(*m_function)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16);
+	ScriptValue_t Invoke(const Array<ScriptValue_t>& v) override
+	{
+		return ObjectToScriptValue<R>(
+			m_function(
+				ValueFromScriptValue<A1>(v[0]),
+				ValueFromScriptValue<A2>(v[1]),
+				ValueFromScriptValue<A3>(v[2]),
+				ValueFromScriptValue<A4>(v[3]),
+				ValueFromScriptValue<A5>(v[4]),
+				ValueFromScriptValue<A6>(v[5]),
+				ValueFromScriptValue<A7>(v[6]),
+				ValueFromScriptValue<A8>(v[7]),
+				ValueFromScriptValue<A9>(v[8]),
+				ValueFromScriptValue<A10>(v[9]),
+				ValueFromScriptValue<A11>(v[10]),
+				ValueFromScriptValue<A12>(v[11]),
+				ValueFromScriptValue<A13>(v[12]),
+				ValueFromScriptValue<A14>(v[13]),
+				ValueFromScriptValue<A15>(v[14]),
+				ValueFromScriptValue<A16>(v[15])
+			)
+		);
+	}
+};
+
+template<class R>
+_FunctionBinderBase* CreateBinder(R(*fn)())
+{
+	auto b = new FunctionBinder0<R>();
+	b->m_function = fn;
+	return b;
+}
+
+template<class R, class A1>
+_FunctionBinderBase* CreateBinder(R(*fn)(A1))
+{
+	auto b = new FunctionBinder1<R, A1>();
+	b->m_function = fn;
+	return b;
+}
+
+template<class R, class A1, class A2>
+_FunctionBinderBase* CreateBinder(R(*fn)(A1, A2))
+{
+	auto b = new FunctionBinder2<R, A1, A2>();
+	b->m_function = fn;
+	return b;
+}
+template<class R, class A1, class A2, class A3>
+_FunctionBinderBase* CreateBinder(R(*fn)(A1, A2, A3))
+{
+	auto b = new FunctionBinder3<R, A1, A2, A3>();
+	b->m_function = fn;
+	return b;
+}
+template<class R, class A1, class A2, class A3, class A4>
+_FunctionBinderBase* CreateBinder(R(*fn)(A1, A2, A3, A4))
+{
+	auto b = new FunctionBinder4<R, A1, A2, A3, A4>();
+	b->m_function = fn;
+	return b;
+}
+template<class R, class A1, class A2, class A3, class A4, class A5>
+_FunctionBinderBase* CreateBinder(R(*fn)(A1, A2, A3, A4, A5))
+{
+	auto b = new FunctionBinder5<R, A1, A2, A3, A4, A5>();
+	b->m_function = fn;
+	return b;
+}
+template<class R, class A1, class A2, class A3, class A4, class A5, class A6>
+_FunctionBinderBase* CreateBinder(R(*fn)(A1, A2, A3, A4, A5, A6))
+{
+	auto b = new FunctionBinder6<R, A1, A2, A3, A4, A5, A6>();
+	b->m_function = fn;
+	return b;
+}
+template<class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7>
+_FunctionBinderBase* CreateBinder(R(*fn)(A1, A2, A3, A4, A5, A6, A7))
+{
+	auto b = new FunctionBinder7<R, A1, A2, A3, A4, A5, A6, A7>();
+	b->m_function = fn;
+	return b;
+}
+template<class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
+_FunctionBinderBase* CreateBinder(R(*fn)(A1, A2, A3, A4, A5, A6, A7, A8))
+{
+	auto b = new FunctionBinder8<R, A1, A2, A3, A4, A5, A6, A7, A8>();
+	b->m_function = fn;
+	return b;
+}
+template<class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
+_FunctionBinderBase* CreateBinder(R(*fn)(A1, A2, A3, A4, A5, A6, A7, A8, A9))
+{
+	auto b = new FunctionBinder9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>();
+	b->m_function = fn;
+	return b;
+}
+template<class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
+_FunctionBinderBase* CreateBinder(R(*fn)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10))
+{
+	auto b = new FunctionBinder10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>();
+	b->m_function = fn;
+	return b;
+}
+template<class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11>
+_FunctionBinderBase* CreateBinder(R(*fn)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11))
+{
+	auto b = new FunctionBinder11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>();
+	b->m_function = fn;
+	return b;
+}
+template<class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12>
+_FunctionBinderBase* CreateBinder(R(*fn)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12))
+{
+	auto b = new FunctionBinder12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>();
+	b->m_function = fn;
+	return b;
+}
+template<class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13>
+_FunctionBinderBase* CreateBinder(R(*fn)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13))
+{
+	auto b = new FunctionBinder13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>();
+	b->m_function = fn;
+	return b;
+}
+template<class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
+_FunctionBinderBase* CreateBinder(R(*fn)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14))
+{
+	auto b = new FunctionBinder14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>();
+	b->m_function = fn;
+	return b;
+}
+template<class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
+_FunctionBinderBase* CreateBinder(R(*fn)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15))
+{
+	auto b = new FunctionBinder15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>();
+	b->m_function = fn;
+	return b;
+}
+template<class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16>
+_FunctionBinderBase* CreateBinder(R(*fn)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16))
+{
+	auto b = new FunctionBinder16<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16>();
+	b->m_function = fn;
+	return b;
+}
+
+template<class R, class...T>
+void BindFunction(IScriptEnvironment* env, R(*function)(T...), const char* name)
+{
+	FunctionBinding binding;
+	binding.m_returnType = TypeToScriptType<R>();
+	binding.m_name = name;
+	binding.m_params.reserve(sizeof...(T));
+	binding.m_binder = CreateBinder(function);
+	TypeToScriptTypeArray<T...>(binding.m_params.data());
+	env->BindFunction(binding);
 }
 
 
