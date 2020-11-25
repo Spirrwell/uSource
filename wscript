@@ -80,11 +80,11 @@ def options(opt):
 	grp.add_option('--memory-debug', action='store_true', dest='MEMORY_DEBUG', default=False,
 				   help='Enables the use of memory debugging. This will define various Mem_XXX functions as macros which will include the locations where the allocations tool place')
 
-	grp.add_option('--enable-scripting', action='store_true', dest='ENABLE_SCRIPTING', default=True,
-				   help='Enables scripting')
+	grp.add_option('--enable-scripting', action='store_true', dest='ENABLE_SCRIPTING', help='Enables scripting and builds the scriptsystem DLL')
 
-	grp.add_option('--enable-luajit', action='store_true', dest='ENABLE_LUA', default=True,
-				   help='Enables lua scripting')
+	grp.add_option('--enable-luajit', action='store_true', dest='ENABLE_LUA', default=False, help='Enables lua scripting')
+
+	grp.add_option('--enable-squirrel', action='store_true', dest='ENABLE_SQUIRREL', help='Enables Squirrel scripting')
 
 	grp.add_option('--enable-new-renderer', action='store_true', dest='ENABLE_RENDERER2', default=False, help='Enables the use of the new renderer')
 	grp.add_option('--enable-vulkan', action='store_true', dest='ENABLE_VULKAN', default=False, help='Enables the use of the vulkan backend')
@@ -449,7 +449,10 @@ def configure(conf):
 	conf.recurse('mainui2')
 
 	conf.env.ENABLE_RENDERER2 = conf.options.ENABLE_RENDERER2
+	conf.env.SCRIPTING = conf.options.ENABLE_SCRIPTING
 
+	if conf.options.ENABLE_SCRIPTING:
+		conf.recurse('scriptsystem')
 	if conf.options.ENABLE_RENDERER2:
 		conf.recurse('rendersystem')
 
@@ -479,5 +482,7 @@ def build(bld):
 	bld.recurse('utils/hlrad')
 	bld.recurse('mainui2')
 
+	if bld.env.SCRIPTING:
+		bld.recurse('scriptsystem')
 	if bld.env.ENABLE_RENDERER2:
 		bld.recurse('rendersystem')

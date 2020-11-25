@@ -1,0 +1,59 @@
+#! /usr/bin/env python
+from waflib import Logs
+import os
+
+top = '.'
+
+def options(opt):
+	return
+
+def configure(conf):
+	conf.env.append_unique('DEFINES', 'SCRIPTSYSTEM')
+	if conf.env.DEST_OS2 == 'android':
+		conf.check_cc(lib='log')
+
+	if conf.options.ENABLE_SQUIRREL:
+		conf.env.ENABLE_SQUIRREL = True
+	if conf.options.ENABLE_LUA:
+		conf.env.ENABLE_LUA = True
+
+def build(bld):
+	libs = [ 'public', 'M' ]
+
+	source = ['script_main.cpp', 'script_debug.cpp']
+
+	test_source = ['tests/main.cpp']
+
+	# Squirrel enabled ?
+	if bld.env.ENABLE_SQUIRREL:
+		libs += ['SQUIRREL_STATIC', 'SQSTDLIB_STATIC']
+		source += ['sq/sq_main.cpp']
+
+	includes = [ '.' ]
+	includes.append(str(bld.env.ENGINE))
+	includes.append(str(bld.env.ENGINE) + "/server")
+	includes.append(str(bld.env.ENGINE) + "/client")
+	includes.append(str(bld.env.PUBLIC))
+	includes.append(str(bld.env.COMMON))
+	includes.append(str(bld.env.PMSHARED))
+	includes.append(str(bld.env.ROOT))
+
+	bld.shlib(
+		source = source,
+		target = 'scriptsystem',
+		features = 'c cxx',
+		includes = includes,
+		use = libs,
+		defines = [],
+		subsystem = bld.env.MSVC_SUBSYSTEM
+	)
+
+	bld(
+		source = test_source,
+		target = 'scriptsystem_test',
+		features = 'c cxx',
+		includes = includes,
+		use = libs,
+		defines = [],
+		subsystem = bld.env.MSVC_SUBSYSTEM
+	)
