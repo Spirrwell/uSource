@@ -19,3 +19,6 @@
 [submodule "public"]
 	path = public
 	url = https://github.com/JJL772/libpublic
+[submodule "thirdparty/nuklear"]
+	path = thirdparty/nuklear
+	url = https://github.com/Immediate-Mode-UI/Nuklear

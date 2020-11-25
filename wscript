@@ -30,7 +30,7 @@ SUBDIRS = [
 	Subproject('launcher', singlebin=True),
 	Subproject('ref_gl'),
 	#Subproject('ref_soft'),
-	Subproject('mainui'),
+	#Subproject('mainui'),
 	# Subproject('vgui_support'),
 	Subproject('engine', dedicated=False),
 	#Subproject('game/server'),
@@ -197,6 +197,8 @@ def configure(conf):
 	if conf.env.DEST_OS == 'win32':
 		conf.env.append_unique('DEFINES', '_WIN32')
 		conf.env.append_value('INCLUDES', ['common'])
+
+	conf.env.append_value('INCLUDES', 'thirdparty/nuklear')
 
 	# Hardcoded include path for Mingw on Linux, also for IDE integration
 	if conf.env.DEST_OS == 'win32' and sys.platform == 'linux':
@@ -444,6 +446,7 @@ def configure(conf):
 	conf.recurse('utils/hlvis')
 	conf.recurse('utils/hlcsg')
 	conf.recurse('utils/hlrad')
+	conf.recurse('mainui2')
 
 	conf.env.ENABLE_RENDERER2 = conf.options.ENABLE_RENDERER2
 
@@ -474,6 +477,7 @@ def build(bld):
 	bld.recurse('utils/hlvis')
 	bld.recurse('utils/hlcsg')
 	bld.recurse('utils/hlrad')
+	bld.recurse('mainui2')
 
 	if bld.env.ENABLE_RENDERER2:
 		bld.recurse('rendersystem')

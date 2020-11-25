@@ -153,11 +153,15 @@ public:
 	virtual void AddRenderTarget(const char* param, int &index, ITexture* pTexture) = 0;
 	virtual void ClearRenderTargets() = 0;
 
+	/* Called after object construction, but pre-rendering */
+	/* Performs any required shader setup */
+	virtual void Init() = 0;
+
 	/* Pre-draw event. Do all setup here */
-	virtual void PreDraw() = 0;
+	virtual void PreDraw(class IMesh* pMesh) = 0;
 
 	/* Post draw callback */
-	virtual void PostDraw() = 0;
+	virtual void PostDraw(class IMesh* pMesh) = 0;
 
 	/* Returns the info log if the operation failed */
 	virtual const char* GetInfoLog() = 0;
@@ -206,6 +210,8 @@ public:
 	virtual void SetDouble4Uniform(const char* param, double d[4]) = 0;
 
 	virtual void SetTextureUniform(const char* param, ITexture* pTex) = 0;
+
+	virtual void SetShaderShadow(class IShaderShadow* pShadow) = 0;
 };
 
 /**
