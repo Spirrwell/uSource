@@ -8,5 +8,5 @@ export RC=x86_64-w64-mingw32-windres
 
 git submodule init
 git submodule update
-./waf configure -T debug -8 -W --dev
-./waf build
+python3 waf configure -T debug -8 -W --dev
+python3 waf build
