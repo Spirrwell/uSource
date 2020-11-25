@@ -22,6 +22,8 @@ def build(bld):
 
 	source = ['script_main.cpp', 'script_debug.cpp']
 
+	test_source = ['tests/main.cpp']
+
 	# Squirrel enabled ?
 	if bld.env.ENABLE_SQUIRREL:
 		libs += ['SQUIRREL_STATIC', 'SQSTDLIB_STATIC']
@@ -39,6 +41,16 @@ def build(bld):
 	bld.shlib(
 		source = source,
 		target = 'scriptsystem',
+		features = 'c cxx',
+		includes = includes,
+		use = libs,
+		defines = [],
+		subsystem = bld.env.MSVC_SUBSYSTEM
+	)
+
+	bld(
+		source = test_source,
+		target = 'scriptsystem_test',
 		features = 'c cxx',
 		includes = includes,
 		use = libs,

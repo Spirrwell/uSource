@@ -41,8 +41,6 @@ public:
 public:
 	/* Non override methods */
 	void unload();
-
-	void BindFunction(const FunctionBinding& b);
 };
 
 
@@ -229,11 +227,6 @@ bool SquirrelEnvironment::InvokeEvent(const char *eventName, std::initializer_li
 bool SquirrelEnvironment::BindFunction(FunctionBinding &binding)
 {
 	m_functions.push_back(binding);
-	for(auto script : m_scripts)
-	{
-		// update the function bindings for already active scripts
-		script->BindFunction(binding);
-	}
 	return true;
 }
 
@@ -373,11 +366,6 @@ SquirrelScript::~SquirrelScript()
 }
 
 void SquirrelScript::unload()
-{
-
-}
-
-void SquirrelScript::BindFunction(const FunctionBinding &b)
 {
 
 }
