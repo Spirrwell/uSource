@@ -1,14 +1,15 @@
 image: debian:sid
 
-build:
-	stage: build-linux-x64
-	before_script:
-		- sh scripts/gitlab_linux_pre.sh
-	script:
-		- sh scripts/gitlab_linux.sh
+build-linux-x64:
+        stage: build
+        before_script:
+                - sh scripts/gitlab_linux_pre.sh
+        script:
+                - sh scripts/gitlab_linux.sh
 
-	stage: build-mingw64-win64
-	before_script:
-		- sh scripts/gitlab_mingw_pre.sh
-	script:
-		- sh scripts/gitlab_mingw.sh
+build-mingw64-x64:
+        stage: build
+        before_script:
+                - sh scripts/gitlab_mingw_pre.sh
+        script:
+                - sh scripts/gitlab_mingw.sh
