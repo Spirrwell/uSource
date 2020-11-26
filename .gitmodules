@@ -17,7 +17,7 @@
 	path = darkradiant
 	url = https://github.com/MicroSource/darkradiant
 [submodule "public"]
-	path = public
+	path = modules/public
 	url = https://github.com/JJL772/libpublic
 [submodule "thirdparty/nuklear"]
 	path = thirdparty/nuklear

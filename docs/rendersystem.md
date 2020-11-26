@@ -365,7 +365,7 @@ Vertex formats are quite simple. They're intended to be tightly packed arrays of
 
  Non-uniform shader params 
 
-| enum class EShaderAPIFeatures |
+| enum class ERenderDeviceFeatures |
 
 --
 

@@ -26,13 +26,13 @@ class Subproject:
 		self.singlebin = singlebin
 
 SUBDIRS = [
-	Subproject('public',      dedicated=False),
-	Subproject('launcher', singlebin=True),
-	Subproject('ref_gl'),
+	Subproject('modules/public',      dedicated=False),
+	Subproject('modules/launcher', singlebin=True),
+	Subproject('modules/ref_gl'),
 	#Subproject('ref_soft'),
 	#Subproject('mainui'),
 	# Subproject('vgui_support'),
-	Subproject('engine', dedicated=False),
+	Subproject('modules/engine', dedicated=False),
 	#Subproject('game/server'),
 	#Subproject('game/client', dedicated=False)
 ]
@@ -93,9 +93,12 @@ def options(opt):
 
 	grp.add_option('--enable-remote-control', action='store_true', dest='ENABLE_RCSYS', help='Enables the experimental remote control system')
 
+	grp.add_option('--game', type=str, dest='GAME', default='hl', help='The game in which to compile')
+
 	opt.load('subproject')
 
-	opt.add_subproject(subdirs())
+	for sub in SUBDIRS:
+		opt.recurse(sub.name)
 
 	opt.load('xcompile compiler_cxx compiler_c sdl2 clang_compilation_database strip_on_install')
 	opt.load('cmake msdev eclipse codeblocks doxygen export cppcheck', tooldir=waftools.location)
@@ -127,20 +130,20 @@ def filter_cflags(conf, flags, required_flags, cxx):
 def configure(conf):
 	# Dirs
 	conf.env.ROOT = str(pathlib.Path('.').resolve())
-	conf.env.PMSHARED = str(conf.env.ROOT + "/pm_shared")
-	conf.env.ENGINE = str(conf.env.ROOT + "/engine")
-	conf.env.SHARED = str(conf.env.ROOT + "/game/shared")
-	conf.env.SERVER = str(conf.env.ROOT + "/game/server")
-	conf.env.CLIENT = str(conf.env.ROOT + "/game/client")
-	conf.env.COMMON = str(conf.env.ROOT + "/common")
-	conf.env.PUBLIC = str(conf.env.ROOT + "/public")
+	conf.env.PMSHARED = str(conf.env.ROOT + "/modules/pm_shared")
+	conf.env.ENGINE = str(conf.env.ROOT + "/modules/engine")
+	conf.env.SHARED = str(conf.env.ROOT + "games/" + conf.options.GAME + "/game/shared")
+	conf.env.SERVER = str(conf.env.ROOT + "games/" + conf.options.GAME + "/game/server")
+	conf.env.CLIENT = str(conf.env.ROOT + "games/" + conf.options.GAME + "/game/client")
+	conf.env.COMMON = str(conf.env.ROOT + "/modules/common")
+	conf.env.PUBLIC = str(conf.env.ROOT + "/modules/public")
 	conf.env.FAKEVGUI = str(conf.env.ROOT + "/utils/false_vgui/include")
-	conf.env.MATHLIB = str(conf.env.ROOT + "/mathlib")
+	conf.env.MATHLIB = str(conf.env.ROOT + "/modules/mathlib")
 
 	conf.env.ENABLE_RCSYS = conf.options.ENABLE_RCSYS
 
 	# Set some opts needed by the server
-	conf.env.GAMEDIR = 'hl1'
+	conf.env.GAMEDIR = conf.options.GAME
 	conf.env.CLIENT_DIR  = 'bin'
 	conf.env.SERVER_DIR  = 'bin'
 
@@ -199,6 +202,7 @@ def configure(conf):
 		conf.env.append_value('INCLUDES', ['common'])
 
 	conf.env.append_value('INCLUDES', 'thirdparty/nuklear')
+	conf.env.append_value('INCLUDES', 'modules')
 
 	# Hardcoded include path for Mingw on Linux, also for IDE integration
 	if conf.env.DEST_OS == 'win32' and sys.platform == 'linux':
@@ -433,28 +437,28 @@ def configure(conf):
 		if conf.env.DEDICATED and i.dedicated:
 			continue
 
-		conf.add_subproject(i.name)
-	conf.recurse('public')
-	conf.recurse('mathlib')
-	conf.recurse('game/server')
-	conf.recurse('game/client')
-	conf.recurse('tier1')
-	conf.recurse('tier2')
-	conf.recurse('networksystem')
-	conf.recurse('rendersystem/renderlib')
+		conf.recurse(i.name)
+	conf.recurse('modules/public')
+	conf.recurse('modules/mathlib')
+	conf.recurse('games/' + conf.env.GAMEDIR + '/server')
+	conf.recurse('games/' + conf.env.GAMEDIR + '/client')
+	conf.recurse('modules/tier1')
+	conf.recurse('modules/tier2')
+	conf.recurse('modules/networksystem')
+	conf.recurse('modules/rendersystem/renderlib')
 	conf.recurse('utils/hlbsp')
 	conf.recurse('utils/hlvis')
 	conf.recurse('utils/hlcsg')
 	conf.recurse('utils/hlrad')
-	conf.recurse('mainui2')
+	conf.recurse('modules/mainui2')
 
 	conf.env.ENABLE_RENDERER2 = conf.options.ENABLE_RENDERER2
 	conf.env.SCRIPTING = conf.options.ENABLE_SCRIPTING
 
 	if conf.options.ENABLE_SCRIPTING:
-		conf.recurse('scriptsystem')
+		conf.recurse('modules/scriptsystem')
 	if conf.options.ENABLE_RENDERER2:
-		conf.recurse('rendersystem')
+		conf.recurse('modules/rendersystem')
 
 def build(bld):
 	for i in SUBDIRS:
@@ -467,22 +471,22 @@ def build(bld):
 		if bld.env.DEDICATED and i.dedicated:
 			continue
 
-		bld.add_subproject(i.name)
-	bld.recurse('game/server')
-	bld.recurse('game/client')
-	bld.recurse('mathlib')
-	bld.recurse('public')
-	bld.recurse('tier1')
-	bld.recurse('tier2')
-	bld.recurse('networksystem')
-	bld.recurse('rendersystem/renderlib')
+		bld.recurse(i.name)
+	bld.recurse('games/' + bld.env.GAMEDIR + '/server')
+	bld.recurse('games/' + bld.env.GAMEDIR + '/client')
+	bld.recurse('modules/mathlib')
+	bld.recurse('modules/public')
+	bld.recurse('modules/tier1')
+	bld.recurse('modules/tier2')
+	bld.recurse('modules/networksystem')
+	bld.recurse('modules/rendersystem/renderlib')
 	bld.recurse('utils/hlbsp')
 	bld.recurse('utils/hlvis')
 	bld.recurse('utils/hlcsg')
 	bld.recurse('utils/hlrad')
-	bld.recurse('mainui2')
+	bld.recurse('modules/mainui2')
 
 	if bld.env.SCRIPTING:
-		bld.recurse('scriptsystem')
+		bld.recurse('modules/scriptsystem')
 	if bld.env.ENABLE_RENDERER2:
-		bld.recurse('rendersystem')
+		bld.recurse('modules/rendersystem')

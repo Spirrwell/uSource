@@ -1,0 +1,18 @@
+syntax = "proto2";
+
+package rcs;
+
+import "modules/engine/common/rcs/protobufs/common.proto";
+
+message PlayUISound
+{
+  required string sound = 1;
+  optional float volume = 2;
+}
+
+message PlaySound
+{
+  required string sound = 1;
+  required Vector3 pos = 2;
+  optional float volume = 3;
+}
