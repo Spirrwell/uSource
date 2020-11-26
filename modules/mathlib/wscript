@@ -1,5 +1,5 @@
 import waflib
- 
+
 def options(opt):
 	return
 
@@ -8,7 +8,7 @@ def configure(conf):
 
 def build(bld):
 	defines = []
-	
+
 	source = list()
 	source += [
 		'vector.cpp',
@@ -20,9 +20,9 @@ def build(bld):
 		'mathlib.cpp'
 	]
 
-	includes = list()
+	includes = []
 	includes.append('.')
-	includes.append(str(bld.env.ROOT))
+	includes.append('..')
 
 	libs = []
 

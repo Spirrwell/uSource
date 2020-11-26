@@ -27,7 +27,7 @@ def build(bld):
 	includes.append(str(bld.env.PUBLIC))
 	includes.append(str(bld.env.COMMON))
 	includes.append(str(bld.env.PMSHARED))
-	includes.append(str(bld.env.ROOT))
+	includes.append('..')
 
 	bld.stlib(
 		source = source,
