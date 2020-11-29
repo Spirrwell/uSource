@@ -29,7 +29,7 @@ GNU General Public License for more details.
 #include <emscripten/emscripten.h>
 #endif
 #include <errno.h>
-#include "common.h"
+#include "engine/common/common.h"
 #include "base_cmd.h"
 #include "client.h"
 #include "netchan.h"
@@ -159,21 +159,21 @@ void Host_EndGame( qboolean abort, const char *message, ... )
 {
 	va_list		argptr;
 	static char	string[MAX_SYSPATH];
-	
+
 	va_start( argptr, message );
 	Q_vsnprintf( string, sizeof( string ), message, argptr );
 	va_end( argptr );
 
 	Con_Printf( "Host_EndGame: %s\n", string );
 
-	SV_Shutdown( "\n" );	
+	SV_Shutdown( "\n" );
 #ifndef XASH_DEDICATED
 	CL_Disconnect();
 
 	// recreate world if needs
 	CL_ClearEdicts ();
 #endif
-	
+
 	// release all models
 	Mod_FreeAll();
 
@@ -265,7 +265,7 @@ void Host_ChangeGame_f( void )
 	}
 	else if( !Q_stricmp( GI->gamefolder, Cmd_Argv( 1 )))
 	{
-		Con_Printf( "%s already active\n", Cmd_Argv( 1 ));	
+		Con_Printf( "%s already active\n", Cmd_Argv( 1 ));
 	}
 	else
 	{
@@ -301,7 +301,7 @@ void Host_Exec_f( void )
 			return;
 	}
 
-	Q_strncpy( cfgpath, Cmd_Argv( 1 ), sizeof( cfgpath )); 
+	Q_strncpy( cfgpath, Cmd_Argv( 1 ), sizeof( cfgpath ));
 	COM_DefaultExtension( cfgpath, ".cfg" ); // append as default
 
 	f = FS_LoadFile( cfgpath, &len, false );
@@ -551,7 +551,7 @@ qboolean Host_FilterTime( float time )
 		else
 		{
 			if(( host.realtime - oldtime ) < ( 1.0 / fps ))
-				return false;		
+				return false;
 		}
 	}
 
@@ -647,7 +647,7 @@ void Host_Error( const char *error, ... )
 	if( host.status == HOST_SHUTDOWN ) return;
 
 	if( recursive )
-	{ 
+	{
 		Con_Printf( "Host_RecursiveError: %s", hosterror2 );
 		Sys_Error( "%s", hosterror1 );
 		return; // don't multiple executes
@@ -768,7 +768,7 @@ void Host_InitCommon( int argc, char **argv, const char *progname, qboolean bCha
 		Sys_Error( "Daemonize not supported on this platform!" );
 #endif
 	}
-	
+
 	if((baseDir = GlobalCommandLine().FindString("-basedir")))
 	{
 		Q_strncpy(host.rootdir, baseDir, sizeof(host.rootdir));
@@ -1000,7 +1000,7 @@ extern "C" int EXPORT Host_Main( int argc, char **argv, const char *progname, in
 
 	host_serverstate = Cvar_Get( "host_serverstate", "0", FCVAR_READ_ONLY, "displays current server state" );
 	host_maxfps = Cvar_Get( "fps_max", "500", FCVAR_ARCHIVE, "host fps upper limit" );
-	host_framerate = Cvar_Get( "host_framerate", "0", 0, "locks frame timing to this value in seconds" );  
+	host_framerate = Cvar_Get( "host_framerate", "0", 0, "locks frame timing to this value in seconds" );
 	host_sleeptime = Cvar_Get( "sleeptime", "0", FCVAR_ARCHIVE, "milliseconds to sleep for each frame. higher values reduce fps accuracy" );
 	host_gameloaded = Cvar_Get( "host_gameloaded", "0", FCVAR_READ_ONLY, "inidcates a loaded game.dll" );
 	host_clientloaded = Cvar_Get( "host_clientloaded", "0", FCVAR_READ_ONLY, "inidcates a loaded client.dll" );

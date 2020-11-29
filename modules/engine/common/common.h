@@ -103,13 +103,13 @@ enum
 {
 	D_INFO = 1,	// "-dev 1", shows various system messages
 	D_WARN,		// "-dev 2", shows not critical system warnings
-	D_ERROR,		// "-dev 3", shows critical warnings 
+	D_ERROR,		// "-dev 3", shows critical warnings
 	D_REPORT,		// "-dev 4", special case for game reports
 	D_NOTE		// "-dev 5", show system notifications for engine developers
 };
 
 typedef enum
-{	
+{
 	HOST_NORMAL,	// listen server, singleplayer
 	HOST_DEDICATED,
 } instance_t;
@@ -209,7 +209,7 @@ typedef struct gameinfo_s
 	// filesystem info
 	char		gamefolder[MAX_QPATH];	// used for change game '-game x'
 	char		basedir[MAX_QPATH];	// base game directory (like 'id1' for Quake or 'valve' for Half-Life)
-	char		falldir[MAX_QPATH];	// used as second basedir 
+	char		falldir[MAX_QPATH];	// used as second basedir
 	char		startmap[MAX_QPATH];// map to start singleplayer game
 	char		trainmap[MAX_QPATH];// map to start hazard course (if specified)
 	char		title[64];	// Game Main Title
@@ -275,14 +275,14 @@ typedef enum
 {
 	HOST_INIT = 0,	// initalize operations
 	HOST_FRAME,	// host running
-	HOST_SHUTDOWN,	// shutdown operations	
+	HOST_SHUTDOWN,	// shutdown operations
 	HOST_ERR_FATAL,	// sys error
 	HOST_SLEEP,	// sleeped by different reason, e.g. minimize window
 	HOST_NOFOCUS,	// same as HOST_FRAME, but disable mouse
 	HOST_CRASHED	// an exception handler called
 } host_status_t;
 
-typedef enum 
+typedef enum
 {
 	STATE_RUNFRAME = 0,
 	STATE_LOAD_LEVEL,
@@ -390,7 +390,7 @@ typedef struct host_parm_s
 {
 	HINSTANCE			hInst;
 	HANDLE				hMutex;
-	
+
 	host_status_t	status;		// global host state
 	game_status_t	game;		// game manager
 	uint		type;		// running at
@@ -449,7 +449,7 @@ typedef struct host_parm_s
 
 	char		rootdir[256];	// member root directory
 	char		rodir[256];		// readonly root
-	char		gamefolder[MAX_QPATH];	// it's a default gamefolder	
+	char		gamefolder[MAX_QPATH];	// it's a default gamefolder
 	byte		*imagepool;	// imagelib mempool
 	byte		*soundpool;	// soundlib mempool
 
@@ -1012,8 +1012,8 @@ void NET_InitMasters( void );
 void NET_SaveMasters( void );
 qboolean NET_SendToMasters( netsrc_t sock, size_t len, const void *data );
 
-#ifdef REF_DLL
-#error "common.h in ref_dll"
-#endif
+//#ifdef REF_DLL
+//#error "common.h in ref_dll"
+//#endif
 
 #endif//COMMON_H
