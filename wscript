@@ -202,7 +202,7 @@ def configure(conf):
 		conf.env.append_value('INCLUDES', ['common'])
 
 	conf.env.append_value('INCLUDES', 'thirdparty/nuklear')
-	conf.env.append_value('INCLUDES', 'modules')
+	conf.env.append_value('INCLUDES', ['modules'])
 
 	# Hardcoded include path for Mingw on Linux, also for IDE integration
 	if conf.env.DEST_OS == 'win32' and sys.platform == 'linux':
@@ -446,6 +446,7 @@ def configure(conf):
 	conf.recurse('modules/tier2')
 	conf.recurse('modules/networksystem')
 	conf.recurse('modules/rendersystem/renderlib')
+	conf.recurse('utils/common')
 	conf.recurse('utils/hlbsp')
 	conf.recurse('utils/hlvis')
 	conf.recurse('utils/hlcsg')
@@ -480,6 +481,7 @@ def build(bld):
 	bld.recurse('modules/tier2')
 	bld.recurse('modules/networksystem')
 	bld.recurse('modules/rendersystem/renderlib')
+	bld.recurse('utils/common')
 	bld.recurse('utils/hlbsp')
 	bld.recurse('utils/hlvis')
 	bld.recurse('utils/hlcsg')
