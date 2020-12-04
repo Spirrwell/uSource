@@ -1,6 +1,6 @@
 #pragma once
 
-#include "game/server/weapons.h"
+#include "server/weapons.h"
 
 class CGlock : public CBasePlayerWeapon
 {
@@ -19,7 +19,7 @@ public:
 	void WeaponIdle( void ) override;
 
 	virtual BOOL UseDecrement( void )
-	{ 
+	{
 #if defined( CLIENT_WEAPONS )
 		return TRUE;
 #else

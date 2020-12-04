@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   This source code contains proprietary and confidential information of
@@ -19,8 +19,8 @@
 #include	"extdll.h"
 #include	"util.h"
 #include	"cbase.h"
-#include        "game/server/ai/ai_monsters.h"
-#include        "game/server/ai/ai_schedule.h"
+#include        "server/ai/ai_monsters.h"
+#include        "server/ai/ai_schedule.h"
 #include	"game.h"
 
 //=========================================================
@@ -155,7 +155,7 @@ const char *CHeadCrab::pBiteSounds[] =
 };
 
 //=========================================================
-// Classify - indicates this monster's place in the 
+// Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
 int CHeadCrab::Classify( void )
@@ -164,8 +164,8 @@ int CHeadCrab::Classify( void )
 }
 
 //=========================================================
-// Center - returns the real center of the headcrab.  The 
-// bounding box is much larger than the actual creature so 
+// Center - returns the real center of the headcrab.  The
+// bounding box is much larger than the actual creature so
 // this is needed for targeting
 //=========================================================
 Vector CHeadCrab::Center( void )
@@ -173,8 +173,8 @@ Vector CHeadCrab::Center( void )
 	return Vector( pev->origin.x, pev->origin.y, pev->origin.z + 6 );
 }
 
-Vector CHeadCrab::BodyTarget( const Vector &posSrc ) 
-{ 
+Vector CHeadCrab::BodyTarget( const Vector &posSrc )
+{
 	return Center();
 }
 
@@ -188,7 +188,7 @@ void CHeadCrab::SetYawSpeed( void )
 
 	switch( m_Activity )
 	{
-	case ACT_IDLE:	
+	case ACT_IDLE:
 		ys = 30;
 		break;
 	case ACT_RUN:
@@ -222,7 +222,7 @@ void CHeadCrab::HandleAnimEvent( MonsterEvent_t *pEvent )
 		{
 			ClearBits( pev->flags, FL_ONGROUND );
 
-			UTIL_SetOrigin( pev, pev->origin + Vector( 0, 0, 1 ) );// take him off ground so engine doesn't instantly reset onground 
+			UTIL_SetOrigin( pev, pev->origin + Vector( 0, 0, 1 ) );// take him off ground so engine doesn't instantly reset onground
 			UTIL_MakeVectors( pev->angles );
 
 			Vector vecJumpDir;
@@ -313,7 +313,7 @@ void CHeadCrab::Precache()
 }
 
 //=========================================================
-// RunTask 
+// RunTask
 //=========================================================
 void CHeadCrab::RunTask( Task_t *pTask )
 {
@@ -444,7 +444,7 @@ void CHeadCrab::IdleSound( void )
 }
 
 //=========================================================
-// AlertSound 
+// AlertSound
 //=========================================================
 void CHeadCrab::AlertSound( void )
 {
@@ -452,7 +452,7 @@ void CHeadCrab::AlertSound( void )
 }
 
 //=========================================================
-// AlertSound 
+// AlertSound
 //=========================================================
 void CHeadCrab::PainSound( void )
 {
@@ -460,7 +460,7 @@ void CHeadCrab::PainSound( void )
 }
 
 //=========================================================
-// DeathSound 
+// DeathSound
 //=========================================================
 void CHeadCrab::DeathSound( void )
 {
@@ -503,7 +503,7 @@ void CBabyCrab::Spawn( void )
 	pev->rendermode = kRenderTransTexture;
 	pev->renderamt = 192;
 	UTIL_SetSize( pev, Vector( -12, -12, 0 ), Vector( 12, 12, 24 ) );
-	
+
 	pev->health = gSkillData.headcrabHealth * 0.25;	// less health than full grown
 }
 

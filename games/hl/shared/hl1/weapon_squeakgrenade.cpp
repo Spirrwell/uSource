@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -16,13 +16,13 @@
 
 #include "extdll.h"
 #include "util.h"
-#include "game/server/cbase.h"
+#include "server/cbase.h"
 #include "ai/ai_monsters.h"
 #include "weapon_squeakgrenade.h"
-#include "game/server/info_node.h"
-#include "game/server/player.h"
-#include "game/server/soundent.h"
-#include "game/server/gamerules.h"
+#include "server/info_node.h"
+#include "server/player.h"
+#include "server/soundent.h"
+#include "server/gamerules.h"
 #include "base_grenade.h"
 
 enum w_squeak_e
@@ -55,7 +55,7 @@ class CSqueakGrenade : public CGrenade
 	void Killed( entvars_t *pevAttacker, int iGib );
 	void GibMonster( void );
 
-	virtual int Save( CSave &save ); 
+	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
 
 	static TYPEDESCRIPTION m_SaveData[];
@@ -284,7 +284,7 @@ void CSqueakGrenade::HuntThink( void )
 
 		if( flAdj > 1.2 )
 			flAdj = 1.2;
-		
+
 		// ALERT( at_console, "think : enemy\n");
 
 		// ALERT( at_console, "%.0f %.2f %.2f %.2f\n", flVel, m_vecTarget.x, m_vecTarget.y, m_vecTarget.z );
@@ -352,7 +352,7 @@ void CSqueakGrenade::SuperBounceTouch( CBaseEntity *pOther )
 			{
 				// ALERT( at_console, "hit enemy\n" );
 				ClearMultiDamage();
-				pOther->TraceAttack( pev, gSkillData.snarkDmgBite, gpGlobals->v_forward, &tr, DMG_SLASH ); 
+				pOther->TraceAttack( pev, gSkillData.snarkDmgBite, gpGlobals->v_forward, &tr, DMG_SLASH );
 				if( m_hOwner != 0 )
 					ApplyMultiDamage( pev, m_hOwner->pev );
 				else
@@ -524,7 +524,7 @@ void CSqueak::PrimaryAttack()
 
 			if( flRndSound <= 0.5 )
 				EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "squeek/sqk_hunt2.wav", 1, ATTN_NORM, 0, 105 );
-			else 
+			else
 				EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "squeek/sqk_hunt3.wav", 1, ATTN_NORM, 0, 105 );
 
 			m_pPlayer->m_iWeaponVolume = QUIET_GUN_VOLUME;

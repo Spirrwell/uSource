@@ -1,6 +1,6 @@
 #pragma once
 
-#include "game/server/weapons.h"
+#include "server/weapons.h"
 
 // Contact Grenade / Timed grenade / Satchel Charge
 class CGrenade : public CBaseMonster

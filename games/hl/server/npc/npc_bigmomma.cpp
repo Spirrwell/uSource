@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   This source code contains proprietary and confidential information of
@@ -21,8 +21,8 @@
 #include	"extdll.h"
 #include	"util.h"
 #include	"cbase.h"
-#include        "game/server/ai/ai_monsters.h"
-#include        "game/server/ai/ai_schedule.h"
+#include        "server/ai/ai_monsters.h"
+#include        "server/ai/ai_schedule.h"
 #include	"decals.h"
 #include	"weapons.h"
 #include	"game.h"
@@ -44,7 +44,7 @@ public:
 	// Reach target in pev->message
 	// Reach delay in pev->speed
 	// Reach sequence in pev->netname
-	
+
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
@@ -250,8 +250,8 @@ public:
 
 	void DeathNotice( entvars_t *pevChild );
 
-	BOOL CanLayCrab( void ) 
-	{ 
+	BOOL CanLayCrab( void )
+	{
 		if( m_crabTime < gpGlobals->time && m_crabCount < BIG_MAXCHILDREN )
 		{
 			// Don't spawn crabs inside each other
@@ -395,7 +395,7 @@ void CBigMomma::KeyValue( KeyValueData *pkvd )
 }
 
 //=========================================================
-// Classify - indicates this monster's place in the 
+// Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
 int CBigMomma::Classify( void )
@@ -515,7 +515,7 @@ void CBigMomma::HandleAnimEvent( MonsterEvent_t *pEvent )
 		case BIG_AE_JUMP_FORWARD:
 			ClearBits( pev->flags, FL_ONGROUND );
 
-			UTIL_SetOrigin( pev, pev->origin + Vector( 0, 0, 1) );// take him off ground so engine doesn't instantly reset onground 
+			UTIL_SetOrigin( pev, pev->origin + Vector( 0, 0, 1) );// take him off ground so engine doesn't instantly reset onground
 			UTIL_MakeVectors( pev->angles );
 
 			pev->velocity = gpGlobals->v_forward * 200 + gpGlobals->v_up * 500;
@@ -673,7 +673,7 @@ void CBigMomma::Precache()
 	PRECACHE_SOUND( "bullchicken/bc_acid1.wav" );
 	PRECACHE_SOUND( "bullchicken/bc_spithit1.wav" );
 	PRECACHE_SOUND( "bullchicken/bc_spithit2.wav" );
-}	
+}
 
 void CBigMomma::Activate( void )
 {
@@ -968,7 +968,7 @@ void CBigMomma::StartTask( Task_t *pTask )
 		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY( pAttackSounds ), 1.0, ATTN_NORM, 0, PITCH_NORM );
 		CBaseMonster::StartTask( pTask );
 		break;
-	default: 
+	default:
 		CBaseMonster::StartTask( pTask );
 		break;
 	}
@@ -1027,7 +1027,7 @@ Vector VecCheckSplatToss( entvars_t *pev, const Vector &vecSpot1, Vector vecSpot
 {
 	TraceResult tr;
 	Vector vecMidPoint;// halfway point between Spot1 and Spot2
-	Vector vecApex;// highest point 
+	Vector vecApex;// highest point
 	Vector vecScale;
 	Vector vecGrenadeVel;
 	Vector vecTemp;
@@ -1051,12 +1051,12 @@ Vector VecCheckSplatToss( entvars_t *pev, const Vector &vecSpot1, Vector vecSpot
 	float height = vecApex.z - vecSpot1.z - 15;
 	// How fast does the grenade need to travel to reach that height given gravity?
 	float speed = sqrt( 2 * flGravity * height );
-	
+
 	// How much time does it take to get there?
 	float time = speed / flGravity;
 	vecGrenadeVel = vecSpot2 - vecSpot1;
 	vecGrenadeVel.z = 0;
-	
+
 	// Travel half the distance to the target in that time (apex is at the midpoint)
 	vecGrenadeVel = vecGrenadeVel * ( 0.5 / time );
 	// Speed to offset gravity at the desired height
@@ -1075,11 +1075,11 @@ void MortarSpray( const Vector &position, const Vector &direction, int spriteMod
 	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, position );
 		WRITE_BYTE( TE_SPRITE_SPRAY );
 		WRITE_COORD( position.x );	// pos
-		WRITE_COORD( position.y );	
-		WRITE_COORD( position.z );	
+		WRITE_COORD( position.y );
+		WRITE_COORD( position.z );
 		WRITE_COORD( direction.x );	// dir
-		WRITE_COORD( direction.y );	
-		WRITE_COORD( direction.z );	
+		WRITE_COORD( direction.y );
+		WRITE_COORD( direction.z );
 		WRITE_SHORT( spriteModel );	// model
 		WRITE_BYTE ( count );			// count
 		WRITE_BYTE ( 130 );			// speed
@@ -1092,7 +1092,7 @@ void CBMortar::Spawn( void )
 {
 	pev->movetype = MOVETYPE_TOSS;
 	pev->classname = MAKE_STRING( "bmortar" );
-	
+
 	pev->solid = SOLID_BBOX;
 	pev->rendermode = kRenderTransAlpha;
 	pev->renderamt = 255;
@@ -1129,7 +1129,7 @@ CBMortar *CBMortar::Shoot( edict_t *pOwner, Vector vecStart, Vector vecVelocity 
 {
 	CBMortar *pSpit = GetClassPtr( (CBMortar *)NULL );
 	pSpit->Spawn();
-	
+
 	UTIL_SetOrigin( pSpit->pev, vecStart );
 	pSpit->pev->velocity = vecVelocity;
 	pSpit->pev->owner = pOwner;

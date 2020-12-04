@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -19,7 +19,7 @@
 #include	"extdll.h"
 #include	"util.h"
 #include	"cbase.h"
-#include        "game/server/ai/ai_monsters.h"
+#include        "server/ai/ai_monsters.h"
 #include	"weapons.h"
 #include	"soundent.h"
 #include        "npc_hornet.h"
@@ -105,7 +105,7 @@ void CHornet::Spawn( void )
 	}
 	else
 	{
-		// no real owner, or owner isn't a client. 
+		// no real owner, or owner isn't a client.
 		pev->dmg = gSkillData.monDmgHornet;
 	}
 
@@ -278,7 +278,7 @@ void CHornet::TrackTarget( void )
 
 	if( pev->velocity.Length() < 0.1 )
 		vecFlightDir = vecDirToEnemy;
-	else 
+	else
 		vecFlightDir = pev->velocity.Normalize();
 
 	// measure how far the turn is, the wider the turn, the slow we'll go this time.
@@ -311,7 +311,7 @@ void CHornet::TrackTarget( void )
 
 	if( pev->owner && ( pev->owner->v.flags & FL_MONSTER ) )
 	{
-		// random pattern only applies to hornets fired by monsters, not players. 
+		// random pattern only applies to hornets fired by monsters, not players.
 		pev->velocity.x += RANDOM_FLOAT( -0.10, 0.10 );// scramble the flight dir a bit.
 		pev->velocity.y += RANDOM_FLOAT( -0.10, 0.10 );
 		pev->velocity.z += RANDOM_FLOAT( -0.10, 0.10 );

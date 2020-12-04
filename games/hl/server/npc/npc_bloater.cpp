@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   This source code contains proprietary and confidential information of
@@ -19,8 +19,8 @@
 #include	"extdll.h"
 #include	"util.h"
 #include	"cbase.h"
-#include        "game/server/ai/ai_monsters.h"
-#include        "game/server/ai/ai_schedule.h"
+#include        "server/ai/ai_monsters.h"
+#include        "server/ai/ai_schedule.h"
 
 //=========================================================
 // Monster's Anim Events Go Here
@@ -50,7 +50,7 @@ public:
 LINK_ENTITY_TO_CLASS( monster_bloater, CBloater )
 
 //=========================================================
-// Classify - indicates this monster's place in the 
+// Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
 int CBloater::Classify( void )
@@ -83,12 +83,12 @@ int CBloater::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float
 
 void CBloater::PainSound( void )
 {
-#if 0	
+#if 0
 	int pitch = 95 + RANDOM_LONG( 0, 9 );
 
 	switch( RANDOM_LONG( 0, 5 ) )
 	{
-	case 0: 
+	case 0:
 		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "zombie/zo_pain1.wav", 1.0, ATTN_NORM, 0, pitch );
 		break;
 	case 1:
@@ -107,9 +107,9 @@ void CBloater::AlertSound( void )
 
 	switch( RANDOM_LONG( 0, 2 ) )
 	{
-	case 0: 
+	case 0:
 		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "zombie/zo_alert10.wav", 1.0, ATTN_NORM, 0, pitch );
-		break; 
+		break;
 	case 1:
 		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "zombie/zo_alert20.wav", 1.0, ATTN_NORM, 0, pitch );
 		break;
@@ -127,7 +127,7 @@ void CBloater::IdleSound( void )
 
 	switch( RANDOM_LONG( 0, 2 ) )
 	{
-	case 0: 
+	case 0:
 		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "zombie/zo_idle1.wav", 1.0, ATTN_NORM, 0, pitch );
 		break;
 	case 1:
@@ -147,7 +147,7 @@ void CBloater::AttackSnd( void )
 
 	switch( RANDOM_LONG( 0, 1 ) )
 	{
-	case 0: 
+	case 0:
 		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "zombie/zo_attack1.wav", 1.0, ATTN_NORM, 0, pitch );
 		break;
 	case 1:
@@ -205,7 +205,7 @@ void CBloater::Spawn()
 void CBloater::Precache()
 {
 	PRECACHE_MODEL( "models/floater.mdl" );
-}	
+}
 
 //=========================================================
 // AI Schedules Specific to this monster

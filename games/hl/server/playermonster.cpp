@@ -12,11 +12,11 @@
 #include	"extdll.h"
 #include	"util.h"
 #include	"cbase.h"
-#include        "game/server/ai/ai_monsters.h"
-#include        "game/server/ai/ai_schedule.h"
+#include        "server/ai/ai_monsters.h"
+#include        "server/ai/ai_schedule.h"
 
 // For holograms, make them not solid so the player can walk through them
-#define	SF_MONSTERPLAYER_NOTSOLID					4 
+#define	SF_MONSTERPLAYER_NOTSOLID					4
 
 //=========================================================
 // Monster's Anim Events Go Here
@@ -36,7 +36,7 @@ public:
 LINK_ENTITY_TO_CLASS( monster_player, CPlayerMonster )
 
 //=========================================================
-// Classify - indicates this monster's place in the 
+// Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
 int CPlayerMonster::Classify( void )

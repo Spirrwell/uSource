@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -21,7 +21,7 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "game/server/ai/ai_monsters.h"
+#include "server/ai/ai_monsters.h"
 #include "weapons.h"
 #include "info_node.h"
 #include "soundent.h"
@@ -186,7 +186,7 @@ void CGrenade::Detonate( void )
 
 //
 // Contact grenade, explode when it touches something
-// 
+//
 void CGrenade::ExplodeTouch( CBaseEntity *pOther )
 {
 	TraceResult tr;
@@ -231,7 +231,7 @@ void CGrenade::BounceTouch( CBaseEntity *pOther )
 		{
 			TraceResult tr = UTIL_GetGlobalTrace();
 			ClearMultiDamage();
-			pOther->TraceAttack( pevOwner, 1, gpGlobals->v_forward, &tr, DMG_CLUB ); 
+			pOther->TraceAttack( pevOwner, 1, gpGlobals->v_forward, &tr, DMG_CLUB );
 			ApplyMultiDamage( pev, pevOwner );
 		}
 		m_flNextAttack = gpGlobals->time + 1.0; // debounce
@@ -241,16 +241,16 @@ void CGrenade::BounceTouch( CBaseEntity *pOther )
 	// pev->avelocity = Vector( 300, 300, 300 );
 
 	// this is my heuristic for modulating the grenade velocity because grenades dropped purely vertical
-	// or thrown very far tend to slow down too quickly for me to always catch just by testing velocity. 
+	// or thrown very far tend to slow down too quickly for me to always catch just by testing velocity.
 	// trimming the Z velocity a bit seems to help quite a bit.
-	vecTestVelocity = pev->velocity; 
+	vecTestVelocity = pev->velocity;
 	vecTestVelocity.z *= 0.45;
 
 	if( !m_fRegisteredSound && vecTestVelocity.Length() <= 60 )
 	{
 		//ALERT( at_console, "Grenade Registered!: %f\n", vecTestVelocity.Length() );
 
-		// grenade is moving really slow. It's probably very close to where it will ultimately stop moving. 
+		// grenade is moving really slow. It's probably very close to where it will ultimately stop moving.
 		// go ahead and emit the danger sound.
 
 		// register a radius louder than the explosion, so we make sure everyone gets out of the way
@@ -395,8 +395,8 @@ CGrenade *CGrenade::ShootTimed( entvars_t *pevOwner, Vector vecStart, Vector vec
 	pGrenade->SetTouch( &CGrenade::BounceTouch );	// Bounce if touched
 
 	// Take one second off of the desired detonation time and set the think to PreDetonate. PreDetonate
-	// will insert a DANGER sound into the world sound list and delay detonation for one second so that 
-	// the grenade explodes after the exact amount of time specified in the call to ShootTimed(). 
+	// will insert a DANGER sound into the world sound list and delay detonation for one second so that
+	// the grenade explodes after the exact amount of time specified in the call to ShootTimed().
 
 	pGrenade->pev->dmgtime = gpGlobals->time + time;
 	pGrenade->SetThink( &CGrenade::TumbleThink );

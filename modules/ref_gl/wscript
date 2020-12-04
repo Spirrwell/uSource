@@ -46,7 +46,6 @@ def configure(conf):
 	if conf.env.GL_STATIC:
 		conf.check( lib='GL' )
 
-	conf.env.append_unique('DEFINES', 'REF_DLL')
 	if conf.env.DEST_OS2 == 'android':
 		conf.check_cxx(lib='log')
 
@@ -72,6 +71,8 @@ def build(bld):
 		if glstatic: return ['XASH_GL_STATIC']
 		else: return []
 
+	defines = ['REF_DLL']
+
 	if bld.env.GL:
 		bld.shlib(
 			source   = source,
@@ -79,7 +80,7 @@ def build(bld):
 			features = 'c cxx',
 			includes = includes,
 			use      = libs + link_gl(bld.env.GL_STATIC),
-			defines  = static_gl(bld.env.GL_STATIC),
+			defines  = static_gl(bld.env.GL_STATIC) + defines,
 			install_path = bld.env.LIBDIR,
 			subsystem = bld.env.MSVC_SUBSYSTEM
 		)
@@ -92,7 +93,7 @@ def build(bld):
 			features = 'c cxx',
 			includes = includes,
 			use      = libs + ['DL', 'nanogl'],
-			defines  = ['XASH_NANOGL'],
+			defines  = ['XASH_NANOGL'] + defines,
 			install_path = bld.env.LIBDIR,
 			subsystem = bld.env.MSVC_SUBSYSTEM)
 
@@ -104,6 +105,6 @@ def build(bld):
 			features = 'c cxx',
 			includes = includes,
 			use      = libs + ['DL', 'gl-wes-v2'],
-			defines  = ['XASH_WES'],
+			defines  = ['XASH_WES'] + defines,
 			install_path = bld.env.LIBDIR,
 			subsystem = bld.env.MSVC_SUBSYSTEM)

@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   This source code contains proprietary and confidential information of
@@ -25,7 +25,7 @@
 #include	"extdll.h"
 #include	"util.h"
 #include	"cbase.h"
-#include        "game/server/ai/ai_monsters.h"
+#include        "server/ai/ai_monsters.h"
 #include	"decals.h"
 
 class CLegacyCineMonster : public CBaseMonster
@@ -114,8 +114,8 @@ void CLegacyCineMonster :: CineSpawn( const char *szModel )
 	pev->effects		= 0;
 	pev->health			= 1;
 	pev->yaw_speed		= 10;
-	
-	// ugly alpha hack, can't set ints from the bsp.	
+
+	// ugly alpha hack, can't set ints from the bsp.
 	pev->sequence		= (int)pev->impulse;
 	ResetSequenceInfo( );
 	pev->framerate = 0.0;
@@ -123,7 +123,7 @@ void CLegacyCineMonster :: CineSpawn( const char *szModel )
 	m_bloodColor = BLOOD_COLOR_RED;
 
 	// if no targetname, start now
-	if ( FStringNull(pev->targetname) )	
+	if ( FStringNull(pev->targetname) )
 	{
 		SetThink( &CLegacyCineMonster::CineThink );
 		pev->nextthink += 1.0;
@@ -159,7 +159,7 @@ void CLegacyCineMonster :: Pain( void )
 void CLegacyCineMonster :: CineThink( void )
 {
 	// DBG_CheckMonsterData(pev);
-	
+
 	// Emit particles from origin (double check animator's placement of model)
 	// THIS is a test feature
 	//UTIL_ParticleEffect(pev->origin, g_vecZero, 255, 20);
@@ -181,7 +181,7 @@ void CLegacyCineMonster :: CineThink( void )
 //
 // cine_blood
 //
-// e3/prealpha only. 
+// e3/prealpha only.
 class CCineBlood : public CBaseEntity
 {
 public:

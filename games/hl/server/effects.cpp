@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -16,7 +16,7 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "game/server/ai/ai_monsters.h"
+#include "server/ai/ai_monsters.h"
 #include "customentity.h"
 #include "effects.h"
 #include "weapons.h"
@@ -88,7 +88,7 @@ void CBubbling::Spawn( void )
 		pev->nextthink = gpGlobals->time + 2.0;
 		m_state = 1;
 	}
-	else 
+	else
 		m_state = 0;
 }
 
@@ -151,7 +151,7 @@ void CBubbling::FizzThink( void )
 }
 
 // --------------------------------------------------
-// 
+//
 // Beams
 //
 // --------------------------------------------------
@@ -173,14 +173,14 @@ void CBeam::Precache( void )
 }
 
 void CBeam::SetStartEntity( int entityIndex )
-{ 
-	pev->sequence = ( entityIndex & 0x0FFF ) | ( ( pev->sequence & 0xF000 ) << 12 ); 
+{
+	pev->sequence = ( entityIndex & 0x0FFF ) | ( ( pev->sequence & 0xF000 ) << 12 );
 	pev->owner = g_engfuncs.pfnPEntityOfEntIndex( entityIndex );
 }
 
 void CBeam::SetEndEntity( int entityIndex )
-{ 
-	pev->skin = ( entityIndex & 0x0FFF ) | ( ( pev->skin & 0xF000 ) << 12 ); 
+{
+	pev->skin = ( entityIndex & 0x0FFF ) | ( ( pev->skin & 0xF000 ) << 12 );
 	pev->aiment = g_engfuncs.pfnPEntityOfEntIndex( entityIndex );
 }
 
@@ -365,7 +365,7 @@ public:
 	void Zap( const Vector &vecSrc, const Vector &vecDest );
 	void EXPORT StrikeUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void EXPORT ToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	
+
 	inline BOOL ServerSide( void )
 	{
 		if( m_life == 0 && !( pev->spawnflags & SF_BEAM_RING ) )
@@ -465,7 +465,7 @@ void CLightning::Spawn( void )
 			}
 			else
 				m_active = 1;
-		
+
 			SetUse( &CLightning::ToggleUse );
 		}
 	}
@@ -1119,7 +1119,7 @@ void CGlow::Think( void )
 }
 
 void CGlow::Animate( float frames )
-{ 
+{
 	if( m_maxFrame > 0 )
 		pev->frame = fmod( pev->frame + frames, m_maxFrame );
 }
@@ -1240,7 +1240,7 @@ void CSprite::ExpandThink( void )
 }
 
 void CSprite::Animate( float frames )
-{ 
+{
 	pev->frame += frames;
 	if( pev->frame > m_maxFrame )
 	{
@@ -1428,7 +1428,7 @@ void CGibShooter::ShootThink( void )
 
 	vecShootDir = vecShootDir.Normalize();
 	CGib *pGib = CreateGib();
-	
+
 	if( pGib )
 	{
 		pGib->pev->origin = pev->origin;
@@ -1593,7 +1593,7 @@ void CTestEffect::TestThink( void )
 		pbeam->SetColor( 255, 180, 100 );
 		pbeam->SetWidth( 100 );
 		pbeam->SetScrollRate( 12 );
-		
+
 		m_flBeamTime[m_iBeam] = gpGlobals->time;
 		m_pBeam[m_iBeam] = pbeam;
 		m_iBeam++;
@@ -1666,12 +1666,12 @@ public:
 	{
 		pev->impulse = color;
 	}
-	
+
 	inline void SetBloodAmount( float amount )
 	{
 		pev->dmg = amount;
 	}
-	
+
 	Vector Direction( void );
 	Vector BloodPosition( CBaseEntity *pActivator );
 private:
@@ -1936,7 +1936,7 @@ void CFade::KeyValue( KeyValueData *pkvd )
 void CFade::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
 	int fadeFlags = 0;
-	
+
 	if( !( pev->spawnflags & SF_FADE_IN ) )
 		fadeFlags |= FFADE_OUT;
 
@@ -2108,7 +2108,7 @@ void CEnvFunnel::Spawn( void )
 
 //=========================================================
 // Beverage Dispenser
-// overloaded pev->frags, is now a flag for whether or not a can is stuck in the dispenser. 
+// overloaded pev->frags, is now a flag for whether or not a can is stuck in the dispenser.
 // overloaded pev->health, is now how many cans remain in the machine.
 //=========================================================
 class CEnvBeverage : public CBaseDelay
@@ -2135,7 +2135,7 @@ void CEnvBeverage::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 		return;
 	}
 
-	CBaseEntity *pCan = CBaseEntity::Create( "item_sodacan", pev->origin, pev->angles, edict() );	
+	CBaseEntity *pCan = CBaseEntity::Create( "item_sodacan", pev->origin, pev->angles, edict() );
 
 	if( pev->skin == 6 )
 	{
@@ -2195,7 +2195,7 @@ void CItemSoda::Spawn( void )
 
 	SET_MODEL( ENT( pev ), "models/can.mdl" );
 	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
-	
+
 	SetThink( &CItemSoda::CanThink );
 	pev->nextthink = gpGlobals->time + 0.5;
 }

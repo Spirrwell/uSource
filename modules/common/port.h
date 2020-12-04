@@ -141,7 +141,7 @@ GNU General Public License for more details.
 
 #if defined XASH_SDL && !defined REF_DLL
 #include <algorithm>
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #endif
 
 

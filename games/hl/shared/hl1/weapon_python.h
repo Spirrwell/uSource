@@ -1,6 +1,6 @@
 #pragma once
 
-#include "game/server/weapons.h"
+#include "server/weapons.h"
 
 class CPython : public CBasePlayerWeapon
 {
@@ -18,7 +18,7 @@ public:
 	void WeaponIdle( void ) override;
 	float m_flSoundDelay;
 
-	BOOL m_fInZoom;// don't save this. 
+	BOOL m_fInZoom;// don't save this.
 
 	virtual BOOL UseDecrement( void )
 	{

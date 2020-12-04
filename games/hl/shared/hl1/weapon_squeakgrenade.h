@@ -1,6 +1,6 @@
 #pragma once
 
-#include "game/server/weapons.h"
+#include "server/weapons.h"
 
 
 class CSqueak : public CBasePlayerWeapon

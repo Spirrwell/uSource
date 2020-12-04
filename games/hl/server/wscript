@@ -75,14 +75,15 @@ def build(bld):
 		defines += ['NO_VOICEGAMEMGR']
 
 	#includes = Utils.to_list('. wpn_shared ../common ../engine ../pm_shared ../game_shared ../public')
-	includes = list()
-	includes.append(bld.env.ENGINE)
-	includes.append(bld.env.COMMON)
-	includes.append(bld.env.PMSHARED)
-	includes.append(bld.env.SHARED)
-	includes.append(bld.env.PUBLIC)
-	includes.append(bld.env.ROOT)
-	includes.append('.')
+	includes = [
+		'.', '../shared', '..',
+		bld.env.ENGINE,
+		bld.env.COMMON,
+		bld.env.PMSHARED,
+		bld.env.PUBLIC,
+		bld.env.ROOT,
+		bld.env.ROOT + '/modules/'
+	]
 
 	libs = ['public', 'mathlib', 'networksystem', 'tier1']
 

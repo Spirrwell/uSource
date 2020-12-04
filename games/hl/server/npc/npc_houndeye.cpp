@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   This source code contains proprietary and confidential information of
@@ -13,23 +13,23 @@
 *
 ****/
 //=========================================================
-// Houndeye - spooky sonic dog. 
+// Houndeye - spooky sonic dog.
 //=========================================================
 
 #include	"extdll.h"
 #include	"util.h"
 #include	"cbase.h"
-#include        "game/server/ai/ai_monsters.h"
-#include        "game/server/ai/ai_schedule.h"
+#include        "server/ai/ai_monsters.h"
+#include        "server/ai/ai_schedule.h"
 #include	"animation.h"
 #include        "info_node.h"
-#include        "game/server/ai/ai_squadmonster.h"
+#include        "server/ai/ai_squadmonster.h"
 #include	"soundent.h"
 #include	"game.h"
 
 extern CGraph WorldGraph;
 
-// houndeye does 20 points of damage spread over a sphere 384 units in diameter, and each additional 
+// houndeye does 20 points of damage spread over a sphere 384 units in diameter, and each additional
 // squad member increases the BASE damage by 110%, per the spec.
 #define HOUNDEYE_MAX_SQUAD_SIZE			4
 #define	HOUNDEYE_MAX_ATTACK_RADIUS		384
@@ -124,7 +124,7 @@ TYPEDESCRIPTION	CHoundeye::m_SaveData[] =
 IMPLEMENT_SAVERESTORE( CHoundeye, CSquadMonster )
 
 //=========================================================
-// Classify - indicates this monster's place in the 
+// Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
 int CHoundeye::Classify( void )
@@ -133,7 +133,7 @@ int CHoundeye::Classify( void )
 }
 
 //=========================================================
-//  FValidateHintType 
+//  FValidateHintType
 //=========================================================
 BOOL CHoundeye::FValidateHintType( short sHint )
 {
@@ -214,11 +214,11 @@ void CHoundeye::SetYawSpeed( void )
 	case ACT_CROUCHIDLE://sleeping!
 		ys = 0;
 		break;
-	case ACT_IDLE:	
+	case ACT_IDLE:
 		ys = 60;
 		break;
 	case ACT_WALK:
-	case ACT_RUN:	
+	case ACT_RUN:
 	case ACT_TURN_LEFT:
 	case ACT_TURN_RIGHT:
 		break;
@@ -230,7 +230,7 @@ void CHoundeye::SetYawSpeed( void )
 }
 
 //=========================================================
-// SetActivity 
+// SetActivity
 //=========================================================
 void CHoundeye::SetActivity( Activity NewActivity )
 {
@@ -245,7 +245,7 @@ void CHoundeye::SetActivity( Activity NewActivity )
 		iSequence = LookupSequence( "madidle" );
 
 		m_Activity = NewActivity; // Go ahead and set this so it doesn't keep trying when the anim is not present
-	
+
 		// In case someone calls this with something other than the ideal activity
 		m_IdealActivity = m_Activity;
 
@@ -372,7 +372,7 @@ void CHoundeye::Precache()
 	PRECACHE_SOUND( "houndeye/he_blast3.wav" );
 
 	m_iSpriteTexture = PRECACHE_MODEL( "sprites/shockwave.spr" );
-}	
+}
 
 //=========================================================
 // IdleSound
@@ -382,13 +382,13 @@ void CHoundeye::IdleSound( void )
 	switch( RANDOM_LONG( 0, 2 ) )
 	{
 	case 0:
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_idle1.wav", 1, ATTN_NORM );	
+		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_idle1.wav", 1, ATTN_NORM );
 		break;
 	case 1:
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_idle2.wav", 1, ATTN_NORM );	
+		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_idle2.wav", 1, ATTN_NORM );
 		break;
 	case 2:
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_idle3.wav", 1, ATTN_NORM );	
+		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_idle3.wav", 1, ATTN_NORM );
 		break;
 	}
 }
@@ -401,35 +401,35 @@ void CHoundeye::WarmUpSound( void )
 	switch( RANDOM_LONG( 0, 1 ) )
 	{
 	case 0:
-		EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "houndeye/he_attack1.wav", 0.7, ATTN_NORM );	
+		EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "houndeye/he_attack1.wav", 0.7, ATTN_NORM );
 		break;
 	case 1:
-		EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "houndeye/he_attack3.wav", 0.7, ATTN_NORM );	
+		EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "houndeye/he_attack3.wav", 0.7, ATTN_NORM );
 		break;
 	}
 }
 
 //=========================================================
-// WarnSound 
+// WarnSound
 //=========================================================
 void CHoundeye::WarnSound( void )
 {
 	switch( RANDOM_LONG( 0, 2 ) )
 	{
 	case 0:
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_hunt1.wav", 1, ATTN_NORM );	
+		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_hunt1.wav", 1, ATTN_NORM );
 		break;
 	case 1:
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_hunt2.wav", 1, ATTN_NORM );	
+		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_hunt2.wav", 1, ATTN_NORM );
 		break;
 	case 2:
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_hunt3.wav", 1, ATTN_NORM );	
+		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_hunt3.wav", 1, ATTN_NORM );
 		break;
 	}
 }
 
 //=========================================================
-// AlertSound 
+// AlertSound
 //=========================================================
 void CHoundeye::AlertSound( void )
 {
@@ -440,59 +440,59 @@ void CHoundeye::AlertSound( void )
 
 	switch( RANDOM_LONG( 0, 2 ) )
 	{
-	case 0:	
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_alert1.wav", 1, ATTN_NORM );	
+	case 0:
+		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_alert1.wav", 1, ATTN_NORM );
 		break;
-	case 1:	
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_alert2.wav", 1, ATTN_NORM );	
+	case 1:
+		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_alert2.wav", 1, ATTN_NORM );
 		break;
-	case 2:	
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_alert3.wav", 1, ATTN_NORM );	
+	case 2:
+		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_alert3.wav", 1, ATTN_NORM );
 		break;
 	}
 }
 
 //=========================================================
-// DeathSound 
+// DeathSound
 //=========================================================
 void CHoundeye::DeathSound( void )
 {
 	switch( RANDOM_LONG( 0, 2 ) )
 	{
 	case 0:
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_die1.wav", 1, ATTN_NORM );	
+		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_die1.wav", 1, ATTN_NORM );
 		break;
 	case 1:
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_die2.wav", 1, ATTN_NORM );	
+		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_die2.wav", 1, ATTN_NORM );
 		break;
 	case 2:
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_die3.wav", 1, ATTN_NORM );	
+		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_die3.wav", 1, ATTN_NORM );
 		break;
 	}
 }
 
 //=========================================================
-// PainSound 
+// PainSound
 //=========================================================
 void CHoundeye::PainSound( void )
 {
 	switch( RANDOM_LONG( 0, 2 ) )
 	{
 	case 0:
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_pain3.wav", 1, ATTN_NORM );	
+		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_pain3.wav", 1, ATTN_NORM );
 		break;
-	case 1:	
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_pain4.wav", 1, ATTN_NORM );	
+	case 1:
+		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_pain4.wav", 1, ATTN_NORM );
 		break;
-	case 2:	
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_pain5.wav", 1, ATTN_NORM );	
+	case 2:
+		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_pain5.wav", 1, ATTN_NORM );
 		break;
 	}
 }
 
 //=========================================================
-// WriteBeamColor - writes a color vector to the network 
-// based on the size of the group. 
+// WriteBeamColor - writes a color vector to the network
+// based on the size of the group.
 //=========================================================
 void CHoundeye::WriteBeamColor( void )
 {
@@ -635,12 +635,12 @@ void CHoundeye::SonicAttack( void )
 				{
 					if( pEntity->IsPlayer() )
 					{
-						// if this entity is a client, and is not in full view, inflict half damage. We do this so that players still 
+						// if this entity is a client, and is not in full view, inflict half damage. We do this so that players still
 						// take the residual damage if they don't totally leave the houndeye's effective radius. We restrict it to clients
 						// so that monsters in other parts of the level don't take the damage and get pissed.
 						flAdjustedDamage *= 0.5;
 					}
-					else if( !FClassnameIs( pEntity->pev, "func_breakable" ) && !FClassnameIs( pEntity->pev, "func_pushable" ) ) 
+					else if( !FClassnameIs( pEntity->pev, "func_breakable" ) && !FClassnameIs( pEntity->pev, "func_pushable" ) )
 					{
 						// do not hurt nonclients through walls, but allow damage to be done to breakables
 						flAdjustedDamage = 0;
@@ -708,7 +708,7 @@ void CHoundeye::StartTask( Task_t *pTask )
 /*
 			if( InSquad() )
 			{
-				// see if there is a battery to connect to. 
+				// see if there is a battery to connect to.
 				CSquadMonster *pSquad = m_pSquadLeader;
 
 				while( pSquad )
@@ -751,7 +751,7 @@ void CHoundeye::StartTask( Task_t *pTask )
 			m_IdealActivity = ACT_GUARD;
 			break;
 		}
-	default: 
+	default:
 		{
 			CSquadMonster::StartTask( pTask );
 			break;
@@ -760,7 +760,7 @@ void CHoundeye::StartTask( Task_t *pTask )
 }
 
 //=========================================================
-// RunTask 
+// RunTask
 //=========================================================
 void CHoundeye::RunTask( Task_t *pTask )
 {
@@ -817,7 +817,7 @@ void CHoundeye::RunTask( Task_t *pTask )
 
 			if( m_fSequenceFinished )
 			{
-				SonicAttack(); 
+				SonicAttack();
 				TaskComplete();
 			}
 			break;
@@ -888,9 +888,9 @@ Task_t tlHoundGuardPack[] =
 
 Schedule_t	slHoundGuardPack[] =
 {
-	{ 
+	{
 		tlHoundGuardPack,
-		ARRAYSIZE ( tlHoundGuardPack ), 
+		ARRAYSIZE ( tlHoundGuardPack ),
 		bits_COND_SEE_HATE		|
 		bits_COND_LIGHT_DAMAGE	|
 		bits_COND_HEAVY_DAMAGE	|
@@ -923,17 +923,17 @@ Task_t	tlHoundYell2[] =
 
 Schedule_t	slHoundRangeAttack[] =
 {
-	{ 
+	{
 		tlHoundYell1,
-		ARRAYSIZE ( tlHoundYell1 ), 
+		ARRAYSIZE ( tlHoundYell1 ),
 		bits_COND_LIGHT_DAMAGE	|
 		bits_COND_HEAVY_DAMAGE,
 		0,
 		"HoundRangeAttack1"
 	},
-	{ 
+	{
 		tlHoundYell2,
-		ARRAYSIZE ( tlHoundYell2 ), 
+		ARRAYSIZE ( tlHoundYell2 ),
 		bits_COND_LIGHT_DAMAGE	|
 		bits_COND_HEAVY_DAMAGE,
 		0,
@@ -960,7 +960,7 @@ Schedule_t	slHoundSleep[] =
 {
 	{
 		tlHoundSleep,
-		ARRAYSIZE ( tlHoundSleep ), 
+		ARRAYSIZE ( tlHoundSleep ),
 		bits_COND_HEAR_SOUND	|
 		bits_COND_LIGHT_DAMAGE	|
 		bits_COND_HEAVY_DAMAGE	|
@@ -1024,14 +1024,14 @@ Task_t	tlHoundSpecialAttack1[] =
 
 Schedule_t	slHoundSpecialAttack1[] =
 {
-	{ 
+	{
 		tlHoundSpecialAttack1,
-		ARRAYSIZE ( tlHoundSpecialAttack1 ), 
+		ARRAYSIZE ( tlHoundSpecialAttack1 ),
 		bits_COND_NEW_ENEMY			|
 		bits_COND_LIGHT_DAMAGE		|
 		bits_COND_HEAVY_DAMAGE		|
 		bits_COND_ENEMY_OCCLUDED,
-		
+
 		0,
 		"Hound Special Attack1"
 	},
@@ -1045,9 +1045,9 @@ Task_t	tlHoundAgitated[] =
 
 Schedule_t	slHoundAgitated[] =
 {
-	{ 
+	{
 		tlHoundAgitated,
-		ARRAYSIZE ( tlHoundAgitated ), 
+		ARRAYSIZE ( tlHoundAgitated ),
 		bits_COND_NEW_ENEMY			|
 		bits_COND_LIGHT_DAMAGE		|
 		bits_COND_HEAVY_DAMAGE,
@@ -1065,9 +1065,9 @@ Task_t	tlHoundHopRetreat[] =
 
 Schedule_t	slHoundHopRetreat[] =
 {
-	{ 
+	{
 		tlHoundHopRetreat,
-		ARRAYSIZE ( tlHoundHopRetreat ), 
+		ARRAYSIZE ( tlHoundHopRetreat ),
 		0,
 		0,
 		"Hound Hop Retreat"
@@ -1084,9 +1084,9 @@ Task_t	tlHoundCombatFailPVS[] =
 
 Schedule_t	slHoundCombatFailPVS[] =
 {
-	{ 
+	{
 		tlHoundCombatFailPVS,
-		ARRAYSIZE ( tlHoundCombatFailPVS ), 
+		ARRAYSIZE ( tlHoundCombatFailPVS ),
 		bits_COND_NEW_ENEMY			|
 		bits_COND_LIGHT_DAMAGE		|
 		bits_COND_HEAVY_DAMAGE,
@@ -1107,9 +1107,9 @@ Task_t	tlHoundCombatFailNoPVS[] =
 
 Schedule_t	slHoundCombatFailNoPVS[] =
 {
-	{ 
+	{
 		tlHoundCombatFailNoPVS,
-		ARRAYSIZE ( tlHoundCombatFailNoPVS ), 
+		ARRAYSIZE ( tlHoundCombatFailNoPVS ),
 		bits_COND_NEW_ENEMY			|
 		bits_COND_LIGHT_DAMAGE		|
 		bits_COND_HEAVY_DAMAGE,
@@ -1136,9 +1136,9 @@ DEFINE_CUSTOM_SCHEDULES( CHoundeye )
 IMPLEMENT_CUSTOM_SCHEDULES( CHoundeye, CSquadMonster )
 
 //=========================================================
-// GetScheduleOfType 
+// GetScheduleOfType
 //=========================================================
-Schedule_t *CHoundeye::GetScheduleOfType( int Type ) 
+Schedule_t *CHoundeye::GetScheduleOfType( int Type )
 {
 	if( m_fAsleep )
 	{
@@ -1226,7 +1226,7 @@ Schedule_t *CHoundeye::GetScheduleOfType( int Type )
 				}
 				else
 				{
-					// client has taken off! 
+					// client has taken off!
 					return &slHoundCombatFailNoPVS[0];
 				}
 			}
@@ -1243,7 +1243,7 @@ Schedule_t *CHoundeye::GetScheduleOfType( int Type )
 }
 
 //=========================================================
-// GetSchedule 
+// GetSchedule
 //=========================================================
 Schedule_t *CHoundeye::GetSchedule( void )
 {

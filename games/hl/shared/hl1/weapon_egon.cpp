@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -16,14 +16,14 @@
 
 #include "extdll.h"
 #include "util.h"
-#include "game/server/cbase.h"
-#include "game/server/player.h"
+#include "server/cbase.h"
+#include "server/player.h"
 #include "ai/ai_monsters.h"
 #include "weapon_egon.h"
-#include "game/server/info_node.h"
-#include "game/server/effects.h"
+#include "server/info_node.h"
+#include "server/effects.h"
 #include "customentity.h"
-#include "game/server/gamerules.h"
+#include "server/gamerules.h"
 
 #define	EGON_PRIMARY_VOLUME		450
 #define EGON_BEAM_SPRITE		"sprites/xbeam1.spr"
@@ -198,7 +198,7 @@ void CEgon::Attack( void )
 			m_flAmmoUseTime = gpGlobals->time;// start using ammo ASAP.
 
 			PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usEgonFire, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, 0.0, 0.0, m_fireState, m_fireMode, 1, 0 );
-		
+
 			m_shakeTime = 0;
 
 			m_pPlayer->m_iWeaponVolume = EGON_PRIMARY_VOLUME;
@@ -246,7 +246,7 @@ void CEgon::Fire( const Vector &vecOrigSrc, const Vector &vecDir )
 	Vector tmpSrc = vecOrigSrc + gpGlobals->v_up * -8 + gpGlobals->v_right * 3;
 
 	// ALERT( at_console, "." );
-	
+
 	UTIL_TraceLine( vecOrigSrc, vecDest, dont_ignore_monsters, pentIgnore, &tr );
 
 	if( tr.fAllSolid )
@@ -487,7 +487,7 @@ void CEgon::WeaponIdle( void )
 		iAnim = EGON_IDLE1;
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat( m_pPlayer->random_seed, 10, 15 );
 	}
-	else 
+	else
 	{
 		iAnim = EGON_FIDGET1;
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 3;
@@ -517,7 +517,7 @@ void CEgon::EndAttack( void )
 class CEgonAmmo : public CBasePlayerAmmo
 {
 	void Spawn( void )
-	{ 
+	{
 		Precache();
 		SET_MODEL( ENT( pev ), "models/w_chainammo.mdl" );
 		CBasePlayerAmmo::Spawn();

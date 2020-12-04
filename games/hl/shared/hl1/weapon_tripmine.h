@@ -1,6 +1,6 @@
 #pragma once
 
-#include "game/server/weapons.h"
+#include "server/weapons.h"
 
 class CTripmine : public CBasePlayerWeapon
 {
@@ -13,7 +13,7 @@ public:
 	{
 		//!!!BUGBUG - fix the model!
 		pev->absmin = pev->origin + Vector(-16, -16, -5);
-		pev->absmax = pev->origin + Vector(16, 16, 28); 
+		pev->absmax = pev->origin + Vector(16, 16, 28);
 	}
 
 	void PrimaryAttack( void ) override;
@@ -22,7 +22,7 @@ public:
 	void WeaponIdle( void ) override;
 
 	virtual BOOL UseDecrement( void )
-	{ 
+	{
 #if defined( CLIENT_WEAPONS )
 		return TRUE;
 #else

@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -15,11 +15,11 @@
 
 #include "extdll.h"
 #include "util.h"
-#include "game/server/cbase.h"
+#include "server/cbase.h"
 #include "ai/ai_monsters.h"
 #include "weapon_frag.h"
-#include "game/server/info_node.h"
-#include "game/server/player.h"
+#include "server/info_node.h"
+#include "server/player.h"
 
 #define	HANDGRENADE_PRIMARY_VOLUME		450
 

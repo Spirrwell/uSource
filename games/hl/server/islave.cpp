@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   This source code contains proprietary and confidential information of
@@ -19,9 +19,9 @@
 #include	"extdll.h"
 #include	"util.h"
 #include	"cbase.h"
-#include        "game/server/ai/ai_monsters.h"
-#include        "game/server/ai/ai_squadmonster.h"
-#include        "game/server/ai/ai_schedule.h"
+#include        "server/ai/ai_monsters.h"
+#include        "server/ai/ai_squadmonster.h"
+#include        "server/ai/ai_schedule.h"
 #include	"effects.h"
 #include	"weapons.h"
 #include	"soundent.h"
@@ -68,7 +68,7 @@ public:
 	Schedule_t *GetScheduleOfType( int Type );
 	CUSTOM_SCHEDULES
 
-	int Save( CSave &save ); 
+	int Save( CSave &save );
 	int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 
@@ -140,7 +140,7 @@ const char *CISlave::pDeathSounds[] =
 };
 
 //=========================================================
-// Classify - indicates this monster's place in the 
+// Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
 int CISlave::Classify( void )
@@ -249,7 +249,7 @@ void CISlave::DeathSound( void )
 
 //=========================================================
 // ISoundMask - returns a bit mask indicating which types
-// of sounds this monster regards. 
+// of sounds this monster regards.
 //=========================================================
 int CISlave::ISoundMask( void )
 {
@@ -275,13 +275,13 @@ void CISlave::SetYawSpeed( void )
 
 	switch( m_Activity )
 	{
-	case ACT_WALK:		
-		ys = 50;	
+	case ACT_WALK:
+		ys = 50;
 		break;
-	case ACT_RUN:		
+	case ACT_RUN:
 		ys = 70;
 		break;
-	case ACT_IDLE:		
+	case ACT_IDLE:
 		ys = 50;
 		break;
 	default:
@@ -434,7 +434,7 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 }
 
 //=========================================================
-// CheckRangeAttack1 - normal beam attack 
+// CheckRangeAttack1 - normal beam attack
 //=========================================================
 BOOL CISlave::CheckRangeAttack1( float flDot, float flDist )
 {
@@ -601,12 +601,12 @@ Task_t	tlSlaveAttack1[] =
 
 Schedule_t	slSlaveAttack1[] =
 {
-	{ 
+	{
 		tlSlaveAttack1,
-		ARRAYSIZE ( tlSlaveAttack1 ), 
+		ARRAYSIZE ( tlSlaveAttack1 ),
 		bits_COND_CAN_MELEE_ATTACK1 |
 		bits_COND_HEAR_SOUND |
-		bits_COND_HEAVY_DAMAGE, 
+		bits_COND_HEAVY_DAMAGE,
 
 		bits_SOUND_DANGER,
 		"Slave Range Attack1"
@@ -678,7 +678,7 @@ Schedule_t *CISlave::GetSchedule( void )
 	return CSquadMonster::GetSchedule();
 }
 
-Schedule_t *CISlave::GetScheduleOfType( int Type ) 
+Schedule_t *CISlave::GetScheduleOfType( int Type )
 {
 	switch( Type )
 	{

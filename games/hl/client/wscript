@@ -60,17 +60,19 @@ def build(bld):
 		'../shared/core/netvar.cpp'
 	]
 	#includes = Utils.to_list('. hl/ ../dlls ../dlls/wpn_shared ../common ../engine ../pm_shared ../game_shared ../public ../utils/false_vgui/include')
-	includes = list()
-	includes.append(bld.env.COMMON)
-	includes.append(bld.env.PMSHARED)
-	includes.append(bld.env.SHARED)
-	includes.append(bld.env.PUBLIC)
-	includes.append(bld.env.FAKEVGUI)
-	includes.append(bld.env.SERVER)
-	includes.append(bld.env.CLIENT)
-	includes.append(bld.env.ENGINE)
-	includes.append('./hl/')
-	includes.append('../../')
+	includes = [
+		'../../', '.', './hl', '..',
+		bld.env.COMMON,
+		bld.env.PMSHARED,
+		bld.env.PUBLIC,
+		bld.env.FAKEVGUI,
+		bld.env.SERVER,
+		bld.env.CLIENT,
+		bld.env.ENGINE,
+		bld.env.MATHLIB,
+		'../../modules',
+		'../shared'
+	]
 
 	defines = ['CLIENT_DLL', 'CLIENT_WEAPONS']
 	if bld.env.GOLDSRC:

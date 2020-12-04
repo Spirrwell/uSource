@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -23,7 +23,7 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "game/server/ai/ai_monsters.h"
+#include "server/ai/ai_monsters.h"
 #include "animation.h"
 #include "weapons.h"
 #include "player.h"
@@ -79,7 +79,7 @@ LINK_ENTITY_TO_CLASS( cycler, CGenericCycler )
 //
 class CCyclerProbe : public CCycler
 {
-public:	
+public:
 	void Spawn( void );
 };
 
@@ -286,7 +286,7 @@ int CCyclerSprite::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, 
 }
 
 void CCyclerSprite::Animate( float frames )
-{ 
+{
 	pev->frame += frames;
 	if( m_maxFrame > 0 )
 		pev->frame = fmod( pev->frame, m_maxFrame );

@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -24,7 +24,7 @@
 #include "util.h"
 #include "cbase.h"
 #include "player.h"
-#include "game/server/ai/ai_monsters.h"
+#include "server/ai/ai_monsters.h"
 #include "weapons.h"
 #include "info_node.h"
 #include "soundent.h"
@@ -75,7 +75,7 @@ MULTIDAMAGE gMultiDamage;
 
 //=========================================================
 // MaxAmmoCarry - pass in a name and this function will tell
-// you the maximum amount of that type of ammunition that a 
+// you the maximum amount of that type of ammunition that a
 // player can carry.
 //=========================================================
 int MaxAmmoCarry( int iszName )
@@ -91,7 +91,7 @@ int MaxAmmoCarry( int iszName )
 	ALERT( at_console, "MaxAmmoCarry() doesn't recognize '%s'!\n", STRING( iszName ) );
 	return -1;
 }
-	
+
 /*
 ==============================================================================
 
@@ -162,7 +162,7 @@ int DamageDecal( CBaseEntity *pEntity, int bitsDamageType )
 {
 	if( !pEntity )
 		return ( DECAL_GUNSHOT1 + RANDOM_LONG( 0, 4 ) );
-	
+
 	return pEntity->DamageDecal( bitsDamageType );
 }
 
@@ -259,7 +259,7 @@ void UTIL_PrecacheOtherWeapon( const char *szClassname )
 		ALERT( at_console, "NULL Ent in UTIL_PrecacheOtherWeapon\n" );
 		return;
 	}
-	
+
 	CBaseEntity *pEntity = CBaseEntity::Instance( VARS( pent ) );
 
 	if( pEntity )
@@ -366,7 +366,7 @@ void W_Precache( void )
 	g_sModelIndexSmoke = PRECACHE_MODEL( "sprites/steam1.spr" );// smoke
 	g_sModelIndexBubbles = PRECACHE_MODEL( "sprites/bubble.spr" );//bubbles
 	g_sModelIndexBloodSpray = PRECACHE_MODEL( "sprites/bloodspray.spr" ); // initial blood
-	g_sModelIndexBloodDrop = PRECACHE_MODEL( "sprites/blood.spr" ); // splattered blood 
+	g_sModelIndexBloodDrop = PRECACHE_MODEL( "sprites/blood.spr" ); // splattered blood
 
 	g_sModelIndexLaser = PRECACHE_MODEL( g_pModelNameLaser );
 	g_sModelIndexLaserDot = PRECACHE_MODEL( "sprites/laserdot.spr" );
@@ -497,7 +497,7 @@ void CWeaponBox::KeyValue( KeyValueData *pkvd )
 }
 
 //=========================================================
-// CWeaponBox - Spawn 
+// CWeaponBox - Spawn
 //=========================================================
 void CWeaponBox::Spawn( void )
 {
@@ -609,7 +609,7 @@ void CWeaponBox::Touch( CBaseEntity *pOther )
 				}
 			}
 
-			// there's some ammo of this type. 
+			// there's some ammo of this type.
 			pPlayer->GiveAmmo( m_rgAmmo[i], STRING( m_rgiszAmmo[i] ), MaxAmmoCarry( m_rgiszAmmo[i] ) );
 
 			//ALERT( at_console, "Gave %d rounds of %s\n", m_rgAmmo[i], STRING( m_rgiszAmmo[i] ) );
@@ -620,8 +620,8 @@ void CWeaponBox::Touch( CBaseEntity *pOther )
 		}
 	}
 
-	// go through my weapons and try to give the usable ones to the player. 
-	// it's important the the player be given ammo first, so the weapons code doesn't refuse 
+	// go through my weapons and try to give the usable ones to the player.
+	// it's important the the player be given ammo first, so the weapons code doesn't refuse
 	// to deploy a better weapon that the player may pick up because he has no ammo for it.
 	for( i = 0; i < MAX_ITEM_TYPES; i++ )
 	{
@@ -675,14 +675,14 @@ BOOL CWeaponBox::PackWeapon( CBasePlayerItem *pWeapon )
 	if( m_rgpPlayerItems[iWeaponSlot] )
 	{
 		// there's already one weapon in this slot, so link this into the slot's column
-		pWeapon->m_pNext = m_rgpPlayerItems[iWeaponSlot];	
+		pWeapon->m_pNext = m_rgpPlayerItems[iWeaponSlot];
 		m_rgpPlayerItems[iWeaponSlot] = pWeapon;
 	}
 	else
 	{
 		// first weapon we have for this slot
 		m_rgpPlayerItems[iWeaponSlot] = pWeapon;
-		pWeapon->m_pNext = NULL;	
+		pWeapon->m_pNext = NULL;
 	}
 
 	pWeapon->pev->spawnflags |= SF_NORESPAWN;// never respawn
@@ -817,7 +817,7 @@ BOOL CWeaponBox::IsEmpty( void )
 void CWeaponBox::SetObjectCollisionBox( void )
 {
 	pev->absmin = pev->origin + Vector( -16, -16, 0 );
-	pev->absmax = pev->origin + Vector( 16, 16, 16 ); 
+	pev->absmax = pev->origin + Vector( 16, 16, 16 );
 }
 
 void CBasePlayerWeapon::PrintState( void )
@@ -894,7 +894,7 @@ TYPEDESCRIPTION CHgun::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE( CHgun, CBasePlayerWeapon )
 
-TYPEDESCRIPTION	CSatchel::m_SaveData[] = 
+TYPEDESCRIPTION	CSatchel::m_SaveData[] =
 {
 	DEFINE_FIELD( CSatchel, m_chargeReady, FIELD_INTEGER ),
 };

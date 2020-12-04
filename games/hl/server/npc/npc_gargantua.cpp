@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   This source code contains proprietary and confidential information of
@@ -21,8 +21,8 @@
 #include	"util.h"
 #include	"cbase.h"
 #include        "info_node.h"
-#include        "game/server/ai/ai_monsters.h"
-#include        "game/server/ai/ai_schedule.h"
+#include        "server/ai/ai_monsters.h"
+#include        "server/ai/ai_schedule.h"
 #include	"customentity.h"
 #include	"weapons.h"
 #include	"effects.h"
@@ -268,7 +268,7 @@ private:
 	float		m_painSoundTime;	// Time of next pain sound
 	float		m_streakTime;		// streak timer (don't send too many)
 	float		m_flameX;		// Flame thrower aim
-	float		m_flameY;			
+	float		m_flameY;
 };
 
 LINK_ENTITY_TO_CLASS( monster_gargantua, CGargantua )
@@ -689,7 +689,7 @@ void CGargantua::PrescheduleThink( void )
 }
 
 //=========================================================
-// Classify - indicates this monster's place in the 
+// Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
 int CGargantua::Classify( void )
@@ -801,7 +801,7 @@ void CGargantua::Precache()
 
 	for( i = 0; i < ARRAYSIZE( pBreatheSounds ); i++ )
 		PRECACHE_SOUND( pBreatheSounds[i] );
-}	
+}
 
 void CGargantua::UpdateOnRemove()
 {
@@ -903,7 +903,7 @@ void CGargantua::Killed( entvars_t *pevAttacker, int iGib )
 //=========================================================
 // CheckMeleeAttack1
 // Garg swipe attack
-// 
+//
 //=========================================================
 BOOL CGargantua::CheckMeleeAttack1( float flDot, float flDist )
 {
@@ -1004,7 +1004,7 @@ void CGargantua::HandleAnimEvent( MonsterEvent_t *pEvent )
 }
 
 //=========================================================
-// CheckTraceHullAttack - expects a length to trace, amount 
+// CheckTraceHullAttack - expects a length to trace, amount
 // of damage to do, and damage type. Returns a pointer to
 // the damaged entity in case the monster wishes to do
 // other stuff to the victim (punchangle, etc)
@@ -1078,7 +1078,7 @@ void CGargantua::StartTask( Task_t *pTask )
 		m_flWaitFinished = gpGlobals->time + 1.6;
 		DeathEffect();
 		// FALL THROUGH
-	default: 
+	default:
 		CBaseMonster::StartTask( pTask );
 		break;
 	}
@@ -1135,12 +1135,12 @@ void CGargantua::RunTask( Task_t *pTask )
 				WRITE_COORD( 128 );
 
 				// velocity
-				WRITE_COORD( 0 ); 
+				WRITE_COORD( 0 );
 				WRITE_COORD( 0 );
 				WRITE_COORD( 0 );
 
 				// randomization
-				WRITE_BYTE( 200 ); 
+				WRITE_BYTE( 200 );
 
 				// Model
 				WRITE_SHORT( gGargGibModel );	//model id#

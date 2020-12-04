@@ -1,6 +1,6 @@
 #pragma once
 
-#include "game/server/weapons.h"
+#include "server/weapons.h"
 #include "base_grenade.h"
 
 class CHandGrenade : public CBasePlayerWeapon
@@ -18,7 +18,7 @@ public:
 	void WeaponIdle( void ) override;
 
 	virtual BOOL UseDecrement( void )
-	{ 
+	{
 #if defined( CLIENT_WEAPONS )
 		return TRUE;
 #else

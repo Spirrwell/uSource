@@ -1,6 +1,6 @@
 #pragma once
 
-#include "game/server/weapons.h"
+#include "server/weapons.h"
 
 class CHgun : public CBasePlayerWeapon
 {
@@ -30,7 +30,7 @@ public:
 	int m_iFirePhase;// don't save me.
 
 	virtual BOOL UseDecrement( void )
-	{ 
+	{
 #if defined( CLIENT_WEAPONS )
 		return TRUE;
 #else

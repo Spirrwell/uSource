@@ -1,6 +1,6 @@
 #pragma once
 
-#include "game/server/weapons.h"
+#include "server/weapons.h"
 #include "base_grenade.h"
 
 class CRpgRocket : public CGrenade
@@ -19,7 +19,7 @@ public:
 
 	int m_iTrail;
 	float m_flIgniteTime;
-	EHANDLE m_hLauncher; // handle back to the launcher that fired me. 
+	EHANDLE m_hLauncher; // handle back to the launcher that fired me.
 };
 
 class CRpg : public CBasePlayerWeapon
@@ -53,7 +53,7 @@ public:
 	int m_cActiveRockets;// how many missiles in flight from this launcher right now?
 
 	virtual BOOL UseDecrement( void )
-	{ 
+	{
 #if defined( CLIENT_WEAPONS )
 		return TRUE;
 #else

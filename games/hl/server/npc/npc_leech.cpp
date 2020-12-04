@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   This source code contains proprietary and confidential information of
@@ -38,7 +38,7 @@
 #include	"extdll.h"
 #include	"util.h"
 #include	"cbase.h"
-#include        "game/server/ai/ai_monsters.h"
+#include        "server/ai/ai_monsters.h"
 
 // Animation events
 #define LEECH_AE_ATTACK		1
@@ -95,7 +95,7 @@ public:
 	void MakeVectors( void );
 	void RecalculateWaterlevel( void );
 	void SwitchLeechState( void );
-	
+
 	// Base entity functions
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	int BloodColor( void ) { return DONT_BLEED; }
@@ -172,7 +172,7 @@ void CLeech::Spawn( void )
 	SET_MODEL( ENT( pev ), "models/leech.mdl" );
 	// Just for fun
 	//	SET_MODEL( ENT( pev ), "models/icky.mdl" );
-	
+
 	//UTIL_SetSize( pev, g_vecZero, g_vecZero );
 	UTIL_SetSize( pev, Vector( -1, -1, 0 ), Vector( 1, 1, 2 ) );
 	// Don't push the minz down too much or the water check will fail because this entity is really point-sized
@@ -678,7 +678,7 @@ void CLeech::Killed( entvars_t *pevAttacker, int iGib )
 	}
 	else
 		SetActivity( ACT_DIEFORWARD );
-	
+
 	pev->movetype = MOVETYPE_TOSS;
 	pev->takedamage = DAMAGE_NO;
 	SetThink( &CLeech::DeadThink );

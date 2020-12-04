@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -16,11 +16,11 @@
 
 #include "extdll.h"
 #include "util.h"
-#include "game/server/cbase.h"
+#include "server/cbase.h"
 #include "weapon_python.h"
 #include "ai/ai_monsters.h"
-#include "game/server/player.h"
-#include "game/server/gamerules.h"
+#include "server/player.h"
+#include "server/gamerules.h"
 
 enum python_e
 {
@@ -271,7 +271,7 @@ void CPython::WeaponIdle( void )
 		iAnim = PYTHON_FIDGET;
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + ( 170.0 / 30.0 );
 	}
-	
+
 	int bUseScope = FALSE;
 #ifdef CLIENT_DLL
 	bUseScope = bIsMultiplayer();
@@ -284,7 +284,7 @@ void CPython::WeaponIdle( void )
 class CPythonAmmo : public CBasePlayerAmmo
 {
 	void Spawn( void )
-	{ 
+	{
 		Precache();
 		SET_MODEL( ENT(pev), "models/w_357ammobox.mdl" );
 		CBasePlayerAmmo::Spawn();
@@ -295,7 +295,7 @@ class CPythonAmmo : public CBasePlayerAmmo
 		PRECACHE_SOUND( "items/9mmclip1.wav" );
 	}
 	BOOL AddAmmo( CBaseEntity *pOther )
-	{ 
+	{
 		if( pOther->GiveAmmo( AMMO_357BOX_GIVE, "357", _357_MAX_CARRY ) != -1 )
 		{
 			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );

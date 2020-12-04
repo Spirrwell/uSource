@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -15,13 +15,13 @@
 
 #include "extdll.h"
 #include "util.h"
-#include "game/server/cbase.h"
+#include "server/cbase.h"
 #include "ai/ai_monsters.h"
 #include "weapon_mp5.h"
-#include "game/server/info_node.h"
-#include "game/server/player.h"
-#include "game/server/soundent.h"
-#include "game/server/gamerules.h"
+#include "server/info_node.h"
+#include "server/player.h"
+#include "server/soundent.h"
+#include "server/gamerules.h"
 #include "base_grenade.h"
 
 enum mp5_e
@@ -217,7 +217,7 @@ void CMP5::SecondaryAttack( void )
 
 	// we don't add in player velocity anymore.
 	CGrenade::ShootContact( m_pPlayer->pev,
-					m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_forward * 16, 
+					m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_forward * 16,
 					gpGlobals->v_forward * 800 );
 
 	int flags;
@@ -257,8 +257,8 @@ void CMP5::WeaponIdle( void )
 	int iAnim;
 	switch( RANDOM_LONG( 0, 1 ) )
 	{
-	case 0:	
-		iAnim = MP5_LONGIDLE;	
+	case 0:
+		iAnim = MP5_LONGIDLE;
 		break;
 	default:
 	case 1:
@@ -290,8 +290,8 @@ class CMP5AmmoClip : public CBasePlayerAmmo
 		PRECACHE_MODEL( "models/w_9mmARclip.mdl" );
 		PRECACHE_SOUND( "items/9mmclip1.wav" );
 	}
-	BOOL AddAmmo( CBaseEntity *pOther ) 
-	{ 
+	BOOL AddAmmo( CBaseEntity *pOther )
+	{
 		int bResult = ( pOther->GiveAmmo( AMMO_MP5CLIP_GIVE, "9mm", _9MM_MAX_CARRY ) != -1 );
 		if( bResult )
 		{
@@ -307,7 +307,7 @@ LINK_ENTITY_TO_CLASS( ammo_9mmAR, CMP5AmmoClip )
 class CMP5Chainammo : public CBasePlayerAmmo
 {
 	void Spawn( void )
-	{ 
+	{
 		Precache();
 		SET_MODEL( ENT( pev ), "models/w_chainammo.mdl" );
 		CBasePlayerAmmo::Spawn();
@@ -317,8 +317,8 @@ class CMP5Chainammo : public CBasePlayerAmmo
 		PRECACHE_MODEL( "models/w_chainammo.mdl" );
 		PRECACHE_SOUND( "items/9mmclip1.wav" );
 	}
-	BOOL AddAmmo( CBaseEntity *pOther ) 
-	{ 
+	BOOL AddAmmo( CBaseEntity *pOther )
+	{
 		int bResult = ( pOther->GiveAmmo( AMMO_CHAINBOX_GIVE, "9mm", _9MM_MAX_CARRY ) != -1 );
 		if( bResult )
 		{
@@ -343,8 +343,8 @@ class CMP5AmmoGrenade : public CBasePlayerAmmo
 		PRECACHE_MODEL( "models/w_ARgrenade.mdl" );
 		PRECACHE_SOUND( "items/9mmclip1.wav" );
 	}
-	BOOL AddAmmo( CBaseEntity *pOther ) 
-	{ 
+	BOOL AddAmmo( CBaseEntity *pOther )
+	{
 		int bResult = ( pOther->GiveAmmo( AMMO_M203BOX_GIVE, "ARgrenades", M203_GRENADE_MAX_CARRY ) != -1 );
 
 		if( bResult )

@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   This source code contains proprietary and confidential information of
@@ -18,8 +18,8 @@
 #include	"extdll.h"
 #include	"util.h"
 #include	"cbase.h"
-#include        "game/server/ai/ai_monsters.h"
-#include        "game/server/ai/ai_schedule.h"
+#include        "server/ai/ai_monsters.h"
+#include        "server/ai/ai_schedule.h"
 #include	"weapons.h"
 
 //=========================================================
@@ -36,7 +36,7 @@ public:
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	int ISoundMask ( void );
 
-	int Save( CSave &save ); 
+	int Save( CSave &save );
 	int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 
@@ -63,7 +63,7 @@ TYPEDESCRIPTION	CGMan::m_SaveData[] =
 IMPLEMENT_SAVERESTORE( CGMan, CBaseMonster )
 
 //=========================================================
-// Classify - indicates this monster's place in the 
+// Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
 int CGMan::Classify( void )
@@ -189,7 +189,7 @@ void CGMan::RunTask( Task_t *pTask )
 			// turn towards vector
 			SetBoneController( 0, yaw );
 		}
-		else 
+		else
 		{
 			SetBoneController( 0, 0 );
 		}

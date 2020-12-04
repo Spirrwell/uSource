@@ -1012,8 +1012,8 @@ void NET_InitMasters( void );
 void NET_SaveMasters( void );
 qboolean NET_SendToMasters( netsrc_t sock, size_t len, const void *data );
 
-//#ifdef REF_DLL
-//#error "common.h in ref_dll"
-//#endif
+#ifdef REF_DLL
+#error "common.h in ref_dll"
+#endif
 
 #endif//COMMON_H

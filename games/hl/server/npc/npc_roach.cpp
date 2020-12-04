@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   This source code contains proprietary and confidential information of
@@ -19,8 +19,8 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "game/server/ai/ai_monsters.h"
-#include "game/server/ai/ai_schedule.h"
+#include "server/ai/ai_monsters.h"
+#include "server/ai/ai_schedule.h"
 #include "soundent.h"
 #include "decals.h"
 
@@ -71,7 +71,7 @@ int CRoach::ISoundMask( void )
 }
 
 //=========================================================
-// Classify - indicates this monster's place in the 
+// Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
 int CRoach::Classify( void )
@@ -171,7 +171,7 @@ void CRoach::Killed( entvars_t *pevAttacker, int iGib )
 	{
 		EMIT_SOUND_DYN( ENT( pev ), CHAN_BODY, "roach/rch_smash.wav", 0.7, ATTN_NORM, 0, 80 + RANDOM_LONG( 0, 39 ) );
 	}
-	
+
 	CSoundEnt::InsertSound( bits_SOUND_WORLD, pev->origin, 128, 1 );
 
 	CBaseEntity *pOwner = CBaseEntity::Instance( pev->owner );
@@ -196,7 +196,7 @@ void CRoach::MonsterThink( void )
 
 	if( !m_fLightHacked )
 	{
-		// if light value hasn't been collection for the first time yet, 
+		// if light value hasn't been collection for the first time yet,
 		// suspend the creature for a second so the world finishes spawning, then we'll collect the light level.
 		pev->nextthink = gpGlobals->time + 1;
 		m_fLightHacked = TRUE;
@@ -234,7 +234,7 @@ void CRoach::MonsterThink( void )
 
 					if( m_iMode == ROACH_EAT )
 					{
-						// roach will ignore food for 30 to 45 seconds if it got bored while eating. 
+						// roach will ignore food for 30 to 45 seconds if it got bored while eating.
 						Eat( 30 + ( RANDOM_LONG( 0, 14 ) ) );
 					}
 				}
@@ -322,7 +322,7 @@ void CRoach::PickNewDest( int iCondition )
 	do
 	{
 		// picks a random spot, requiring that it be at least 128 units away
-		// else, the roach will pick a spot too close to itself and run in 
+		// else, the roach will pick a spot too close to itself and run in
 		// circles. this is a hack but buys me time to work on the real monsters.
 		vecNewDir.x = RANDOM_FLOAT( -1, 1 );
 		vecNewDir.y = RANDOM_FLOAT( -1, 1 );
@@ -368,7 +368,7 @@ void CRoach::Move( float flInterval )
 			PickNewDest( m_iMode );
 		}
 	}
-	
+
 	WALK_MOVE( ENT( pev ), pev->ideal_yaw, m_flGroundSpeed * flInterval, WALKMOVE_NORMAL );
 
 	// if the waypoint is closer than step size, then stop after next step (ok for roach to overshoot)
@@ -397,13 +397,13 @@ void CRoach::Move( float flInterval )
 }
 
 //=========================================================
-// Look - overriden for the roach, which can virtually see 
+// Look - overriden for the roach, which can virtually see
 // 360 degrees.
 //=========================================================
 void CRoach::Look( int iDistance )
 {
 	CBaseEntity *pSightEnt = NULL;// the current visible entity that we're dealing with
-	CBaseEntity *pPreviousEnt;// the last entity added to the link list 
+	CBaseEntity *pPreviousEnt;// the last entity added to the link list
 	int iSighted = 0;
 
 	// DON'T let visibility information from last frame sit around!
@@ -440,7 +440,7 @@ void CRoach::Look( int iDistance )
 				switch( IRelationship( pSightEnt ) )
 				{
 				case R_FR:
-					iSighted |= bits_COND_SEE_FEAR;	
+					iSighted |= bits_COND_SEE_FEAR;
 					break;
 				case R_NO:
 					break;

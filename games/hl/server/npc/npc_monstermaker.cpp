@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -20,7 +20,7 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "game/server/ai/ai_monsters.h"
+#include "server/ai/ai_monsters.h"
 #include "saverestore.h"
 
 // Monstermaker spawnflags
@@ -47,11 +47,11 @@ public:
 	virtual int Restore( CRestore &restore );
 
 	static TYPEDESCRIPTION m_SaveData[];
-	
+
 	string_t m_iszMonsterClassname;// classname of the monster(s) that will be created.
-	
+
 	int m_cNumMonsters;// max number of monsters this ent can create
-	
+
 	int m_cLiveChildren;// how many monsters made by this monster maker that are currently alive
 	int m_iMaxLiveChildren;// max number of monsters that this maker may have out at one time.
 
@@ -170,7 +170,7 @@ void CMonsterMaker::MakeMonster( void )
 
 	if( !m_flGround )
 	{
-		// set altitude. Now that I'm activated, any breakables, etc should be out from under me. 
+		// set altitude. Now that I'm activated, any breakables, etc should be out from under me.
 		TraceResult tr;
 
 		UTIL_TraceLine( pev->origin, pev->origin - Vector( 0, 0, 2048 ), ignore_monsters, ENT( pev ), &tr );

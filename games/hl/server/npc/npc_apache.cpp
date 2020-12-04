@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   This source code contains proprietary and confidential information of
@@ -17,7 +17,7 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "game/server/ai/ai_monsters.h"
+#include "server/ai/ai_monsters.h"
 #include "weapons.h"
 #include "info_node.h"
 #include "effects.h"
@@ -262,12 +262,12 @@ void CApache::DyingThink( void )
 			WRITE_COORD( 132 );
 
 			// velocity
-			WRITE_COORD( pev->velocity.x ); 
+			WRITE_COORD( pev->velocity.x );
 			WRITE_COORD( pev->velocity.y );
 			WRITE_COORD( pev->velocity.z );
 
 			// randomization
-			WRITE_BYTE( 50 ); 
+			WRITE_BYTE( 50 );
 
 			// Model
 			WRITE_SHORT( m_iBodyGibs );	//model id#
@@ -587,7 +587,7 @@ void CApache::Flight( void )
 	UTIL_MakeAimVectors( pev->angles + pev->avelocity * 2 + vecAdj );
 	// Vector vecEst1 = pev->origin + pev->velocity + gpGlobals->v_up * m_flForce - Vector( 0, 0, 384 );
 	// float flSide = DotProduct( m_posDesired - vecEst1, gpGlobals->v_right );
-	
+
 	float flSide = DotProduct( m_vecDesired, gpGlobals->v_right );
 
 	if( flSide < 0 )
@@ -704,7 +704,7 @@ void CApache::Flight( void )
 		CBaseEntity *pPlayer = NULL;
 
 		pPlayer = UTIL_FindEntityByClassname( NULL, "player" );
-		// UNDONE: this needs to send different sounds to every player for multiplayer.	
+		// UNDONE: this needs to send different sounds to every player for multiplayer.
 		if( pPlayer )
 		{
 			float pitch = DotProduct( pev->velocity - pPlayer->pev->velocity, ( pPlayer->pev->origin - pev->origin ).Normalize() );
@@ -719,13 +719,13 @@ void CApache::Flight( void )
 				pitch = 101;
 
 			float flVol = ( m_flForce / 100.0 ) + .1;
-			if( flVol > 1.0 ) 
+			if( flVol > 1.0 )
 				flVol = 1.0;
 
 			EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_rotor2.wav", 1.0, 0.3, SND_CHANGE_PITCH | SND_CHANGE_VOL, pitch );
 		}
 		// EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_whine1.wav", flVol, 0.2, SND_CHANGE_PITCH | SND_CHANGE_VOL, pitch );
-	
+
 		// ALERT( at_console, "%.0f %.2f\n", pitch, flVol );
 	}
 }

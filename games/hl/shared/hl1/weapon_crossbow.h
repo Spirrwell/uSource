@@ -1,6 +1,6 @@
 #pragma once
 
-#include "game/server/weapons.h"
+#include "server/weapons.h"
 
 class CCrossbow : public CBasePlayerWeapon
 {
@@ -23,7 +23,7 @@ public:
 	int m_fInZoom; // don't save this
 
 	virtual BOOL UseDecrement( void )
-	{ 
+	{
 #if defined( CLIENT_WEAPONS )
 		return TRUE;
 #else

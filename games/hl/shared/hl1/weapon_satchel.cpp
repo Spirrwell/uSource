@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -16,12 +16,12 @@
 
 #include "extdll.h"
 #include "util.h"
-#include "game/server/cbase.h"
+#include "server/cbase.h"
 #include "ai/ai_monsters.h"
 #include "weapon_satchel.h"
-#include "game/server/info_node.h"
-#include "game/server/player.h"
-#include "game/server/gamerules.h"
+#include "server/info_node.h"
+#include "server/player.h"
+#include "server/gamerules.h"
 #include "base_grenade.h"
 
 enum satchel_state
@@ -65,7 +65,7 @@ public:
 LINK_ENTITY_TO_CLASS( monster_satchel, CSatchelCharge )
 
 //=========================================================
-// Deactivate - do whatever it is we do to an orphaned 
+// Deactivate - do whatever it is we do to an orphaned
 // satchel when we don't want it in the world anymore.
 //=========================================================
 void CSatchelCharge::Deactivate( void )
@@ -158,7 +158,7 @@ void CSatchelCharge::SatchelThink( void )
 	else
 	{
 		pev->velocity.z -= 8;
-	}	
+	}
 }
 
 void CSatchelCharge::Precache( void )
@@ -235,7 +235,7 @@ void CSatchel::Spawn()
 	SET_MODEL( ENT( pev ), "models/w_satchel.mdl" );
 
 	m_iDefaultAmmo = SATCHEL_DEFAULT_GIVE;
-		
+
 	FallInit();// get ready to fall down.
 }
 
@@ -276,7 +276,7 @@ BOOL CSatchel::IsUseable( void )
 
 BOOL CSatchel::CanDeploy( void )
 {
-	if( m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] > 0 ) 
+	if( m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] > 0 )
 	{
 		// player is carrying some satchels
 		return TRUE;
@@ -300,7 +300,7 @@ BOOL CSatchel::Deploy()
 		return DefaultDeploy( "models/v_satchel_radio.mdl", "models/p_satchel_radio.mdl", SATCHEL_RADIO_DRAW, "hive" );
 	else
 		return DefaultDeploy( "models/v_satchel.mdl", "models/p_satchel.mdl", SATCHEL_DRAW, "trip" );
-	
+
 	return TRUE;
 }
 
@@ -458,7 +458,7 @@ void CSatchel::WeaponIdle( void )
 //=========================================================
 void DeactivateSatchels( CBasePlayer *pOwner )
 {
-	edict_t *pFind; 
+	edict_t *pFind;
 
 	pFind = FIND_ENTITY_BY_CLASSNAME( NULL, "monster_satchel" );
 

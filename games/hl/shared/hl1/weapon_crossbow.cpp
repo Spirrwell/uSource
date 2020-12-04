@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -16,12 +16,12 @@
 
 #include "extdll.h"
 #include "util.h"
-#include "game/server/cbase.h"
+#include "server/cbase.h"
 #include "ai/ai_monsters.h"
 #include "weapon_crossbow.h"
-#include "game/server/info_node.h"
-#include "game/server/player.h"
-#include "game/server/gamerules.h"
+#include "server/info_node.h"
+#include "server/player.h"
+#include "server/gamerules.h"
 
 #ifndef CLIENT_DLL
 #define BOLT_AIR_VELOCITY	2000
@@ -30,7 +30,7 @@
 extern BOOL gPhysicsInterfaceInitialized;
 
 // UNDONE: Save/restore this?  Don't forget to set classname and LINK_ENTITY_TO_CLASS()
-// 
+//
 // OVERLOADS SOME ENTVARS:
 //
 // speed - the ideal magnitude of my velocity
@@ -112,11 +112,11 @@ void CCrossbowBolt::BoltTouch( CBaseEntity *pOther )
 
 		if( pOther->IsPlayer() )
 		{
-			pOther->TraceAttack( pevOwner, gSkillData.plrDmgCrossbowClient, pev->velocity.Normalize(), &tr, DMG_NEVERGIB ); 
+			pOther->TraceAttack( pevOwner, gSkillData.plrDmgCrossbowClient, pev->velocity.Normalize(), &tr, DMG_NEVERGIB );
 		}
 		else
 		{
-			pOther->TraceAttack( pevOwner, gSkillData.plrDmgCrossbowMonster, pev->velocity.Normalize(), &tr, DMG_BULLET | DMG_NEVERGIB ); 
+			pOther->TraceAttack( pevOwner, gSkillData.plrDmgCrossbowMonster, pev->velocity.Normalize(), &tr, DMG_BULLET | DMG_NEVERGIB );
 		}
 
 		ApplyMultiDamage( pev, pevOwner );
@@ -167,7 +167,7 @@ void CCrossbowBolt::BoltTouch( CBaseEntity *pOther )
 			pev->velocity = Vector( 0, 0, 0 );
 			pev->avelocity.z = 0;
 			pev->angles.z = RANDOM_LONG( 0, 360 );
-			pev->nextthink = gpGlobals->time + 10.0;			
+			pev->nextthink = gpGlobals->time + 10.0;
 
 			if (gPhysicsInterfaceInitialized) {
 				// g-cont. Setup movewith feature
@@ -389,7 +389,7 @@ void CCrossbow::FireSniperBolt()
 	if( tr.pHit->v.takedamage )
 	{
 		ClearMultiDamage();
-		CBaseEntity::Instance( tr.pHit )->TraceAttack( m_pPlayer->pev, 120, vecDir, &tr, DMG_BULLET | DMG_NEVERGIB ); 
+		CBaseEntity::Instance( tr.pHit )->TraceAttack( m_pPlayer->pev, 120, vecDir, &tr, DMG_BULLET | DMG_NEVERGIB );
 		ApplyMultiDamage( pev, m_pPlayer->pev );
 	}
 #endif
@@ -500,7 +500,7 @@ void CCrossbow::WeaponIdle( void )
 	m_pPlayer->GetAutoaimVector( AUTOAIM_2DEGREES );  // get the autoaim vector but ignore it;  used for autoaim crosshair in DM
 
 	ResetEmptySound();
-	
+
 	if( m_flTimeWeaponIdle < UTIL_WeaponTimeBase() )
 	{
 		float flRand = UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0, 1 );
@@ -536,7 +536,7 @@ void CCrossbow::WeaponIdle( void )
 class CCrossbowAmmo : public CBasePlayerAmmo
 {
 	void Spawn( void )
-	{ 
+	{
 		Precache();
 		SET_MODEL( ENT( pev ), "models/w_crossbow_clip.mdl" );
 		CBasePlayerAmmo::Spawn();
@@ -547,7 +547,7 @@ class CCrossbowAmmo : public CBasePlayerAmmo
 		PRECACHE_SOUND( "items/9mmclip1.wav" );
 	}
 	BOOL AddAmmo( CBaseEntity *pOther )
-	{ 
+	{
 		if( pOther->GiveAmmo( AMMO_CROSSBOWCLIP_GIVE, "bolts", BOLT_MAX_CARRY ) != -1 )
 		{
 			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );

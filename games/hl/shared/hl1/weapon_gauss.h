@@ -1,6 +1,6 @@
 #pragma once
 
-#include "game/server/weapons.h"
+#include "server/weapons.h"
 
 class CGauss : public CBasePlayerWeapon
 {
@@ -32,11 +32,11 @@ public:
 	int m_iSoundState; // don't save this
 
 	// was this weapon just fired primary or secondary?
-	// we need to know so we can pick the right set of effects. 
+	// we need to know so we can pick the right set of effects.
 	BOOL m_fPrimaryFire;
 
 	virtual BOOL UseDecrement( void )
-	{ 
+	{
 #if defined( CLIENT_WEAPONS )
 		return TRUE;
 #else

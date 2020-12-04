@@ -139,7 +139,7 @@ def configure(conf):
 	conf.env.PUBLIC = str(conf.env.ROOT + "/modules/public")
 	conf.env.FAKEVGUI = str(conf.env.ROOT + "/utils/false_vgui/include")
 	conf.env.MATHLIB = str(conf.env.ROOT + "/modules/mathlib")
-
+	conf.env.MODULESROOT = str(conf.env.ROOT + "/modules")
 	conf.env.ENABLE_RCSYS = conf.options.ENABLE_RCSYS
 
 	# Set some opts needed by the server
