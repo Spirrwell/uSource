@@ -4,9 +4,6 @@
 [submodule "ref_gl/gl-wes-v2"]
 	path = ref_gl/gl-wes-v2
 	url = https://github.com/FWGS/gl-wes-v2
-[submodule "thirdparty/stb"]
-	path = thirdparty/stb
-	url = https://github.com/nothings/stb
 [submodule "utils"]
 	path = utils
 	url = https://github.com/MicroSource/uSource-Utils
