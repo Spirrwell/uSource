@@ -1,12 +1,14 @@
 #! /usr/bin/env python
 # encoding: utf-8
 # a1batross, mittorn, 2018
+# vim: noexpandtab shiftwidth=8
 
 from __future__ import print_function
 from waflib import Logs
 import sys
 import os, pathlib
 import waftools
+import subprocess 
 from waftools import cmake, msdev, eclipse, codeblocks, export
 
 VERSION = '0.10'
@@ -36,6 +38,24 @@ SUBDIRS = [
 	#Subproject('game/server'),
 	#Subproject('game/client', dedicated=False)
 ]
+
+""" 
+List of vcpkg dependencies to install 
+"""
+dependencies = [
+	"lua",
+	"protobuf",
+	"glew",
+	"sdl2",
+	"sdl2-gfx",
+	"sdl2-mixer",
+	"nuklear",
+	"freetype",
+	"fontconfig",
+	"cgltf",
+	"stb"
+]
+
 
 def subdirs():
 	return map(lambda x: x.name, SUBDIRS)
@@ -419,6 +439,56 @@ def configure(conf):
 
 	conf.env.append_unique('DEFINES', 'XASH_BUILD_COMMIT="{0}"'.format(conf.env.GIT_VERSION if conf.env.GIT_VERSION else 'notset'))
 
+	#======================================================================#
+	# HANDLES THE VCPKG STUFF 
+	#
+	# Mapping between platforms and the slug
+	dep_slug = {
+		"linux": {
+			"x86": "x86-linux",
+			"x86_64": "x64-linux",
+			"aarch32": "arm-linux",
+			"aarch64": "arm64-linux"
+		},
+		"freebsd": {
+			"x86": "x86-freebsd",
+			"x86_64": "x64-freebsd",
+			"aarch32": "arm-freebsd",
+			"aarch64": "arm64-freebsd",
+		},
+		"darwin": {
+			"x86": "x86-osx",
+			"x86_64": "x64-osx",
+			"aarch32": "arm-osx",
+			"aarch64": "arm64-osx"
+		}
+	}
+ 
+	if conf.env.COMPILER_CC == 'msvc':
+		dep_slug["win32"] = {
+			"x86": "x86-windows",
+			"amd64": "x64-windows",
+			"aarch32": "arm-windows",
+			"aarch64": "arm64-windows"
+		}
+	else:
+		dep_slug["win32"] = {
+			"x86": "x86-mingw-static",
+			"amd64": "x64-mingw-static",
+			"aarch32": "arm-mingw-static",
+			"aarch64": "arm64-mingw-static"
+		}
+
+	# Add the vcpkg lib paths and include paths 
+	vcpkg_slug = dep_slug[conf.env.DEST_OS][conf.env.DEST_CPU]
+	conf.env.append_value('INCLUDES', 'thirdparty/vcpkg/installed/{0}/include'.format(vcpkg_slug))
+	conf.env.append_value('LIBPATH', 'thirdparty/vcpkg/installed/{0}/lib/'.format(vcpkg_slug))
+	conf.env.append_value('STLIBPATH', 'thirdparty/vcpkg/installed/{0}/lib/'.format(vcpkg_slug))
+	
+
+	#======================================================================#
+
+
 	# Set platform props
 	if conf.options.ALLOW64:
 		conf.env.PLATFORM_64BIT = True
@@ -492,3 +562,19 @@ def build(bld):
 		bld.recurse('modules/scriptsystem')
 	if bld.env.ENABLE_RENDERER2:
 		bld.recurse('modules/rendersystem')
+
+def install_deps(conf):
+	print("Running bootstrap-vcpkg...")
+	subdir = "thirdparty/vcpkg"
+	command = './vcpkg'
+	if sys.platform == "win32":
+		if not os.path.exists('thirdparty/vcpkg/vcpkg'):
+			subprocess.run(args=["bootstrap-vcpkg.bat", '-disableMetrics'], cwd=subdir)
+		command = 'vcpkg.exe'
+	else:
+		if not os.path.exists('thirdparty/vcpkg/vcpkg'): 
+			subprocess.run(args=["./bootstrap-vcpkg.sh", '-disableMetrics'], cwd=subdir)
+	# Installl all deps
+	for d in dependencies:
+		print("Installing {0}".format(d))
+		subprocess.run(args=[command, 'install', d], cwd=subdir)
