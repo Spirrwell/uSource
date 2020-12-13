@@ -7,9 +7,6 @@
 [submodule "thirdparty/stb"]
 	path = thirdparty/stb
 	url = https://github.com/nothings/stb
-[submodule "thirdparty/tbb"]
-	path = thirdparty/tbb
-	url = https://github.com/oneapi-src/oneTBB
 [submodule "utils"]
 	path = utils
 	url = https://github.com/MicroSource/uSource-Utils
