@@ -2,6 +2,7 @@
 
 #include "server/weapons.h"
 #include "base_grenade.h"
+#include "c_base_weapon.h"
 
 class CHandGrenade : public CBasePlayerWeapon
 {

@@ -65,13 +65,13 @@ def build(bld):
 		bld.env.COMMON,
 		bld.env.PMSHARED,
 		bld.env.PUBLIC,
-		bld.env.FAKEVGUI,
+		'../server',
+                bld.env.FAKEVGUI,
 		bld.env.CLIENT,
 		bld.env.ENGINE,
 		bld.env.MATHLIB,
 		'../../../modules',
 		'../shared',
-                '../server',
 	]
 
 	defines = ['CLIENT_DLL', 'CLIENT_WEAPONS']

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "server/weapons.h"
+#include "c_base_weapon.h"
 
 class CGauss : public CBasePlayerWeapon
 {
