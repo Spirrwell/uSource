@@ -53,7 +53,8 @@ dependencies = [
 	"freetype",
 	"fontconfig",
 	"cgltf",
-	"stb"
+	"stb",
+	"tbb"
 ]
 
 
