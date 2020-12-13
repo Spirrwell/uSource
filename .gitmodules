@@ -22,3 +22,6 @@
 [submodule "thirdparty/nuklear"]
 	path = thirdparty/nuklear
 	url = https://github.com/Immediate-Mode-UI/Nuklear
+[submodule "vcpkg"]
+	path = thirdparty/vcpkg
+	url = https://github.com/microsoft/vcpkg
