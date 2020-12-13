@@ -19,9 +19,6 @@
 [submodule "public"]
 	path = modules/public
 	url = https://github.com/JJL772/libpublic
-[submodule "thirdparty/nuklear"]
-	path = thirdparty/nuklear
-	url = https://github.com/Immediate-Mode-UI/Nuklear
 [submodule "thirdparty/vcpkg"]
 	path = thirdparty/vcpkg
 	url = https://github.com/MicroSource/vcpkg
