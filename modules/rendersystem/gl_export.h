@@ -19,12 +19,15 @@ GNU General Public License for more details.
 #define APIENTRY
 #endif
 
+#include "GL/glew.h"
+
 #if defined XASH_NANOGL || defined XASH_WES || defined XASH_REGAL
 #define XASH_GLES
 #define XASH_GL_STATIC
 #define REF_GL_KEEP_MANGLED_FUNCTIONS
 #endif
 
+#if 0
 typedef uint GLenum;
 typedef byte GLboolean;
 typedef uint GLbitfield;
@@ -1363,8 +1366,9 @@ GL_EXTERN void GL_FUNCTION( glSwapInterval ) ( int interval );
 GL_EXTERN GLint GL_FUNCTION(glCreateShader)(GLenum shaderType);
 GL_EXTERN void GL_FUNCTION(glShaderSource)(GLuint shader, GLsizei count, const GLchar** string, const GLint* length);
 GL_EXTERN void GL_FUNCTION(glCompileShader)(GLuint shader);
+#endif
 
-#if defined( XASH_GL_STATIC ) && !defined( REF_GL_KEEP_MANGLED_FUNCTIONS )
+#if 1
 #define pglGetError glGetError
 #define pglGetString glGetString
 #define pglAccum glAccum

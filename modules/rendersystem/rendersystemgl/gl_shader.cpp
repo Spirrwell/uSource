@@ -316,11 +316,6 @@ const char *CGenericShader_GL::GLGetInfoLog()
 //=============================================================================================================================================//
 // CShaderProgram_GL
 
-IShaderProgram* CRenderSystem_GL::CreateShaderProgram(const char *name)
-{
-	return new CShaderProgram_GL(name);
-}
-
 CShaderProgram_GL::CShaderProgram_GL(const char* name) :
 	m_fragShader(nullptr),
 	m_vertShader(nullptr),

@@ -598,6 +598,9 @@ void TriCullFace( TRICULLSTYLE mode );
 
 =======================================================================
 */
+#undef GL_TEXTURE_LOD_BIAS
+#undef GL_TEXTURE_3D_EXT
+#undef GL_DEBUG_OUTPUT
 enum
 {
 	GL_OPENGL_110 = 0,		// base

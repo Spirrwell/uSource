@@ -258,7 +258,7 @@ DebugCallback
 For ARB_debug_output
 ========================
 */
-static void APIENTRY GL_DebugOutput( GLuint source, GLuint type, GLuint id, GLuint severity, GLint length, const GLcharARB *message, GLvoid *userParam )
+static void GL_DebugOutput( GLuint source, GLuint type, GLuint id, GLuint severity, GLint length, const GLcharARB *message, GLvoid *userParam )
 {
 	switch( type )
 	{
@@ -919,7 +919,7 @@ qboolean R_Init( void )
 
 	r_temppool = static_cast<byte *>(Mem_AllocPool("Render Zone"));
 
-	g_pRenderSystem->Init({});
+	g_pRenderSystem->Init();
 
 	GL_SetDefaults();
 	R_CheckVBO();

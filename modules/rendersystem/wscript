@@ -65,7 +65,7 @@ def build(bld):
 	source_gl = bld.path.ant_glob(['rendersystemgl/*.cpp'])
 	source_vk = bld.path.ant_glob(['rendersystemvk/*.cpp'])
 
-	includes = list()
+	includes = ['.', '..']
 	includes.append(str(bld.env.ENGINE))
 	includes.append(str(bld.env.ENGINE) + "/server")
 	includes.append(str(bld.env.ENGINE) + "/client")

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <itriapi.h>
 #include "rendersystem/rendersystem.h"
 #include "rendersystem/imesh.h"
 #include "rendersystem/ishader.h"
@@ -39,6 +40,8 @@ private:
 
 	int m_stencilRef;
 	unsigned int m_stencilMask;
+
+	rendersystem::ITriangleAPI *GetTriAPI();
 };
 
 namespace GL
