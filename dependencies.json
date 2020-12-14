@@ -1,0 +1,105 @@
+[
+  {
+    "name": "lua",
+    "type": "static",
+    "libs": [
+      "lua"
+    ]
+  },
+  {
+    "name": "protobuf",
+    "type": "static",
+    "libs": [
+      "protobuf"
+    ],
+    "includes": [
+      "google/protobuf"
+    ]
+  },
+  {
+    "name": "glew",
+    "type": "static",
+    "libs": [
+      "GLEW"
+    ]
+  },
+  {
+    "name": "sdl2",
+    "type": "dynamic",
+    "libs": [
+      "SDL2"
+    ],
+    "includes": [
+      "SDL2"
+    ]
+  },
+  {
+    "name": "sdl2-gfx",
+    "type": "static",
+    "libs": [
+      "SDL2_gfx"
+    ]
+  },
+  {
+    "name": "sdl2-mixer",
+    "type": "static",
+    "libs": [
+      "SDL2_mixer"
+    ]
+  },
+  {
+    "name": "nuklear",
+    "type": "static",
+    "libs": [
+
+    ]
+  },
+  {
+    "name": "freetype",
+    "type": "static",
+    "libs": [
+      "freetype"
+    ],
+    "includes": [
+      "freetype"
+    ]
+  },
+  {
+    "name": "fontconfig",
+    "type": "static",
+    "libs": [
+      "fontconfig"
+    ]
+  },
+  {
+    "name": "cgltf",
+    "type": "static",
+    "libs": [
+
+    ]
+  },
+  {
+    "name": "stb",
+    "type": "static",
+    "libs": [
+
+    ]
+  },
+  {
+    "name": "tbb",
+    "type": "static",
+    "libs": [
+      "tbb"
+    ]
+  },
+  {
+    "name": "libsndfile",
+    "type": "static",
+    "libs": [
+      "sndfile"
+    ],
+    "includes": [
+      "tbb"
+    ]
+  }
+]
