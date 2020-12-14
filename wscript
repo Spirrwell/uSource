@@ -8,7 +8,7 @@ from waflib import Logs
 import sys
 import os, pathlib
 import waftools
-import subprocess
+import subprocess, json
 from waftools import cmake, msdev, eclipse, codeblocks, export
 
 VERSION = '0.10'
@@ -41,23 +41,81 @@ SUBDIRS = [
     # Subproject('game/client', dedicated=False)
 ]
 
-""" 
-List of vcpkg dependencies to install 
 """
-dependencies = [
-    "lua",
-    "protobuf",
-    "glew",
-    "sdl2",
-    "sdl2-gfx",
-    "sdl2-mixer",
-    "nuklear",
-    "freetype",
-    "fontconfig",
-    "cgltf",
-    "stb",
-    "tbb"
-]
+Returns a vcpkg triplet to install to
+"""
+def get_triplet(conf, _type):
+    dep_slug = {
+        "linux": {
+            "x86": "x86-linux",
+            "x86_64": "x64-linux",
+            "aarch32": "arm-linux",
+            "aarch64": "arm64-linux"
+        },
+        "freebsd": {
+            "x86": "x86-freebsd",
+            "x86_64": "x64-freebsd",
+            "aarch32": "arm-freebsd",
+            "aarch64": "arm64-freebsd",
+        },
+        "darwin": {
+            "x86": "x86-osx",
+            "x86_64": "x64-osx",
+            "aarch32": "arm-osx",
+            "aarch64": "arm64-osx"
+        }
+    }
+    if conf.env.COMPILER_CC == 'msvc':
+        dep_slug["win32"] = {
+            "x86": "x86-windows",
+            "amd64": "x64-windows",
+            "aarch32": "arm-windows",
+            "aarch64": "arm64-windows"
+        }
+    else:
+        dep_slug["win32"] = {
+            "x86": "x86-mingw",
+            "amd64": "x64-mingw",
+            "aarch32": "arm-mingw",
+            "aarch64": "arm64-mingw"
+        }
+    r = dep_slug[conf.env.DEST_OS][conf.env.DEST_CPU]
+
+    if conf.env.DEST_OS == 'linux' or conf.env.DEST_OS == 'freebsd':
+        if _type == 'dynamic':
+            r += '-shared'
+    if conf.env.DEST_OS == 'darwin':
+        if _type == 'dynamic':
+            r += '-dynamic'
+    if conf.env.DEST_OS == 'win32' and conf.env.COMPILER_CC != 'msvc':
+        if _type == 'dynamic':
+            r += '-dynamic'
+        else:
+            r += '-static'
+    if conf.env.DEST_OS == 'win32' and conf.env.COMPILER_CC == 'msvc':
+        if _type == 'static':
+            r += '-static'
+    return r
+
+
+"""
+Installs a vcpkg package, runs bootstrap-vcpkg if required 
+"""
+def try_install_pkg(dep, triplet):
+    subdir = "thirdparty/vcpkg"
+    if not os.path.exists('thirdparty/vcpkg/vcpkg'):
+        if sys.platform == "win32":
+            if not os.path.exists('thirdparty/vcpkg/vcpkg'):
+                subprocess.run(args=["bootstrap-vcpkg.bat", '-disableMetrics'], cwd=subdir, capture_output=True)
+        else:
+            if not os.path.exists('thirdparty/vcpkg/vcpkg'):
+                subprocess.run(args=["./bootstrap-vcpkg.sh", '-disableMetrics'], cwd=subdir, capture_output=True)
+    # Run vcpkg install
+    command = './vcpkg'
+    if sys.platform == 'win32':
+        command += '.exe'
+    subprocess.run(args=[command, '--triplet={0}'.format(triplet), 'install', dep['name']], cwd=subdir, capture_output=True)
+
 
 
 def subdirs():
@@ -131,7 +189,7 @@ def options(opt):
     for sub in SUBDIRS:
         opt.recurse(sub.name)
 
-    opt.load('xcompile compiler_cxx compiler_c sdl2 clang_compilation_database strip_on_install')
+    opt.load('xcompile compiler_cxx compiler_c clang_compilation_database strip_on_install')
     opt.load('cmake msdev eclipse codeblocks doxygen export cppcheck', tooldir=waftools.location)
     if sys.platform == 'win32':
         opt.load('msvc msdev msvs')
@@ -160,6 +218,11 @@ def filter_cflags(conf, flags, required_flags, cxx):
 
 
 def configure(conf):
+    # firstly read the dependencies!
+    dependencies = {}
+    with open('dependencies.json', 'r') as fp:
+        dependencies = json.load(fp)
+
     # Dirs
     conf.env.ROOT = str(pathlib.Path('.').resolve())
     conf.env.PMSHARED = str(conf.env.ROOT + "/modules/pm_shared")
@@ -455,54 +518,56 @@ def configure(conf):
     # ======================================================================#
     # HANDLES THE VCPKG STUFF
     #
-    # Mapping between platforms and the slug
-    dep_slug = {
-        "linux": {
-            "x86": "x86-linux",
-            "x86_64": "x64-linux",
-            "aarch32": "arm-linux",
-            "aarch64": "arm64-linux"
-        },
-        "freebsd": {
-            "x86": "x86-freebsd",
-            "x86_64": "x64-freebsd",
-            "aarch32": "arm-freebsd",
-            "aarch64": "arm64-freebsd",
-        },
-        "darwin": {
-            "x86": "x86-osx",
-            "x86_64": "x64-osx",
-            "aarch32": "arm-osx",
-            "aarch64": "arm64-osx"
-        }
-    }
 
-    if conf.env.COMPILER_CC == 'msvc':
-        dep_slug["win32"] = {
-            "x86": "x86-windows",
-            "amd64": "x64-windows",
-            "aarch32": "arm-windows",
-            "aarch64": "arm64-windows"
-        }
-    else:
-        dep_slug["win32"] = {
-            "x86": "x86-mingw-static",
-            "amd64": "x64-mingw-static",
-            "aarch32": "arm-mingw-static",
-            "aarch64": "arm64-mingw-static"
-        }
+    for dep in dependencies:
+        name = dep['name']
+        typ = dep['type']
+        libs = dep['libs']
+        incs = []
+        try:
+            incs = dep['includes'] or []
+        except:
+            incs = []
+        triplet = get_triplet(conf, typ)
+        vcpkg_dir = 'thirdparty/vcpkg/installed/{0}'.format(triplet)
+        lib_dir = '{0}/lib'.format(vcpkg_dir)
+        inc_dir = '{0}/include'.format(vcpkg_dir)
 
-    # Add the vcpkg lib paths and include paths
-    vcpkg_slug = dep_slug[conf.env.DEST_OS][conf.env.DEST_CPU]
-    conf.env['INCLUDES'] += [os.path.abspath('thirdparty/vcpkg/installed/{0}/include'.format(vcpkg_slug))]
-    conf.env.append_value('LIBPATH', 'thirdparty/vcpkg/installed/{0}/lib/'.format(vcpkg_slug))
-    conf.env.append_value('STLIBPATH', 'thirdparty/vcpkg/installed/{0}/lib/'.format(vcpkg_slug))
-    conf.env.VCPKG_DIR = 'thirdparty/vcpkg/installed/{0}/'.format(vcpkg_slug)
+        conf.start_msg('Installing or finding {0}'.format(name))
 
-    # ======================================================================#
+        # Firstly invoke vcpkg and check if the dep is installed!
+        try_install_pkg(dep, triplet)
 
-    if conf.env.DEST_OS != 'android' and not conf.options.DEDICATED:
-        conf.load('sdl2')
+        # Set HAVE_XXX to 1, signaling that we have it
+        conf.env['HAVE_{0}'.format(name.upper())] = 1
+
+        # Add the include directories
+        I = 'INCLUDES_{0}'.format(name.upper())
+        conf.env[I] = []
+        for i in incs:
+            conf.env[I] += [os.path.abspath(vcpkg_dir + '/include/' + i)]
+
+        # Add libraries from this dep
+        conf.env['LIB_{0}'.format(name.upper())] = []
+        conf.env['LIB_{0}'.format(name.upper())] += libs
+
+        # Add the library path
+        conf.env['LIBPATH_{0}'.format(name.upper())] = [
+            os.path.abspath(lib_dir)
+        ]
+
+        # If this is protobuf, we need to add an envvar for the protoc path
+        # Slightly hacky, but okay!
+        if name == 'protobuf':
+            conf.env.PROTOC_PATH = 'thirdparty/vcpkg/installed/{0}/tools/protobuf/protoc'.format(triplet)
+
+        # Add this triplet to the global list of inc dirs
+        conf.env['INCLUDES'] += [os.path.abspath('thirdparty/vcpkg/installed/{0}/include'.format(triplet))]
+
+        conf.end_msg('Done')
+
+
+# ======================================================================#
 
     # Set platform props
     if conf.options.ALLOW64:
@@ -578,20 +643,3 @@ def build(bld):
         bld.recurse('modules/scriptsystem')
     if bld.env.ENABLE_RENDERER2:
         bld.recurse('modules/rendersystem')
-
-
-def install_deps(conf):
-    print("Running bootstrap-vcpkg...")
-    subdir = "thirdparty/vcpkg"
-    command = './vcpkg'
-    if sys.platform == "win32":
-        if not os.path.exists('thirdparty/vcpkg/vcpkg'):
-            subprocess.run(args=["bootstrap-vcpkg.bat", '-disableMetrics'], cwd=subdir)
-        command = 'vcpkg.exe'
-    else:
-        if not os.path.exists('thirdparty/vcpkg/vcpkg'):
-            subprocess.run(args=["./bootstrap-vcpkg.sh", '-disableMetrics'], cwd=subdir)
-    # Installl all deps
-    for d in dependencies:
-        print("Installing {0}".format(d))
-        subprocess.run(args=[command, 'install', d], cwd=subdir)
