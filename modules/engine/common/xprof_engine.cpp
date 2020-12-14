@@ -181,10 +181,7 @@ void xprof_engine_shutdown(CXProf& xprof)
 	{
 		GlobalXProf().DumpToJSON(fs);
 		fs.close();
-		Msg("Dumped xprof data to %s\n", g_outputFileName.c_str());
 	}
-	else
-		Msg("Failed to dump xprof data to %s\n", g_outputFileName.c_str());
 }
 
 void xprof_engine_static_init()
