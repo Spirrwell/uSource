@@ -12,7 +12,7 @@
 
 /* cgltf includes */
 #define CGLTF_IMPLEMENTATION
-#include "cgltf/cgltf.h"
+#include "cgltf.h"
 
 /* glTf extensions */
 const char* g_gltf_extensions[] = {
