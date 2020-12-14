@@ -13,77 +13,8 @@
 
 import os
 
-def options(opt):
-	grp = opt.add_option_group('SDL2 options')
-	grp.add_option('-s', '--sdl2', action='store', dest = 'SDL2_PATH', default = None,
-		help = 'path to precompiled SDL2 library(required for Windows)')
-
-	grp.add_option('--skip-sdl2-sanity-check', action='store_false', default = True, dest='SDL2_SANITY_CHECK',
-		help = 'skip checking SDL2 sanity')
-
-def my_dirname(path):
-	# really dumb, will not work with /path/framework//, but still enough
-	if path[-1] == '/':
-		path = path[:-1]
-	return os.path.dirname(path)
-
-def sdl2_configure_path(conf, path):
-	conf.env.HAVE_SDL2 = 1
-	if conf.env.DEST_OS == 'darwin':
-		conf.env.INCLUDES_SDL2 = [
-			os.path.abspath(os.path.join(path, 'Headers'))
-		]
-		conf.env.FRAMEWORKPATH_SDL2 = [my_dirname(path)]
-		conf.env.FRAMEWORK_SDL2 = ['SDL2']
-	else:
-		conf.env.INCLUDES_SDL2 = [
-			os.path.abspath(os.path.join(path, 'include')),
-			os.path.abspath(os.path.join(path, 'include/SDL2'))
-		]
-		libpath = 'lib'
-		# NOTE: Only supporting x86 and x64 windows right now.
-		if conf.env.COMPILER_CC == 'msvc':
-			if conf.env.DEST_CPU == 'amd64':
-				libpath = 'lib/win64'
-			else:
-				libpath = 'lib/win32'
-		conf.env.LIBPATH_SDL2 = [os.path.abspath(os.path.join(path, libpath))]
-		conf.env.LIB_SDL2 = ['SDL2']
-
 def configure(conf):
-	if conf.options.SDL2_PATH:
-		conf.start_msg('Configuring SDL2 by provided path')
-		sdl2_configure_path(conf, conf.options.SDL2_PATH)
-		conf.end_msg('yes: {0}, {1}, {2}'.format(conf.env.LIB_SDL2, conf.env.LIBPATH_SDL2, conf.env.INCLUDES_SDL2))
-	else:
-		try:
-			conf.check_cfg(
-				path='sdl2-config',
-				args='--cflags --libs',
-				package='',
-				msg='Checking for library SDL2',
-				uselib_store='SDL2')
-		except conf.errors.ConfigurationError:
-			conf.env.HAVE_SDL2 = 0
-
-	if not conf.env.HAVE_SDL2 and conf.env.CONAN:
-		conf.load('conan')
-		conf.add_conan_remote('bincrafters', 'https://api.bintray.com/conan/bincrafters/public-conan')
-		conf.add_dependency('sdl2/2.0.9@bincrafters/stable', options = { 'shared': 'True' } )
-
-	if conf.env.HAVE_SDL2 and conf.options.SDL2_SANITY_CHECK:
-		try:
-			conf.check_cxx(
-				fragment='''
-				#define SDL_MAIN_HANDLED
-				#include <SDL.h>
-				int main( void )
-				{
-					SDL_Init( SDL_INIT_EVERYTHING );
-					return 0;
-				}''',
-				msg	= 'Checking for library SDL2 sanity',
-				use = 'SDL2',
-				execute = False)
-		except conf.errors.ConfigurationError:
-			conf.env.HAVE_SDL2 = 0
+    conf.env.INCLUDES_SDL2 = [os.path.abspath(conf.env.VCPKG_DIR + '/include/'), os.path.abspath(conf.env.VCPKG_DIR + '/include/SDL2/')]
+    conf.env.LIB_SDL2 = ['SDL2']
+    conf.env.LIBPATH_SDL2 = [os.path.abspath(conf.env.VCPKG_DIR + '/lib/')]
+    conf.env.HAVE_SDL2 = 1
