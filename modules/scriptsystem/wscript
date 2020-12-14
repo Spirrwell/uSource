@@ -29,7 +29,7 @@ def build(bld):
 		libs += ['SQUIRREL_STATIC', 'SQSTDLIB_STATIC']
 		source += ['sq/sq_main.cpp']
 
-	includes = [ '.' ]
+	includes = ['.', '..']
 	includes.append(str(bld.env.ENGINE))
 	includes.append(str(bld.env.ENGINE) + "/server")
 	includes.append(str(bld.env.ENGINE) + "/client")

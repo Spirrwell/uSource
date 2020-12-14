@@ -638,7 +638,7 @@ MethodBinding CreateMethodBinding(R(C::*function)(T...), const char* name)
 }
 
 template<class T>
-T ValueFromScriptValue(const ScriptValue_t& v)
+static T ValueFromScriptValue(const ScriptValue_t& v)
 {
 	return T();
 };
