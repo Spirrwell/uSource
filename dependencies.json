@@ -101,5 +101,14 @@
     "includes": [
       "tbb"
     ]
+  },
+  {
+    "name": "assimp",
+    "type": "static",
+    "libs": [
+      "assimp"
+    ],
+    "includes": [
+    ]
   }
 ]
