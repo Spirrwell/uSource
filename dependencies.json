@@ -93,22 +93,31 @@
     ]
   },
   {
-    "name": "libsndfile",
-    "type": "static",
-    "libs": [
-      "sndfile"
-    ],
-    "includes": [
-      "tbb"
-    ]
-  },
-  {
     "name": "assimp",
     "type": "static",
     "libs": [
       "assimp"
     ],
     "includes": [
+    ]
+  },
+  {
+    "name": "libvorbis",
+    "type": "static",
+    "libs": [
+      "vorbis"
+    ],
+    "includes": [
+    ]
+  },
+  {
+    "name": "libogg",
+    "type": "static",
+    "libs": [
+      "ogg"
+    ],
+    "includes": [
+
     ]
   }
 ]

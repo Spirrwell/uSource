@@ -21,6 +21,31 @@ static const byte *iff_end;
 static const byte *iff_lastChunk;
 static int iff_chunkLen;
 
+class WavFileLoader : public SoundFileLoader
+{
+public:
+	explicit  WavFileLoader();
+
+	virtual bool LoadSound(const char* name, const byte* buffer, size_t filesize, struct sndlib_s* loadDest);
+
+	/* Feature tests */
+	virtual bool SupportsStreamReading();
+	virtual bool SupportsLoading();
+
+	virtual stream_t* OpenStream(const char* filename, sndlib_t* sound);
+	virtual int ReadStream(stream_t* stream, int bytes, void* buffer);
+	virtual int SetStreamPos(stream_t* stream, int newpos);
+	virtual int GetStreamPos(stream_t* stream);
+	virtual void CloseStream(stream_t* stream);
+
+	/* File extension */
+	virtual const char* GetFileExtension();
+	virtual const char* GetFormatString();
+	virtual const char* GetPrettyName();
+};
+
+static WavFileLoader gWavLoader;
+
 /*
 =================
 GetLittleShort
@@ -54,6 +79,7 @@ static int GetLittleLong( void )
 
 	return val;
 }
+
 
 /*
 =================
@@ -134,12 +160,16 @@ qboolean StreamFindNextChunk( file_t *file, const char *name, int *last_chunk )
 	return false;
 }
 
-/*
-=============
-Sound_LoadWAV
-=============
-*/
-qboolean Sound_LoadWAV( const char *name, const byte *buffer, fs_offset_t filesize )
+
+
+
+WavFileLoader::WavFileLoader() :
+	SoundFileLoader()
+{
+
+}
+
+bool WavFileLoader::LoadSound(const char *name, const byte *buffer, size_t filesize, struct sndlib_s *sound)
 {
 	int	samples, fmt;
 	qboolean	mpeg_stream = false;
@@ -186,20 +216,20 @@ qboolean Sound_LoadWAV( const char *name, const byte *buffer, fs_offset_t filesi
 		}
 	}
 
-	sound.channels = GetLittleShort();
-	if( sound.channels != 1 && sound.channels != 2 )
+	sound->channels = GetLittleShort();
+	if( sound->channels != 1 && sound->channels != 2 )
 	{
 		Con_DPrintf( S_ERROR "Sound_LoadWAV: only mono and stereo WAV files supported (%s)\n", name );
 		return false;
 	}
 
-	sound.rate = GetLittleLong();
+	sound->rate = GetLittleLong();
 	iff_dataPtr += 6;
 
-	sound.width = GetLittleShort() / 8;
-	if( mpeg_stream ) sound.width = 2; // mp3 always 16bit
+	sound->width = GetLittleShort() / 8;
+	if( mpeg_stream ) sound->width = 2; // mp3 always 16bit
 
-	if( sound.width != 1 && sound.width != 2 )
+	if( sound->width != 1 && sound->width != 2 )
 	{
 		Con_DPrintf( S_ERROR "Sound_LoadWAV: only 8 and 16 bit WAV files supported (%s)\n", name );
 		return false;
@@ -211,23 +241,23 @@ qboolean Sound_LoadWAV( const char *name, const byte *buffer, fs_offset_t filesi
 	if( iff_dataPtr )
 	{
 		iff_dataPtr += 32;
-		sound.loopstart = GetLittleLong();
+		sound->loopstart = GetLittleLong();
 		FindNextChunk( "LIST" ); // if the next chunk is a LIST chunk, look for a cue length marker
 
 		if( iff_dataPtr )
 		{
 			if( !Q_strncmp( (const char *)iff_dataPtr + 28, "mark", 4 ))
-			{	
+			{
 				// this is not a proper parse, but it works with CoolEdit...
 				iff_dataPtr += 24;
-				sound.samples = sound.loopstart + GetLittleLong(); // samples in loop
+				sound->samples = sound->loopstart + GetLittleLong(); // samples in loop
 			}
 		}
 	}
-	else 
+	else
 	{
-		sound.loopstart = -1;
-		sound.samples = 0;
+		sound->loopstart = -1;
+		sound->samples = 0;
 	}
 
 	// find data chunk
@@ -240,58 +270,61 @@ qboolean Sound_LoadWAV( const char *name, const byte *buffer, fs_offset_t filesi
 	}
 
 	iff_dataPtr += 4;
-	samples = GetLittleLong() / sound.width;
+	samples = GetLittleLong() / sound->width;
 
-	if( sound.samples )
+	if( sound->samples )
 	{
-		if( samples < sound.samples )
+		if( samples < sound->samples )
 		{
 			Con_DPrintf( S_ERROR "Sound_LoadWAV: %s has a bad loop length\n", name );
 			return false;
 		}
 	}
-	else sound.samples = samples;
+	else sound->samples = samples;
 
-	if( sound.samples <= 0 )
+	if( sound->samples <= 0 )
 	{
-		Con_Reportf( S_ERROR "Sound_LoadWAV: file with %i samples (%s)\n", sound.samples, name );
+		Con_Reportf( S_ERROR "Sound_LoadWAV: file with %i samples (%s)\n", sound->samples, name );
 		return false;
 	}
 
-	sound.type = WF_PCMDATA;
-	sound.samples /= sound.channels;
+	sound->type = WF_PCMDATA;
+	sound->samples /= sound->channels;
 
 	// g-cont. get support for mp3 streams packed in wav container
 	// e.g. CAd menu sounds
 	if( mpeg_stream )
 	{
+		// Get the mpg loader
+		SoundFileLoader* mpg = SoundFileLoader::GetLoader("mp3");
+		if(!mpg) return false;
 		int	hdr_size = (iff_dataPtr - buffer);
 
 		if(( filesize - hdr_size ) < FRAME_SIZE )
 		{
-			sound.tempbuffer = (byte *)Mem_Realloc( host.soundpool, sound.tempbuffer, FRAME_SIZE );
-			memcpy( sound.tempbuffer, buffer + (iff_dataPtr - buffer), filesize - hdr_size );
-			return Sound_LoadMPG( name, sound.tempbuffer, FRAME_SIZE );
+			sound->tempbuffer = (byte *)Mem_Realloc( host.soundpool, sound->tempbuffer, FRAME_SIZE );
+			memcpy( sound->tempbuffer, buffer + (iff_dataPtr - buffer), filesize - hdr_size );
+			return mpg->LoadSound( name, sound->tempbuffer, FRAME_SIZE, sound );
 		}
 
-		return Sound_LoadMPG( name, buffer + hdr_size, filesize - hdr_size );
+		return mpg->LoadSound( name, buffer + hdr_size, filesize - hdr_size, sound );
 	}
 
 	// Load the data
-	sound.size = sound.samples * sound.width * sound.channels;
-	sound.wav = static_cast<byte *>(Mem_Malloc(host.soundpool, sound.size));
+	sound->size = sound->samples * sound->width * sound->channels;
+	sound->wav = static_cast<byte *>(Mem_Malloc(host.soundpool, sound->size));
 
-	memcpy( sound.wav, buffer + (iff_dataPtr - buffer), sound.size );
+	memcpy( sound->wav, buffer + (iff_dataPtr - buffer), sound->size );
 
 	// now convert 8-bit sounds to signed
-	if( sound.width == 1 )
+	if( sound->width == 1 )
 	{
 		int	i, j;
-		signed char	*pData = (signed char *)sound.wav;
+		signed char	*pData = (signed char *)sound->wav;
 
-		for( i = 0; i < sound.samples; i++ )
+		for( i = 0; i < sound->samples; i++ )
 		{
-			for( j = 0; j < sound.channels; j++ )
+			for( j = 0; j < sound->channels; j++ )
 			{
 				*pData = (byte)((int)((byte)*pData) - 128 );
 				pData++;
@@ -302,12 +335,17 @@ qboolean Sound_LoadWAV( const char *name, const byte *buffer, fs_offset_t filesi
 	return true;
 }
 
-/*
-=================
-Stream_OpenWAV
-=================
-*/
-stream_t *Stream_OpenWAV( const char *filename )
+bool WavFileLoader::SupportsStreamReading()
+{
+	return true;
+}
+
+bool WavFileLoader::SupportsLoading()
+{
+	return true;
+}
+
+stream_t *WavFileLoader::OpenStream(const char *filename, sndlib_t* sound)
 {
 	stream_t	*stream;
 	int 	last_chunk = 0;
@@ -321,7 +359,7 @@ stream_t *Stream_OpenWAV( const char *filename )
 
 	// open
 	file = FS_Open( filename, "rb", false );
-	if( !file ) return NULL;	
+	if( !file ) return NULL;
 
 	// find "RIFF" chunk
 	if( !StreamFindNextChunk( file, "RIFF", &last_chunk ))
@@ -360,16 +398,16 @@ stream_t *Stream_OpenWAV( const char *filename )
 	}
 
 	FS_Read( file, &t, sizeof( t ));
-	sound.channels = t;
+	sound->channels = t;
 
-	FS_Read( file, &sound.rate, sizeof( int ));
+	FS_Read( file, &sound->rate, sizeof( int ));
 
 	FS_Seek( file, 6, SEEK_CUR );
 
 	FS_Read( file, &t, sizeof( t ));
-	sound.width = t / 8;
+	sound->width = t / 8;
 
-	sound.loopstart = 0;
+	sound->loopstart = 0;
 
 	// find data chunk
 	last_chunk = iff_data;
@@ -380,30 +418,23 @@ stream_t *Stream_OpenWAV( const char *filename )
 		return NULL;
 	}
 
-	FS_Read( file, &sound.samples, sizeof( int ));
-	sound.samples = ( sound.samples / sound.width ) / sound.channels;
+	FS_Read( file, &sound->samples, sizeof( int ));
+	sound->samples = ( sound->samples / sound->width ) / sound->channels;
 
 	// at this point we have valid stream
 	stream = static_cast<stream_t *>(Mem_Calloc(host.soundpool, sizeof(stream_t)));
 	stream->file = file;
-	stream->size = sound.samples * sound.width * sound.channels;
+	stream->size = sound->samples * sound->width * sound->channels;
 	stream->buffsize = FS_Tell( file ); // header length
-	stream->channels = sound.channels;
-	stream->width = sound.width;
-	stream->rate = sound.rate;
+	stream->channels = sound->channels;
+	stream->width = sound->width;
+	stream->rate = sound->rate;
 	stream->type = WF_PCMDATA;
-	
+
 	return stream;
 }
 
-/*
-=================
-Stream_ReadWAV
-
-assume stream is valid
-=================
-*/
-int Stream_ReadWAV( stream_t *stream, int bytes, void *buffer )
+int WavFileLoader::ReadStream(stream_t *stream, int bytes, void *buffer)
 {
 	int	remaining;
 
@@ -419,14 +450,7 @@ int Stream_ReadWAV( stream_t *stream, int bytes, void *buffer )
 	return bytes;
 }
 
-/*
-=================
-Stream_SetPosWAV
-
-assume stream is valid
-=================
-*/
-int Stream_SetPosWAV( stream_t *stream, int newpos )
+int WavFileLoader::SetStreamPos(stream_t *stream, int newpos)
 {
 	// NOTE: stream->pos it's real file position without header size
 	if( FS_Seek( stream->file, stream->buffsize + newpos, SEEK_SET ) != -1 )
@@ -438,28 +462,29 @@ int Stream_SetPosWAV( stream_t *stream, int newpos )
 	return false;
 }
 
-/*
-=================
-Stream_GetPosWAV
-
-assume stream is valid
-=================
-*/
-int Stream_GetPosWAV( stream_t *stream )
+int WavFileLoader::GetStreamPos(stream_t *stream)
 {
 	return stream->pos;
 }
 
-/*
-=================
-Stream_FreeWAV
-
-assume stream is valid
-=================
-*/
-void Stream_FreeWAV( stream_t *stream )
+void WavFileLoader::CloseStream(stream_t *stream)
 {
 	if( stream->file )
 		FS_Close( stream->file );
 	Mem_Free( stream );
+}
+
+const char *WavFileLoader::GetFileExtension()
+{
+	return "wav";
+}
+
+const char *WavFileLoader::GetFormatString()
+{
+	return "";
+}
+
+const char *WavFileLoader::GetPrettyName()
+{
+	return "Xash3d Wav File Loader";
 }

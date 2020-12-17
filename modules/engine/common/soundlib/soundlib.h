@@ -21,6 +21,32 @@ GNU General Public License for more details.
 #define FRAME_SIZE		32768	// must match with mp3 frame size
 #define OUTBUF_SIZE		8192	// don't change!
 
+class SoundFileLoader
+{
+public:
+	/* Make sure to call the constructor to register your loader */
+	explicit  SoundFileLoader();
+
+	virtual bool LoadSound(const char* name, const byte* buffer, size_t filesize, struct sndlib_s* loadDest) = 0;
+
+	/* Feature tests */
+	virtual bool SupportsStreamReading() = 0;
+	virtual bool SupportsLoading() = 0;
+
+	virtual stream_t* OpenStream(const char* filename, struct sndlib_s* sound) = 0;
+	virtual int ReadStream(stream_t* stream, int bytes, void* buffer) = 0;
+	virtual int SetStreamPos(stream_t* stream, int newpos) = 0;
+	virtual int GetStreamPos(stream_t* stream) = 0;
+	virtual void CloseStream(stream_t* stream) = 0;
+
+	/* File extension */
+	virtual const char* GetFileExtension() = 0;
+	virtual const char* GetFormatString() = 0;
+	virtual const char* GetPrettyName() = 0;
+
+	static SoundFileLoader* GetLoader(const char* ext);
+};
+
 typedef struct loadwavfmt_s
 {
 	const char *formatstring;
@@ -30,14 +56,7 @@ typedef struct loadwavfmt_s
 
 typedef struct streamfmt_s
 {
-	const char *formatstring;
-	const char *ext;
-
-	stream_t *(*openfunc)( const char *filename );
-	int (*readfunc)( stream_t *stream, int bytes, void *buffer );
-	int (*setposfunc)( stream_t *stream, int newpos );
-	int (*getposfunc)( stream_t *stream );
-	void (*freefunc)( stream_t *stream );
+	SoundFileLoader* loader;
 } streamfmt_t;
 
 typedef struct sndlib_s
@@ -62,7 +81,7 @@ typedef struct sndlib_s
 
 typedef struct stream_s
 {
-	const streamfmt_t	*format;	// streamformat to operate
+	streamfmt_t	*format;	// streamformat to operate
 
 	// stream info
 	file_t		*file;	// stream file
@@ -113,25 +132,5 @@ typedef struct
 	int	dLen;
 } chunkhdr_t;
 
-extern sndlib_t sound;
-//
-// formats load
-//
-qboolean Sound_LoadWAV( const char *name, const byte *buffer, fs_offset_t filesize );
-qboolean Sound_LoadMPG( const char *name, const byte *buffer, fs_offset_t filesize );
-
-//
-// stream operate
-//
-stream_t *Stream_OpenWAV( const char *filename );
-int Stream_ReadWAV( stream_t *stream, int bytes, void *buffer );
-int Stream_SetPosWAV( stream_t *stream, int newpos );
-int Stream_GetPosWAV( stream_t *stream );
-void Stream_FreeWAV( stream_t *stream );
-stream_t *Stream_OpenMPG( const char *filename );
-int Stream_ReadMPG( stream_t *stream, int bytes, void *buffer );
-int Stream_SetPosMPG( stream_t *stream, int newpos );
-int Stream_GetPosMPG( stream_t *stream );
-void Stream_FreeMPG( stream_t *stream );
 
 #endif//SOUNDLIB_H

@@ -23,7 +23,40 @@ GNU General Public License for more details.
 
 =================================================================
 */
-qboolean Sound_LoadMPG( const char *name, const byte *buffer, fs_offset_t filesize )
+
+class MpgSoundLoader : public SoundFileLoader
+{
+public:
+	/* Make sure to call the constructor to register your loader */
+	explicit  MpgSoundLoader();
+
+	virtual bool LoadSound(const char* name, const byte* buffer, size_t filesize, struct sndlib_s* loadDest);
+
+	/* Feature tests */
+	virtual bool SupportsStreamReading();
+	virtual bool SupportsLoading();
+
+	virtual stream_t* OpenStream(const char* filename, sndlib_t* sound);
+	virtual int ReadStream(stream_t* stream, int bytes, void* buffer);
+	virtual int SetStreamPos(stream_t* stream, int newpos);
+	virtual int GetStreamPos(stream_t* stream);
+	virtual void CloseStream(stream_t* stream);
+
+	/* File extension */
+	virtual const char* GetFileExtension();
+	virtual const char* GetFormatString();
+	virtual const char* GetPrettyName();
+};
+
+static MpgSoundLoader gMpgLoader;
+
+MpgSoundLoader::MpgSoundLoader() :
+	SoundFileLoader()
+{
+
+}
+
+bool MpgSoundLoader::LoadSound(const char *name, const byte *buffer, size_t filesize, struct sndlib_s *sound)
 {
 	void	*mpeg;
 	size_t	pos = 0;
@@ -51,15 +84,15 @@ qboolean Sound_LoadMPG( const char *name, const byte *buffer, fs_offset_t filesi
 		return false;
 	}
 
-	sound.channels = sc.channels;
-	sound.rate = sc.rate;
-	sound.width = 2; // always 16-bit PCM
-	sound.loopstart = -1;
-	sound.size = ( sound.channels * sound.rate * sound.width ) * ( sc.playtime / 1000 ); // in bytes
-	padsize = sound.size % FRAME_SIZE;
+	sound->channels = sc.channels;
+	sound->rate = sc.rate;
+	sound->width = 2; // always 16-bit PCM
+	sound->loopstart = -1;
+	sound->size = ( sound->channels * sound->rate * sound->width ) * ( sc.playtime / 1000 ); // in bytes
+	padsize = sound->size % FRAME_SIZE;
 	pos += FRAME_SIZE; // evaluate pos
 
-	if( !sound.size )
+	if( !sound->size )
 	{
 		// bad mpeg file ?
 		Con_DPrintf( S_ERROR "Sound_LoadMPG: (%s) is probably corrupted\n", name );
@@ -68,11 +101,11 @@ qboolean Sound_LoadMPG( const char *name, const byte *buffer, fs_offset_t filesi
 	}
 
 	// add sentinel make sure we not overrun
-	sound.wav = (byte *)Mem_Calloc( host.soundpool, sound.size + padsize );
-	sound.type = WF_PCMDATA;
+	sound->wav = (byte *)Mem_Calloc( host.soundpool, sound->size + padsize );
+	sound->type = WF_PCMDATA;
 
 	// decompress mpg into pcm wav format
-	while( bytesWrite < sound.size )
+	while( bytesWrite < sound->size )
 	{
 		int	size;
 
@@ -91,26 +124,31 @@ qboolean Sound_LoadMPG( const char *name, const byte *buffer, fs_offset_t filesi
 				break; // there was end of the stream
 		}
 
-		if( bytesWrite + outsize > sound.size )
-			size = ( sound.size - bytesWrite );
+		if( bytesWrite + outsize > sound->size )
+			size = ( sound->size - bytesWrite );
 		else size = outsize;
 
-		memcpy( &sound.wav[bytesWrite], out, size );
+		memcpy( &sound->wav[bytesWrite], out, size );
 		bytesWrite += size;
 	}
 
-	sound.samples = bytesWrite / ( sound.width * sound.channels );
+	sound->samples = bytesWrite / ( sound->width * sound->channels );
 	close_decoder( mpeg );
 
 	return true;
 }
 
-/*
-=================
-Stream_OpenMPG
-=================
-*/
-stream_t *Stream_OpenMPG( const char *filename )
+bool MpgSoundLoader::SupportsStreamReading()
+{
+	return true;
+}
+
+bool MpgSoundLoader::SupportsLoading()
+{
+	return true;
+}
+
+stream_t *MpgSoundLoader::OpenStream(const char *filename, sndlib_t* sound)
 {
 	stream_t	*stream;
 	void	*mpeg;
@@ -158,14 +196,7 @@ stream_t *Stream_OpenMPG( const char *filename )
 	return stream;
 }
 
-/*
-=================
-Stream_ReadMPG
-
-assume stream is valid
-=================
-*/
-int Stream_ReadMPG( stream_t *stream, int needBytes, void *buffer )
+int MpgSoundLoader::ReadStream(stream_t *stream, int needBytes, void *buffer)
 {
 	// buffer handling
 	int	bytesWritten = 0;
@@ -186,7 +217,7 @@ int Stream_ReadMPG( stream_t *stream, int needBytes, void *buffer )
 
 		// check remaining size
 		if( bytesWritten + stream->pos > needBytes )
-			outsize = ( needBytes - bytesWritten ); 
+			outsize = ( needBytes - bytesWritten );
 		else outsize = stream->pos;
 
 		// copy raw sample to output buffer
@@ -206,14 +237,7 @@ int Stream_ReadMPG( stream_t *stream, int needBytes, void *buffer )
 	return 0;
 }
 
-/*
-=================
-Stream_SetPosMPG
-
-assume stream is valid
-=================
-*/
-int Stream_SetPosMPG( stream_t *stream, int newpos )
+int MpgSoundLoader::SetStreamPos(stream_t *stream, int newpos)
 {
 	if( set_stream_pos( stream->ptr, newpos ) != -1 )
 	{
@@ -226,26 +250,12 @@ int Stream_SetPosMPG( stream_t *stream, int newpos )
 	return false;
 }
 
-/*
-=================
-Stream_GetPosMPG
-
-assume stream is valid
-=================
-*/
-int Stream_GetPosMPG( stream_t *stream )
+int MpgSoundLoader::GetStreamPos(stream_t *stream)
 {
 	return get_stream_pos( stream->ptr );
 }
 
-/*
-=================
-Stream_FreeMPG
-
-assume stream is valid
-=================
-*/
-void Stream_FreeMPG( stream_t *stream )
+void MpgSoundLoader::CloseStream(stream_t *stream)
 {
 	if( stream->ptr )
 	{
@@ -260,4 +270,19 @@ void Stream_FreeMPG( stream_t *stream )
 	}
 
 	Mem_Free( stream );
+}
+
+const char *MpgSoundLoader::GetFileExtension()
+{
+	return "mp3";
+}
+
+const char *MpgSoundLoader::GetFormatString()
+{
+	return nullptr;
+}
+
+const char *MpgSoundLoader::GetPrettyName()
+{
+	return "Xash3D MPG File Loader";
 }

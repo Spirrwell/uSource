@@ -152,6 +152,7 @@ def build(bld):
 			'common/rcs/protobufs/*.proto'
 		])
 		features += ' protoc'
+	libs += ['LIBVORBIS', 'LIBOGG']
 
 	bld(source   = source,
 		target   = 'engine',

@@ -15,6 +15,8 @@ GNU General Public License for more details.
 
 #include "soundlib.h"
 
+extern sndlib_t sound;
+
 /*
 =============================================================================
 
@@ -22,20 +24,7 @@ GNU General Public License for more details.
 
 =============================================================================
 */
-// stub
-static const loadwavfmt_t load_null[] =
-{
-{ NULL, NULL, NULL }
-};
 
-static const loadwavfmt_t load_game[] =
-{
-{ DEFAULT_SOUNDPATH "%s%s.%s", "wav", Sound_LoadWAV },
-{ "%s%s.%s", "wav", Sound_LoadWAV },
-{ DEFAULT_SOUNDPATH "%s%s.%s", "mp3", Sound_LoadMPG },
-{ "%s%s.%s", "mp3", Sound_LoadMPG },
-{ NULL, NULL, NULL }
-};
 
 /*
 =============================================================================
@@ -44,36 +33,12 @@ static const loadwavfmt_t load_game[] =
 
 =============================================================================
 */
-// stub
-static const streamfmt_t stream_null[] =
-{
-{ NULL, NULL, NULL, NULL, NULL, NULL, NULL }
-};
-
-static const streamfmt_t stream_game[] =
-{
-{ "%s%s.%s", "mp3", Stream_OpenMPG, Stream_ReadMPG, Stream_SetPosMPG, Stream_GetPosMPG, Stream_FreeMPG },
-{ "%s%s.%s", "wav", Stream_OpenWAV, Stream_ReadWAV, Stream_SetPosWAV, Stream_GetPosWAV, Stream_FreeWAV },
-{ NULL, NULL, NULL, NULL, NULL, NULL, NULL }
-};
 
 void Sound_Init( void )
 {
 	// init pools
 	host.soundpool = Mem_AllocPool( "SoundLib Pool" );
 
-	// install image formats (can be re-install later by Sound_Setup)
-	switch( host.type )
-	{
-	case HOST_NORMAL:
-		sound.loadformats = load_game;
-		sound.streamformat = stream_game;		
-		break;
-	default:	// all other instances not using soundlib or will be reinstalling later
-		sound.loadformats = load_null;
-		sound.streamformat = stream_null;
-		break;
-	}
 	sound.tempbuffer = NULL;
 }
 

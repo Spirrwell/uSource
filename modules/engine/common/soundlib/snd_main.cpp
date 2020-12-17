@@ -15,8 +15,12 @@ GNU General Public License for more details.
 
 #include "soundlib.h"
 
+#include "containers/array.h"
+
 // global sound variables
 sndlib_t	sound;
+List<SoundFileLoader*>* gSoundLoaders;
+const char* const g_PathsToTry[] = {"sound", ""};
 
 void Sound_Reset( void )
 {
@@ -47,6 +51,25 @@ wavdata_t *SoundPack( void )
 	return pack;
 }
 
+SoundFileLoader::SoundFileLoader()
+{
+	if(!gSoundLoaders)
+		gSoundLoaders = new List<SoundFileLoader*>();
+	gSoundLoaders->push_back(this);
+}
+
+SoundFileLoader *SoundFileLoader::GetLoader(const char *ext)
+{
+	if(!gSoundLoaders) return nullptr;
+	for(auto l : *gSoundLoaders)
+	{
+		if(Q_stricmp(ext, l->GetFileExtension()) == 0)
+			return l;
+	}
+	return nullptr;
+}
+
+
 /*
 ================
 FS_LoadSound
@@ -70,9 +93,9 @@ wavdata_t *FS_LoadSound( const char *filename, const byte *buffer, size_t size )
 	{
 		// we needs to compare file extension with list of supported formats
 		// and be sure what is real extension, not a filename with dot
-		for( format = sound.loadformats; format && format->formatstring; format++ )
+		for(auto loader : *gSoundLoaders)
 		{
-			if( !Q_stricmp( format->ext, ext ))
+			if(!Q_stricmp(loader->GetFileExtension(), ext))
 			{
 				COM_StripExtension( loadname );
 				anyformat = false;
@@ -85,34 +108,40 @@ wavdata_t *FS_LoadSound( const char *filename, const byte *buffer, size_t size )
 	if( filename[0] == '#' && buffer && size )
 		goto load_internal;
 
-	// now try all the formats in the selected list
-	for( format = sound.loadformats; format && format->formatstring; format++)
+	for(auto loader : *gSoundLoaders)
 	{
-		if( anyformat || !Q_stricmp( ext, format->ext ))
+		if(anyformat || !Q_stricmp(ext, loader->GetFileExtension()))
 		{
-			Q_sprintf( path, format->formatstring, loadname, "", format->ext );
+			Q_sprintf( path, "%s.%s", loadname, loader->GetFileExtension() );
 			f = FS_LoadFile( path, &filesize, false );
+			if(!f)
+			{
+				Q_sprintf(path, "sound/%s.%s", loadname, loader->GetFileExtension());
+				f = FS_LoadFile(path, &filesize, false);
+			}
+
 			if( f && filesize > 0 )
 			{
-				if( format->loadfunc( path, f, filesize ))
+				if(loader->LoadSound(path, f, filesize, &sound))
 				{
 					Mem_Free(f); // release buffer
 					return SoundPack(); // loaded
 				}
-				else Mem_Free(f); // release buffer 
+				else Mem_Free(f); // release buffer
 			}
 		}
 	}
 
 load_internal:
-	for( format = sound.loadformats; format && format->formatstring; format++ )
+	for(auto loader : *gSoundLoaders)
 	{
-		if( anyformat || !Q_stricmp( ext, format->ext ))
+		if(anyformat || !Q_stricmp(loader->GetFileExtension(), ext))
 		{
-			if( buffer && size > 0  )
+			if(buffer && size > 0)
 			{
-				if( format->loadfunc( loadname, buffer, size ))
-					return SoundPack(); // loaded
+				if(loader->LoadSound(loadname, buffer, size, &sound))
+					return SoundPack();
+
 			}
 		}
 	}
@@ -120,7 +149,7 @@ load_internal:
 	if( filename[0] != '#' )
 		Con_DPrintf( S_WARN "FS_LoadSound: couldn't load \"%s\"\n", loadname );
 
-	return NULL;
+	return nullptr;
 }
 
 /*
@@ -159,27 +188,26 @@ stream_t *FS_OpenStream( const char *filename )
 	{
 		// we needs to compare file extension with list of supported formats
 		// and be sure what is real extension, not a filename with dot
-		for( format = sound.streamformat; format && format->formatstring; format++ )
+		for(auto loader : *gSoundLoaders)
 		{
-			if( !Q_stricmp( format->ext, ext ))
+			if(!Q_stricmp(loader->GetFileExtension(), ext))
 			{
-				COM_StripExtension( loadname );
+				COM_StripExtension(loadname);
 				anyformat = false;
 				break;
 			}
 		}
 	}
 
-	// now try all the formats in the selected list
-	for( format = sound.streamformat; format && format->formatstring; format++)
+	for(auto loader : *gSoundLoaders)
 	{
-		if( anyformat || !Q_stricmp( ext, format->ext ))
+		if(anyformat || !Q_stricmp(ext, loader->GetFileExtension()))
 		{
-			Q_sprintf( path, format->formatstring, loadname, "", format->ext );
-			if(( stream = format->openfunc( path )) != NULL )
+			Q_sprintf(path, "sound/%s.%s", loadname, loader->GetFileExtension());
+			if((stream = loader->OpenStream(path, &sound)))
 			{
-				stream->format = format;
-				return stream; // done
+				stream->format->loader = loader;
+				return stream;
 			}
 		}
 	}
@@ -225,13 +253,13 @@ extract stream as wav-data and put into buffer, move file pointer
 */
 int FS_ReadStream( stream_t *stream, int bytes, void *buffer )
 {
-	if( !stream || !stream->format || !stream->format->readfunc )
+	if( !stream || !stream->format || !stream->format->loader )
 		return 0;
 
 	if( bytes <= 0 || buffer == NULL )
 		return 0;
 
-	return stream->format->readfunc( stream, bytes, buffer );
+	return stream->format->loader->ReadStream(stream, bytes, buffer);
 }
 
 /*
@@ -243,10 +271,10 @@ get stream position (in bytes)
 */
 int FS_GetStreamPos( stream_t *stream )
 {
-	if( !stream || !stream->format || !stream->format->getposfunc )
+	if( !stream || !stream->format || !stream->format->loader )
 		return -1;
 
-	return stream->format->getposfunc( stream );
+	return stream->format->loader->GetStreamPos(stream);
 }
 
 /*
@@ -258,10 +286,10 @@ set stream position (in bytes)
 */
 int FS_SetStreamPos( stream_t *stream, int newpos )
 {
-	if( !stream || !stream->format || !stream->format->setposfunc )
+	if( !stream || !stream->format || !stream->format->loader )
 		return -1;
 
-	return stream->format->setposfunc( stream, newpos );
+	return stream->format->loader->SetStreamPos(stream, newpos);
 }
 
 /*
@@ -273,8 +301,8 @@ close sound stream
 */
 void FS_FreeStream( stream_t *stream )
 {
-	if( !stream || !stream->format || !stream->format->freefunc )
+	if( !stream || !stream->format || !stream->format->loader )
 		return;
 
-	stream->format->freefunc( stream );
+	stream->format->loader->CloseStream(stream);
 }
