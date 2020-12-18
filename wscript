@@ -184,6 +184,8 @@ def options(opt):
 
     grp.add_option('--game', type=str, dest='GAME', default='hl', help='The game in which to compile')
 
+    opt.load('subproject')
+
     for sub in SUBDIRS:
         opt.recurse(sub.name)
 
@@ -260,6 +262,8 @@ def configure(conf):
     # -march=native should not be used
     if conf.options.BUILD_TYPE == 'fast':
         Logs.warn('WARNING: \'fast\' build type should not be used in release builds')
+
+    conf.load('subproject')
 
     # Force XP compability, all build targets should add
     # subsystem=bld.env.MSVC_SUBSYSTEM
